@@ -12,6 +12,8 @@ MVP de una plataforma que ayuda a clínicas de investigación a optimizar el **p
 
 | Ruta | Módulo | Descripción |
 | --- | --- | --- |
+| `/` | Panel general | Métricas del sitio y accesos a los módulos. |
+| `/login` | Login | Ingreso y registro con Supabase Auth (email + contraseña). |
 | `/patients` | Patient Registry | Listado de pacientes con buscador y alta de nuevos pacientes. |
 | `/patients/[id]` | Clinical Profile | Edición de condiciones, medicación concomitante y laboratorios. |
 | `/protocols` | Protocol Matcher | Alta de protocolos con criterios estructurados de inclusión/exclusión. |
@@ -35,9 +37,17 @@ El `match_score` es el porcentaje de criterios superados sobre el total evaluado
 
 1. Creá un proyecto en [supabase.com](https://supabase.com).
 2. En el **SQL Editor**, ejecutá `supabase/migrations/0001_initial_schema.sql` (tablas, enums, triggers y políticas RLS).
-3. (Opcional) Ejecutá `supabase/seed.sql` para cargar datos de demo (8 pacientes, 3 protocolos y screenings iniciales).
+3. Ejecutá `supabase/migrations/0002_require_authentication.sql` para que los datos exijan sesión iniciada (recomendado si la app es pública).
+4. (Opcional) Ejecutá `supabase/seed.sql` para cargar datos de demo (8 pacientes, 3 protocolos y screenings iniciales).
 
 Alternativa con CLI: `supabase link` + `supabase db push`.
+
+### Login de prueba
+
+La app usa **Supabase Auth** con email y contraseña. Para crear un usuario de prueba tenés dos caminos:
+
+- **Desde el dashboard:** Authentication → Users → **Add user** (marcá "Auto Confirm User").
+- **Desde la app:** en `/login`, usá "Registrate para probar". Si el proyecto tiene activada la confirmación por email (opción por defecto), vas a tener que confirmar desde el correo; para pruebas podés desactivar **Confirm email** en Authentication → Sign In / Providers → Email.
 
 ### 2. Aplicación
 
@@ -73,4 +83,4 @@ src/
 
 ## Nota sobre seguridad (MVP)
 
-RLS está habilitado en todas las tablas con políticas permisivas para el rol `anon`, pensadas para un MVP de una sola clínica sin autenticación. Antes de producción, incorporá Supabase Auth y reemplazá las políticas por filtros de `clinic_id` contra `app_metadata` del JWT (ver comentarios en la migración).
+RLS está habilitado en todas las tablas. La migración `0001` crea políticas permisivas (rol `anon`) para poder probar sin login; la migración `0002` las reemplaza por políticas que exigen usuario autenticado, acompañando el login de la app. Para producción multi-clínica, el siguiente paso es filtrar por `clinic_id` contra `app_metadata` del JWT (ver comentarios en las migraciones).

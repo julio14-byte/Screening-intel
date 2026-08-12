@@ -1,19 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, type ReactNode } from "react";
 import {
   Activity,
-  ClipboardList,
   FlaskConical,
   KanbanSquare,
+  LayoutDashboard,
+  LogOut,
   RefreshCw,
   Users,
 } from "lucide-react";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
 import { cn } from "@/lib/utils";
-import type { ReactNode } from "react";
 
 const NAV_ITEMS = [
+  { href: "/", label: "Inicio", icon: LayoutDashboard, exact: true },
   { href: "/patients", label: "Patient Registry", icon: Users },
   { href: "/protocols", label: "Protocol Matcher", icon: FlaskConical },
   { href: "/tracker", label: "Screening Tracker", icon: KanbanSquare },
@@ -22,6 +26,41 @@ const NAV_ITEMS = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { session, loading, configError, signOut } = useAuth();
+  const isLoginRoute = pathname === "/login";
+
+  useEffect(() => {
+    if (!isLoginRoute && !loading && !session && !configError) {
+      router.replace("/login");
+    }
+  }, [isLoginRoute, loading, session, configError, router]);
+
+  // La pantalla de login se renderiza sin el shell (a pantalla completa).
+  if (isLoginRoute) return <>{children}</>;
+
+  if (configError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
+        <div className="w-full max-w-lg">
+          <ErrorState message={configError} />
+        </div>
+      </div>
+    );
+  }
+
+  if (loading || !session) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <LoadingState label="Verificando sesión…" />
+      </div>
+    );
+  }
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.replace("/login");
+  };
 
   return (
     <div className="flex min-h-screen bg-slate-50">
@@ -44,9 +83,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Link>
 
         <nav className="flex-1 space-y-0.5 p-2" aria-label="Principal">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-            const active =
-              pathname === href || pathname.startsWith(href + "/");
+          {NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => {
+            const active = exact
+              ? pathname === href
+              : pathname === href || pathname.startsWith(href + "/");
             return (
               <Link
                 key={href}
@@ -66,11 +106,21 @@ export function AppShell({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        <div className="border-t border-slate-200 p-4">
-          <p className="flex items-center gap-1.5 text-[11px] text-slate-400">
-            <ClipboardList className="h-3.5 w-3.5" aria-hidden />
-            MVP · Datos de demo
+        <div className="space-y-2 border-t border-slate-200 p-3">
+          <p
+            className="truncate px-1 text-xs text-slate-500"
+            title={session.user.email ?? undefined}
+          >
+            {session.user.email}
           </p>
+          <button
+            type="button"
+            onClick={() => void handleSignOut()}
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+          >
+            <LogOut className="h-3.5 w-3.5" aria-hidden />
+            Cerrar sesión
+          </button>
         </div>
       </aside>
 
