@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# mcp
+mcp-icd11/.env
+mcp-icd11/node_modules

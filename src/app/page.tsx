@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { ScreeningFunnelDashboard } from "@/components/dashboard/ScreeningFunnelDashboard";
 
-export default function Home() {
-  redirect("/patients");
+export default function HomePage() {
+  return <ScreeningFunnelDashboard />;
 }

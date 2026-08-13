@@ -1,0 +1,23 @@
+{
+  "name": "mcp-icd11",
+  "version": "1.0.0",
+  "description": "MCP server para consultar ICD-11 vía la API oficial de la OMS (WHO ICD API)",
+  "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "mcp-icd11": "build/index.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod +x build/index.js",
+    "start": "node build/index.js",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "@types/node": "^22.10.5"
+  }
+}

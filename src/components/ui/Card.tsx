@@ -11,7 +11,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-lg border border-slate-200 bg-white shadow-sm",
+        "rounded-xl border border-violet-100/80 bg-white/90 shadow-sm shadow-indigo-100/50 backdrop-blur-sm",
         className
       )}
     >
@@ -30,7 +30,7 @@ export function CardHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-4 py-3">
+    <div className="flex items-start justify-between gap-4 border-b border-violet-100 bg-gradient-to-r from-indigo-50/50 to-violet-50/30 px-4 py-3">
       <div>
         <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
         {description ? (

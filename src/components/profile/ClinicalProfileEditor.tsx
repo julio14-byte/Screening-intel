@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ErrorState } from "@/components/ui/StateMessage";
+import { ConditionsEditor } from "@/components/profile/ConditionsEditor";
 import { LabsEditor } from "@/components/profile/LabsEditor";
 import { TagListEditor } from "@/components/profile/TagListEditor";
 import type { ProfileUpdate } from "@/hooks/usePatientDetail";
@@ -92,19 +93,16 @@ export function ClinicalProfileEditor({
         <Card>
           <CardHeader
             title="Condiciones médicas"
-            description="Patologías y diagnósticos activos"
+            description="Patologías y diagnósticos activos — texto libre con soporte ICD-11"
             actions={<HeartPulse className="h-4 w-4 text-slate-400" aria-hidden />}
           />
           <CardBody>
-            <TagListEditor
-              label="condiciones"
-              items={conditions}
+            <ConditionsEditor
+              conditions={conditions}
               onChange={(items) => {
                 setConditions(items);
                 setDirty(true);
               }}
-              placeholder="ej: diabetes tipo 2"
-              emptyText="Sin condiciones registradas."
             />
           </CardBody>
         </Card>
