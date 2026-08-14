@@ -1,44 +1,47 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import {
-  getDemoCredentials,
-  SESSION_COOKIE,
-  USER_COOKIE,
-} from "@/lib/auth/constants";
+import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { getDemoCredentials } from "@/lib/auth/constants";
 
 export async function POST(request: Request) {
   const body = (await request.json()) as { email?: string; password?: string };
   const email = body.email?.trim().toLowerCase() ?? "";
   const password = body.password ?? "";
 
-  const demo = getDemoCredentials();
-  if (
-    email !== demo.email.toLowerCase() ||
-    password !== demo.password
-  ) {
+  if (!email || !password) {
     return NextResponse.json(
-      { error: "Correo o contraseña incorrectos." },
-      { status: 401 }
+      { error: "Email y contraseña requeridos." },
+      { status: 400 }
     );
   }
 
-  const cookieStore = await cookies();
-  const secure = process.env.NODE_ENV === "production";
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json(
+      { error: "Supabase no configurado en el servidor." },
+      { status: 503 }
+    );
+  }
 
-  cookieStore.set(SESSION_COOKIE, "1", {
-    httpOnly: true,
-    secure,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7,
-  });
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  cookieStore.set(USER_COOKIE, email, {
-    secure,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7,
-  });
+  if (error) {
+    const demo = getDemoCredentials();
+    if (
+      email === demo.email.toLowerCase() &&
+      password === demo.password
+    ) {
+      return NextResponse.json({
+        error:
+          "Credenciales demo válidas pero el usuario no existe en Supabase Auth. " +
+          "Crea el usuario en Authentication → Users (Auto Confirm) o desactiva Confirm email y registrate.",
+      });
+    }
+    return NextResponse.json(
+      { error: error.message },
+      { status: 401 }
+    );
+  }
 
   return NextResponse.json({ email });
 }

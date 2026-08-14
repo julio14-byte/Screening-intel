@@ -19,6 +19,7 @@ import {
   LoadingState,
 } from "@/components/ui/StateMessage";
 import { VerdictDot } from "@/components/ui/VerdictBadge";
+import { PricingSection } from "@/components/billing/PricingSection";
 import { useScreenings } from "@/hooks/useScreenings";
 import type { ScreeningStatus, ScreeningWithRelations } from "@/lib/types";
 import {
@@ -259,6 +260,10 @@ export function ScreeningFunnelDashboard() {
           </div>
         </div>
       )}
+
+      <div className="mt-8">
+        <PricingSection />
+      </div>
     </>
   );
 }
