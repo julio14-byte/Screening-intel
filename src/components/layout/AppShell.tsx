@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import {
   Activity,
   ClipboardList,
+  CreditCard,
   FlaskConical,
   KanbanSquare,
   LayoutDashboard,
@@ -67,6 +68,13 @@ const NAV_ITEMS: NavItem[] = [
     label: "Asistente IA",
     icon: MessageSquare,
     activeClass: "bg-violet-400/25 text-violet-100 ring-1 ring-violet-300/40",
+    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
+  },
+  {
+    href: "/account/billing",
+    label: "Facturación",
+    icon: CreditCard,
+    activeClass: "bg-rose-400/20 text-rose-100 ring-1 ring-rose-300/30",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
 ];

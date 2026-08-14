@@ -1,18 +1,15 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { SESSION_COOKIE, USER_COOKIE } from "@/lib/auth/constants";
+import { getUser } from "@/lib/supabase/server";
 
 export async function GET() {
-  const cookieStore = await cookies();
-  const session = cookieStore.get(SESSION_COOKIE);
-  const user = cookieStore.get(USER_COOKIE);
+  const user = await getUser();
 
-  if (!session?.value) {
+  if (!user) {
     return NextResponse.json({ authenticated: false });
   }
 
   return NextResponse.json({
     authenticated: true,
-    email: user?.value ?? null,
+    email: user.email ?? null,
   });
 }
