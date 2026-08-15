@@ -13,11 +13,17 @@ const config = {
   },
 
   features: {
-    waitlist: false,
+    waitlist: true,
     emailLogin: true,
     aiChat: true,
-    pricing: true, // vitrina de planes en el tablero
-    payments: true, // Stripe suscripciones — Fase 1 SaaS
+    pricing: true,
+    payments: true,
+  },
+
+  /** Métricas globales en el tablero (waitlist, signups, chat). */
+  productMetrics: {
+    enabled: true,
+    founderEmails: [] as string[],
   },
 
   auth: {

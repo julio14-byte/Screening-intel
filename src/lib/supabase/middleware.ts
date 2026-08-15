@@ -8,6 +8,7 @@ const PUBLIC_PREFIXES = [
   "/login",
   "/api/auth/login",
   "/api/webhooks/stripe",
+  "/api/waitlist",
 ];
 
 export async function updateSession(request: NextRequest) {

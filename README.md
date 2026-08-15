@@ -52,7 +52,13 @@ El `match_score` es el porcentaje de criterios superados sobre el total evaluado
 
 Alternativa con CLI: `supabase link` + `supabase db push`.
 
-### 2. Aplicación
+### Métricas de producto (waitlist, signups, chat IA)
+
+1. Ejecutá `supabase/migrations/0003_waitlist_ai_metrics.sql`.
+2. Configurá `SUPABASE_SERVICE_ROLE_KEY` en el servidor para leer métricas globales en el tablero.
+3. Las sesiones del asistente en `/chat` se guardan automáticamente en `ai_conversations`.
+4. Waitlist: `POST /api/waitlist` con `{ "email": "..." }` (público).
+
 
 ```bash
 cp .env.example .env.local   # completar con la URL y anon key del proyecto

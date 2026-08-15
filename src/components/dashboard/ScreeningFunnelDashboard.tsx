@@ -20,7 +20,9 @@ import {
 } from "@/components/ui/StateMessage";
 import { VerdictDot } from "@/components/ui/VerdictBadge";
 import { PricingSection } from "@/components/billing/PricingSection";
+import { ProductMetricsKpis } from "@/components/dashboard/ProductMetricsKpis";
 import { useScreenings } from "@/hooks/useScreenings";
+import type { ProductMetrics } from "@/lib/dashboard/productMetrics";
 import type { ScreeningStatus, ScreeningWithRelations } from "@/lib/types";
 import {
   cn,
@@ -70,7 +72,13 @@ function pct(part: number, total: number) {
   return Math.round((part / total) * 100);
 }
 
-export function ScreeningFunnelDashboard() {
+export function ScreeningFunnelDashboard({
+  productMetrics = null,
+  productMetricsError = null,
+}: {
+  productMetrics?: ProductMetrics | null;
+  productMetricsError?: string | null;
+}) {
   const { screenings, loading, error } = useScreenings();
 
   const stats = useMemo(() => {
@@ -121,6 +129,13 @@ export function ScreeningFunnelDashboard() {
           </div>
         }
       />
+
+      <div className="mb-6">
+        <ProductMetricsKpis
+          productMetrics={productMetrics}
+          error={productMetricsError}
+        />
+      </div>
 
       {loading ? (
         <LoadingState label="Actualizando embudo…" />
