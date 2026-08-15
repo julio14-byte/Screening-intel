@@ -1,0 +1,3 @@
+[submodule "references/vibefast"]
+	path = references/vibefast
+	url = https://github.com/arampersand/VibeFast.git

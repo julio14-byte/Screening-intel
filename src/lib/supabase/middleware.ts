@@ -4,16 +4,36 @@ import config from "@/config";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { getPaywallRedirect } from "@/plugins/stripe/paywall";
 
-const PUBLIC_PREFIXES = [
-  "/login",
+/**
+ * Rutas privadas (patrón VibeFast).
+ * El middleware no ve route groups; listamos prefijos explícitos.
+ */
+const PROTECTED_PREFIXES = [
+  "/dashboard",
+  "/patients",
+  "/protocols",
+  "/tracker",
+  "/rematch",
+  "/chat",
+  "/account",
+];
+
+const PUBLIC_API_PREFIXES = [
   "/api/auth/login",
   "/api/webhooks/stripe",
   "/api/waitlist",
 ];
 
-function isPublicPath(pathname: string) {
-  if (pathname === config.auth.landingUrl) return true;
-  return PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
+function isProtectedPath(pathname: string) {
+  return PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
+function isPublicApi(pathname: string) {
+  return PUBLIC_API_PREFIXES.some((p) => pathname.startsWith(p));
+}
+
+function isMarketingPath(pathname: string) {
+  return pathname === config.auth.landingUrl;
 }
 
 export async function updateSession(request: NextRequest) {
@@ -29,10 +49,12 @@ async function runUpdateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
   const { pathname } = request.nextUrl;
 
-  const isPublic = isPublicPath(pathname);
+  const isLogin = pathname === config.auth.loginUrl;
+  const isPublic =
+    isMarketingPath(pathname) || isLogin || isPublicApi(pathname);
 
   if (!isSupabaseConfigured()) {
-    if (!isPublic && pathname !== "/login") {
+    if (!isPublic && !isLogin) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = config.auth.loginUrl;
       loginUrl.searchParams.set("from", pathname);
@@ -68,31 +90,33 @@ async function runUpdateSession(request: NextRequest) {
 
   response.headers.set("x-pathname", pathname);
 
-  if (user && pathname === config.auth.loginUrl) {
+  if (user && isLogin) {
     const url = request.nextUrl.clone();
     const from = request.nextUrl.searchParams.get("from");
-    url.pathname =
-      from && from.startsWith("/") && !from.startsWith("//")
-        ? from
-        : config.auth.afterLoginUrl;
+    const next = request.nextUrl.searchParams.get("next");
+    const redirectPath =
+      (from && from.startsWith("/") && !from.startsWith("//") ? from : null) ??
+      (next && next.startsWith("/") && !next.startsWith("//") ? next : null) ??
+      config.auth.afterLoginUrl;
+    url.pathname = redirectPath;
     url.search = "";
     return NextResponse.redirect(url);
   }
 
-  if (user && pathname === config.auth.landingUrl) {
+  if (user && isMarketingPath(pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = config.auth.afterLoginUrl;
     return NextResponse.redirect(url);
   }
 
-  if (!isPublic && !user) {
+  if (isProtectedPath(pathname) && !user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = config.auth.loginUrl;
     loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (user && !isPublic && !pathname.startsWith("/account")) {
+  if (user && isProtectedPath(pathname) && !pathname.startsWith("/account")) {
     const paywallRedirect = await getPaywallRedirect(user.id, pathname);
     if (paywallRedirect) {
       const url = request.nextUrl.clone();

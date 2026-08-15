@@ -9,7 +9,10 @@ export function LandingPricing() {
   const { eyebrow, title, subtitle, plans } = config.pricing;
 
   return (
-    <section id="precios" className="scroll-mt-20 px-4 py-20 sm:px-6">
+    <section
+      id="pricing"
+      className="scroll-mt-20 border-t border-white/10 px-4 py-20 sm:px-6"
+    >
       <div className="mx-auto max-w-5xl">
         <div className="text-center">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-400">
@@ -32,26 +35,19 @@ export function LandingPricing() {
               <div
                 key={plan.id}
                 className={cn(
-                  "rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm",
+                  "relative flex flex-col rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm",
                   plan.highlighted &&
                     "border-violet-400/40 bg-gradient-to-br from-violet-500/15 to-fuchsia-500/10 ring-1 ring-violet-400/30"
                 )}
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">
-                      {plan.name}
-                    </h3>
-                    <p className="mt-1 text-sm text-violet-200/80">
-                      {plan.description}
-                    </p>
-                  </div>
-                  {plan.highlighted ? (
-                    <span className="rounded-full bg-violet-500/30 px-2.5 py-0.5 text-[10px] font-semibold uppercase text-violet-100">
-                      Popular
-                    </span>
-                  ) : null}
-                </div>
+                {plan.highlighted ? (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-violet-500 px-3 py-1 text-xs font-semibold text-white">
+                    Más popular
+                  </span>
+                ) : null}
+
+                <h3 className="text-lg font-semibold text-white">{plan.name}</h3>
+                <p className="mt-1 text-sm text-violet-200/80">{plan.description}</p>
 
                 <p className="mt-5 text-3xl font-bold tabular-nums text-white">
                   {plan.price === 0 ? "Gratis" : `$${plan.price}`}
@@ -62,7 +58,7 @@ export function LandingPricing() {
                   ) : null}
                 </p>
 
-                <ul className="mt-5 space-y-2">
+                <ul className="mt-5 flex-1 space-y-2">
                   {plan.features.map((feature) => (
                     <li
                       key={feature}
