@@ -23,12 +23,27 @@ git clone https://github.com/julio14-byte/VibeFast.git
 
 | VibeFast | Screening Intelligence |
 |----------|------------------------|
-| `web/config.js` | `src/config.ts` (`app`, `brand`, `features`, `landing`, `pricing`) |
+| `web/config.js` | `src/config.ts` (`app`, `brand`, `features`, `landing`, `pricing`, `routes`) |
+| `config.routes` + `app.nav` | URLs canónicas y sidebar desde un solo config |
 | `(marketing)/` landing modular | `src/app/(marketing)/` |
 | `(app)/` zona privada | `src/app/(app)/` con `AppShell` |
-| `PROTECTED_PREFIXES` en middleware | `src/lib/supabase/middleware.ts` |
+| `PROTECTED_PREFIXES` en middleware | `config.routes.protected` vía `src/lib/app/routes.ts` |
 | DaisyUI + JS | Tailwind custom + TypeScript |
 | Google Auth | Email/password (demo) + Stripe SaaS |
+
+## URLs de la app (desde `config.routes`)
+
+| Módulo | URL |
+|--------|-----|
+| Landing | `/` |
+| Login | `/login` |
+| Tablero + métricas | `/dashboard` |
+| Pacientes | `/patients`, `/patients/[id]` |
+| Protocolos | `/protocols`, `/protocols/[id]/match` |
+| Tracker | `/tracker` |
+| Re-Match | `/rematch` |
+| Asistente IA | `/chat` |
+| Facturación | `/account/billing` |
 
 ## Rama de pruebas
 

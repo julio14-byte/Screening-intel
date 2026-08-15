@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { Mail, Send } from "lucide-react";
 import config from "@/config";
+import { routes } from "@/lib/app/routes";
 import { Button } from "@/components/ui/Button";
 
 export function LandingWaitlist() {
@@ -21,7 +22,7 @@ export function LandingWaitlist() {
     setMessage(null);
 
     try {
-      const res = await fetch("/api/waitlist", {
+      const res = await fetch(routes.apis.waitlist, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, source: "landing" }),

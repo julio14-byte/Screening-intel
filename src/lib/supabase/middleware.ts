@@ -1,36 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import config from "@/config";
+import { isProtectedPath, isPublicApiPath } from "@/lib/app/routes";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { getPaywallRedirect } from "@/plugins/stripe/paywall";
-
-/**
- * Rutas privadas (patrón VibeFast).
- * El middleware no ve route groups; listamos prefijos explícitos.
- */
-const PROTECTED_PREFIXES = [
-  "/dashboard",
-  "/patients",
-  "/protocols",
-  "/tracker",
-  "/rematch",
-  "/chat",
-  "/account",
-];
-
-const PUBLIC_API_PREFIXES = [
-  "/api/auth/login",
-  "/api/webhooks/stripe",
-  "/api/waitlist",
-];
-
-function isProtectedPath(pathname: string) {
-  return PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
-}
-
-function isPublicApi(pathname: string) {
-  return PUBLIC_API_PREFIXES.some((p) => pathname.startsWith(p));
-}
 
 function isMarketingPath(pathname: string) {
   return pathname === config.auth.landingUrl;
@@ -51,7 +24,7 @@ async function runUpdateSession(request: NextRequest) {
 
   const isLogin = pathname === config.auth.loginUrl;
   const isPublic =
-    isMarketingPath(pathname) || isLogin || isPublicApi(pathname);
+    isMarketingPath(pathname) || isLogin || isPublicApiPath(pathname);
 
   if (!isSupabaseConfigured()) {
     if (!isPublic && !isLogin) {

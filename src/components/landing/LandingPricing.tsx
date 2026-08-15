@@ -1,5 +1,6 @@
 import Link from "next/link";
 import config from "@/config";
+import { routes, loginUrlWithFrom } from "@/lib/app/routes";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 
@@ -26,10 +27,9 @@ export function LandingPricing() {
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2">
           {plans.map((plan) => {
-            const href =
-              plan.id === "pro"
-                ? "/login?from=/account/billing"
-                : "/login?from=/dashboard";
+            const appPath =
+              plan.id === "pro" ? routes.app.billing : routes.app.dashboard;
+            const href = loginUrlWithFrom(appPath);
 
             return (
               <div

@@ -6,6 +6,7 @@ import { Activity, Lock, Mail, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/Field";
 import { DEFAULT_DEMO_EMAIL, DEFAULT_DEMO_PASSWORD } from "@/lib/auth/constants";
+import { routes } from "@/lib/app/routes";
 
 export function LoginForm() {
   const router = useRouter();
@@ -21,7 +22,7 @@ export function LoginForm() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch(routes.apis.authLogin, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -37,7 +38,7 @@ export function LoginForm() {
       const from =
         fromParam && fromParam.startsWith("/") && !fromParam.startsWith("//")
           ? fromParam
-          : "/dashboard";
+          : routes.afterLogin;
       router.replace(from);
       router.refresh();
     } catch {

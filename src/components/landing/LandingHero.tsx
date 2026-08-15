@@ -1,23 +1,9 @@
 import Link from "next/link";
+import { ArrowRight, Sparkles } from "lucide-react";
 import config from "@/config";
+import { routes } from "@/lib/app/routes";
 import { Logo } from "@/components/Logo";
-import {
-  ArrowRight,
-  FlaskConical,
-  KanbanSquare,
-  LayoutDashboard,
-  MessageSquare,
-  Sparkles,
-  Users,
-} from "lucide-react";
-
-const MOCK_NAV = [
-  { label: "Tablero", icon: LayoutDashboard, active: true },
-  { label: "Pacientes", icon: Users },
-  { label: "Protocolos", icon: FlaskConical },
-  { label: "Tracker", icon: KanbanSquare },
-  { label: "Asistente", icon: MessageSquare },
-];
+import { appIcon } from "@/lib/app/nav";
 
 export function LandingHero() {
   const { eyebrow, title, subtitle, cta, ctaSecondary } = config.landing.hero;
@@ -68,7 +54,7 @@ export function LandingHero() {
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
             </div>
             <div className="flex-1 rounded-md border border-white/10 bg-black/20 px-3 py-1.5 text-xs text-violet-300/70">
-              https://{config.app.domain}/dashboard
+              https://{config.app.domain}{routes.app.dashboard}
             </div>
           </div>
 
@@ -81,20 +67,24 @@ export function LandingHero() {
                 </span>
               </div>
               <ul className="space-y-1">
-                {MOCK_NAV.map(({ label, icon: Icon, active }) => (
-                  <li
-                    key={label}
-                    className={
-                      "flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm " +
-                      (active
-                        ? "bg-violet-500/20 font-medium text-violet-100"
-                        : "text-violet-300/60")
-                    }
-                  >
-                    <Icon className="h-4 w-4" aria-hidden />
-                    {label}
-                  </li>
-                ))}
+                {config.app.nav.slice(0, 5).map((item, index) => {
+                  const Icon = appIcon(item.icon);
+                  const active = index === 0;
+                  return (
+                    <li
+                      key={item.href}
+                      className={
+                        "flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm " +
+                        (active
+                          ? "bg-violet-500/20 font-medium text-violet-100"
+                          : "text-violet-300/60")
+                      }
+                    >
+                      <Icon className="h-4 w-4" aria-hidden />
+                      {item.label}
+                    </li>
+                  );
+                })}
               </ul>
             </aside>
 

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import config from "@/config";
+import { routes } from "@/lib/app/routes";
 import { Button } from "@/components/ui/Button";
 
 export function CheckoutButton({
@@ -20,7 +22,7 @@ export function CheckoutButton({
     setError(null);
 
     try {
-      const res = await fetch("/api/stripe/checkout", {
+      const res = await fetch(routes.apis.stripeCheckout, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

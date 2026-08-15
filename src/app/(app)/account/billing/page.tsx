@@ -1,5 +1,6 @@
 import Link from "next/link";
 import config from "@/config";
+import { routes } from "@/lib/app/routes";
 import { getUser } from "@/lib/supabase/server";
 import { getOrganizationForUser } from "@/plugins/stripe/organization";
 import {
@@ -28,7 +29,7 @@ export default async function BillingPage({
   if (!user) {
     return (
       <p className="text-sm text-slate-600">
-        <Link href="/login" className="text-sky-700 hover:underline">
+        <Link href={routes.login} className="text-sky-700 hover:underline">
           Inicia sesión
         </Link>{" "}
         para ver tu plan.
@@ -148,10 +149,10 @@ export default async function BillingPage({
 
       {active ? (
         <div className="mt-4 flex flex-wrap gap-3">
-          <Link href="/dashboard">
+          <Link href={routes.app.dashboard}>
             <Button>Ir al tablero</Button>
           </Link>
-          <Link href="/patients">
+          <Link href={routes.app.patients}>
             <Button variant="secondary">Pacientes</Button>
           </Link>
         </div>

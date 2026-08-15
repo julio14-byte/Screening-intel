@@ -10,6 +10,45 @@ const config = {
     domain: "screening-intel.vercel.app",
     locale: "es",
     defaultUrl: "http://localhost:3000",
+    nav: [
+      {
+        href: "/dashboard",
+        label: "Tablero Central",
+        icon: "LayoutDashboard",
+      },
+      {
+        href: "/patients",
+        label: "Patient Registry",
+        icon: "Users",
+      },
+      {
+        href: "/protocols",
+        label: "Protocol Matcher",
+        icon: "FlaskConical",
+      },
+      {
+        href: "/tracker",
+        label: "Screening Tracker",
+        icon: "KanbanSquare",
+      },
+      {
+        href: "/rematch",
+        label: "Re-Match & Follow-up",
+        icon: "RefreshCw",
+      },
+      {
+        href: "/chat",
+        label: "Asistente IA",
+        icon: "MessageSquare",
+        feature: "aiChat" as const,
+      },
+      {
+        href: "/account/billing",
+        label: "Facturación",
+        icon: "CreditCard",
+        feature: "payments" as const,
+      },
+    ],
   },
 
   brand: {
@@ -30,6 +69,48 @@ const config = {
   productMetrics: {
     enabled: true,
     founderEmails: [] as string[],
+  },
+
+  /** URLs canónicas — middleware, nav y landing leen desde aquí. */
+  routes: {
+    landing: "/",
+    login: "/login",
+    afterLogin: "/dashboard",
+    protected: [
+      "/dashboard",
+      "/patients",
+      "/protocols",
+      "/tracker",
+      "/rematch",
+      "/chat",
+      "/account",
+    ],
+    publicApis: [
+      "/api/auth/login",
+      "/api/waitlist",
+      "/api/webhooks/stripe",
+    ],
+    app: {
+      dashboard: "/dashboard",
+      patients: "/patients",
+      protocols: "/protocols",
+      tracker: "/tracker",
+      rematch: "/rematch",
+      chat: "/chat",
+      billing: "/account/billing",
+    },
+    apis: {
+      waitlist: "/api/waitlist",
+      authLogin: "/api/auth/login",
+      authLogout: "/api/auth/logout",
+      authSession: "/api/auth/session",
+      authChats: "/api/auth/chats",
+      stripeCheckout: "/api/stripe/checkout",
+      stripePortal: "/api/stripe/portal",
+      stripeWebhook: "/api/webhooks/stripe",
+      icd11Search: "/api/icd11/search",
+      icd11Normalize: "/api/icd11/normalize",
+    },
   },
 
   auth: {
@@ -87,31 +168,37 @@ const config = {
           icon: "Users",
           title: "Patient Registry",
           body: "Perfil clínico estructurado y registro centralizado de candidatos.",
+          href: "/patients",
         },
         {
           icon: "FlaskConical",
           title: "Protocol Matcher",
           body: "Motor de matching contra criterios de inclusión y exclusión.",
+          href: "/protocols",
         },
         {
           icon: "KanbanSquare",
           title: "Screening Tracker",
           body: "Kanban de estados con trazabilidad de cada decisión.",
+          href: "/tracker",
         },
         {
           icon: "RefreshCw",
           title: "Re-Match",
           body: "Re-evalúa cohortes cuando cambian protocolos o criterios.",
+          href: "/rematch",
         },
         {
           icon: "MessageSquare",
           title: "Asistente IA",
           body: "Consulta criterios y resúmenes clínicos en chat contextual.",
+          href: "/chat",
         },
         {
           icon: "CreditCard",
           title: "SaaS con Stripe",
           body: "Trial Starter y plan Site Pro con cobro mensual y portal de cliente.",
+          href: "/account/billing",
         },
       ],
     },
@@ -189,6 +276,17 @@ const config = {
             { label: "Funciones", href: "#features" },
             { label: "Precios", href: "#pricing" },
             { label: "Preguntas", href: "#faq" },
+          ],
+        },
+        {
+          title: "App",
+          links: [
+            { label: "Tablero", href: "/dashboard" },
+            { label: "Pacientes", href: "/patients" },
+            { label: "Protocolos", href: "/protocols" },
+            { label: "Tracker", href: "/tracker" },
+            { label: "Re-Match", href: "/rematch" },
+            { label: "Asistente IA", href: "/chat" },
           ],
         },
         {
