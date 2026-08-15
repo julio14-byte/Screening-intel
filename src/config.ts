@@ -28,8 +28,9 @@ const config = {
 
   auth: {
     loginUrl: "/login",
-    afterLoginUrl: "/",
+    afterLoginUrl: "/dashboard",
     afterLogoutUrl: "/login",
+    landingUrl: "/",
   },
 
   /** Planes SaaS Fase 1 — research site = organization */

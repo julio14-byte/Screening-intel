@@ -148,7 +148,7 @@ export default async function BillingPage({
 
       {active ? (
         <div className="mt-4 flex flex-wrap gap-3">
-          <Link href="/">
+          <Link href="/dashboard">
             <Button>Ir al tablero</Button>
           </Link>
           <Link href="/patients">

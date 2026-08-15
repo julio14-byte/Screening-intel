@@ -33,7 +33,11 @@ export function LoginForm() {
         return;
       }
 
-      const from = searchParams.get("from") || "/";
+      const fromParam = searchParams.get("from");
+      const from =
+        fromParam && fromParam.startsWith("/") && !fromParam.startsWith("//")
+          ? fromParam
+          : "/dashboard";
       router.replace(from);
       router.refresh();
     } catch {

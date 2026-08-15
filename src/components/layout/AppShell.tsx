@@ -29,7 +29,7 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   {
-    href: "/",
+    href: "/dashboard",
     label: "Tablero Central",
     icon: LayoutDashboard,
     activeClass: "bg-white/15 text-white ring-1 ring-white/25",
@@ -103,7 +103,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/40 to-violet-50/50">
       <aside className="fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-gradient-to-b from-indigo-950 via-violet-950 to-fuchsia-950 text-white shadow-xl shadow-indigo-950/20">
         <Link
-          href="/"
+          href="/dashboard"
           className="flex items-center gap-3 border-b border-white/10 px-4 py-5"
         >
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-violet-500 shadow-lg shadow-violet-900/50">
@@ -118,9 +118,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <nav className="flex-1 space-y-1 p-3" aria-label="Principal">
           {NAV_ITEMS.map(({ href, label, icon: Icon, activeClass, idleClass }) => {
             const active =
-              href === "/"
-                ? pathname === "/"
-                : pathname === href || pathname.startsWith(href + "/");
+              pathname === href || pathname.startsWith(href + "/");
             return (
               <Link
                 key={href}

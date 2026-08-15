@@ -11,6 +11,11 @@ const PUBLIC_PREFIXES = [
   "/api/waitlist",
 ];
 
+function isPublicPath(pathname: string) {
+  if (pathname === config.auth.landingUrl) return true;
+  return PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
+}
+
 export async function updateSession(request: NextRequest) {
   try {
     return await runUpdateSession(request);
@@ -24,7 +29,7 @@ async function runUpdateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
   const { pathname } = request.nextUrl;
 
-  const isPublic = PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
+  const isPublic = isPublicPath(pathname);
 
   if (!isSupabaseConfigured()) {
     if (!isPublic && pathname !== "/login") {
@@ -64,6 +69,17 @@ async function runUpdateSession(request: NextRequest) {
   response.headers.set("x-pathname", pathname);
 
   if (user && pathname === config.auth.loginUrl) {
+    const url = request.nextUrl.clone();
+    const from = request.nextUrl.searchParams.get("from");
+    url.pathname =
+      from && from.startsWith("/") && !from.startsWith("//")
+        ? from
+        : config.auth.afterLoginUrl;
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
+
+  if (user && pathname === config.auth.landingUrl) {
     const url = request.nextUrl.clone();
     url.pathname = config.auth.afterLoginUrl;
     return NextResponse.redirect(url);

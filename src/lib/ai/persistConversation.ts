@@ -15,8 +15,9 @@ export async function persistChatExchange(input: {
 
   const supabase = await createClient();
 
-  let convId = input.conversationId;
-  if (!convId) {
+  let conversationId = input.conversationId ?? null;
+
+  if (!conversationId) {
     const { data, error } = await supabase
       .from("ai_conversations")
       .insert({ user_id: input.userId })
@@ -26,17 +27,19 @@ export async function persistChatExchange(input: {
       console.error("[ai] crear conversación:", error?.message);
       return null;
     }
-    convId = data.id;
+    conversationId = data.id;
   }
 
+  if (!conversationId) return null;
+
   const rows: { conversation_id: string; role: string; content: string }[] = [
-    { conversation_id: convId, role: "user", content: trimmedUser },
+    { conversation_id: conversationId, role: "user", content: trimmedUser },
   ];
 
   const trimmedAssistant = input.assistantText?.trim();
   if (trimmedAssistant) {
     rows.push({
-      conversation_id: convId,
+      conversation_id: conversationId,
       role: "assistant",
       content: trimmedAssistant,
     });
@@ -47,7 +50,7 @@ export async function persistChatExchange(input: {
     console.error("[ai] insertar mensajes:", insertError.message);
   }
 
-  return convId;
+  return conversationId;
 }
 
 export function textFromUIMessage(

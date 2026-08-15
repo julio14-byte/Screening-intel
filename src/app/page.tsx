@@ -1,30 +1,19 @@
-import { ScreeningFunnelDashboard } from "@/components/dashboard/ScreeningFunnelDashboard";
-import {
-  canViewProductMetrics,
-  getProductMetrics,
-} from "@/lib/dashboard/productMetrics";
+import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+import { LandingPage } from "@/components/landing/LandingPage";
+import config from "@/config";
 import { getUser } from "@/lib/supabase/server";
 
-export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  title: `${config.app.name} · Pre-screening para research sites`,
+  description: config.app.description,
+};
 
 export default async function HomePage() {
   const user = await getUser();
-  let productMetrics = null;
-  let productMetricsError: string | null = null;
-
-  if (user && canViewProductMetrics(user)) {
-    const result = await getProductMetrics();
-    if ("error" in result) {
-      productMetricsError = result.error;
-    } else {
-      productMetrics = result;
-    }
+  if (user) {
+    redirect("/dashboard");
   }
 
-  return (
-    <ScreeningFunnelDashboard
-      productMetrics={productMetrics}
-      productMetricsError={productMetricsError}
-    />
-  );
+  return <LandingPage />;
 }
