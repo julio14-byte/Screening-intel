@@ -4,7 +4,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import config from "@/config";
 import { getUser } from "@/lib/supabase/server";
 
-/** Zona privada — layout VibeFast (app) con shell de la aplicación. */
+/** Zona privada con shell de la aplicación. */
 export default async function AppGroupLayout({
   children,
 }: {

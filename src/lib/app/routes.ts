@@ -1,6 +1,6 @@
 import config from "@/config";
 
-/** Rutas canónicas — una sola fuente (patrón VibeFast config). */
+/** Rutas canónicas — middleware, nav y landing leen desde aquí. */
 export const routes = config.routes;
 
 export function isProtectedPath(pathname: string): boolean {

@@ -1,9 +1,12 @@
 import Link from "next/link";
 import config from "@/config";
 import { Logo } from "@/components/Logo";
-import { Menu } from "lucide-react";
+import { loginUrlWithFrom, routes } from "@/lib/app/routes";
+import { LogIn, Menu } from "lucide-react";
 
 export function MarketingNavbar() {
+  const enterHref = loginUrlWithFrom(routes.app.dashboard);
+
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-indigo-950/80 backdrop-blur-md">
       <nav
@@ -31,10 +34,18 @@ export function MarketingNavbar() {
                   </a>
                 </li>
               ))}
+              <li>
+                <Link
+                  href={enterHref}
+                  className="block rounded-lg px-3 py-2 text-sm font-semibold text-cyan-300 hover:bg-white/10"
+                >
+                  Entrar a la app
+                </Link>
+              </li>
             </ul>
           </details>
 
-          <Link href="/" className="flex items-center gap-2.5">
+          <Link href={routes.landing} className="flex items-center gap-2.5">
             <Logo className="h-9 w-9" />
             <span className="text-sm font-semibold leading-tight text-white">
               {config.brand.logoText}
@@ -59,17 +70,18 @@ export function MarketingNavbar() {
         </ul>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <Link
-            href={config.auth.loginUrl}
-            className="rounded-lg px-3 py-2 text-sm font-medium text-violet-200 transition-colors hover:text-white"
+          <a
+            href="#pricing"
+            className="hidden rounded-lg px-3 py-2 text-sm font-medium text-violet-200 transition-colors hover:text-white sm:inline"
           >
-            Iniciar sesión
-          </Link>
+            Precios
+          </a>
           <Link
-            href={config.landing.hero.cta.href}
-            className="inline-flex items-center rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 transition hover:from-cyan-400 hover:to-violet-400 sm:px-4"
+            href={enterHref}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 transition hover:from-cyan-400 hover:to-violet-400 sm:px-4"
           >
-            {config.landing.hero.cta.label}
+            <LogIn className="h-4 w-4" aria-hidden />
+            Entrar
           </Link>
         </div>
       </nav>

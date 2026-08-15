@@ -1,5 +1,5 @@
 /**
- * Config central del producto (patrón VibeFast).
+ * Config central del producto.
  * Cambiar branding, copy, features y pricing aquí altera el producto sin abrir JSX.
  */
 const config = {
@@ -122,18 +122,21 @@ const config = {
 
   landing: {
     nav: [
-      { label: "Problema", href: "#problem" },
-      { label: "Funciones", href: "#features" },
       { label: "Precios", href: "#pricing" },
-      { label: "Preguntas", href: "#faq" },
+      { label: "Funciones", href: "#features" },
+      { label: "Entrar", href: "#entrar" },
     ],
     hero: {
       eyebrow: "Research sites · Pre-screening clínico",
       title: "Encuentra candidatos al protocolo correcto, más rápido.",
       subtitle:
-        "Screening Intelligence centraliza pacientes, cruza criterios de inclusión y exclusion, y trackea el funnel de screening con re-matching automático y asistente IA.",
-      cta: { label: "Empezar trial gratis", href: "/login?from=/dashboard" },
-      ctaSecondary: { label: "Ver precios", href: "#pricing" },
+        "Elige tu plan de suscripción y accede al tablero con pacientes, protocolos, tracker de screening y asistente IA.",
+    },
+    enterApp: {
+      eyebrow: "Acceso",
+      title: "¿Listo para usar la app?",
+      subtitle:
+        "Inicia sesión y entra al tablero central. Si aún no tienes cuenta, usa el trial Starter o suscríbete a Site Pro.",
     },
     problem: {
       eyebrow: "El problema",
@@ -267,15 +270,14 @@ const config = {
       placeholder: "tu@researchsite.com",
     },
     footer: {
-      tagline:
-        "Pre-screening inteligente para research sites. Basado en el patrón VibeFast.",
+      tagline: "Pre-screening inteligente para research sites.",
       columns: [
         {
-          title: "Producto",
+          title: "Suscripciones",
           links: [
-            { label: "Funciones", href: "#features" },
-            { label: "Precios", href: "#pricing" },
-            { label: "Preguntas", href: "#faq" },
+            { label: "Ver planes", href: "#pricing" },
+            { label: "Entrar a la app", href: "#entrar" },
+            { label: "Facturación", href: "/account/billing" },
           ],
         },
         {
@@ -294,32 +296,17 @@ const config = {
           links: [
             { label: "Iniciar sesión", href: "/login" },
             { label: "Trial gratis", href: "/login?from=/dashboard" },
-            { label: "Facturación", href: "/account/billing" },
-          ],
-        },
-        {
-          title: "Referencia",
-          links: [
-            {
-              label: "VibeFast (upstream)",
-              href: "https://github.com/arampersand/VibeFast",
-              external: true,
-            },
-            {
-              label: "Screening-intel",
-              href: "https://github.com/julio14-byte/Screening-intel",
-              external: true,
-            },
           ],
         },
       ],
     },
   },
 
-  pricing: {
-    eyebrow: "Precios",
+    pricing: {
+    eyebrow: "Suscripciones",
     title: "Planes para tu research site",
-    subtitle: "14 días de prueba. Luego un plan mensual simple vía Stripe.",
+    subtitle:
+      "Empieza con trial gratis o suscríbete a Site Pro. Luego entra a la app con el botón «Entrar».",
     plans: [
       {
         id: "starter",

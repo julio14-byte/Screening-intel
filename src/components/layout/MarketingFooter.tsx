@@ -72,7 +72,7 @@ export function MarketingFooter() {
           <span>
             © {new Date().getFullYear()} {config.brand.logoText}
           </span>
-          <span>Patrón VibeFast · Screening Intelligence MVP</span>
+          <span>Screening Intelligence MVP</span>
         </div>
       </div>
     </footer>
