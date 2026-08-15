@@ -18,6 +18,18 @@ MVP de una plataforma que ayuda a clínicas de investigación a optimizar el **p
 | `/protocols/[id]/match` | Motor de cruce | Ranking de toda la base de pacientes con semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple y detalle criterio por criterio. |
 | `/tracker` | Screening Tracker | Kanban con drag & drop: Pre-screening → Screening → Randomización → Screen Failure. |
 | `/rematch` | Re-Match & Follow-up | Para cada paciente con screen failure, propone automáticamente otros protocolos activos donde podría encajar. |
+| `/account/billing` | Facturación | Plan, trial, checkout Stripe y portal de cliente (Fase 1 SaaS). |
+
+## SaaS Fase 1 (Stripe)
+
+- `src/config.ts`: `features.pricing` y `features.payments` activados.
+- Plugin en `src/plugins/stripe/` (checkout, portal, webhook, paywall).
+- Migración `supabase/migrations/0002_profiles_saas_fase1.sql` (organizations + trial 14 días).
+- Planes: **Starter** (50 pacientes, 3 protocolos) y **Site Pro** (500 pacientes, 50 protocolos).
+
+Variables: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_PRO`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_APP_URL`.
+
+Webhook Stripe → `https://tu-dominio/api/webhooks/stripe`
 
 ## Motor de matching
 
@@ -35,7 +47,8 @@ El `match_score` es el porcentaje de criterios superados sobre el total evaluado
 
 1. Creá un proyecto en [supabase.com](https://supabase.com).
 2. En el **SQL Editor**, ejecutá `supabase/migrations/0001_initial_schema.sql` (tablas, enums, triggers y políticas RLS).
-3. (Opcional) Ejecutá `supabase/seed.sql` para cargar datos de demo (8 pacientes, 3 protocolos y screenings iniciales).
+3. Ejecutá `supabase/migrations/0002_profiles_saas_fase1.sql` (profiles + organizations SaaS).
+4. (Opcional) Ejecutá `supabase/seed.sql` para cargar datos de demo.
 
 Alternativa con CLI: `supabase link` + `supabase db push`.
 
