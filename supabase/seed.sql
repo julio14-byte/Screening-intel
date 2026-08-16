@@ -2,6 +2,7 @@
 -- Datos de ejemplo para demo — Screening Intelligence
 -- =============================================================================
 -- Opcional. Ejecutar después de 0001_initial_schema.sql.
+-- Idempotente: se puede ejecutar varias veces sin error de claves duplicadas.
 
 -- Pacientes
 insert into public.patients (id, first_name, last_name, birth_date, gender) values
@@ -12,7 +13,8 @@ insert into public.patients (id, first_name, last_name, birth_date, gender) valu
   ('11111111-1111-1111-1111-111111111105', 'Ana',      'Suárez',    '1970-06-17', 'female'),
   ('11111111-1111-1111-1111-111111111106', 'Ricardo',  'López',     '1948-02-08', 'male'),
   ('11111111-1111-1111-1111-111111111107', 'Valentina','Ríos',      '1995-08-25', 'female'),
-  ('11111111-1111-1111-1111-111111111108', 'Héctor',   'Domínguez', '1966-12-01', 'male');
+  ('11111111-1111-1111-1111-111111111108', 'Héctor',   'Domínguez', '1966-12-01', 'male')
+on conflict (id) do nothing;
 
 -- Perfiles clínicos
 insert into public.clinical_profiles (patient_id, conditions, medications, laboratories) values
@@ -43,7 +45,12 @@ insert into public.clinical_profiles (patient_id, conditions, medications, labor
   ('11111111-1111-1111-1111-111111111107',
    array['migraña'],
    array['ibuprofeno'],
-   '{}');
+   '{}')
+on conflict (patient_id) do update set
+  conditions = excluded.conditions,
+  medications = excluded.medications,
+  laboratories = excluded.laboratories,
+  updated_at = now();
 -- El paciente 108 queda sin perfil clínico a propósito (caso "Pendiente").
 
 -- Protocolos
@@ -91,7 +98,8 @@ insert into public.protocols (id, title, code_name, inclusion_criteria, exclusio
       "excluded_conditions": ["asma"],
       "excluded_medications": []
     }',
-   'active');
+   'active')
+on conflict (id) do nothing;
 
 -- Screenings iniciales para poblar el tracker
 insert into public.screenings (patient_id, protocol_id, status, match_score, match_details) values
@@ -99,4 +107,5 @@ insert into public.screenings (patient_id, protocol_id, status, match_score, mat
   ('11111111-1111-1111-1111-111111111102', '22222222-2222-2222-2222-222222222201', 'screen_failure',  60, '[]'),
   ('11111111-1111-1111-1111-111111111105', '22222222-2222-2222-2222-222222222201', 'pre_screening',   80, '[]'),
   ('11111111-1111-1111-1111-111111111106', '22222222-2222-2222-2222-222222222203', 'randomized',     100, '[]'),
-  ('11111111-1111-1111-1111-111111111104', '22222222-2222-2222-2222-222222222202', 'screen_failure',  40, '[]');
+  ('11111111-1111-1111-1111-111111111104', '22222222-2222-2222-2222-222222222202', 'screen_failure',  40, '[]')
+on conflict (patient_id, protocol_id) do nothing;
