@@ -1,7 +1,23 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { getDemoCredentials } from "@/lib/auth/constants";
+import { provisionDemoUserIfNeeded } from "@/lib/auth/demo-user";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
+
+type SessionCookie = {
+  name: string;
+  value: string;
+  options?: Parameters<NextResponse["cookies"]["set"]>[2];
+};
+
+function applySessionCookies(
+  response: NextResponse,
+  sessionCookies: SessionCookie[]
+) {
+  sessionCookies.forEach(({ name, value, options }) =>
+    response.cookies.set(name, value, options)
+  );
+}
 
 export async function POST(request: Request) {
   const body = (await request.json()) as { email?: string; password?: string };
@@ -22,11 +38,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const sessionCookies: Array<{
-    name: string;
-    value: string;
-    options?: Parameters<NextResponse["cookies"]["set"]>[2];
-  }> = [];
+  const sessionCookies: SessionCookie[] = [];
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -45,7 +57,25 @@ export async function POST(request: Request) {
     }
   );
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  let { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    const provision = await provisionDemoUserIfNeeded(email, password);
+
+    if (provision.ok) {
+      sessionCookies.length = 0;
+      const retry = await supabase.auth.signInWithPassword({ email, password });
+      error = retry.error;
+    } else if (provision.reason !== "not_demo") {
+      const demo = getDemoCredentials();
+      if (
+        email === demo.email.toLowerCase() &&
+        password === demo.password
+      ) {
+        return NextResponse.json({ error: provision.reason }, { status: 401 });
+      }
+    }
+  }
 
   if (error) {
     const demo = getDemoCredentials();
@@ -57,7 +87,7 @@ export async function POST(request: Request) {
         {
           error:
             "Credenciales demo válidas pero el usuario no existe en Supabase Auth. " +
-            "Crea el usuario en Authentication → Users (Auto Confirm).",
+            "Crea el usuario en Authentication → Users (Auto Confirm) o agrega SUPABASE_SERVICE_ROLE_KEY.",
         },
         { status: 401 }
       );
@@ -66,9 +96,7 @@ export async function POST(request: Request) {
   }
 
   const jsonResponse = NextResponse.json({ email });
-  sessionCookies.forEach(({ name, value, options }) =>
-    jsonResponse.cookies.set(name, value, options)
-  );
+  applySessionCookies(jsonResponse, sessionCookies);
 
   return jsonResponse;
 }
