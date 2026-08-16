@@ -124,11 +124,7 @@ const config = {
   },
 
   landing: {
-    nav: [
-      { label: "Documentación", href: "#docs" },
-      { label: "Precios", href: "#pricing" },
-      { label: "Entrar", href: "#entrar" },
-    ],
+    nav: [],
     hero: {
       eyebrow: "Research sites · Pre-screening clínico",
       title: "Encuentra candidatos al protocolo correcto, más rápido.",
@@ -270,13 +266,6 @@ const config = {
             { label: "Documentación", href: "/docs" },
             { label: "Precios", href: "#pricing" },
             { label: "Waitlist", href: "#waitlist" },
-          ],
-        },
-        {
-          title: "Acceso",
-          links: [
-            { label: "Iniciar sesión", href: "/login" },
-            { label: "Entrar a la app", href: "#entrar" },
           ],
         },
       ],

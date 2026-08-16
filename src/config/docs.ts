@@ -32,21 +32,5 @@ export const productDocs = {
         },
       ],
     },
-    {
-      id: "soporte",
-      title: "Soporte",
-      items: [
-        {
-          heading: "Waitlist",
-          body:
-            "Si aún no tienes acceso, deja tu email en la waitlist de la landing y te avisamos.",
-        },
-        {
-          heading: "Datos de demo",
-          body:
-            "En entornos de prueba puedes usar las credenciales demo mostradas en la pantalla de login.",
-        },
-      ],
-    },
   ],
 };
