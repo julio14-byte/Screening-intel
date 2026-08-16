@@ -42,7 +42,7 @@ export function KpiCard({
   trend,
 }: {
   title: string;
-  value: number;
+  value: number | string;
   subtitle?: string;
   icon?: LucideIcon;
   accent?: Accent;

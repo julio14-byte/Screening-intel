@@ -1,9 +1,9 @@
-import { ScreeningFunnelDashboard } from "@/components/dashboard/ScreeningFunnelDashboard";
 import config from "@/config";
 import {
   canViewProductMetrics,
   getProductMetrics,
 } from "@/lib/dashboard/productMetrics";
+import { DashboardView } from "@/components/dashboard/DashboardView";
 import { getUser } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +25,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <ScreeningFunnelDashboard
+    <DashboardView
       productMetrics={productMetrics}
       productMetricsError={productMetricsError}
       showProductMetrics={showProductMetrics}
