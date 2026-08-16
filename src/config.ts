@@ -67,7 +67,7 @@ const config = {
   },
 
   productMetrics: {
-    enabled: true,
+    enabled: false,
     founderEmails: [] as string[],
   },
 
@@ -123,7 +123,7 @@ const config = {
   auth: {
     loginUrl: "/login",
     afterLoginUrl: "/dashboard",
-    afterLogoutUrl: "/login",
+    afterLogoutUrl: "/",
     landingUrl: "/",
   },
 

@@ -5,7 +5,6 @@ import { useMemo, useState } from "react";
 import { DashboardFilters, type TrafficLightFilter } from "@/components/dashboard/DashboardFilters";
 import { DashboardKpiCards } from "@/components/dashboard/DashboardKpiCards";
 import { DashboardPatientsTable } from "@/components/dashboard/DashboardPatientsTable";
-import { ProductMetricsKpis } from "@/components/dashboard/ProductMetricsKpis";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import {
@@ -15,7 +14,6 @@ import {
 } from "@/components/ui/StateMessage";
 import { computeDashboardMetrics } from "@/lib/dashboard/metrics";
 import { screeningToVerdict } from "@/lib/dashboard/traffic-light";
-import type { ProductMetrics } from "@/lib/dashboard/productMetrics";
 import { routes } from "@/lib/app/routes";
 import { useScreenings } from "@/hooks/useScreenings";
 import { normalizeTerm } from "@/lib/utils";
@@ -24,18 +22,12 @@ type DashboardViewProps = {
   title?: string;
   description?: string;
   defaultTrafficFilter?: TrafficLightFilter;
-  productMetrics?: ProductMetrics | null;
-  productMetricsError?: string | null;
-  showProductMetrics?: boolean;
 };
 
 export function DashboardView({
   title = "Tablero Central",
   description = "Vista operativa del research site: semáforos clínicos, screening y cohortes activas.",
   defaultTrafficFilter = "all",
-  productMetrics = null,
-  productMetricsError = null,
-  showProductMetrics = false,
 }: DashboardViewProps) {
   const { screenings, loading, error } = useScreenings();
   const [search, setSearch] = useState("");
@@ -69,15 +61,6 @@ export function DashboardView({
   return (
     <>
       <PageHeader title={title} description={description} />
-
-      {showProductMetrics ? (
-        <div className="mb-6">
-          <ProductMetricsKpis
-            productMetrics={productMetrics}
-            error={productMetricsError}
-          />
-        </div>
-      ) : null}
 
       {loading ? (
         <LoadingState label="Cargando pacientes en screening…" />

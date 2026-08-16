@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Activity, ClipboardList, LogOut } from "lucide-react";
 import config from "@/config";
@@ -12,7 +12,6 @@ import type { ReactNode } from "react";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
   const [email, setEmail] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -33,9 +32,11 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   async function handleLogout() {
     setLoggingOut(true);
-    await fetch(routes.apis.authLogout, { method: "POST" });
-    router.replace(config.auth.afterLogoutUrl);
-    router.refresh();
+    await fetch(routes.apis.authLogout, {
+      method: "POST",
+      credentials: "include",
+    });
+    window.location.assign(config.auth.afterLogoutUrl);
   }
 
   return (
