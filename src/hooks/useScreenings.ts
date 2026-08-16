@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import { useSupabaseReady } from "@/hooks/useSupabaseReady";
 import type {
   CriterionResult,
   ScreeningStatus,
@@ -15,6 +16,7 @@ export function useScreenings() {
   const [screenings, setScreenings] = useState<ScreeningWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const supabaseReady = useSupabaseReady();
 
   const fetchScreenings = useCallback(async () => {
     setLoading(true);
@@ -35,10 +37,9 @@ export function useScreenings() {
   }, []);
 
   useEffect(() => {
-    // Deferido a una microtarea para no llamar setState de forma síncrona
-    // dentro del efecto (regla react-hooks/set-state-in-effect).
-    void Promise.resolve().then(fetchScreenings);
-  }, [fetchScreenings]);
+    if (!supabaseReady) return;
+    void fetchScreenings();
+  }, [supabaseReady, fetchScreenings]);
 
   const updateStatus = useCallback(
     async (screeningId: string, status: ScreeningStatus) => {

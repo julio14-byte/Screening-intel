@@ -68,7 +68,7 @@ export function DashboardView({
         <Card>
           <EmptyState
             title="Sin pacientes en screening"
-            description="Registra pacientes y ejecuta matching en un protocolo para poblar el Dashboard."
+            description="Registra pacientes y ejecuta matching en un protocolo para poblar el Dashboard. Si ya cargaste pacientes en Supabase, ejecutá también la parte de screenings en seed.sql."
             action={
               <Link
                 href={routes.app.protocols}
