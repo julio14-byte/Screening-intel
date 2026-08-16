@@ -1,12 +1,17 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import config from "@/config";
+import { routes } from "@/lib/app/routes";
 import { isProtectedPath, isPublicApiPath } from "@/lib/app/routes";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { getPaywallRedirect } from "@/plugins/stripe/paywall";
 
-function isMarketingPath(pathname: string) {
-  return pathname === config.auth.landingUrl;
+function isPublicMarketingPath(pathname: string) {
+  return (
+    pathname === config.auth.landingUrl ||
+    pathname === routes.app.docs ||
+    pathname.startsWith("/docs/")
+  );
 }
 
 export async function updateSession(request: NextRequest) {
@@ -24,7 +29,7 @@ async function runUpdateSession(request: NextRequest) {
 
   const isLogin = pathname === config.auth.loginUrl;
   const isPublic =
-    isMarketingPath(pathname) || isLogin || isPublicApiPath(pathname);
+    isPublicMarketingPath(pathname) || isLogin || isPublicApiPath(pathname);
 
   if (!isSupabaseConfigured()) {
     if (!isPublic && !isLogin) {
@@ -76,7 +81,7 @@ async function runUpdateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && isMarketingPath(pathname)) {
+  if (user && isPublicMarketingPath(pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = config.auth.afterLoginUrl;
     return NextResponse.redirect(url);
@@ -89,7 +94,7 @@ async function runUpdateSession(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (user && isProtectedPath(pathname) && !pathname.startsWith("/account")) {
+  if (user && isProtectedPath(pathname) && !pathname.startsWith("/account") && !pathname.startsWith("/settings")) {
     const paywallRedirect = await getPaywallRedirect(user.id, pathname);
     if (paywallRedirect) {
       const url = request.nextUrl.clone();

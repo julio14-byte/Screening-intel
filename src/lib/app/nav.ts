@@ -9,6 +9,7 @@ import {
   LogOut,
   MessageSquare,
   RefreshCw,
+  Settings,
   Users,
 } from "lucide-react";
 
@@ -20,6 +21,7 @@ export const APP_ICONS: Record<string, LucideIcon> = {
   RefreshCw,
   MessageSquare,
   CreditCard,
+  Settings,
   Activity,
   ClipboardList,
   LogOut,
@@ -64,6 +66,10 @@ export const APP_NAV_STYLES: Record<
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
   "/account/billing": {
+    activeClass: "bg-rose-400/20 text-rose-100 ring-1 ring-rose-300/30",
+    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
+  },
+  "/settings": {
     activeClass: "bg-rose-400/20 text-rose-100 ring-1 ring-rose-300/30",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },

@@ -70,6 +70,12 @@ export function MarketingNavbar() {
         </ul>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          <Link
+            href={routes.app.docs}
+            className="hidden rounded-lg px-3 py-2 text-sm font-medium text-violet-200 transition-colors hover:text-white sm:inline"
+          >
+            Docs
+          </Link>
           <a
             href="#pricing"
             className="hidden rounded-lg px-3 py-2 text-sm font-medium text-violet-200 transition-colors hover:text-white sm:inline"

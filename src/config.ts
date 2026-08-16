@@ -43,9 +43,9 @@ const config = {
         feature: "aiChat" as const,
       },
       {
-        href: "/account/billing",
-        label: "Facturación",
-        icon: "CreditCard",
+        href: "/settings",
+        label: "Configuración",
+        icon: "Settings",
         feature: "payments" as const,
       },
     ],
@@ -84,6 +84,7 @@ const config = {
       "/rematch",
       "/chat",
       "/account",
+      "/settings",
     ],
     publicApis: [
       "/api/auth/login",
@@ -98,6 +99,8 @@ const config = {
       rematch: "/rematch",
       chat: "/chat",
       billing: "/account/billing",
+      settings: "/settings",
+      docs: "/docs",
     },
     apis: {
       waitlist: "/api/waitlist",
@@ -122,6 +125,7 @@ const config = {
 
   landing: {
     nav: [
+      { label: "Documentación", href: "#docs" },
       { label: "Precios", href: "#pricing" },
       { label: "Funciones", href: "#features" },
       { label: "Entrar", href: "#entrar" },
@@ -273,11 +277,11 @@ const config = {
       tagline: "Pre-screening inteligente para research sites.",
       columns: [
         {
-          title: "Suscripciones",
+          title: "Recursos",
           links: [
+            { label: "Documentación", href: "/docs" },
             { label: "Ver planes", href: "#pricing" },
-            { label: "Entrar a la app", href: "#entrar" },
-            { label: "Facturación", href: "/account/billing" },
+            { label: "Waitlist", href: "#waitlist" },
           ],
         },
         {
