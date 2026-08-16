@@ -20,13 +20,11 @@ import { normalizeTerm } from "@/lib/utils";
 
 type DashboardViewProps = {
   title?: string;
-  description?: string;
   defaultTrafficFilter?: TrafficLightFilter;
 };
 
 export function DashboardView({
   title = "Dashboard",
-  description = "Vista operativa del research site: semáforos clínicos, screening y cohortes activas.",
   defaultTrafficFilter = "all",
 }: DashboardViewProps) {
   const { screenings, loading, error } = useScreenings();
@@ -60,7 +58,7 @@ export function DashboardView({
 
   return (
     <>
-      <PageHeader title={title} description={description} />
+      <PageHeader title={title} />
 
       {loading ? (
         <LoadingState label="Cargando pacientes en screening…" />

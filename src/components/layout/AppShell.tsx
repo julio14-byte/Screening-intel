@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Activity, ClipboardList, LogOut } from "lucide-react";
+import { Activity, ClipboardList } from "lucide-react";
 import config from "@/config";
+import { AccountMenu } from "@/components/layout/AccountMenu";
 import { APP_NAV_STYLES, appIcon } from "@/lib/app/nav";
 import { routes } from "@/lib/app/routes";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     return config.app.nav.filter((item) => {
       if (item.feature === "aiChat" && !config.features.aiChat) return false;
       if (item.feature === "payments" && !config.features.payments) return false;
+      if (item.href === routes.app.settings) return false;
       return true;
     });
   }, []);
@@ -79,21 +81,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        <div className="space-y-3 border-t border-white/10 p-4">
-          {email ? (
-            <p className="truncate text-xs text-violet-300" title={email}>
-              Sesión: <span className="font-medium text-violet-100">{email}</span>
-            </p>
-          ) : null}
-          <button
-            type="button"
-            onClick={handleLogout}
-            disabled={loggingOut}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm font-medium text-violet-100 transition-colors hover:bg-white/10 disabled:opacity-50"
-          >
-            <LogOut className="h-4 w-4" aria-hidden />
-            {loggingOut ? "Saliendo…" : "Cerrar sesión"}
-          </button>
+        <div className="border-t border-white/10 p-4">
           <p className="flex items-center gap-1.5 text-[11px] text-violet-400">
             <ClipboardList className="h-3.5 w-3.5" aria-hidden />
             MVP · Datos de demo
@@ -102,7 +90,16 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       <main className="ml-64 flex-1 px-6 py-6">
-        <div className="mx-auto max-w-6xl">{children}</div>
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-5 flex justify-end">
+            <AccountMenu
+              email={email}
+              loggingOut={loggingOut}
+              onLogout={handleLogout}
+            />
+          </div>
+          {children}
+        </div>
       </main>
     </div>
   );

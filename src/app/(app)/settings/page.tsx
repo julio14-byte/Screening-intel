@@ -49,10 +49,7 @@ export default async function SettingsPage({
 
   return (
     <>
-      <PageHeader
-        title="Configuración"
-        description="Plan de tu research site, suscripción Stripe y opciones de upgrade."
-      />
+      <PageHeader title="Configuración" />
 
       {reason === "subscription" && !active ? (
         <div
@@ -148,14 +145,7 @@ export default async function SettingsPage({
       </Card>
 
       <div className="mt-8 space-y-4">
-        <div>
-          <h2 className="text-lg font-bold text-slate-900">Planes disponibles</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            {planId === "pro" || planId === "pro_plus"
-              ? "Gestiona tu suscripción en el portal Stripe."
-              : "Upgrade a Pro o Pro+ para más pacientes, protocolos y funciones IA."}
-          </p>
-        </div>
+        <h2 className="text-lg font-bold text-slate-900">Planes disponibles</h2>
         <PlanUpgradeCards
           currentPlanId={planId}
           showCheckout={paymentsEnabled}

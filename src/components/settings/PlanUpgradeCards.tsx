@@ -20,15 +20,17 @@ export function PlanUpgradeCards({
     currentPlanId === "starter" ? "free" : currentPlanId;
 
   return (
-      <div className="grid gap-4 sm:grid-cols-3">
-      {plans.map((plan) => (
-        <PlanCard
-          key={plan.id}
-          plan={plan}
-          isCurrent={plan.id === normalizedCurrent}
-          showCheckout={showCheckout}
-        />
-      ))}
+    <div className="overflow-x-auto pb-1">
+      <div className="grid min-w-[720px] grid-cols-3 gap-4">
+        {plans.map((plan) => (
+          <PlanCard
+            key={plan.id}
+            plan={plan}
+            isCurrent={plan.id === normalizedCurrent}
+            showCheckout={showCheckout}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -51,7 +53,7 @@ function PlanCard({
   return (
     <Card
       className={cn(
-        "relative p-5",
+        "relative flex h-full flex-col p-4 sm:p-5",
         plan.highlighted && "ring-2 ring-violet-400/50",
         isCurrent && "border-2 border-emerald-400/60 bg-emerald-50/30"
       )}
@@ -78,7 +80,7 @@ function PlanCard({
         ) : null}
       </p>
 
-      <ul className="mt-4 space-y-1.5">
+      <ul className="mt-4 flex-1 space-y-1.5">
         {plan.features.map((feature) => (
           <li
             key={feature}
@@ -94,17 +96,15 @@ function PlanCard({
         <div className="mt-4">
           <CheckoutButton
             planId={plan.id}
-            label={`Upgrade a ${plan.name}`}
+            label={`Cambiar a ${plan.name}`}
           />
         </div>
       ) : isCurrent ? (
         <p className="mt-4 text-xs font-medium text-emerald-700">
-          Este es tu plan actual
+          Plan vigente
         </p>
       ) : plan.price === 0 ? (
-        <p className="mt-4 text-xs text-slate-500">
-          Incluido al registrarte
-        </p>
+        <p className="mt-4 text-xs text-slate-500">Incluido al registrarte</p>
       ) : null}
     </Card>
   );
