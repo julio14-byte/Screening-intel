@@ -54,12 +54,12 @@ export function AppShell({ children }: { children: ReactNode }) {
           </span>
         </Link>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto p-3" aria-label="Principal">
+        <nav className="flex-1 space-y-1 p-3" aria-label="Principal">
           {navItems.map(({ href, label, icon }) => {
             const Icon = appIcon(icon);
             const styles = APP_NAV_STYLES[href] ?? APP_NAV_STYLES["/dashboard"];
             const active =
-              pathname === href || pathname.startsWith(`${href}/`);
+              pathname === href || pathname.startsWith(href + "/");
 
             return (
               <Link
@@ -100,7 +100,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <main className="ml-64 flex-1 px-4 py-4 sm:px-6 sm:py-6">
+      <main className="ml-64 flex-1 px-6 py-6">
         <div className="mx-auto max-w-6xl">{children}</div>
       </main>
     </div>
