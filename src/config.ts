@@ -90,6 +90,8 @@ const config = {
     ],
     publicApis: [
       "/api/auth/login",
+      "/api/auth/logout",
+      "/api/auth/session",
       "/api/waitlist",
       "/api/webhooks/stripe",
     ],

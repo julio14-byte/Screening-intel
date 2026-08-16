@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { readJsonResponse } from "@/lib/http/readJsonResponse";
 import { Button } from "@/components/ui/Button";
 
 export function BillingPortalButton({
@@ -23,9 +24,9 @@ export function BillingPortalButton({
         credentials: "include",
       });
 
-      const data = (await res.json()) as { url?: string; error?: string };
-      if (!res.ok || !data.url) {
-        throw new Error(data.error || "No se pudo abrir el portal.");
+      const data = await readJsonResponse<{ url?: string; error?: string }>(res);
+      if (!res.ok || !data?.url) {
+        throw new Error(data?.error || "No se pudo abrir el portal.");
       }
 
       window.location.href = data.url;
