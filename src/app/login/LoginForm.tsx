@@ -5,13 +5,18 @@ import { FormEvent, useState } from "react";
 import { Activity, Lock, Mail, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/Field";
-import { DEFAULT_DEMO_EMAIL, DEFAULT_DEMO_PASSWORD } from "@/lib/auth/constants";
+import { routes } from "@/lib/app/routes";
 
-export function LoginForm() {
+type LoginFormProps = {
+  demoEmail: string;
+  demoPassword: string;
+};
+
+export function LoginForm({ demoEmail, demoPassword }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [email, setEmail] = useState(DEFAULT_DEMO_EMAIL);
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState(demoEmail);
+  const [password, setPassword] = useState(demoPassword);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -21,9 +26,10 @@ export function LoginForm() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch(routes.apis.authLogin, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
 
@@ -33,9 +39,14 @@ export function LoginForm() {
         return;
       }
 
-      const from = searchParams.get("from") || "/";
+      const fromParam = searchParams.get("from");
+      const from =
+        fromParam && fromParam.startsWith("/") && !fromParam.startsWith("//")
+          ? fromParam
+          : routes.afterLogin;
       router.replace(from);
       router.refresh();
+      window.location.assign(from);
     } catch {
       setError("Error de conexión. Intentá de nuevo.");
     } finally {
@@ -75,8 +86,8 @@ export function LoginForm() {
           <div className="mb-5 flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-50 to-violet-50 px-3 py-2 text-xs text-indigo-800">
             <Sparkles className="h-4 w-4 shrink-0 text-violet-500" aria-hidden />
             <span>
-              Demo: <strong>{DEFAULT_DEMO_EMAIL}</strong> /{" "}
-              <strong>{DEFAULT_DEMO_PASSWORD}</strong>
+              Demo: <strong>{demoEmail}</strong> /{" "}
+              <strong>{demoPassword}</strong>
             </span>
           </div>
 
@@ -87,7 +98,7 @@ export function LoginForm() {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="demo@screening.local"
+              placeholder={demoEmail}
               required
               className="border-violet-200 focus:border-violet-500 focus:ring-violet-500"
             />

@@ -1,0 +1,22 @@
+import { redirect } from "next/navigation";
+import { routes } from "@/lib/app/routes";
+
+/** Redirige /settings legacy a facturación */
+export default async function SettingsRedirectPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await searchParams;
+  const params = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(sp)) {
+    if (typeof value === "string") params.set(key, value);
+    else if (Array.isArray(value)) {
+      value.forEach((v) => params.append(key, v));
+    }
+  }
+
+  const qs = params.toString();
+  redirect(qs ? `${routes.app.billing}?${qs}` : routes.app.billing);
+}

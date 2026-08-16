@@ -20,7 +20,10 @@ import {
 } from "@/components/ui/StateMessage";
 import { VerdictDot } from "@/components/ui/VerdictBadge";
 import { PricingSection } from "@/components/billing/PricingSection";
+import { ProductMetricsKpis } from "@/components/dashboard/ProductMetricsKpis";
+import { routes } from "@/lib/app/routes";
 import { useScreenings } from "@/hooks/useScreenings";
+import type { ProductMetrics } from "@/lib/dashboard/productMetrics";
 import type { ScreeningStatus, ScreeningWithRelations } from "@/lib/types";
 import {
   cn,
@@ -70,7 +73,15 @@ function pct(part: number, total: number) {
   return Math.round((part / total) * 100);
 }
 
-export function ScreeningFunnelDashboard() {
+export function ScreeningFunnelDashboard({
+  productMetrics = null,
+  productMetricsError = null,
+  showProductMetrics = false,
+}: {
+  productMetrics?: ProductMetrics | null;
+  productMetricsError?: string | null;
+  showProductMetrics?: boolean;
+}) {
   const { screenings, loading, error } = useScreenings();
 
   const stats = useMemo(() => {
@@ -102,17 +113,17 @@ export function ScreeningFunnelDashboard() {
   return (
     <>
       <PageHeader
-        title="Tablero Central"
+        title="Dashboard"
         description="El Embudo de Screening — tracker en tiempo real del pipeline de tu clínica."
         actions={
           <div className="flex flex-wrap gap-2">
-            <Link href="/tracker">
+            <Link href={routes.app.tracker}>
               <Button variant="secondary">
                 <KanbanSquare className="h-4 w-4" aria-hidden />
                 Ver Kanban
               </Button>
             </Link>
-            <Link href="/rematch">
+            <Link href={routes.app.rematch}>
               <Button>
                 <RefreshCw className="h-4 w-4" aria-hidden />
                 Re-Match
@@ -121,6 +132,15 @@ export function ScreeningFunnelDashboard() {
           </div>
         }
       />
+
+      {showProductMetrics ? (
+        <div className="mb-6">
+          <ProductMetricsKpis
+            productMetrics={productMetrics}
+            error={productMetricsError}
+          />
+        </div>
+      ) : null}
 
       {loading ? (
         <LoadingState label="Actualizando embudo…" />
@@ -132,7 +152,7 @@ export function ScreeningFunnelDashboard() {
             title="El embudo está vacío"
             description="Ejecutá matching en un protocolo para poblar el pipeline de screening."
             action={
-              <Link href="/protocols" className="text-xs font-medium text-indigo-700">
+              <Link href={routes.app.protocols} className="text-xs font-medium text-indigo-700">
                 Ir a Protocol Matcher →
               </Link>
             }

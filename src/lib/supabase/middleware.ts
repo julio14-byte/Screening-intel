@@ -1,14 +1,18 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import config from "@/config";
+import { routes } from "@/lib/app/routes";
+import { isProtectedPath, isPublicApiPath } from "@/lib/app/routes";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { getPaywallRedirect } from "@/plugins/stripe/paywall";
 
-const PUBLIC_PREFIXES = [
-  "/login",
-  "/api/auth/login",
-  "/api/webhooks/stripe",
-];
+function isPublicMarketingPath(pathname: string) {
+  return (
+    pathname === config.auth.landingUrl ||
+    pathname === routes.app.docs ||
+    pathname.startsWith("/docs/")
+  );
+}
 
 export async function updateSession(request: NextRequest) {
   try {
@@ -23,10 +27,12 @@ async function runUpdateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
   const { pathname } = request.nextUrl;
 
-  const isPublic = PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
+  const isLogin = pathname === config.auth.loginUrl;
+  const isPublic =
+    isPublicMarketingPath(pathname) || isLogin || isPublicApiPath(pathname);
 
   if (!isSupabaseConfigured()) {
-    if (!isPublic && pathname !== "/login") {
+    if (!isPublic && !isLogin) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = config.auth.loginUrl;
       loginUrl.searchParams.set("from", pathname);
@@ -62,20 +68,33 @@ async function runUpdateSession(request: NextRequest) {
 
   response.headers.set("x-pathname", pathname);
 
-  if (user && pathname === config.auth.loginUrl) {
+  if (user && isLogin) {
+    const url = request.nextUrl.clone();
+    const from = request.nextUrl.searchParams.get("from");
+    const next = request.nextUrl.searchParams.get("next");
+    const redirectPath =
+      (from && from.startsWith("/") && !from.startsWith("//") ? from : null) ??
+      (next && next.startsWith("/") && !next.startsWith("//") ? next : null) ??
+      config.auth.afterLoginUrl;
+    url.pathname = redirectPath;
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
+
+  if (user && isPublicMarketingPath(pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = config.auth.afterLoginUrl;
     return NextResponse.redirect(url);
   }
 
-  if (!isPublic && !user) {
+  if (isProtectedPath(pathname) && !user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = config.auth.loginUrl;
     loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (user && !isPublic && !pathname.startsWith("/account")) {
+  if (user && isProtectedPath(pathname) && !pathname.startsWith("/account")) {
     const paywallRedirect = await getPaywallRedirect(user.id, pathname);
     if (paywallRedirect) {
       const url = request.nextUrl.clone();

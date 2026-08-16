@@ -47,9 +47,10 @@ async function getScreeningAgent() {
 export async function streamScreeningAgentToUI(
   messages: UIMessage[],
   writer: UIMessageStreamWriter
-) {
+): Promise<string> {
   const textId = generateId();
   const langChainMessages = uiMessagesToLangChain(messages);
+  let accumulated = "";
 
   writer.write({ type: "text-start", id: textId });
 
@@ -68,10 +69,12 @@ export async function streamScreeningAgentToUI(
     const delta = extractTextFromLangChainMessage(message);
     if (!delta) continue;
 
+    accumulated += delta;
     writer.write({ type: "text-delta", id: textId, delta });
   }
 
   writer.write({ type: "text-end", id: textId });
+  return accumulated;
 }
 
 /** Nodos del grafo ReAct expuestos para debugging o UI futura. */

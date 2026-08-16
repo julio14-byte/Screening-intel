@@ -159,10 +159,7 @@ export function ClinicalChat() {
 
   return (
     <>
-      <PageHeader
-        title="Asistente Clínico"
-        description="LangGraph acoplado a MCP: screening-intel + ICD-11 como servidores de herramientas."
-      />
+      <PageHeader title="Asistente Clínico" />
 
       <Card className="flex min-h-[calc(100vh-11rem)] flex-col overflow-hidden">
         <div
@@ -177,10 +174,6 @@ export function ClinicalChat() {
               <div>
                 <p className="text-sm font-medium text-indigo-900">
                   ¿En qué te puedo ayudar hoy?
-                </p>
-                <p className="mt-1 max-w-md text-xs text-indigo-600/70">
-                  Escribí en lenguaje coloquial (ej. &quot;presión alta&quot;) y te lo
-                  convierto a terminología ICD-11, o preguntame por pacientes y protocolos.
                 </p>
               </div>
               <div className="flex flex-wrap justify-center gap-2">

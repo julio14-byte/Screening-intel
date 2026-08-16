@@ -1,7 +1,10 @@
 import { Suspense } from "react";
+import { getDemoCredentials } from "@/lib/auth/constants";
 import { LoginForm } from "./LoginForm";
 
 export default function LoginPage() {
+  const demo = getDemoCredentials();
+
   return (
     <Suspense
       fallback={
@@ -10,7 +13,7 @@ export default function LoginPage() {
         </div>
       }
     >
-      <LoginForm />
+      <LoginForm demoEmail={demo.email} demoPassword={demo.password} />
     </Suspense>
   );
 }
