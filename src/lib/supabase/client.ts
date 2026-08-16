@@ -1,10 +1,11 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 let client: SupabaseClient | null = null;
 
 /**
- * Cliente de Supabase para el navegador (singleton).
- * Requiere NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY.
+ * Cliente de Supabase para el navegador.
+ * Usa @supabase/ssr para leer la sesión de las cookies del login API.
  */
 export function getSupabaseClient(): SupabaseClient {
   if (client) return client;
@@ -19,7 +20,7 @@ export function getSupabaseClient(): SupabaseClient {
     );
   }
 
-  client = createClient(url, anonKey);
+  client = createBrowserClient(url, anonKey);
   return client;
 }
 
