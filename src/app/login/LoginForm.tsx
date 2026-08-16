@@ -25,6 +25,7 @@ export function LoginForm() {
       const response = await fetch(routes.apis.authLogin, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
 
@@ -41,6 +42,8 @@ export function LoginForm() {
           : routes.afterLogin;
       router.replace(from);
       router.refresh();
+      // Navegación completa para asegurar que el middleware lee la sesión
+      window.location.assign(from);
     } catch {
       setError("Error de conexión. Intentá de nuevo.");
     } finally {

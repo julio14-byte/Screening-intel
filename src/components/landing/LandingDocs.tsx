@@ -8,7 +8,7 @@ export function LandingDocs() {
       id="docs"
       className="scroll-mt-20 border-t border-white/10 bg-black/20 px-4 py-20 sm:px-6"
     >
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-3xl">
         <div className="text-center">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-400">
             Documentación
@@ -21,18 +21,18 @@ export function LandingDocs() {
           </p>
         </div>
 
-        <div className="mt-12 grid gap-6 md:grid-cols-2">
-          {productDocs.sections.slice(0, 4).map((section) => (
+        <div className="mt-12 space-y-8">
+          {productDocs.sections.map((section) => (
             <div
               key={section.id}
               className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm"
             >
-              <div className="mb-3 flex items-center gap-2 text-violet-200">
+              <div className="mb-4 flex items-center gap-2 text-violet-200">
                 <BookOpen className="h-5 w-5 text-cyan-400" aria-hidden />
                 <h3 className="font-semibold text-white">{section.title}</h3>
               </div>
-              <ul className="space-y-3">
-                {section.items.slice(0, 2).map((item) => (
+              <ul className="space-y-4">
+                {section.items.map((item) => (
                   <li key={item.heading}>
                     <p className="text-sm font-medium text-violet-100">
                       {item.heading}

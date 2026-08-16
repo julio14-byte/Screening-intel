@@ -127,20 +127,19 @@ const config = {
     nav: [
       { label: "Documentación", href: "#docs" },
       { label: "Precios", href: "#pricing" },
-      { label: "Funciones", href: "#features" },
       { label: "Entrar", href: "#entrar" },
     ],
     hero: {
       eyebrow: "Research sites · Pre-screening clínico",
       title: "Encuentra candidatos al protocolo correcto, más rápido.",
       subtitle:
-        "Elige tu plan de suscripción y accede al tablero con pacientes, protocolos, tracker de screening y asistente IA.",
+        "Pre-screening y re-matching de pacientes para protocolos de investigación clínica.",
     },
     enterApp: {
       eyebrow: "Acceso",
       title: "¿Listo para usar la app?",
       subtitle:
-        "Inicia sesión y entra al tablero central. Si aún no tienes cuenta, usa el trial Starter o suscríbete a Site Pro.",
+        "Inicia sesión con tu cuenta y entra al tablero central de tu research site.",
     },
     problem: {
       eyebrow: "El problema",
@@ -280,26 +279,15 @@ const config = {
           title: "Recursos",
           links: [
             { label: "Documentación", href: "/docs" },
-            { label: "Ver planes", href: "#pricing" },
+            { label: "Precios", href: "#pricing" },
             { label: "Waitlist", href: "#waitlist" },
           ],
         },
         {
-          title: "App",
-          links: [
-            { label: "Tablero", href: "/dashboard" },
-            { label: "Pacientes", href: "/patients" },
-            { label: "Protocolos", href: "/protocols" },
-            { label: "Tracker", href: "/tracker" },
-            { label: "Re-Match", href: "/rematch" },
-            { label: "Asistente IA", href: "/chat" },
-          ],
-        },
-        {
-          title: "Cuenta",
+          title: "Acceso",
           links: [
             { label: "Iniciar sesión", href: "/login" },
-            { label: "Trial gratis", href: "/login?from=/dashboard" },
+            { label: "Entrar a la app", href: "#entrar" },
           ],
         },
       ],
