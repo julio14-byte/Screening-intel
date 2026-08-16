@@ -88,13 +88,6 @@ export function LandingPricing() {
             );
           })}
         </div>
-
-        {config.features.payments ? (
-          <p className="mt-6 text-center text-xs text-violet-300/70">
-            Pagos seguros con Stripe. Cancela cuando quieras desde el portal de
-            cliente.
-          </p>
-        ) : null}
       </div>
     </section>
   );

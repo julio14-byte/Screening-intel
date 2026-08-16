@@ -174,37 +174,26 @@ const config = {
           icon: "Users",
           title: "Patient Registry",
           body: "Perfil clínico estructurado y registro centralizado de candidatos.",
-          href: "/patients",
         },
         {
           icon: "FlaskConical",
           title: "Protocol Matcher",
           body: "Motor de matching contra criterios de inclusión y exclusión.",
-          href: "/protocols",
         },
         {
           icon: "KanbanSquare",
           title: "Screening Tracker",
           body: "Kanban de estados con trazabilidad de cada decisión.",
-          href: "/tracker",
         },
         {
           icon: "RefreshCw",
           title: "Re-Match",
           body: "Re-evalúa cohortes cuando cambian protocolos o criterios.",
-          href: "/rematch",
         },
         {
           icon: "MessageSquare",
           title: "Asistente IA",
           body: "Consulta criterios y resúmenes clínicos en chat contextual.",
-          href: "/chat",
-        },
-        {
-          icon: "CreditCard",
-          title: "SaaS con Stripe",
-          body: "Trial Starter y plan Site Pro con cobro mensual y portal de cliente.",
-          href: "/account/billing",
         },
       ],
     },
@@ -222,7 +211,7 @@ const config = {
         },
         {
           q: "¿Cómo funciona Site Pro?",
-          a: "Suscripción mensual vía Stripe ($149/mes). Incluye mayor volumen de pacientes y protocolos, más re-match y asistente IA.",
+          a: "Plan con mayor volumen de pacientes y protocolos, más re-match y asistente IA.",
         },
         {
           q: "¿Los datos están aislados por sitio?",
@@ -260,7 +249,7 @@ const config = {
       title: "Empieza el trial en tu research site.",
       subtitle:
         "Crea tu cuenta, registra pacientes y activa tu primer protocolo en la misma tarde.",
-      cta: { label: "Empezar trial gratis", href: "/login?from=/dashboard" },
+      cta: { label: "Entrar a la app", href: "/login?from=/dashboard" },
       ctaSecondary: { label: "Unirme a waitlist", href: "#waitlist" },
     },
     waitlist: {
@@ -298,7 +287,7 @@ const config = {
     eyebrow: "Suscripciones",
     title: "Planes para tu research site",
     subtitle:
-      "Empieza con trial gratis o suscríbete a Site Pro. Luego entra a la app con el botón «Entrar».",
+      "Elige un plan y entra a la app con el botón «Entrar».",
     plans: [
       {
         id: "starter",

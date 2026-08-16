@@ -1,6 +1,4 @@
-import Link from "next/link";
 import config from "@/config";
-import { loginUrlWithFrom } from "@/lib/app/routes";
 import { landingIcon } from "@/lib/landing/icons";
 
 export function LandingFeatures() {
@@ -27,44 +25,20 @@ export function LandingFeatures() {
         <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => {
             const Icon = landingIcon(item.icon);
-            const href =
-              "href" in item && item.href
-                ? loginUrlWithFrom(item.href as string)
-                : null;
-
-            const card = (
-              <>
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/20 text-violet-200">
-                  <Icon className="h-5 w-5" aria-hidden />
-                </div>
-                <h3 className="font-semibold text-white">{item.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-violet-200/80">
-                  {item.body}
-                </p>
-                {href ? (
-                  <p className="mt-3 text-xs font-medium text-cyan-300">
-                    Abrir módulo →
-                  </p>
-                ) : null}
-              </>
-            );
 
             return (
               <li key={item.title}>
-                {href ? (
-                  <Link
-                    href={href}
-                    className="block rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm transition hover:border-white/20 hover:bg-white/[0.07]"
-                  >
-                    {card}
-                  </Link>
-                ) : (
-                  <div
-                    className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm"
-                  >
-                    {card}
+                <div
+                  className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm"
+                >
+                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/20 text-violet-200">
+                    <Icon className="h-5 w-5" aria-hidden />
                   </div>
-                )}
+                  <h3 className="font-semibold text-white">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-violet-200/80">
+                    {item.body}
+                  </p>
+                </div>
               </li>
             );
           })}
