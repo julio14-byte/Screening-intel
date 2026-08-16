@@ -122,7 +122,12 @@ const config = {
   },
 
   landing: {
-    nav: [],
+    nav: [
+      { label: "Documentación", href: "#docs" },
+      { label: "Precios", href: "#pricing" },
+      { label: "Waitlist", href: "#waitlist" },
+      { label: "Entrar", href: "#entrar" },
+    ],
     hero: {
       eyebrow: "Research sites · Pre-screening clínico",
       title: "Encuentra candidatos al protocolo correcto, más rápido.",
