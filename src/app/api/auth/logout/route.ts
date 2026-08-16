@@ -1,8 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   if (!isSupabaseConfigured()) {
     return NextResponse.json({ ok: true });
   }

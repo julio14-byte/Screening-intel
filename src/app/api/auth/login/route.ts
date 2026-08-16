@@ -1,5 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { getDemoCredentials } from "@/lib/auth/constants";
 import { provisionDemoUserIfNeeded } from "@/lib/auth/demo-user";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -19,7 +19,7 @@ function applySessionCookies(
   );
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const body = (await request.json()) as { email?: string; password?: string };
   const email = body.email?.trim().toLowerCase() ?? "";
   const password = body.password ?? "";
