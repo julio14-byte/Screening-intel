@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getDemoCredentials } from "@/lib/auth/constants";
+import { ensureDemoPatientData } from "@/lib/auth/demo-seed";
 import { provisionDemoUserIfNeeded } from "@/lib/auth/demo-user";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
@@ -93,6 +94,15 @@ export async function POST(request: NextRequest) {
       );
     }
     return NextResponse.json({ error: error.message }, { status: 401 });
+  }
+
+  const demo = getDemoCredentials();
+  if (email === demo.email.toLowerCase()) {
+    try {
+      await ensureDemoPatientData();
+    } catch (seedErr) {
+      console.error("[login] demo seed:", (seedErr as Error)?.message);
+    }
   }
 
   const jsonResponse = NextResponse.json({ email });

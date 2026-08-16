@@ -8,6 +8,7 @@ import config from "@/config";
 import { AccountMenu } from "@/components/layout/AccountMenu";
 import { APP_NAV_STYLES, appIcon } from "@/lib/app/nav";
 import { routes } from "@/lib/app/routes";
+import { readJsonResponse } from "@/lib/http/readJsonResponse";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
@@ -27,8 +28,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetch(routes.apis.authSession)
-      .then((res) => res.json())
-      .then((data: { email?: string }) => setEmail(data.email ?? null))
+      .then((res) => readJsonResponse<{ email?: string }>(res))
+      .then((data) => setEmail(data?.email ?? null))
       .catch(() => setEmail(null));
   }, []);
 

@@ -6,6 +6,7 @@ import { Activity, Lock, Mail, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/Field";
 import { routes } from "@/lib/app/routes";
+import { readJsonResponse } from "@/lib/http/readJsonResponse";
 
 type LoginFormProps = {
   demoEmail: string;
@@ -34,8 +35,11 @@ export function LoginForm({ demoEmail, demoPassword }: LoginFormProps) {
       });
 
       if (!response.ok) {
-        const data = (await response.json()) as { error?: string };
-        setError(data.error ?? "No se pudo iniciar sesión.");
+        const data = await readJsonResponse<{ error?: string }>(response);
+        setError(
+          data?.error ??
+            `No se pudo iniciar sesión (${response.status}). Revisá las variables en Vercel.`
+        );
         return;
       }
 

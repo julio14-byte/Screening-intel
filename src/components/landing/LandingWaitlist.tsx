@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { Mail, Send } from "lucide-react";
 import config from "@/config";
 import { routes } from "@/lib/app/routes";
+import { readJsonResponse } from "@/lib/http/readJsonResponse";
 import { Button } from "@/components/ui/Button";
 
 export function LandingWaitlist() {
@@ -28,11 +29,13 @@ export function LandingWaitlist() {
         body: JSON.stringify({ email, source: "landing" }),
       });
 
-      const data = (await res.json()) as { error?: string };
+      const data = await readJsonResponse<{ error?: string }>(res);
 
       if (!res.ok) {
         setStatus("error");
-        setMessage(data.error ?? "No se pudo registrar el email.");
+        setMessage(
+          data?.error ?? `No se pudo registrar el email (${res.status}).`
+        );
         return;
       }
 
