@@ -43,9 +43,6 @@ export function LandingEnterApp() {
             Ya tengo cuenta
           </Link>
         </div>
-        <p className="mt-4 text-xs text-violet-400 sm:text-sm">
-          Tras iniciar sesión irás al tablero con pacientes, protocolos y métricas.
-        </p>
       </div>
     </section>
   );

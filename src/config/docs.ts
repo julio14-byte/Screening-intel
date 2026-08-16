@@ -13,7 +13,7 @@ export const productDocs = {
         {
           heading: "1. Accede a la plataforma",
           body:
-            "Usa el botón Entrar en la landing o ve a /login. Tras iniciar sesión llegas al tablero central.",
+            "Usa el botón Entrar en la landing o ve a /login. Tras iniciar sesión llegas al Dashboard.",
         },
         {
           heading: "2. Registra pacientes",
@@ -28,7 +28,7 @@ export const productDocs = {
         {
           heading: "4. Ejecuta matching y tracking",
           body:
-            "Evalúa candidatos contra protocolos y sigue el estado de screening en el tablero.",
+            "Evalúa candidatos contra protocolos y sigue el estado de screening en el Dashboard.",
         },
       ],
     },

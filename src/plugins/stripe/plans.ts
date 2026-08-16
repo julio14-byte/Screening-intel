@@ -2,8 +2,10 @@ import config from "@/config";
 
 /** Límites por plan — Fase 1 SaaS (research sites). */
 export const SAAS_PLAN_LIMITS = {
+  free: { patientLimit: 50, protocolLimit: 3, userLimit: 1 },
   starter: { patientLimit: 50, protocolLimit: 3, userLimit: 1 },
   pro: { patientLimit: 500, protocolLimit: 50, userLimit: 3 },
+  pro_plus: { patientLimit: 2000, protocolLimit: 100, userLimit: 10 },
 } as const;
 
 export type PlanId = keyof typeof SAAS_PLAN_LIMITS;
@@ -41,7 +43,8 @@ export function getPricingPlans(): PricingPlan[] {
 }
 
 export function getPlanConfig(planId: string): PricingPlan | undefined {
-  return getPricingPlans().find((p) => p.id === planId);
+  const normalized = planId === "starter" ? "free" : planId;
+  return getPricingPlans().find((p) => p.id === normalized);
 }
 
 export function getStripePriceId(planId: string): string {
@@ -52,11 +55,19 @@ export function getStripePriceId(planId: string): string {
       ""
     );
   }
+  if (planId === "pro_plus") {
+    return (
+      process.env.STRIPE_PRICE_ID_PRO_PLUS ||
+      getPlanConfig("pro_plus")?.stripePriceId ||
+      ""
+    );
+  }
   return getPlanConfig(planId)?.stripePriceId || "";
 }
 
 export function getPlanLimits(planId: string) {
-  return SAAS_PLAN_LIMITS[planId as PlanId] ?? SAAS_PLAN_LIMITS.starter;
+  const normalized = planId === "starter" ? "free" : planId;
+  return SAAS_PLAN_LIMITS[normalized as PlanId] ?? SAAS_PLAN_LIMITS.free;
 }
 
 export function isSubscriptionActive(organization: OrganizationRow | null): boolean {

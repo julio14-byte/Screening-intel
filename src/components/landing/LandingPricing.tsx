@@ -4,6 +4,13 @@ import { routes, loginUrlWithFrom } from "@/lib/app/routes";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 
+function planLoginHref(planId: string, price: number) {
+  if (price === 0) {
+    return loginUrlWithFrom(routes.app.dashboard);
+  }
+  return loginUrlWithFrom(routes.app.settings);
+}
+
 export function LandingPricing() {
   if (!config.features.pricing) return null;
 
@@ -14,7 +21,7 @@ export function LandingPricing() {
       id="pricing"
       className="scroll-mt-14 border-t border-white/10 px-4 py-12 sm:scroll-mt-16 sm:px-6 sm:py-16 lg:py-20"
     >
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-6xl">
         <div className="text-center">
           <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-violet-400 sm:text-xs">
             {eyebrow}
@@ -27,11 +34,9 @@ export function LandingPricing() {
           </p>
         </div>
 
-        <div className="mt-8 grid gap-4 sm:mt-12 sm:gap-6 md:grid-cols-2">
+        <div className="mt-8 grid gap-4 sm:mt-12 sm:gap-6 lg:grid-cols-3">
           {plans.map((plan) => {
-            const appPath =
-              plan.id === "pro" ? routes.app.billing : routes.app.dashboard;
-            const href = loginUrlWithFrom(appPath);
+            const href = planLoginHref(plan.id, plan.price);
 
             return (
               <div

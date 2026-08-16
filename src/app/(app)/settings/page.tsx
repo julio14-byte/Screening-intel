@@ -42,7 +42,7 @@ export default async function SettingsPage({
   const checkout = params?.checkout?.toString();
   const reason = params?.reason?.toString();
 
-  const planId = organization?.plan_id ?? "starter";
+  const planId = organization?.plan_id ?? "free";
   const plan = getPlanConfig(planId);
   const active = organization ? isSubscriptionActive(organization) : false;
   const paymentsEnabled = config.features.payments;
@@ -151,9 +151,9 @@ export default async function SettingsPage({
         <div>
           <h2 className="text-lg font-bold text-slate-900">Planes disponibles</h2>
           <p className="mt-1 text-sm text-slate-500">
-            {planId === "pro"
-              ? "Ya tienes Site Pro. Gestiona la suscripción en el portal Stripe."
-              : "Upgrade a Site Pro para más pacientes, protocolos y funciones IA."}
+            {planId === "pro" || planId === "pro_plus"
+              ? "Gestiona tu suscripción en el portal Stripe."
+              : "Upgrade a Pro o Pro+ para más pacientes, protocolos y funciones IA."}
           </p>
         </div>
         <PlanUpgradeCards
@@ -162,12 +162,9 @@ export default async function SettingsPage({
         />
       </div>
 
-      <div className="mt-8 flex flex-wrap gap-3">
+      <div className="mt-8">
         <Link href={routes.app.dashboard}>
-          <Button>Ir al tablero</Button>
-        </Link>
-        <Link href={routes.app.docs}>
-          <Button variant="secondary">Ver documentación</Button>
+          <Button>Ir al Dashboard</Button>
         </Link>
       </div>
     </>

@@ -13,7 +13,7 @@ const config = {
     nav: [
       {
         href: "/dashboard",
-        label: "Tablero Central",
+        label: "Dashboard",
         icon: "LayoutDashboard",
       },
       {
@@ -143,8 +143,7 @@ const config = {
     enterApp: {
       eyebrow: "Acceso",
       title: "¿Listo para usar la app?",
-      subtitle:
-        "Inicia sesión con tu cuenta y entra al tablero central de tu research site.",
+      subtitle: "Inicia sesión con tu cuenta de research site.",
     },
     problem: {
       eyebrow: "El problema",
@@ -268,28 +267,22 @@ const config = {
     },
     footer: {
       tagline: "Pre-screening inteligente para research sites.",
-      columns: [
-        {
-          title: "Recursos",
-          links: [
-            { label: "Documentación", href: "/docs" },
-            { label: "Precios", href: "#pricing" },
-            { label: "Waitlist", href: "#waitlist" },
-          ],
-        },
+      links: [
+        { label: "Precios", href: "#pricing" },
+        { label: "Waitlist", href: "#waitlist" },
+        { label: "Documentación", href: "/docs" },
       ],
     },
   },
 
-    pricing: {
+  pricing: {
     eyebrow: "Suscripciones",
-    title: "Planes para tu research site",
-    subtitle:
-      "Elige un plan y entra a la app con el botón «Entrar».",
+    title: "Elige tu plan",
+    subtitle: "Free para empezar. Pro y Pro+ para research sites en crecimiento.",
     plans: [
       {
-        id: "starter",
-        name: "Starter",
+        id: "free",
+        name: "Free",
         price: 0,
         currency: "USD",
         interval: "mes",
@@ -305,20 +298,37 @@ const config = {
       },
       {
         id: "pro",
-        name: "Site Pro",
-        price: 149,
+        name: "Pro",
+        price: 399,
         currency: "USD",
         interval: "mes",
         description: "Para clínicas con varios protocolos y mayor volumen.",
         features: [
           "Hasta 500 pacientes",
           "50 protocolos activos",
-          "3 usuarios (próximamente)",
+          "3 usuarios",
           "Re-match automático",
           "Asistente IA clínico",
         ],
         cta: "Suscribirse a Pro",
         highlighted: true,
+        stripePriceId: "",
+      },
+      {
+        id: "pro_plus",
+        name: "Pro+",
+        price: 699,
+        currency: "USD",
+        interval: "mes",
+        description: "Máximo volumen, multi-equipo y operaciones avanzadas.",
+        features: [
+          "Hasta 2.000 pacientes",
+          "100 protocolos activos",
+          "10 usuarios",
+          "Re-match prioritario",
+          "Asistente IA + soporte dedicado",
+        ],
+        cta: "Suscribirse a Pro+",
         stripePriceId: "",
       },
     ],

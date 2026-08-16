@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 
-/** Vitrina de precios (plantilla VibeFast) — se muestra si features.pricing está activo. */
+/** Vitrina de precios — se muestra si features.pricing está activo. */
 export function PricingSection() {
   if (!config.features.pricing) return null;
 
@@ -20,7 +20,7 @@ export function PricingSection() {
         <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-3">
         {plans.map((plan) => (
           <Card
             key={plan.id}
@@ -41,9 +41,7 @@ export function PricingSection() {
               ) : null}
             </div>
             <p className="mt-4 text-2xl font-bold tabular-nums text-slate-900">
-              {plan.price === 0
-                ? "Gratis"
-                : `$${plan.price}`}
+              {plan.price === 0 ? "Gratis" : `$${plan.price}`}
               {plan.price > 0 ? (
                 <span className="text-sm font-normal text-slate-500">
                   /{plan.interval}
@@ -61,9 +59,9 @@ export function PricingSection() {
                 </li>
               ))}
             </ul>
-            {plan.id === "pro" && config.features.payments ? (
+            {plan.price > 0 && config.features.payments ? (
               <div className="mt-4">
-                <CheckoutButton planId="pro" label={plan.cta} />
+                <CheckoutButton planId={plan.id} label={plan.cta} />
               </div>
             ) : (
               <p className="mt-4 text-xs font-medium text-violet-600">

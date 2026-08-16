@@ -16,14 +16,16 @@ export function PlanUpgradeCards({
   if (!config.features.pricing) return null;
 
   const plans = getPricingPlans();
+  const normalizedCurrent =
+    currentPlanId === "starter" ? "free" : currentPlanId;
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid gap-4 lg:grid-cols-3">
       {plans.map((plan) => (
         <PlanCard
           key={plan.id}
           plan={plan}
-          isCurrent={plan.id === currentPlanId}
+          isCurrent={plan.id === normalizedCurrent}
           showCheckout={showCheckout}
         />
       ))}
@@ -40,8 +42,11 @@ function PlanCard({
   isCurrent: boolean;
   showCheckout: boolean;
 }) {
-  const canUpgradeToPro =
-    plan.id === "pro" && !isCurrent && config.features.payments && showCheckout;
+  const canCheckout =
+    !isCurrent &&
+    plan.price > 0 &&
+    config.features.payments &&
+    showCheckout;
 
   return (
     <Card
@@ -85,17 +90,20 @@ function PlanCard({
         ))}
       </ul>
 
-      {canUpgradeToPro ? (
+      {canCheckout ? (
         <div className="mt-4">
-          <CheckoutButton planId="pro" label={`Upgrade a ${plan.name}`} />
+          <CheckoutButton
+            planId={plan.id}
+            label={`Upgrade a ${plan.name}`}
+          />
         </div>
       ) : isCurrent ? (
         <p className="mt-4 text-xs font-medium text-emerald-700">
           Este es tu plan actual
         </p>
-      ) : plan.id === "starter" ? (
+      ) : plan.price === 0 ? (
         <p className="mt-4 text-xs text-slate-500">
-          Trial incluido al registrarte
+          Incluido al registrarte
         </p>
       ) : null}
     </Card>

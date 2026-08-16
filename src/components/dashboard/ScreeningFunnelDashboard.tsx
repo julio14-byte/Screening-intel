@@ -113,7 +113,7 @@ export function ScreeningFunnelDashboard({
   return (
     <>
       <PageHeader
-        title="Tablero Central"
+        title="Dashboard"
         description="El Embudo de Screening — tracker en tiempo real del pipeline de tu clínica."
         actions={
           <div className="flex flex-wrap gap-2">

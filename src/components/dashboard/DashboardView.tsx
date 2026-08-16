@@ -25,7 +25,7 @@ type DashboardViewProps = {
 };
 
 export function DashboardView({
-  title = "Tablero Central",
+  title = "Dashboard",
   description = "Vista operativa del research site: semáforos clínicos, screening y cohortes activas.",
   defaultTrafficFilter = "all",
 }: DashboardViewProps) {
@@ -70,7 +70,7 @@ export function DashboardView({
         <Card>
           <EmptyState
             title="Sin pacientes en screening"
-            description="Registra pacientes y ejecuta matching en un protocolo para poblar el tablero."
+            description="Registra pacientes y ejecuta matching en un protocolo para poblar el Dashboard."
             action={
               <Link
                 href={routes.app.protocols}

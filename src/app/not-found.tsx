@@ -9,14 +9,14 @@ export default function NotFound() {
       <p className="text-6xl font-bold text-violet-300">404</p>
       <h1 className="mt-4 text-2xl font-semibold">Página no encontrada</h1>
       <p className="mt-2 max-w-md text-violet-200">
-        La URL no existe en {config.app.name}. Revisa el menú o vuelve al tablero.
+        La URL no existe en {config.app.name}. Revisa el menú o vuelve al Dashboard.
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <Link href={routes.landing}>
           <Button variant="secondary">Landing</Button>
         </Link>
         <Link href={routes.app.dashboard}>
-          <Button>Tablero Central</Button>
+          <Button>Dashboard</Button>
         </Link>
       </div>
     </div>
