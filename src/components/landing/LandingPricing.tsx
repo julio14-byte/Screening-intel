@@ -8,7 +8,7 @@ function planLoginHref(planId: string, price: number) {
   if (price === 0) {
     return loginUrlWithFrom(routes.app.dashboard);
   }
-  return loginUrlWithFrom(routes.app.settings);
+  return loginUrlWithFrom(routes.app.billing);
 }
 
 export function LandingPricing() {

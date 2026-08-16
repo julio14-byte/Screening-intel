@@ -20,8 +20,8 @@ export function PlanUpgradeCards({
     currentPlanId === "starter" ? "free" : currentPlanId;
 
   return (
-    <div className="overflow-x-auto pb-1">
-      <div className="grid min-w-[720px] grid-cols-3 gap-4">
+    <div className="overflow-visible pt-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {plans.map((plan) => (
           <PlanCard
             key={plan.id}

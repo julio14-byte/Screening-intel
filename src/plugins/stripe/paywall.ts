@@ -11,14 +11,13 @@ export async function getPaywallRedirect(
 ): Promise<string | null> {
   if (!config.features.payments) return null;
 
-  const isAccountOrSettings =
-    pathname.startsWith("/account") || pathname.startsWith("/settings");
-  if (isAccountOrSettings) return null;
+  const isAccountPath = pathname.startsWith("/account");
+  if (isAccountPath) return null;
 
   try {
     const organization = await getOrganizationForUser(userId);
     if (organization && !isSubscriptionActive(organization)) {
-      return "/settings?reason=subscription";
+      return "/account/billing?reason=subscription";
     }
   } catch (err) {
     console.error("[stripe] paywall check failed:", (err as Error)?.message);

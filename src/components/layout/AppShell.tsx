@@ -20,7 +20,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     return config.app.nav.filter((item) => {
       if (item.feature === "aiChat" && !config.features.aiChat) return false;
       if (item.feature === "payments" && !config.features.payments) return false;
-      if (item.href === routes.app.settings) return false;
+      if (item.href === routes.app.billing) return false;
       return true;
     });
   }, []);
@@ -89,8 +89,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <main className="ml-64 flex-1 px-6 py-6">
-        <div className="mx-auto max-w-6xl">
+      <main className="ml-64 min-w-0 flex-1 px-4 py-6 sm:px-6">
+        <div
+          className={cn(
+            "mx-auto w-full",
+            pathname.startsWith("/account") ? "max-w-7xl" : "max-w-6xl"
+          )}
+        >
           <div className="mb-5 flex justify-end">
             <AccountMenu
               email={email}

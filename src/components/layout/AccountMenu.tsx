@@ -54,7 +54,7 @@ export function AccountMenu({ email, loggingOut, onLogout }: AccountMenuProps) {
         ) : null}
         <li>
           <Link
-            href={routes.app.settings}
+            href={routes.app.billing}
             className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-indigo-800 transition hover:bg-violet-50"
           >
             <CreditCard className="h-4 w-4 shrink-0 text-violet-500" aria-hidden />

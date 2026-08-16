@@ -94,7 +94,7 @@ async function runUpdateSession(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (user && isProtectedPath(pathname) && !pathname.startsWith("/account") && !pathname.startsWith("/settings")) {
+  if (user && isProtectedPath(pathname) && !pathname.startsWith("/account")) {
     const paywallRedirect = await getPaywallRedirect(user.id, pathname);
     if (paywallRedirect) {
       const url = request.nextUrl.clone();

@@ -43,9 +43,9 @@ const config = {
         feature: "aiChat" as const,
       },
       {
-        href: "/settings",
-        label: "Configuración",
-        icon: "Settings",
+        href: "/account/billing",
+        label: "Facturación",
+        icon: "CreditCard",
         feature: "payments" as const,
       },
     ],
@@ -103,7 +103,6 @@ const config = {
       rematch: "/rematch",
       chat: "/chat",
       billing: "/account/billing",
-      settings: "/settings",
       docs: "/docs",
     },
     apis: {
