@@ -20,7 +20,7 @@ export function PlanUpgradeCards({
     currentPlanId === "starter" ? "free" : currentPlanId;
 
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-3">
       {plans.map((plan) => (
         <PlanCard
           key={plan.id}

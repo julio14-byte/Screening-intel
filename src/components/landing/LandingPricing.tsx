@@ -34,7 +34,7 @@ export function LandingPricing() {
           </p>
         </div>
 
-        <div className="mt-8 grid gap-4 sm:mt-12 sm:gap-6 lg:grid-cols-3">
+        <div className="mt-8 grid gap-4 sm:mt-12 sm:grid-cols-3 sm:gap-6">
           {plans.map((plan) => {
             const href = planLoginHref(plan.id, plan.price);
 
