@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { SelectInput, TextInput } from "@/components/ui/Field";
 import { ErrorState } from "@/components/ui/StateMessage";
 import { TagListEditor } from "@/components/profile/TagListEditor";
 import { LabCriteriaEditor } from "@/components/protocols/LabCriteriaEditor";
+import type { ExtractedProtocolDraft } from "@/lib/protocols/extractCriteria";
+import { ProtocolPdfImport } from "@/components/protocols/ProtocolPdfImport";
 import type { NewProtocolInput } from "@/hooks/useProtocols";
 import type { LabCriterion } from "@/lib/types";
 
@@ -14,10 +16,12 @@ export function NewProtocolModal({
   open,
   onClose,
   onCreate,
+  prefill,
 }: {
   open: boolean;
   onClose: () => void;
   onCreate: (input: NewProtocolInput) => Promise<void>;
+  prefill?: ExtractedProtocolDraft | null;
 }) {
   const [title, setTitle] = useState("");
   const [codeName, setCodeName] = useState("");
@@ -42,6 +46,22 @@ export function NewProtocolModal({
     setExcludedConditions([]);
     setExcludedMedications([]);
   };
+
+  function applyDraft(draft: ExtractedProtocolDraft) {
+    setTitle(draft.title);
+    setCodeName(draft.code_name);
+    setMinAge(draft.inclusion_criteria.min_age?.toString() ?? "");
+    setMaxAge(draft.inclusion_criteria.max_age?.toString() ?? "");
+    setGender(draft.inclusion_criteria.gender ?? "any");
+    setRequiredConditions(draft.inclusion_criteria.required_conditions ?? []);
+    setRequiredLabs(draft.inclusion_criteria.required_labs ?? []);
+    setExcludedConditions(draft.exclusion_criteria.excluded_conditions ?? []);
+    setExcludedMedications(draft.exclusion_criteria.excluded_medications ?? []);
+  }
+
+  useEffect(() => {
+    if (open && prefill) applyDraft(prefill);
+  }, [open, prefill]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,6 +100,8 @@ export function NewProtocolModal({
   return (
     <Modal open={open} title="Nuevo protocolo de estudio" onClose={onClose} wide>
       <form onSubmit={handleSubmit} className="space-y-5">
+        <ProtocolPdfImport onExtracted={applyDraft} />
+
         {error ? <ErrorState message={error} /> : null}
 
         <div className="grid grid-cols-3 gap-3">

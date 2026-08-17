@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import { useSupabaseReady } from "@/hooks/useSupabaseReady";
 import type {
   ExclusionCriteria,
   InclusionCriteria,
@@ -21,6 +22,7 @@ export function useProtocols() {
   const [protocols, setProtocols] = useState<Protocol[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const supabaseReady = useSupabaseReady();
 
   const fetchProtocols = useCallback(async () => {
     setLoading(true);
@@ -41,10 +43,9 @@ export function useProtocols() {
   }, []);
 
   useEffect(() => {
-    // Deferido a una microtarea para no llamar setState de forma síncrona
-    // dentro del efecto (regla react-hooks/set-state-in-effect).
-    void Promise.resolve().then(fetchProtocols);
-  }, [fetchProtocols]);
+    if (!supabaseReady) return;
+    void fetchProtocols();
+  }, [supabaseReady, fetchProtocols]);
 
   const addProtocol = useCallback(
     async (input: NewProtocolInput) => {

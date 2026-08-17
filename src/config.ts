@@ -32,6 +32,11 @@ const config = {
         icon: "KanbanSquare",
       },
       {
+        href: "/epro",
+        label: "ePRO",
+        icon: "ClipboardList",
+      },
+      {
         href: "/rematch",
         label: "Re-Match & Follow-up",
         icon: "RefreshCw",
@@ -81,6 +86,7 @@ const config = {
       "/patients",
       "/protocols",
       "/tracker",
+      "/epro",
       "/rematch",
       "/chat",
       "/account",
@@ -102,6 +108,7 @@ const config = {
       semaforos: "/semaforos",
       devices: "/devices",
       tracker: "/tracker",
+      epro: "/epro",
       rematch: "/rematch",
       chat: "/chat",
       billing: "/account/billing",
