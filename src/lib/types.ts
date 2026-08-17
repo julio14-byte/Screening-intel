@@ -104,3 +104,40 @@ export interface ScreeningWithRelations extends Screening {
   patients: Patient;
   protocols: Pick<Protocol, "id" | "title" | "code_name" | "status">;
 }
+
+// ---------------------------------------------------------------------------
+// ePRO — Fase A
+// ---------------------------------------------------------------------------
+
+export type EproQuestionType = "scale" | "yesno" | "text";
+
+export interface EproQuestion {
+  id: string;
+  type: EproQuestionType;
+  label: string;
+  min?: number;
+  max?: number;
+}
+
+export interface EproForm {
+  id: string;
+  title: string;
+  description: string | null;
+  protocol_id: string | null;
+  questions: EproQuestion[];
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EproResponse {
+  id: string;
+  form_id: string;
+  patient_id: string;
+  answers: Record<string, string | number | boolean>;
+  submitted_at: string;
+}
+
+export interface EproResponseWithPatient extends EproResponse {
+  patients: Pick<Patient, "id" | "first_name" | "last_name">;
+}

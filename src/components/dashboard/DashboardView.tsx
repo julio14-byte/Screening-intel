@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { Download } from "lucide-react";
 import { useMemo, useState } from "react";
 import { DashboardFilters, type TrafficLightFilter } from "@/components/dashboard/DashboardFilters";
 import { DashboardKpiCards } from "@/components/dashboard/DashboardKpiCards";
 import { DashboardPatientsTable } from "@/components/dashboard/DashboardPatientsTable";
+import { Button } from "@/components/ui/Button";
+import { downloadCsv, screeningsToCsv } from "@/lib/export/dashboardCsv";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import {
@@ -58,7 +61,25 @@ export function DashboardView({
 
   return (
     <>
-      <PageHeader title={title} />
+      <PageHeader
+        title={title}
+        actions={
+          filteredRows.length > 0 ? (
+            <Button
+              variant="secondary"
+              onClick={() =>
+                downloadCsv(
+                  `dashboard-screening-${new Date().toISOString().slice(0, 10)}.csv`,
+                  screeningsToCsv(filteredRows)
+                )
+              }
+            >
+              <Download className="h-4 w-4" aria-hidden />
+              Exportar CSV
+            </Button>
+          ) : null
+        }
+      />
 
       {loading ? (
         <LoadingState label="Cargando pacientes en screening…" />

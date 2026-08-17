@@ -69,6 +69,10 @@ export const APP_NAV_STYLES: Record<
     activeClass: "bg-amber-400/20 text-amber-100 ring-1 ring-amber-300/30",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
+  "/epro": {
+    activeClass: "bg-sky-400/20 text-sky-100 ring-1 ring-sky-300/30",
+    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
+  },
   "/rematch": {
     activeClass: "bg-emerald-400/20 text-emerald-100 ring-1 ring-emerald-300/30",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
