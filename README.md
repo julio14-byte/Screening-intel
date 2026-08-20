@@ -82,7 +82,13 @@ import { RoleGuard } from "@/components/rbac/RoleGuard";
 </RoleGuard>
 ```
 
-Administración de roles: `/settings/roles` (solo investigator).
+### Administración de usuarios
+
+En `/settings/roles` (solo **investigator**):
+- **Crear usuario** con email, contraseña temporal, nombre y rol clínico
+- **Cambiar rol** de miembros existentes
+
+Requiere `SUPABASE_SERVICE_ROLE_KEY` en el servidor para crear usuarios en Auth.
 
 ## Audit Trail (21 CFR Part 11)
 

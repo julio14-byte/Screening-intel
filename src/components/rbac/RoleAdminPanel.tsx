@@ -6,6 +6,7 @@ import {
   assignClinicalRoleAction,
   getMembersWithRolesAction,
 } from "@/actions/rbac";
+import { CreateSiteUserForm } from "@/components/rbac/CreateSiteUserForm";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
@@ -17,6 +18,50 @@ import {
 } from "@/lib/rbac/types";
 
 const ROLES: AppRole[] = ["investigator", "coordinator", "monitor"];
+
+function MemberCard({
+  member,
+  pending,
+  onAssign,
+}: {
+  member: OrganizationMemberWithRole;
+  pending: boolean;
+  onAssign: (userId: string, role: AppRole) => void;
+}) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-3 sm:hidden">
+      <p className="font-medium text-slate-900">
+        {member.full_name ?? member.email ?? member.user_id.slice(0, 8)}
+      </p>
+      {member.email ? (
+        <p className="text-xs text-slate-500">{member.email}</p>
+      ) : null}
+      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+        <span className="rounded bg-slate-100 px-2 py-0.5 text-slate-600">
+          Org: {member.org_role}
+        </span>
+        <span className="rounded-full bg-violet-50 px-2 py-0.5 font-medium text-violet-800">
+          {APP_ROLE_LABELS[member.clinical_role]}
+        </span>
+      </div>
+      <select
+        className="mt-3 w-full rounded-md border border-slate-300 px-2 py-2 text-sm"
+        value={member.clinical_role}
+        disabled={pending}
+        onChange={(e) =>
+          onAssign(member.user_id, e.target.value as AppRole)
+        }
+        aria-label={`Rol clínico de ${member.email ?? member.user_id}`}
+      >
+        {ROLES.map((r) => (
+          <option key={r} value={r}>
+            {APP_ROLE_LABELS[r]}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
 
 export function RoleAdminPanel() {
   const [members, setMembers] = useState<OrganizationMemberWithRole[]>([]);
@@ -55,111 +100,134 @@ export function RoleAdminPanel() {
   }
 
   return (
-    <Card>
-      <CardHeader
-        title="Roles clínicos del sitio"
-        description="Asigná permisos según la función de cada miembro (RBAC / GCP)."
-        actions={<UserCog className="h-4 w-4 text-slate-400" aria-hidden />}
-      />
-      <CardBody>
-        {loading ? (
-          <LoadingState label="Cargando miembros…" />
-        ) : error ? (
-          <ErrorState message={error} />
-        ) : (
-          <>
-            {message ? (
-              <p className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
-                {message}
-              </p>
-            ) : null}
+    <>
+      <CreateSiteUserForm onCreated={() => void load()} />
 
-            <div className="mb-4 grid gap-2 sm:grid-cols-3">
-              {ROLES.map((role) => (
-                <div
-                  key={role}
-                  className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2"
-                >
-                  <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
-                    <Shield className="h-3.5 w-3.5" aria-hidden />
-                    {APP_ROLE_LABELS[role]}
-                  </p>
-                  <p className="mt-1 text-[11px] leading-snug text-slate-500">
-                    {APP_ROLE_DESCRIPTIONS[role]}
-                  </p>
-                </div>
-              ))}
-            </div>
+      <Card>
+        <CardHeader
+          title="Usuarios del sitio"
+          description="Personal con acceso y rol clínico asignado (RBAC / GCP)."
+          actions={<UserCog className="h-4 w-4 text-slate-400" aria-hidden />}
+        />
+        <CardBody>
+          {loading ? (
+            <LoadingState label="Cargando miembros…" />
+          ) : error ? (
+            <ErrorState message={error} />
+          ) : (
+            <>
+              {message ? (
+                <p className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+                  {message}
+                </p>
+              ) : null}
 
-            <div className="overflow-hidden rounded-md border border-slate-200">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                  <tr>
-                    <th className="px-3 py-2 font-medium">Usuario</th>
-                    <th className="px-3 py-2 font-medium">Rol org.</th>
-                    <th className="px-3 py-2 font-medium">Rol clínico</th>
-                    <th className="px-3 py-2 font-medium">Acción</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {members.map((member) => (
-                    <tr key={member.user_id}>
-                      <td className="px-3 py-2">
-                        <p className="font-medium text-slate-900">
-                          {member.full_name ?? member.email ?? member.user_id.slice(0, 8)}
-                        </p>
-                        {member.email ? (
-                          <p className="text-xs text-slate-500">{member.email}</p>
-                        ) : null}
-                      </td>
-                      <td className="px-3 py-2 text-xs text-slate-600">
-                        {member.org_role}
-                      </td>
-                      <td className="px-3 py-2">
-                        <span className="rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-800">
-                          {APP_ROLE_LABELS[member.clinical_role]}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2">
-                        <select
-                          className="rounded-md border border-slate-300 px-2 py-1 text-xs"
-                          value={member.clinical_role}
-                          disabled={pending}
-                          onChange={(e) =>
-                            handleAssign(
-                              member.user_id,
-                              e.target.value as AppRole
-                            )
-                          }
-                          aria-label={`Rol clínico de ${member.email ?? member.user_id}`}
-                        >
-                          {ROLES.map((r) => (
-                            <option key={r} value={r}>
-                              {APP_ROLE_LABELS[r]}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
+              <div className="mb-4 grid gap-2 sm:grid-cols-3">
+                {ROLES.map((role) => (
+                  <div
+                    key={role}
+                    className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2"
+                  >
+                    <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
+                      <Shield className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                      {APP_ROLE_LABELS[role]}
+                    </p>
+                    <p className="mt-1 text-[11px] leading-snug text-slate-500">
+                      {APP_ROLE_DESCRIPTIONS[role]}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-3 sm:hidden">
+                {members.map((member) => (
+                  <MemberCard
+                    key={member.user_id}
+                    member={member}
+                    pending={pending}
+                    onAssign={handleAssign}
+                  />
+                ))}
+              </div>
+
+              <div className="hidden overflow-x-auto rounded-md border border-slate-200 sm:block">
+                <table className="w-full min-w-[640px] text-left text-sm">
+                  <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                    <tr>
+                      <th className="px-3 py-2 font-medium">Usuario</th>
+                      <th className="px-3 py-2 font-medium">Rol org.</th>
+                      <th className="px-3 py-2 font-medium">Rol clínico</th>
+                      <th className="px-3 py-2 font-medium">Acción</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {members.map((member) => (
+                      <tr key={member.user_id}>
+                        <td className="px-3 py-2">
+                          <p className="font-medium text-slate-900">
+                            {member.full_name ??
+                              member.email ??
+                              member.user_id.slice(0, 8)}
+                          </p>
+                          {member.email ? (
+                            <p className="text-xs text-slate-500">
+                              {member.email}
+                            </p>
+                          ) : null}
+                        </td>
+                        <td className="px-3 py-2 text-xs text-slate-600">
+                          {member.org_role}
+                        </td>
+                        <td className="px-3 py-2">
+                          <span className="rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-800">
+                            {APP_ROLE_LABELS[member.clinical_role]}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2">
+                          <select
+                            className="rounded-md border border-slate-300 px-2 py-1 text-xs"
+                            value={member.clinical_role}
+                            disabled={pending}
+                            onChange={(e) =>
+                              handleAssign(
+                                member.user_id,
+                                e.target.value as AppRole
+                              )
+                            }
+                            aria-label={`Rol clínico de ${member.email ?? member.user_id}`}
+                          >
+                            {ROLES.map((r) => (
+                              <option key={r} value={r}>
+                                {APP_ROLE_LABELS[r]}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-            {members.length === 0 ? (
-              <p className="mt-4 text-center text-xs text-slate-500">
-                No hay miembros en la organización.
-              </p>
-            ) : null}
+              {members.length === 0 ? (
+                <p className="mt-4 text-center text-xs text-slate-500">
+                  No hay miembros. Creá el primer usuario arriba.
+                </p>
+              ) : null}
 
-            <div className="mt-4 flex justify-end">
-              <Button variant="secondary" onClick={() => void load()} disabled={pending}>
-                Actualizar lista
-              </Button>
-            </div>
-          </>
-        )}
-      </CardBody>
-    </Card>
+              <div className="mt-4 flex justify-end">
+                <Button
+                  variant="secondary"
+                  onClick={() => void load()}
+                  disabled={pending}
+                >
+                  Actualizar lista
+                </Button>
+              </div>
+            </>
+          )}
+        </CardBody>
+      </Card>
+    </>
   );
 }

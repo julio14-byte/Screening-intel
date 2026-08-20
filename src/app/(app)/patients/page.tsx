@@ -52,7 +52,7 @@ export default function PatientsPage() {
         }
       />
 
-      <Card>
+      <Card className="overflow-hidden">
         <div className="border-b border-slate-200 p-3">
           <div className="relative max-w-sm">
             <Search
@@ -86,7 +86,8 @@ export default function PatientsPage() {
             }
           />
         ) : (
-          <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px] text-left text-sm">
             <thead>
               <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
                 <th className="px-4 py-2.5 font-medium">Paciente</th>
@@ -136,6 +137,7 @@ export default function PatientsPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </Card>
 

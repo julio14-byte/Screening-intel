@@ -12,6 +12,8 @@ type AccountMenuProps = {
   role: AppRole | null;
   loggingOut: boolean;
   onLogout: () => void;
+  /** Solo avatar en barra móvil */
+  compact?: boolean;
 };
 
 function displayEmail(email: string) {
@@ -23,25 +25,39 @@ function displayEmail(email: string) {
   return `${local.slice(0, 12)}…@${domain}`;
 }
 
-export function AccountMenu({ email, role, loggingOut, onLogout }: AccountMenuProps) {
+export function AccountMenu({
+  email,
+  role,
+  loggingOut,
+  onLogout,
+  compact = false,
+}: AccountMenuProps) {
   const initial = email?.charAt(0).toUpperCase() ?? "?";
 
   return (
     <details className="relative">
       <summary
         className={cn(
-          "flex cursor-pointer list-none items-center gap-2 rounded-xl border border-violet-200/80 bg-white/90 px-3 py-2 text-sm shadow-sm backdrop-blur-sm transition hover:border-violet-300 hover:bg-white",
+          "flex cursor-pointer list-none items-center gap-2 rounded-xl border border-violet-200/80 bg-white/90 text-sm shadow-sm backdrop-blur-sm transition hover:border-violet-300 hover:bg-white",
+          compact ? "p-1.5" : "px-3 py-2",
           "[&::-webkit-details-marker]:hidden"
         )}
         aria-label="Menú de cuenta"
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-violet-500 text-xs font-semibold text-white">
+        <span
+          className={cn(
+            "flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-violet-500 text-xs font-semibold text-white",
+            compact ? "h-8 w-8" : "h-8 w-8"
+          )}
+        >
           {initial}
         </span>
         <span className="hidden max-w-[10rem] truncate text-indigo-950 sm:inline">
           {email ? displayEmail(email) : "Cuenta"}
         </span>
-        <ChevronDown className="h-4 w-4 shrink-0 text-violet-500" aria-hidden />
+        {!compact ? (
+          <ChevronDown className="h-4 w-4 shrink-0 text-violet-500" aria-hidden />
+        ) : null}
       </summary>
 
       <ul className="absolute right-0 z-50 mt-2 w-56 rounded-xl border border-violet-100 bg-white p-1.5 shadow-lg shadow-violet-200/40">
@@ -67,7 +83,7 @@ export function AccountMenu({ email, role, loggingOut, onLogout }: AccountMenuPr
               className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-indigo-800 transition hover:bg-violet-50"
             >
               <Shield className="h-4 w-4 shrink-0 text-violet-500" aria-hidden />
-              Roles clínicos
+              Roles clínicos y usuarios
             </Link>
           </li>
         ) : null}

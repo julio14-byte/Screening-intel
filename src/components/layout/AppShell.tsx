@@ -1,14 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Activity, ClipboardList } from "lucide-react";
+import { Menu } from "lucide-react";
 import config from "@/config";
 import { AccountMenu } from "@/components/layout/AccountMenu";
+import { AppSidebar } from "@/components/layout/AppSidebar";
 import { useRole } from "@/contexts/role-context";
-import { APP_ROLE_LABELS } from "@/lib/rbac/types";
-import { APP_NAV_STYLES, appIcon } from "@/lib/app/nav";
 import { routes } from "@/lib/app/routes";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
 import { cn } from "@/lib/utils";
@@ -18,17 +16,34 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [email, setEmail] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const { role, isReadOnly } = useRole();
 
   const navItems = useMemo(() => {
-    return config.app.nav.filter((item) => {
-      if (item.feature === "aiChat" && !config.features.aiChat) return false;
-      if (item.feature === "payments" && !config.features.payments) return false;
-      if (item.href === routes.app.billing) return false;
-      if (isReadOnly && item.href === routes.app.chat) return false;
-      return true;
-    });
+    return config.app.nav
+      .filter((item) => {
+        if (item.feature === "aiChat" && !config.features.aiChat) return false;
+        if (item.feature === "payments" && !config.features.payments)
+          return false;
+        if (item.href === routes.app.billing) return false;
+        if (isReadOnly && item.href === routes.app.chat) return false;
+        return true;
+      })
+      .map(({ href, label, icon }) => ({ href, label, icon }));
   }, [isReadOnly]);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [menuOpen]);
 
   useEffect(() => {
     fetch(routes.apis.authSession)
@@ -46,62 +61,72 @@ export function AppShell({ children }: { children: ReactNode }) {
     window.location.assign(config.auth.afterLogoutUrl);
   }
 
+  const closeMenu = () => setMenuOpen(false);
+
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/40 to-violet-50/50">
-      <aside className="fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-gradient-to-b from-indigo-950 via-violet-950 to-fuchsia-950 text-white shadow-xl shadow-indigo-950/20">
-        <Link
-          href={routes.app.dashboard}
-          className="flex items-center gap-3 border-b border-white/10 px-4 py-5"
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/40 to-violet-50/50">
+      {/* Sidebar desktop */}
+      <div className="fixed inset-y-0 left-0 z-30 hidden lg:block">
+        <AppSidebar navItems={navItems} role={role} />
+      </div>
+
+      {/* Drawer móvil */}
+      {menuOpen ? (
+        <button
+          type="button"
+          className="fixed inset-0 z-40 bg-indigo-950/50 backdrop-blur-sm lg:hidden"
+          aria-label="Cerrar menú"
+          onClick={closeMenu}
+        />
+      ) : null}
+
+      <div
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 w-64 transition-transform duration-200 ease-out lg:hidden",
+          menuOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"
+        )}
+      >
+        <AppSidebar
+          navItems={navItems}
+          role={role}
+          showClose
+          onClose={closeMenu}
+          onNavigate={closeMenu}
+          className="h-full"
+        />
+      </div>
+
+      {/* Barra superior móvil */}
+      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-violet-200/60 bg-white/90 px-4 py-3 backdrop-blur-md lg:hidden">
+        <button
+          type="button"
+          onClick={() => setMenuOpen(true)}
+          className="rounded-lg p-2 text-indigo-800 hover:bg-violet-50"
+          aria-label="Abrir menú"
+          aria-expanded={menuOpen}
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-violet-500 shadow-lg shadow-violet-900/50">
-            <Activity className="h-5 w-5" aria-hidden />
-          </span>
-          <span className="leading-tight">
-            <span className="block text-sm font-semibold">{config.app.name}</span>
-            <span className="block text-[11px] text-violet-300">Research Sites</span>
-          </span>
-        </Link>
+          <Menu className="h-6 w-6" aria-hidden />
+        </button>
+        <span className="truncate text-sm font-semibold text-indigo-950">
+          {config.app.name}
+        </span>
+        <AccountMenu
+          email={email}
+          role={role}
+          loggingOut={loggingOut}
+          onLogout={handleLogout}
+          compact
+        />
+      </header>
 
-        <nav className="flex-1 space-y-1 p-3" aria-label="Principal">
-          {navItems.map(({ href, label, icon }) => {
-            const Icon = appIcon(icon);
-            const styles = APP_NAV_STYLES[href] ?? APP_NAV_STYLES["/dashboard"];
-            const active =
-              pathname === href || pathname.startsWith(href + "/");
-
-            return (
-              <Link
-                key={href}
-                href={href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
-                  active ? styles.activeClass : styles.idleClass
-                )}
-              >
-                <Icon className="h-4 w-4 shrink-0" aria-hidden />
-                {label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="border-t border-white/10 p-4">
-          <p className="flex items-center gap-1.5 text-[11px] text-violet-400">
-            <ClipboardList className="h-3.5 w-3.5" aria-hidden />
-            {role ? APP_ROLE_LABELS[role] : "Research site"}
-          </p>
-        </div>
-      </aside>
-
-      <main className="ml-64 min-w-0 flex-1 px-4 py-6 sm:px-6">
+      <main className="min-w-0 px-4 py-4 sm:px-6 sm:py-6 lg:ml-64 lg:py-6">
         <div
           className={cn(
             "mx-auto w-full",
             pathname.startsWith("/account") ? "max-w-7xl" : "max-w-6xl"
           )}
         >
-          <div className="mb-5 flex justify-end">
+          <div className="mb-4 hidden justify-end lg:mb-5 lg:flex">
             <AccountMenu
               email={email}
               role={role}

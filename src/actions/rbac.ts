@@ -3,6 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import {
+  createSiteUser,
+  getOrganizationIdForUser,
+} from "@/lib/rbac/create-site-user";
+import {
   getUserAppRole,
   listOrganizationMembersWithRoles,
 } from "@/lib/rbac/get-user-role";
@@ -55,4 +59,43 @@ export async function getCurrentRoleAction(): Promise<{
 }> {
   const role = await getUserAppRole();
   return { role };
+}
+
+export async function createSiteUserAction(input: {
+  email: string;
+  password: string;
+  fullName: string;
+  clinicalRole: AppRole;
+}): Promise<
+  | { ok: true; userId: string; email: string }
+  | { ok: false; error: string }
+> {
+  try {
+    const { user } = await requirePermission("roles:manage");
+
+    const organizationId = await getOrganizationIdForUser(user.id);
+    if (!organizationId) {
+      return {
+        ok: false,
+        error: "No se encontró la organización del research site.",
+      };
+    }
+
+    const result = await createSiteUser({
+      email: input.email,
+      password: input.password,
+      fullName: input.fullName,
+      clinicalRole: input.clinicalRole,
+      organizationId,
+      invitedByUserId: user.id,
+    });
+
+    revalidatePath("/settings/roles");
+    return { ok: true, ...result };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Error al crear usuario",
+    };
+  }
 }
