@@ -41,6 +41,57 @@ La lógica vive en `src/lib/matching.ts` y evalúa cada criterio del protocolo c
 
 El `match_score` es el porcentaje de criterios superados sobre el total evaluado, y `match_details` guarda la trazabilidad criterio por criterio en la tabla `screenings`.
 
+## Audit Trail (21 CFR Part 11)
+
+Bitácora de auditoría inmutable para expedientes de pacientes.
+
+### 1. Migración
+
+En el SQL Editor de Supabase, ejecutá `supabase/migrations/0006_audit_trail.sql` después de las migraciones anteriores.
+
+Incluye:
+
+- Tabla `audit_logs` (append-only).
+- Triggers en `patients` para `UPDATE` y `DELETE`.
+- RPC `record_custom_audit_event` para eventos manuales (aprobaciones, notas).
+- Protección contra `UPDATE`/`DELETE` directos en `audit_logs`.
+
+### 2. Server Actions / API
+
+```typescript
+import { logCustomAuditEventAction } from "@/actions/audit";
+
+await logCustomAuditEventAction({
+  tableName: "patients",
+  recordId: patientId,
+  description: "El investigador principal aprobó el criterio de inclusión.",
+  metadata: { protocol_id: "...", criterion: "Edad 18-75" },
+});
+```
+
+- `POST /api/audit` — registrar evento manual (JSON).
+- `GET /api/audit?table_name=patients&record_id=<uuid>` — consultar bitácora.
+
+### 3. UI
+
+En `/patients/[id]` se muestra `<AuditTimeline />`. También podés usarlo en cualquier expediente:
+
+```tsx
+import { AuditTimeline } from "@/components/audit/audit-timeline";
+
+<AuditTimeline tableName="patients" recordId={patient.id} />
+```
+
+### Extender a otras tablas
+
+Para auditar `clinical_profiles` o `screenings`, agregá triggers similares:
+
+```sql
+create trigger clinical_profiles_audit_trail
+  after update or delete on public.clinical_profiles
+  for each row execute function audit.capture_row_change();
+```
+
 ## Puesta en marcha
 
 ### 1. Base de datos (Supabase)

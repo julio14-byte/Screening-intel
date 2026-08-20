@@ -43,6 +43,8 @@ export function useScreenings() {
 
   const updateStatus = useCallback(
     async (screeningId: string, status: ScreeningStatus) => {
+      const previous = screenings.find((s) => s.id === screeningId);
+
       // Actualización optimista para que el Kanban responda al instante.
       setScreenings((prev) =>
         prev.map((s) => (s.id === screeningId ? { ...s, status } : s))
@@ -56,8 +58,29 @@ export function useScreenings() {
         await fetchScreenings();
         throw error;
       }
+
+      if (previous && previous.status !== status) {
+        void fetch("/api/audit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tableName: "patients",
+            recordId: previous.patient_id,
+            description: `Cambio de estatus de screening: ${previous.status} → ${status}.`,
+            metadata: {
+              event_type: "screening_status_change",
+              screening_id: screeningId,
+              protocol_id: previous.protocol_id,
+              previous_status: previous.status,
+              new_status: status,
+            },
+          }),
+        }).catch(() => {
+          /* La auditoría no debe bloquear el flujo clínico */
+        });
+      }
     },
-    [fetchScreenings]
+    [fetchScreenings, screenings]
   );
 
   return { screenings, loading, error, updateStatus, refetch: fetchScreenings };
