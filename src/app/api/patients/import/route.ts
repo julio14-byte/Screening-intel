@@ -1,9 +1,23 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/supabase/server";
+import {
+  AuthorizationError,
+  requirePermission,
+} from "@/lib/rbac/require-permission";
 import type { ParsedPatientRow } from "@/lib/import/parsePatientCsv";
 
 export async function POST(request: Request) {
+  try {
+    await requirePermission("patients:write");
+  } catch (e) {
+    if (e instanceof AuthorizationError) {
+      const status = e.code === "UNAUTHENTICATED" ? 401 : 403;
+      return NextResponse.json({ error: e.message }, { status });
+    }
+    throw e;
+  }
+
   const user = await getUser();
   if (!user) {
     return NextResponse.json({ error: "No autenticado." }, { status: 401 });

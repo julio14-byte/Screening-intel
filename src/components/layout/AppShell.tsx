@@ -6,6 +6,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Activity, ClipboardList } from "lucide-react";
 import config from "@/config";
 import { AccountMenu } from "@/components/layout/AccountMenu";
+import { useRole } from "@/contexts/role-context";
+import { APP_ROLE_LABELS } from "@/lib/rbac/types";
 import { APP_NAV_STYLES, appIcon } from "@/lib/app/nav";
 import { routes } from "@/lib/app/routes";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
@@ -16,15 +18,17 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [email, setEmail] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
+  const { role, isReadOnly } = useRole();
 
   const navItems = useMemo(() => {
     return config.app.nav.filter((item) => {
       if (item.feature === "aiChat" && !config.features.aiChat) return false;
       if (item.feature === "payments" && !config.features.payments) return false;
       if (item.href === routes.app.billing) return false;
+      if (isReadOnly && item.href === routes.app.chat) return false;
       return true;
     });
-  }, []);
+  }, [isReadOnly]);
 
   useEffect(() => {
     fetch(routes.apis.authSession)
@@ -85,7 +89,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="border-t border-white/10 p-4">
           <p className="flex items-center gap-1.5 text-[11px] text-violet-400">
             <ClipboardList className="h-3.5 w-3.5" aria-hidden />
-            MVP · Datos de demo
+            {role ? APP_ROLE_LABELS[role] : "Research site"}
           </p>
         </div>
       </aside>
@@ -100,6 +104,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="mb-5 flex justify-end">
             <AccountMenu
               email={email}
+              role={role}
               loggingOut={loggingOut}
               onLogout={handleLogout}
             />

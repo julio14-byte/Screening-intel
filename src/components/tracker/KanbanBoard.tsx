@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, GripVertical } from "lucide-react";
+import { useRole } from "@/contexts/role-context";
+import { canSetScreeningStatus } from "@/lib/rbac/screening-transitions";
 import type { ScreeningStatus, ScreeningWithRelations } from "@/lib/types";
 import {
   cn,
@@ -20,25 +22,39 @@ const COLUMN_STYLES: Record<ScreeningStatus, { header: string; count: string }> 
 function KanbanCard({
   screening,
   onMove,
+  readOnly,
+  canMoveTo,
 }: {
   screening: ScreeningWithRelations;
   onMove: (id: string, status: ScreeningStatus) => void;
+  readOnly: boolean;
+  canMoveTo: (status: ScreeningStatus) => boolean;
 }) {
   const index = SCREENING_STATUS_ORDER.indexOf(screening.status);
-  const prev = index > 0 ? SCREENING_STATUS_ORDER[index - 1] : null;
+  const prev =
+    index > 0 && canMoveTo(SCREENING_STATUS_ORDER[index - 1])
+      ? SCREENING_STATUS_ORDER[index - 1]
+      : null;
   const next =
-    index < SCREENING_STATUS_ORDER.length - 1
+    index < SCREENING_STATUS_ORDER.length - 1 &&
+    canMoveTo(SCREENING_STATUS_ORDER[index + 1])
       ? SCREENING_STATUS_ORDER[index + 1]
       : null;
 
   return (
     <div
-      draggable
+      draggable={!readOnly}
       onDragStart={(e) => {
+        if (readOnly) {
+          e.preventDefault();
+          return;
+        }
         e.dataTransfer.setData("text/plain", screening.id);
         e.dataTransfer.effectAllowed = "move";
       }}
-      className="group cursor-grab rounded-md border border-slate-200 bg-white p-2.5 shadow-sm transition-shadow hover:shadow active:cursor-grabbing"
+      className={`group rounded-md border border-slate-200 bg-white p-2.5 shadow-sm transition-shadow hover:shadow ${
+        readOnly ? "cursor-default" : "cursor-grab active:cursor-grabbing"
+      }`}
     >
       <div className="flex items-start justify-between gap-1">
         <div className="min-w-0">
@@ -62,7 +78,7 @@ function KanbanCard({
           Match {Math.round(Number(screening.match_score))}%
         </span>
         <div className="flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-          {prev ? (
+          {!readOnly && prev ? (
             <button
               type="button"
               onClick={() => onMove(screening.id, prev)}
@@ -73,7 +89,7 @@ function KanbanCard({
               <ChevronLeft className="h-3.5 w-3.5" aria-hidden />
             </button>
           ) : null}
-          {next ? (
+          {!readOnly && next ? (
             <button
               type="button"
               onClick={() => onMove(screening.id, next)}
@@ -98,6 +114,10 @@ export function KanbanBoard({
   onMove: (id: string, status: ScreeningStatus) => void;
 }) {
   const [dragOver, setDragOver] = useState<ScreeningStatus | null>(null);
+  const { role, isReadOnly } = useRole();
+
+  const canMoveTo = (status: ScreeningStatus) =>
+    !isReadOnly && role ? canSetScreeningStatus(role, status) : false;
 
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -109,6 +129,7 @@ export function KanbanBoard({
             key={status}
             aria-label={SCREENING_STATUS_LABELS[status]}
             onDragOver={(e) => {
+              if (isReadOnly || !canMoveTo(status)) return;
               e.preventDefault();
               setDragOver(status);
             }}
@@ -116,6 +137,7 @@ export function KanbanBoard({
             onDrop={(e) => {
               e.preventDefault();
               setDragOver(null);
+              if (isReadOnly || !canMoveTo(status)) return;
               const id = e.dataTransfer.getData("text/plain");
               if (id) onMove(id, status);
             }}
@@ -146,7 +168,13 @@ export function KanbanBoard({
                 </p>
               ) : (
                 items.map((s) => (
-                  <KanbanCard key={s.id} screening={s} onMove={onMove} />
+                  <KanbanCard
+                    key={s.id}
+                    screening={s}
+                    onMove={onMove}
+                    readOnly={isReadOnly}
+                    canMoveTo={canMoveTo}
+                  />
                 ))
               )}
             </div>

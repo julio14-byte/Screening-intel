@@ -3,6 +3,10 @@ import {
   fetchAuditLogs,
   recordCustomAuditEvent,
 } from "@/lib/audit/record-audit-event";
+import {
+  AuthorizationError,
+  requirePermission,
+} from "@/lib/rbac/require-permission";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 export async function GET(request: Request) {
@@ -30,6 +34,10 @@ export async function GET(request: Request) {
     const logs = await fetchAuditLogs({ tableName, recordId, limit });
     return NextResponse.json({ logs });
   } catch (e) {
+    if (e instanceof AuthorizationError) {
+      const status = e.code === "UNAUTHENTICATED" ? 401 : 403;
+      return NextResponse.json({ error: e.message }, { status });
+    }
     const message =
       e instanceof Error ? e.message : "Error al consultar auditoría";
     return NextResponse.json({ error: message }, { status: 500 });
@@ -70,6 +78,7 @@ export async function POST(request: Request) {
   }
 
   try {
+    await requirePermission("audit:write");
     const auditId = await recordCustomAuditEvent({
       tableName: payload.tableName,
       recordId: payload.recordId,
@@ -79,6 +88,10 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ auditId }, { status: 201 });
   } catch (e) {
+    if (e instanceof AuthorizationError) {
+      const status = e.code === "UNAUTHENTICATED" ? 401 : 403;
+      return NextResponse.json({ error: e.message }, { status });
+    }
     const message =
       e instanceof Error ? e.message : "Error al registrar auditoría";
     return NextResponse.json({ error: message }, { status: 500 });

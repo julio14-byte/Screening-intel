@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown, CreditCard, LogOut, User } from "lucide-react";
+import { ChevronDown, CreditCard, LogOut, Shield, User } from "lucide-react";
 import { routes } from "@/lib/app/routes";
+import type { AppRole } from "@/lib/rbac/types";
+import { APP_ROLE_LABELS } from "@/lib/rbac/types";
 import { cn } from "@/lib/utils";
 
 type AccountMenuProps = {
   email: string | null;
+  role: AppRole | null;
   loggingOut: boolean;
   onLogout: () => void;
 };
@@ -20,7 +23,7 @@ function displayEmail(email: string) {
   return `${local.slice(0, 12)}…@${domain}`;
 }
 
-export function AccountMenu({ email, loggingOut, onLogout }: AccountMenuProps) {
+export function AccountMenu({ email, role, loggingOut, onLogout }: AccountMenuProps) {
   const initial = email?.charAt(0).toUpperCase() ?? "?";
 
   return (
@@ -50,17 +53,35 @@ export function AccountMenu({ email, loggingOut, onLogout }: AccountMenuProps) {
                 {email}
               </span>
             </p>
+            {role ? (
+              <p className="mt-1 text-[10px] font-medium text-violet-600">
+                {APP_ROLE_LABELS[role]}
+              </p>
+            ) : null}
           </li>
         ) : null}
-        <li>
-          <Link
-            href={routes.app.billing}
-            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-indigo-800 transition hover:bg-violet-50"
-          >
-            <CreditCard className="h-4 w-4 shrink-0 text-violet-500" aria-hidden />
-            Facturación y plan
-          </Link>
-        </li>
+        {role === "investigator" ? (
+          <li>
+            <Link
+              href={routes.app.roles}
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-indigo-800 transition hover:bg-violet-50"
+            >
+              <Shield className="h-4 w-4 shrink-0 text-violet-500" aria-hidden />
+              Roles clínicos
+            </Link>
+          </li>
+        ) : null}
+        {role === "investigator" ? (
+          <li>
+            <Link
+              href={routes.app.billing}
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-indigo-800 transition hover:bg-violet-50"
+            >
+              <CreditCard className="h-4 w-4 shrink-0 text-violet-500" aria-hidden />
+              Facturación y plan
+            </Link>
+          </li>
+        ) : null}
         <li>
           <button
             type="button"

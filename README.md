@@ -41,6 +41,49 @@ La lógica vive en `src/lib/matching.ts` y evalúa cada criterio del protocolo c
 
 El `match_score` es el porcentaje de criterios superados sobre el total evaluado, y `match_details` guarda la trazabilidad criterio por criterio en la tabla `screenings`.
 
+## RBAC clínico (investigator / coordinator / monitor)
+
+Control de acceso basado en roles para personal del research site.
+
+### Migración
+
+Ejecutá `supabase/migrations/0007_rbac.sql` después de `0006_audit_trail.sql`.
+
+Incluye:
+- Enum `app_role` y tabla `user_roles`
+- Funciones `get_user_app_role()`, `can_write_clinical_data()`, etc.
+- RLS por rol en `patients`, `clinical_profiles`, `protocols`, `screenings`
+- Trigger: solo `investigator` puede pasar a estatus `randomized` (Apto)
+- RPC `assign_user_clinical_role` para administración de roles
+
+### Roles
+
+| Rol | Permisos |
+|-----|----------|
+| **investigator** | Control total, protocolos, aprobaciones médicas, gestión de roles |
+| **coordinator** | Alta/edición de pacientes, perfil clínico, screening (sin randomización) |
+| **monitor** | Solo lectura: expedientes + audit trail (CRA) |
+
+### Server Actions / permisos
+
+```typescript
+import { requirePermission } from "@/lib/rbac/require-permission";
+
+const { user, role } = await requirePermission("screenings:approve");
+```
+
+### UI
+
+```tsx
+import { RoleGuard } from "@/components/rbac/RoleGuard";
+
+<RoleGuard allowedRoles={["investigator"]}>
+  <Button>Aprobar criterio</Button>
+</RoleGuard>
+```
+
+Administración de roles: `/settings/roles` (solo investigator).
+
 ## Audit Trail (21 CFR Part 11)
 
 Bitácora de auditoría inmutable para expedientes de pacientes.

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/StateMessage";
 import { ImportPatientsModal } from "@/components/patients/ImportPatientsModal";
 import { NewPatientModal } from "@/components/patients/NewPatientModal";
+import { RoleGuard } from "@/components/rbac/RoleGuard";
 import { usePatients } from "@/hooks/usePatients";
 import { calculateAge, formatDate, GENDER_LABELS, normalizeTerm } from "@/lib/utils";
 
@@ -36,16 +37,18 @@ export default function PatientsPage() {
         title="Patient Registry"
         description="Base de pacientes de la clínica para pre-screening."
         actions={
-          <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" onClick={() => setImportOpen(true)}>
-              <Upload className="h-4 w-4" aria-hidden />
-              Importar CSV
-            </Button>
-            <Button onClick={() => setModalOpen(true)}>
-              <UserPlus className="h-4 w-4" aria-hidden />
-              Nuevo paciente
-            </Button>
-          </div>
+          <RoleGuard permission="patients:write">
+            <div className="flex flex-wrap gap-2">
+              <Button variant="secondary" onClick={() => setImportOpen(true)}>
+                <Upload className="h-4 w-4" aria-hidden />
+                Importar CSV
+              </Button>
+              <Button onClick={() => setModalOpen(true)}>
+                <UserPlus className="h-4 w-4" aria-hidden />
+                Nuevo paciente
+              </Button>
+            </div>
+          </RoleGuard>
         }
       />
 

@@ -3,14 +3,22 @@ import {
   extractProtocolCriteriaFromText,
   extractTextFromPdf,
 } from "@/lib/protocols/extractCriteria";
-import { getUser } from "@/lib/supabase/server";
+import {
+  AuthorizationError,
+  requirePermission,
+} from "@/lib/rbac/require-permission";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  const user = await getUser();
-  if (!user) {
-    return NextResponse.json({ error: "No autenticado." }, { status: 401 });
+  try {
+    await requirePermission("protocols:write");
+  } catch (e) {
+    if (e instanceof AuthorizationError) {
+      const status = e.code === "UNAUTHENTICATED" ? 401 : 403;
+      return NextResponse.json({ error: e.message }, { status });
+    }
+    throw e;
   }
 
   const formData = await request.formData();

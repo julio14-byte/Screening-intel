@@ -7,11 +7,13 @@ import {
   recordScreeningStatusAudit,
 } from "@/lib/audit/record-audit-event";
 import type { AuditLog, RecordCustomAuditInput } from "@/lib/audit/types";
+import { requirePermission } from "@/lib/rbac/require-permission";
 
 export async function logCustomAuditEventAction(
   input: RecordCustomAuditInput
 ): Promise<{ ok: true; auditId: string } | { ok: false; error: string }> {
   try {
+    await requirePermission("audit:write");
     const auditId = await recordCustomAuditEvent(input);
     return { ok: true, auditId };
   } catch (e) {
@@ -30,7 +32,11 @@ export async function logInclusionApprovalAction(input: {
   notes?: string;
 }): Promise<{ ok: true; auditId: string } | { ok: false; error: string }> {
   try {
-    const auditId = await recordInclusionApproval(input);
+    const { user } = await requirePermission("screenings:approve");
+    const auditId = await recordInclusionApproval({
+      ...input,
+      approvedByUserId: input.approvedByUserId ?? user.id,
+    });
     return { ok: true, auditId };
   } catch (e) {
     return {
@@ -48,6 +54,7 @@ export async function logScreeningStatusAction(input: {
   userId?: string | null;
 }): Promise<{ ok: true; auditId: string } | { ok: false; error: string }> {
   try {
+    await requirePermission("audit:write");
     const auditId = await recordScreeningStatusAudit(input);
     return { ok: true, auditId };
   } catch (e) {

@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { getSupabaseClient } from "@/lib/supabase/client";
+import { useRole } from "@/contexts/role-context";
 import { useSupabaseReady } from "@/hooks/useSupabaseReady";
+import { canSetScreeningStatus } from "@/lib/rbac/screening-transitions";
+import { getSupabaseClient } from "@/lib/supabase/client";
 import type {
   CriterionResult,
   ScreeningStatus,
@@ -17,6 +19,7 @@ export function useScreenings() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const supabaseReady = useSupabaseReady();
+  const { role, isReadOnly } = useRole();
 
   const fetchScreenings = useCallback(async () => {
     setLoading(true);
@@ -43,6 +46,18 @@ export function useScreenings() {
 
   const updateStatus = useCallback(
     async (screeningId: string, status: ScreeningStatus) => {
+      if (isReadOnly || !role) {
+        throw new Error("Monitor CRA: acceso de solo lectura.");
+      }
+
+      if (!canSetScreeningStatus(role, status)) {
+        throw new Error(
+          status === "randomized"
+            ? "Solo el Investigador Principal puede marcar Randomización (Apto)."
+            : "Tu rol no puede mover pacientes a esta etapa."
+        );
+      }
+
       const previous = screenings.find((s) => s.id === screeningId);
 
       // Actualización optimista para que el Kanban responda al instante.
@@ -80,7 +95,7 @@ export function useScreenings() {
         });
       }
     },
-    [fetchScreenings, screenings]
+    [fetchScreenings, screenings, role, isReadOnly]
   );
 
   return { screenings, loading, error, updateStatus, refetch: fetchScreenings };

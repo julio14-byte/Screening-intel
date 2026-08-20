@@ -3,8 +3,26 @@ import { NextResponse, type NextRequest } from "next/server";
 import config from "@/config";
 import { routes } from "@/lib/app/routes";
 import { isProtectedPath, isPublicApiPath } from "@/lib/app/routes";
+import {
+  isRouteAllowedForRole,
+  WRITE_API_PREFIXES,
+} from "@/lib/rbac/permissions";
+import type { AppRole } from "@/lib/rbac/types";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { getPaywallRedirect } from "@/plugins/stripe/paywall";
+
+async function fetchUserClinicalRole(
+  supabase: ReturnType<typeof createServerClient>,
+  userId: string
+): Promise<AppRole> {
+  const { data } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  return (data?.role as AppRole | undefined) ?? "coordinator";
+}
 
 function isPublicMarketingPath(pathname: string) {
   return (
@@ -106,6 +124,31 @@ async function runUpdateSession(request: NextRequest) {
         );
       }
       return NextResponse.redirect(url);
+    }
+  }
+
+  if (user) {
+    const role = await fetchUserClinicalRole(supabase, user.id);
+
+    if (!isRouteAllowedForRole(pathname, role)) {
+      const url = request.nextUrl.clone();
+      url.pathname = routes.app.dashboard;
+      url.searchParams.set("rbac", "denied");
+      return NextResponse.redirect(url);
+    }
+
+    const isWriteMethod = !["GET", "HEAD", "OPTIONS"].includes(
+      request.method
+    );
+    const isWriteApi = WRITE_API_PREFIXES.some((prefix) =>
+      pathname.startsWith(prefix)
+    );
+
+    if (isWriteMethod && isWriteApi && role === "monitor") {
+      return NextResponse.json(
+        { error: "Monitor CRA: acceso de solo lectura." },
+        { status: 403 }
+      );
     }
   }
 

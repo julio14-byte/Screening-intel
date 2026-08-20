@@ -7,6 +7,8 @@ import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ErrorState } from "@/components/ui/StateMessage";
 import { ConditionsEditor } from "@/components/profile/ConditionsEditor";
+import { RoleGuard } from "@/components/rbac/RoleGuard";
+import { useRole } from "@/contexts/role-context";
 import { LabsEditor } from "@/components/profile/LabsEditor";
 import { TagListEditor } from "@/components/profile/TagListEditor";
 import type { ProfileUpdate } from "@/hooks/usePatientDetail";
@@ -39,6 +41,8 @@ export function ClinicalProfileEditor({
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<Date | null>(null);
+  const { isReadOnly, hasPermission } = useRole();
+  const canEdit = hasPermission("profiles:write") && !isReadOnly;
 
   const handleSave = async () => {
     setSaving(true);
@@ -68,10 +72,12 @@ export function ClinicalProfileEditor({
                 Guardado {savedAt.toLocaleTimeString("es-AR")}
               </span>
             ) : null}
-            <Button onClick={handleSave} disabled={saving || !dirty}>
-              <Save className="h-4 w-4" aria-hidden />
-              {saving ? "Guardando…" : "Guardar perfil"}
-            </Button>
+            <RoleGuard permission="profiles:write">
+              <Button onClick={handleSave} disabled={saving || !dirty || !canEdit}>
+                <Save className="h-4 w-4" aria-hidden />
+                {saving ? "Guardando…" : "Guardar perfil"}
+              </Button>
+            </RoleGuard>
           </div>
         }
       />
@@ -82,14 +88,21 @@ export function ClinicalProfileEditor({
         </div>
       ) : null}
 
-      {!profile ? (
+      {!profile && canEdit ? (
         <p className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
           Este paciente todavía no tiene perfil clínico. Cargá sus datos y
           guardá para habilitar el matching contra protocolos.
         </p>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      {isReadOnly ? (
+        <p className="mb-4 rounded-md border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-800">
+          Modo solo lectura (Monitor CRA). Podés revisar el expediente y la
+          bitácora de auditoría, sin modificar datos clínicos.
+        </p>
+      ) : null}
+
+      <div className={`grid gap-4 lg:grid-cols-2 ${!canEdit ? "pointer-events-none opacity-80" : ""}`}>
         <Card>
           <CardHeader
             title="Condiciones médicas"

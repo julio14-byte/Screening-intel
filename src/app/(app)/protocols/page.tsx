@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/StateMessage";
 import { CriteriaSummary } from "@/components/protocols/CriteriaSummary";
 import { NewProtocolModal } from "@/components/protocols/NewProtocolModal";
+import { RoleGuard } from "@/components/rbac/RoleGuard";
 import { useProtocols } from "@/hooks/useProtocols";
 import { cn } from "@/lib/utils";
 
@@ -27,10 +28,12 @@ export default function ProtocolsPage() {
         title="Protocol Matcher"
         description="Protocolos de estudio con criterios estructurados. Seleccioná uno para cruzarlo contra la base de pacientes."
         actions={
-          <Button onClick={() => setModalOpen(true)}>
-            <FlaskConical className="h-4 w-4" aria-hidden />
-            Nuevo protocolo
-          </Button>
+          <RoleGuard permission="protocols:write">
+            <Button onClick={() => setModalOpen(true)}>
+              <FlaskConical className="h-4 w-4" aria-hidden />
+              Nuevo protocolo
+            </Button>
+          </RoleGuard>
         }
       />
 
@@ -74,27 +77,29 @@ export default function ProtocolsPage() {
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <Button
-                    variant="secondary"
-                    onClick={() =>
-                      setProtocolStatus(
-                        protocol.id,
-                        protocol.status === "active" ? "closed" : "active"
-                      )
-                    }
-                  >
-                    {protocol.status === "active" ? (
-                      <>
-                        <Archive className="h-4 w-4" aria-hidden />
-                        Cerrar
-                      </>
-                    ) : (
-                      <>
-                        <Play className="h-4 w-4" aria-hidden />
-                        Reactivar
-                      </>
-                    )}
-                  </Button>
+                  <RoleGuard permission="protocols:write">
+                    <Button
+                      variant="secondary"
+                      onClick={() =>
+                        setProtocolStatus(
+                          protocol.id,
+                          protocol.status === "active" ? "closed" : "active"
+                        )
+                      }
+                    >
+                      {protocol.status === "active" ? (
+                        <>
+                          <Archive className="h-4 w-4" aria-hidden />
+                          Cerrar
+                        </>
+                      ) : (
+                        <>
+                          <Play className="h-4 w-4" aria-hidden />
+                          Reactivar
+                        </>
+                      )}
+                    </Button>
+                  </RoleGuard>
                   <Link href={`/protocols/${protocol.id}/match`}>
                     <Button>
                       <Target className="h-4 w-4" aria-hidden />

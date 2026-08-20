@@ -91,6 +91,7 @@ const config = {
       "/chat",
       "/account",
       "/settings",
+      "/settings/roles",
       "/semaforos",
       "/devices",
     ],
@@ -112,6 +113,7 @@ const config = {
       rematch: "/rematch",
       chat: "/chat",
       billing: "/account/billing",
+      roles: "/settings/roles",
       docs: "/docs",
     },
     apis: {
