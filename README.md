@@ -1,70 +1,182 @@
-# Screening Intelligence para Research Sites
+# Screening Intelligence
 
-MVP de una plataforma que ayuda a clínicas de investigación a optimizar el **pre-screening** y **re-matching** de pacientes para sus protocolos clínicos.
+Plataforma **HealthTech** para **research sites** y clínicas de investigación. Optimiza el **pre-screening**, el **matching** paciente–protocolo y el **re-matching** cuando un paciente cae en screen failure — con trazabilidad clínica, RBAC y asistente IA.
 
-## Stack
+[![Next.js](https://img.shields.io/badge/Next.js-16-000?style=flat&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?style=flat&logo=supabase&logoColor=white)](https://supabase.com/)
+[![Stripe](https://img.shields.io/badge/Stripe-SaaS-635BFF?style=flat&logo=stripe&logoColor=white)](https://stripe.com/)
 
-- **Next.js** (App Router, TypeScript, Tailwind CSS) — listo para desplegar en Vercel.
-- **Supabase** (PostgreSQL con Row Level Security) — persistencia y API.
-- **Lucide** — íconos; componentes UI propios, accesibles y densos en datos.
+---
 
-## Módulos
+## Características principales
 
-| Ruta | Módulo | Descripción |
-| --- | --- | --- |
-| `/patients` | Patient Registry | Listado de pacientes con buscador y alta de nuevos pacientes. |
-| `/patients/[id]` | Clinical Profile | Edición de condiciones, medicación concomitante y laboratorios. |
-| `/protocols` | Protocol Matcher | Alta de protocolos con criterios estructurados de inclusión/exclusión. |
-| `/protocols/[id]/match` | Motor de cruce | Ranking de toda la base de pacientes con semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple y detalle criterio por criterio. |
-| `/tracker` | Screening Tracker | Kanban con drag & drop: Pre-screening → Screening → Randomización → Screen Failure. |
-| `/rematch` | Re-Match & Follow-up | Para cada paciente con screen failure, propone automáticamente otros protocolos activos donde podría encajar. |
-| `/account/billing` | Facturación | Plan, trial, checkout Stripe y portal de cliente (Fase 1 SaaS). |
+| Área | Qué hace |
+|------|----------|
+| **Patient Registry** | Alta, búsqueda e importación CSV de pacientes |
+| **Clinical Profile** | Condiciones, medicación, laboratorios + búsqueda ICD-11 |
+| **Protocol Matcher** | Criterios de inclusión/exclusión; extracción NLP desde PDF |
+| **Motor de elegibilidad** | Semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple + `match_score` |
+| **Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure |
+| **Re-Match** | Propone protocolos alternativos para pacientes con screen failure |
+| **Asistente IA** | Chat clínico (LangGraph + GPT-4o-mini) con herramientas MCP |
+| **Audit Trail** | Bitácora inmutable alineada a 21 CFR Part 11 |
+| **RBAC clínico** | Investigator / Coordinator / Monitor |
+| **SaaS** | Organizations, trial 14 días, Stripe Checkout + Portal |
+| **ePRO** | Formularios electrónicos del paciente (Fase A) |
+| **API Docs** | Swagger UI en [`/docs/api`](http://localhost:3000/docs/api) |
 
-## SaaS Fase 1 (Stripe)
+---
 
-- `src/config.ts`: `features.pricing` y `features.payments` activados.
-- Plugin en `src/plugins/stripe/` (checkout, portal, webhook, paywall).
-- Migración `supabase/migrations/0002_profiles_saas_fase1.sql` (organizations + trial 14 días).
-- Planes: **Starter** (50 pacientes, 3 protocolos) y **Site Pro** (500 pacientes, 50 protocolos).
+## Stack tecnológico
 
-Variables: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_PRO`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_APP_URL`.
+- **Frontend:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4
+- **Backend / DB:** Supabase (PostgreSQL, Auth SSR, Row Level Security)
+- **IA:** OpenAI, LangGraph, Vercel AI SDK, MCP (screening + ICD-11)
+- **Pagos:** Stripe (suscripciones)
+- **Validación:** Zod
+- **Docs API:** OpenAPI 3.0 + Swagger UI
 
-Webhook Stripe → `https://tu-dominio/api/webhooks/stripe`
+---
+
+## Módulos de la aplicación
+
+| Ruta | Descripción |
+|------|-------------|
+| `/dashboard` | Embudo de screening y métricas del site |
+| `/patients` | Registro de pacientes |
+| `/patients/[id]` | Perfil clínico + timeline de auditoría |
+| `/protocols` | Gestión de protocolos |
+| `/protocols/[id]/match` | Cruce masivo paciente ↔ protocolo |
+| `/tracker` | Pipeline Kanban con drag & drop |
+| `/rematch` | Re-matching automático post screen failure |
+| `/chat` | Asistente clínico IA |
+| `/epro` | Formularios ePRO |
+| `/settings/roles` | Creación de usuarios y roles (investigator) |
+| `/account/billing` | Plan, trial y facturación Stripe |
+| `/docs` | Documentación del producto |
+| `/docs/api` | Swagger UI (REST API) |
+
+---
+
+## Inicio rápido
+
+### Requisitos
+
+- Node.js 20+
+- Cuenta en [Supabase](https://supabase.com)
+- (Opcional) OpenAI, Stripe, credenciales WHO ICD-11
+
+### 1. Clonar e instalar
+
+```bash
+git clone https://github.com/julio14-byte/Screening-intel.git
+cd Screening-intel
+npm install
+```
+
+### 2. Variables de entorno
+
+```bash
+cp .env.example .env.local
+```
+
+Mínimo para desarrollo:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...          # creación de usuarios demo / admin
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+OPENAI_API_KEY=sk-...                     # chat IA + extracción PDF
+```
+
+Ver [`.env.example`](.env.example) para Stripe, ICD-11 y login demo.
+
+### 3. Base de datos (Supabase)
+
+Ejecutá las migraciones **en orden** en el SQL Editor o con la CLI:
+
+```text
+supabase/migrations/0001_initial_schema.sql
+supabase/migrations/0002_profiles_saas_fase1.sql
+supabase/migrations/0003_waitlist_ai_metrics.sql
+supabase/migrations/0004_mvp_clinical_rls.sql
+supabase/migrations/0005_epro_phase_a.sql
+supabase/migrations/0006_audit_trail.sql
+supabase/migrations/0007_rbac.sql
+```
+
+Opcional — datos de demo:
+
+```bash
+# supabase/seed.sql en el SQL Editor
+```
+
+Con Supabase CLI:
+
+```bash
+supabase link
+supabase db push
+```
+
+### 4. Arrancar
+
+```bash
+npm run dev
+```
+
+| URL | Uso |
+|-----|-----|
+| http://localhost:3000 | Landing |
+| http://localhost:3000/login | Login |
+| http://localhost:3000/docs/api | Swagger UI |
+
+**Usuario demo** (auto-provisión si existe `SUPABASE_SERVICE_ROLE_KEY`):
+
+- Email: `demo@screening.local`
+- Password: `demo123`
+
+---
 
 ## Motor de matching
 
-La lógica vive en `src/lib/matching.ts` y evalúa cada criterio del protocolo contra el perfil del paciente:
+La lógica central está en [`src/lib/matching.ts`](src/lib/matching.ts):
 
-- **🟢 Cumple (eligible):** todos los criterios de inclusión superados y ninguna exclusión activada.
-- **🟡 Pendiente (pending):** falta información (sin perfil clínico o sin un laboratorio requerido).
-- **🔴 No cumple (excluded):** falla un criterio de inclusión o se activa una exclusión.
+- **🟢 Cumple** — inclusión OK, sin exclusiones activas
+- **🟡 Pendiente** — falta perfil clínico o laboratorio requerido
+- **🔴 No cumple** — falla inclusión o activa exclusión
 
-El `match_score` es el porcentaje de criterios superados sobre el total evaluado, y `match_details` guarda la trazabilidad criterio por criterio en la tabla `screenings`.
+Cada screening guarda `match_score` (0–100) y `match_details` (trazabilidad criterio por criterio).
 
-## RBAC clínico (investigator / coordinator / monitor)
+---
 
-Control de acceso basado en roles para personal del research site.
+## Inteligencia artificial
 
-### Migración
+| Funcionalidad | Ruta / API | Modelo |
+|---------------|------------|--------|
+| Chat clínico | `/chat` · `POST /api/auth/chats` | GPT-4o-mini + LangGraph |
+| Extracción de protocolos PDF | `POST /api/protocols/extract` | GPT-4o-mini |
+| Normalización ICD-11 | `GET /api/icd11/normalize` | API WHO (no LLM) |
 
-Ejecutá `supabase/migrations/0007_rbac.sql` después de `0006_audit_trail.sql`.
+Servidores MCP locales (opcional):
 
-Incluye:
-- Enum `app_role` y tabla `user_roles`
-- Funciones `get_user_app_role()`, `can_write_clinical_data()`, etc.
-- RLS por rol en `patients`, `clinical_profiles`, `protocols`, `screenings`
-- Trigger: solo `investigator` puede pasar a estatus `randomized` (Apto)
-- RPC `assign_user_clinical_role` para administración de roles
+```bash
+npm run mcp:screening
+npm run mcp:icd11
+```
 
-### Roles
+---
+
+## RBAC clínico
 
 | Rol | Permisos |
 |-----|----------|
-| **investigator** | Control total, protocolos, aprobaciones médicas, gestión de roles |
-| **coordinator** | Alta/edición de pacientes, perfil clínico, screening (sin randomización) |
-| **monitor** | Solo lectura: expedientes + audit trail (CRA) |
+| **investigator** | Protocolos, aprobaciones, randomización, gestión de roles |
+| **coordinator** | Pacientes, screening operativo (sin marcar Apto) |
+| **monitor** | Solo lectura (CRA / auditoría farmacéutica) |
 
-### Server Actions / permisos
+Administración en `/settings/roles` (solo investigator). Migración: `0007_rbac.sql`.
 
 ```typescript
 import { requirePermission } from "@/lib/rbac/require-permission";
@@ -72,124 +184,117 @@ import { requirePermission } from "@/lib/rbac/require-permission";
 const { user, role } = await requirePermission("screenings:approve");
 ```
 
-### UI
-
-```tsx
-import { RoleGuard } from "@/components/rbac/RoleGuard";
-
-<RoleGuard allowedRoles={["investigator"]}>
-  <Button>Aprobar criterio</Button>
-</RoleGuard>
-```
-
-### Administración de usuarios
-
-En `/settings/roles` (solo **investigator**):
-- **Crear usuario** con email, contraseña temporal, nombre y rol clínico
-- **Cambiar rol** de miembros existentes
-
-Requiere `SUPABASE_SERVICE_ROLE_KEY` en el servidor para crear usuarios en Auth.
+---
 
 ## Audit Trail (21 CFR Part 11)
 
-Bitácora de auditoría inmutable para expedientes de pacientes.
+- Tabla `audit_logs` **append-only**
+- Triggers automáticos en `patients` (UPDATE / DELETE)
+- RPC `record_custom_audit_event` para eventos manuales
+- UI: `<AuditTimeline />` en `/patients/[id]`
 
-### 1. Migración
+Migración: `0006_audit_trail.sql`
 
-En el SQL Editor de Supabase, ejecutá `supabase/migrations/0006_audit_trail.sql` después de las migraciones anteriores.
+---
 
-Incluye:
+## API REST
 
-- Tabla `audit_logs` (append-only).
-- Triggers en `patients` para `UPDATE` y `DELETE`.
-- RPC `record_custom_audit_event` para eventos manuales (aprobaciones, notas).
-- Protección contra `UPDATE`/`DELETE` directos en `audit_logs`.
+Documentación interactiva:
 
-### 2. Server Actions / API
+- **Swagger UI:** `/docs/api`
+- **OpenAPI JSON:** `/api/openapi`
 
-```typescript
-import { logCustomAuditEventAction } from "@/actions/audit";
+Endpoints públicos principales:
 
-await logCustomAuditEventAction({
-  tableName: "patients",
-  recordId: patientId,
-  description: "El investigador principal aprobó el criterio de inclusión.",
-  metadata: { protocol_id: "...", criterion: "Edad 18-75" },
-});
+```http
+POST /api/auth/login
+POST /api/waitlist
+GET  /api/openapi
 ```
 
-- `POST /api/audit` — registrar evento manual (JSON).
-- `GET /api/audit?table_name=patients&record_id=<uuid>` — consultar bitácora.
+El resto requiere sesión Supabase (cookies).
 
-### 3. UI
+---
 
-En `/patients/[id]` se muestra `<AuditTimeline />`. También podés usarlo en cualquier expediente:
+## SaaS y Stripe
 
-```tsx
-import { AuditTimeline } from "@/components/audit/audit-timeline";
+- Trial 14 días por organization
+- Planes **Starter** y **Site Pro** (`src/config.ts`)
+- Webhook: `POST /api/webhooks/stripe`
 
-<AuditTimeline tableName="patients" recordId={patient.id} />
-```
+Variables: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_PRO`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`.
 
-### Extender a otras tablas
+---
 
-Para auditar `clinical_profiles` o `screenings`, agregá triggers similares:
+## Deploy en Vercel
 
-```sql
-create trigger clinical_profiles_audit_trail
-  after update or delete on public.clinical_profiles
-  for each row execute function audit.capture_row_change();
-```
-
-## Puesta en marcha
-
-### 1. Base de datos (Supabase)
-
-1. Creá un proyecto en [supabase.com](https://supabase.com).
-2. En el **SQL Editor**, ejecutá `supabase/migrations/0001_initial_schema.sql` (tablas, enums, triggers y políticas RLS).
-3. Ejecutá `supabase/migrations/0002_profiles_saas_fase1.sql` (profiles + organizations SaaS).
-4. (Opcional) Ejecutá `supabase/seed.sql` para cargar datos de demo.
-
-Alternativa con CLI: `supabase link` + `supabase db push`.
-
-### Métricas de producto (waitlist, signups, chat IA)
-
-1. Ejecutá `supabase/migrations/0003_waitlist_ai_metrics.sql`.
-2. Configurá `SUPABASE_SERVICE_ROLE_KEY` en el servidor para leer métricas globales en el tablero.
-3. Las sesiones del asistente en `/chat` se guardan automáticamente en `ai_conversations`.
-4. Waitlist: `POST /api/waitlist` con `{ "email": "..." }` (público).
-
+1. Importá el repositorio en [Vercel](https://vercel.com).
+2. Configurá las variables de `.env.example`.
+3. Webhook Stripe → `https://tu-dominio/api/webhooks/stripe`
+4. `NEXT_PUBLIC_APP_URL` → URL de producción
 
 ```bash
-cp .env.example .env.local   # completar con la URL y anon key del proyecto
-npm install
-npm run dev                  # http://localhost:3000
+npm run build
 ```
 
-### 3. Deploy en Vercel
-
-Importá el repo en Vercel y definí las variables de entorno `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`. No se requiere configuración adicional.
+---
 
 ## Estructura del proyecto
 
-```
+```text
 supabase/
-  migrations/          # Esquema SQL (tablas, RLS, triggers)
-  seed.sql             # Datos de demo
+  migrations/     # Esquema SQL, RLS, triggers, RBAC, audit
+  seed.sql        # Datos de demo
 src/
+  app/            # App Router (páginas + API routes)
+  actions/        # Server Actions
+  components/     # UI por módulo (patients, protocols, tracker…)
   lib/
-    types.ts           # Tipos de dominio (tablas + motor de matching)
-    matching.ts        # Motor de reglas de elegibilidad (core)
-    supabase/client.ts # Cliente supabase-js (singleton, env vars)
-    utils.ts           # Helpers (edad, normalización, labels)
-  hooks/               # Hooks de datos (usePatients, useProtocolMatch, useRematch…)
-  components/
-    ui/                # Primitivas (Button, Card, Modal, VerdictBadge…)
-    layout/            # AppShell con navegación lateral
-    patients/ profile/ protocols/ tracker/  # Componentes por módulo
-  app/                 # Rutas del App Router
+    matching.ts   # Motor de elegibilidad
+    rbac/         # Permisos y roles
+    audit/        # Audit trail
+    agents/       # LangGraph + MCP
+    openapi/      # Spec OpenAPI
+  plugins/stripe/ # Checkout, portal, paywall
+mcp/              # Servidores MCP (screening, icd11)
 ```
 
-## Nota sobre seguridad (MVP)
+---
 
-RLS está habilitado en todas las tablas con políticas permisivas para el rol `anon`, pensadas para un MVP de una sola clínica sin autenticación. Antes de producción, incorporá Supabase Auth y reemplazá las políticas por filtros de `clinic_id` contra `app_metadata` del JWT (ver comentarios en la migración).
+## Scripts disponibles
+
+| Comando | Descripción |
+|---------|-------------|
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` | Build de producción |
+| `npm run start` | Servidor de producción |
+| `npm run lint` | ESLint |
+| `npm run mcp:screening` | MCP servidor screening |
+| `npm run mcp:icd11` | MCP servidor ICD-11 |
+
+---
+
+## Seguridad
+
+- Autenticación Supabase SSR con middleware
+- RLS en PostgreSQL + RBAC clínico (`0007_rbac.sql`)
+- Validación Zod en APIs críticas
+- Rate limiting en middleware (login, import, waitlist…)
+- Cabeceras HTTP / CSP (branch `cursor/security-hardening-4921`)
+
+Antes de producción con datos reales de pacientes: revisá políticas RLS, rotá claves y completá evaluación de cumplimiento (HIPAA / GDPR según jurisdicción).
+
+---
+
+## Contribuir
+
+1. Fork del repositorio
+2. Branch: `cursor/tu-feature-4921`
+3. Commit descriptivo
+4. Pull Request contra `main`
+
+---
+
+## Autor
+
+Desarrollado por [**julio14-byte**](https://github.com/julio14-byte) — Screening Intelligence para research sites.
