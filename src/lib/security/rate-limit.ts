@@ -1,9 +1,6 @@
 /**
- * Rate limiting — memoria (dev / single instance) + Upstash Redis REST (prod).
- *
- * Variables opcionales:
- *   UPSTASH_REDIS_REST_URL
- *   UPSTASH_REDIS_REST_TOKEN
+ * Rate limiting en memoria (middleware / instancia local).
+ * En despliegues multi-instancia cada réplica cuenta por separado.
  */
 
 export type RateLimitConfig = {
@@ -48,54 +45,10 @@ function memoryRateLimit(
   };
 }
 
-async function upstashRateLimit(
+export function checkRateLimit(
   key: string,
   config: RateLimitConfig
-): Promise<RateLimitResult | null> {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) return null;
-
-  const redisKey = `rl:${key}`;
-  const nowSec = Math.floor(Date.now() / 1000);
-  const windowKey = `${redisKey}:${Math.floor(nowSec / config.windowSec)}`;
-
-  try {
-    const res = await fetch(`${url}/pipeline`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify([
-        ["INCR", windowKey],
-        ["EXPIRE", windowKey, config.windowSec.toString()],
-      ]),
-      cache: "no-store",
-    });
-
-    if (!res.ok) return null;
-
-    const data = (await res.json()) as { result?: unknown[] };
-    const count = Number(data.result?.[0] ?? 1);
-    const resetAt = (Math.floor(nowSec / config.windowSec) + 1) * config.windowSec * 1000;
-
-    return {
-      allowed: count <= config.max,
-      remaining: Math.max(0, config.max - count),
-      resetAt,
-    };
-  } catch {
-    return null;
-  }
-}
-
-export async function checkRateLimit(
-  key: string,
-  config: RateLimitConfig
-): Promise<RateLimitResult> {
-  const upstash = await upstashRateLimit(key, config);
-  if (upstash) return upstash;
+): RateLimitResult {
   return memoryRateLimit(key, config);
 }
 

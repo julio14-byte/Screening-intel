@@ -45,7 +45,7 @@ export async function enforceRateLimit(
   const config: RateLimitConfig = RATE_LIMITS[route];
   const ip = clientIp(request);
   const key = rateLimitKey(route, ip, userId);
-  const result = await checkRateLimit(key, config);
+  const result = checkRateLimit(key, config);
 
   if (!result.allowed) {
     const retryAfter = Math.max(

@@ -84,14 +84,7 @@ Los textos clínicos rechazan caracteres de control y tags `<>` para reducir XSS
 | Escritura `/api/rbac/*` | 30 | 1 h |
 | `POST /api/audit` | 60 | 1 h |
 
-**Producción (Vercel / multi-instancia):** configurá Upstash Redis:
-
-```env
-UPSTASH_REDIS_REST_URL=https://...
-UPSTASH_REDIS_REST_TOKEN=...
-```
-
-Sin Upstash, el middleware usa un store en memoria (solo válido para dev o una sola instancia).
+El middleware aplica límites con un store **en memoria** por instancia. En Vercel con varias réplicas, cada una cuenta por separado; para rate limiting global en prod considerá Redis u otro store compartido más adelante.
 
 Respuesta `429` incluye `Retry-After` y cabeceras `X-RateLimit-*`.
 
@@ -99,7 +92,6 @@ Respuesta `429` incluye `Retry-After` y cabeceras `X-RateLimit-*`.
 
 - [ ] Migraciones `0006`–`0008` aplicadas en Supabase
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` solo en servidor (nunca `NEXT_PUBLIC_*`)
-- [ ] Upstash configurado en producción
 - [ ] HTTPS forzado (Vercel lo hace por defecto; HSTS activo en prod)
 - [ ] Revisar políticas RLS en Dashboard → Authentication → Policies
 - [ ] Rotar claves si alguna se expuso en logs o commits
