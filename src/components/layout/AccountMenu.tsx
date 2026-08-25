@@ -79,6 +79,17 @@ export function AccountMenu({
         {role === "investigator" ? (
           <li>
             <Link
+              href={routes.app.portalSettings}
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-indigo-800 transition hover:bg-violet-50"
+            >
+              <Shield className="h-4 w-4 shrink-0 text-violet-500" aria-hidden />
+              Portal de candidatos
+            </Link>
+          </li>
+        ) : null}
+        {role === "investigator" ? (
+          <li>
+            <Link
               href={routes.app.roles}
               className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-indigo-800 transition hover:bg-violet-50"
             >

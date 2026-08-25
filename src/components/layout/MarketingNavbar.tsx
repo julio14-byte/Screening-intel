@@ -2,12 +2,13 @@ import Link from "next/link";
 import config from "@/config";
 import { Logo } from "@/components/Logo";
 import { loginUrlWithFrom, routes } from "@/lib/app/routes";
-import { LogIn, Menu } from "lucide-react";
+import { Heart, LogIn, Menu } from "lucide-react";
 
 const pricingHref = `${routes.landing}#pricing`;
 
 export function MarketingNavbar() {
-  const enterHref = loginUrlWithFrom(routes.app.dashboard);
+  const coordinatorHref = loginUrlWithFrom(routes.app.dashboard);
+  const candidatoHref = routes.candidato.hub;
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-indigo-950/80 backdrop-blur-md">
@@ -44,10 +45,18 @@ export function MarketingNavbar() {
               </li>
               <li>
                 <Link
-                  href={enterHref}
+                  href={candidatoHref}
+                  className="block rounded-lg px-3 py-2 text-sm text-violet-200 hover:bg-white/10 hover:text-white"
+                >
+                  Pre-registro pacientes
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={coordinatorHref}
                   className="block rounded-lg px-3 py-2 text-sm font-semibold text-cyan-300 hover:bg-white/10"
                 >
-                  Entrar a la app
+                  Acceso coordinadores
                 </Link>
               </li>
             </ul>
@@ -78,11 +87,20 @@ export function MarketingNavbar() {
             Precios
           </Link>
           <Link
-            href={enterHref}
+            href={candidatoHref}
+            className="hidden rounded-lg px-3 py-2 text-sm font-medium text-violet-200 transition-colors hover:text-white sm:inline"
+          >
+            <span className="inline-flex items-center gap-1">
+              <Heart className="h-3.5 w-3.5" aria-hidden />
+              Pacientes
+            </span>
+          </Link>
+          <Link
+            href={coordinatorHref}
             className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 transition hover:from-cyan-400 hover:to-violet-400 sm:px-4"
           >
             <LogIn className="h-4 w-4" aria-hidden />
-            Entrar
+            Coordinadores
           </Link>
         </div>
       </nav>

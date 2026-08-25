@@ -13,11 +13,13 @@ import {
   Settings,
   ListChecks,
   Users,
+  UserPlus,
 } from "lucide-react";
 
 export const APP_ICONS: Record<string, LucideIcon> = {
   LayoutDashboard,
   Users,
+  UserPlus,
   FlaskConical,
   KanbanSquare,
   RefreshCw,
@@ -51,6 +53,10 @@ export const APP_NAV_STYLES: Record<
   },
   "/patients": {
     activeClass: "bg-cyan-400/20 text-cyan-100 ring-1 ring-cyan-300/30",
+    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
+  },
+  "/candidatos": {
+    activeClass: "bg-teal-400/20 text-teal-100 ring-1 ring-teal-300/30",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
   "/protocols": {

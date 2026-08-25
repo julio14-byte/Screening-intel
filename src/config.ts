@@ -22,6 +22,11 @@ const config = {
         icon: "Users",
       },
       {
+        href: "/candidatos",
+        label: "Candidatos",
+        icon: "UserPlus",
+      },
+      {
         href: "/protocols",
         label: "Protocolos",
         icon: "FlaskConical",
@@ -92,6 +97,8 @@ const config = {
       "/account",
       "/settings",
       "/settings/roles",
+      "/settings/portal",
+      "/candidatos",
       "/semaforos",
       "/devices",
     ],
@@ -102,7 +109,13 @@ const config = {
       "/api/waitlist",
       "/api/webhooks/stripe",
       "/api/openapi",
+      "/api/candidato/config",
+      "/api/candidato/enviar",
     ],
+    candidato: {
+      hub: "/candidato",
+      gracias: "/candidato/gracias",
+    },
     app: {
       dashboard: "/dashboard",
       patients: "/patients",
@@ -115,6 +128,8 @@ const config = {
       chat: "/chat",
       billing: "/account/billing",
       roles: "/settings/roles",
+      portalSettings: "/settings/portal",
+      candidatos: "/candidatos",
       docs: "/docs",
       apiDocs: "/docs/api",
     },

@@ -59,11 +59,14 @@ export const WRITE_API_PREFIXES = [
   "/api/protocols/extract",
   "/api/audit",
   "/api/rbac",
+  "/api/candidatos",
+  "/api/settings/portal",
 ] as const;
 
 /** Rutas de app restringidas por rol. */
 export const ROLE_RESTRICTED_ROUTES: Record<string, AppRole[]> = {
   "/settings/roles": ["investigator"],
+  "/settings/portal": ["investigator"],
   "/account/billing": ["investigator"],
 };
 

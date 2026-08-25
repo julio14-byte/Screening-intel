@@ -192,6 +192,50 @@ export function evaluatePatientAgainstProtocol(
 }
 
 /**
+ * Pre-filtro para portal de candidatos: sin laboratorios (el paciente no los trae).
+ * Labs se evalúan en visita de screening dentro de la app.
+ */
+export function evaluatePatientIntake(
+  patient: Patient,
+  profile: ClinicalProfile | null,
+  protocol: Protocol
+): MatchResult {
+  const full = evaluatePatientAgainstProtocol(patient, profile, protocol);
+  const details = full.details.filter(
+    (d) => !d.criterion.toLowerCase().startsWith("lab ")
+  );
+
+  const total = details.length;
+  const passed = details.filter((d) => d.status === "pass").length;
+  const hasExclusionTriggered = details.some(
+    (d) => d.type === "exclusion" && d.status === "fail"
+  );
+  const hasInclusionFail = details.some(
+    (d) => d.type === "inclusion" && d.status === "fail"
+  );
+  const hasMissing = details.some((d) => d.status === "missing");
+
+  let verdict: MatchVerdict;
+  if (hasExclusionTriggered || hasInclusionFail) {
+    verdict = "excluded";
+  } else if (hasMissing || !profile) {
+    verdict = "pending";
+  } else {
+    verdict = "eligible";
+  }
+
+  const score = total === 0 ? 100 : Math.round((passed / total) * 100);
+
+  return {
+    patient: full.patient,
+    profile: full.profile,
+    verdict,
+    score,
+    details,
+  };
+}
+
+/**
  * Evalúa toda la base de pacientes contra un protocolo y devuelve los
  * resultados ordenados: elegibles primero, luego pendientes, luego excluidos,
  * y dentro de cada grupo por score descendente.
