@@ -30,7 +30,7 @@ export default function EproPage() {
         <Card>
           <EmptyState
             title="Sin formularios ePRO"
-            description="Ejecutá la migración 0005_epro_phase_a.sql en Supabase para crear el formulario demo."
+            description="Todavía no hay formularios configurados para este research site. El investigador principal puede habilitarlos desde la administración del sitio."
           />
         </Card>
       ) : (

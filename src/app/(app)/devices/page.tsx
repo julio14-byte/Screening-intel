@@ -35,8 +35,14 @@ export default function DevicesPage() {
     <>
       <PageHeader
         title="Dispositivos Hardware"
-        description="Estatus de sensores ESP32 conectados al research site (vista simulada)."
+        description="Telemetría de sensores clínicos conectados al research site."
       />
+
+      <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <strong>Vista de demostración.</strong> La integración con dispositivos
+        ESP32 estará disponible en una próxima versión. Los datos siguientes son
+        simulados para diseño y pruebas de interfaz.
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {MOCK_DEVICES.map((device) => (

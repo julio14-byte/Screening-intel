@@ -11,9 +11,14 @@ import { readJsonResponse } from "@/lib/http/readJsonResponse";
 type LoginFormProps = {
   demoEmail: string;
   demoPassword: string;
+  showDemoHint?: boolean;
 };
 
-export function LoginForm({ demoEmail, demoPassword }: LoginFormProps) {
+export function LoginForm({
+  demoEmail,
+  demoPassword,
+  showDemoHint = true,
+}: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState(demoEmail);
@@ -87,13 +92,15 @@ export function LoginForm({ demoEmail, demoPassword }: LoginFormProps) {
         </div>
 
         <div className="rounded-2xl border border-white/15 bg-white/95 p-6 shadow-2xl shadow-indigo-950/40 backdrop-blur-sm">
-          <div className="mb-5 flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-50 to-violet-50 px-3 py-2 text-xs text-indigo-800">
-            <Sparkles className="h-4 w-4 shrink-0 text-violet-500" aria-hidden />
-            <span>
-              Demo: <strong>{demoEmail}</strong> /{" "}
-              <strong>{demoPassword}</strong>
-            </span>
-          </div>
+          {showDemoHint ? (
+            <div className="mb-5 flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-50 to-violet-50 px-3 py-2 text-xs text-indigo-800">
+              <Sparkles className="h-4 w-4 shrink-0 text-violet-500" aria-hidden />
+              <span>
+                Demo: <strong>{demoEmail}</strong> /{" "}
+                <strong>{demoPassword}</strong>
+              </span>
+            </div>
+          ) : null}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <TextInput

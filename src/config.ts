@@ -18,17 +18,17 @@ const config = {
       },
       {
         href: "/patients",
-        label: "Patient Registry",
+        label: "Pacientes",
         icon: "Users",
       },
       {
         href: "/protocols",
-        label: "Protocol Matcher",
+        label: "Protocolos",
         icon: "FlaskConical",
       },
       {
         href: "/tracker",
-        label: "Screening Tracker",
+        label: "Tracker",
         icon: "KanbanSquare",
       },
       {
@@ -38,7 +38,7 @@ const config = {
       },
       {
         href: "/rematch",
-        label: "Re-Match & Follow-up",
+        label: "Re-Match",
         icon: "RefreshCw",
       },
       {
