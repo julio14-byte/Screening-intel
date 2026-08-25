@@ -4,6 +4,8 @@ import { Logo } from "@/components/Logo";
 import { loginUrlWithFrom, routes } from "@/lib/app/routes";
 import { LogIn, Menu } from "lucide-react";
 
+const pricingHref = `${routes.landing}#pricing`;
+
 export function MarketingNavbar() {
   const enterHref = loginUrlWithFrom(routes.app.dashboard);
 
@@ -24,12 +26,12 @@ export function MarketingNavbar() {
             <ul className="absolute left-0 top-full z-50 mt-2 w-52 rounded-xl border border-white/15 bg-indigo-950 p-2 shadow-xl">
               {config.landing.nav.map((item) => (
                 <li key={item.href}>
-                  <a
-                    href={item.href}
+                  <Link
+                    href={`${routes.landing}${item.href}`}
                     className="block rounded-lg px-3 py-2 text-sm text-violet-200 hover:bg-white/10 hover:text-white"
                   >
                     {item.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
               <li>
@@ -69,12 +71,12 @@ export function MarketingNavbar() {
           >
             Docs
           </Link>
-          <a
-            href="#pricing"
+          <Link
+            href={pricingHref}
             className="rounded-lg px-3 py-2 text-sm font-medium text-violet-200 transition-colors hover:text-white"
           >
             Precios
-          </a>
+          </Link>
           <Link
             href={enterHref}
             className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 transition hover:from-cyan-400 hover:to-violet-400 sm:px-4"

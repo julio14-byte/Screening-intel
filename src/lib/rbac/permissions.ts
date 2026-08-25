@@ -55,6 +55,7 @@ export function roleHasAnyPermission(
 /** Rutas de API que requieren permiso de escritura clínica. */
 export const WRITE_API_PREFIXES = [
   "/api/patients/import",
+  "/api/patients/profile/extract",
   "/api/protocols/extract",
   "/api/audit",
   "/api/rbac",

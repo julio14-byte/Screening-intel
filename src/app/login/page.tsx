@@ -13,7 +13,11 @@ export default function LoginPage() {
         </div>
       }
     >
-      <LoginForm demoEmail={demo.email} demoPassword={demo.password} />
+      <LoginForm
+        demoEmail={demo.email}
+        demoPassword={demo.password}
+        showDemoHint={process.env.NODE_ENV !== "production"}
+      />
     </Suspense>
   );
 }
