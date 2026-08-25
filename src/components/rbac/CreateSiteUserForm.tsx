@@ -11,7 +11,12 @@ import {
   type AppRole,
 } from "@/lib/rbac/types";
 
-const ROLES: AppRole[] = ["investigator", "coordinator", "monitor"];
+const ROLES: AppRole[] = [
+  "investigator",
+  "sub_investigator",
+  "coordinator",
+  "monitor",
+];
 
 export function CreateSiteUserForm({ onCreated }: { onCreated?: () => void }) {
   const [email, setEmail] = useState("");

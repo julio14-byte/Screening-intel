@@ -22,10 +22,10 @@ export function InclusionApprovalPanel({
   const [pending, startTransition] = useTransition();
 
   return (
-    <RoleGuard allowedRoles={["investigator"]}>
+    <RoleGuard allowedRoles={["investigator", "sub_investigator"]}>
       <Card className="mt-6">
         <CardHeader
-          title="Aprobación médica (Investigador Principal)"
+          title="Aprobación médica (Investigador / Sub-investigador)"
           description="Registra la firma / aprobación del criterio de inclusión en la bitácora inmutable."
           actions={<ShieldCheck className="h-4 w-4 text-violet-500" aria-hidden />}
         />

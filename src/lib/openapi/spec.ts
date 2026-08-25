@@ -1,6 +1,6 @@
 import type { OpenAPIV3 } from "openapi-types";
 
-const APP_ROLES = ["investigator", "coordinator", "monitor"];
+const APP_ROLES = ["investigator", "sub_investigator", "coordinator", "monitor"];
 
 const EXAMPLES = {
   login: { email: "demo@screening.local", password: "demo123" },

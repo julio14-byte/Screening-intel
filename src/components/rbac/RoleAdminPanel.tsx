@@ -17,7 +17,12 @@ import {
   type OrganizationMemberWithRole,
 } from "@/lib/rbac/types";
 
-const ROLES: AppRole[] = ["investigator", "coordinator", "monitor"];
+const ROLES: AppRole[] = [
+  "investigator",
+  "sub_investigator",
+  "coordinator",
+  "monitor",
+];
 
 function MemberCard({
   member,

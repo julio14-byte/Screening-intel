@@ -15,6 +15,12 @@ const ALLOWED_TRANSITIONS: Record<
     "randomized",
     "screen_failure",
   ],
+  sub_investigator: [
+    "pre_screening",
+    "screening",
+    "randomized",
+    "screen_failure",
+  ],
   coordinator: ["pre_screening", "screening", "screen_failure"],
   monitor: [],
 };
