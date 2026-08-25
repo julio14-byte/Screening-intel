@@ -101,6 +101,7 @@ const config = {
       "/api/auth/session",
       "/api/waitlist",
       "/api/webhooks/stripe",
+      "/api/openapi",
     ],
     app: {
       dashboard: "/dashboard",
@@ -115,8 +116,10 @@ const config = {
       billing: "/account/billing",
       roles: "/settings/roles",
       docs: "/docs",
+      apiDocs: "/docs/api",
     },
     apis: {
+      openApi: "/api/openapi",
       waitlist: "/api/waitlist",
       authLogin: "/api/auth/login",
       authLogout: "/api/auth/logout",
