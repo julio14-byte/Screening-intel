@@ -51,12 +51,31 @@ export function SwaggerDocs() {
         <SwaggerUI
           url="/api/openapi"
           docExpansion="list"
-          defaultModelsExpandDepth={1}
+          defaultModelRendering="example"
+          defaultModelExpandDepth={3}
+          defaultModelsExpandDepth={-1}
           tryItOutEnabled
+          requestSnippetsEnabled
           persistAuthorization
           filter
         />
       </div>
+
+      <style jsx global>{`
+        /* Request body: editor JSON visible por defecto, modelos colapsados */
+        .swagger-wrap .body-param__text,
+        .swagger-wrap textarea.body-param__text {
+          min-height: 220px;
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+          font-size: 13px;
+        }
+        .swagger-wrap .model-box-control {
+          cursor: pointer;
+        }
+        .swagger-wrap .parameters-col_description input[type="text"] {
+          min-width: 200px;
+        }
+      `}</style>
     </div>
   );
 }

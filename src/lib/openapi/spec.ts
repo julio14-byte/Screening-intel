@@ -2,6 +2,44 @@ import type { OpenAPIV3 } from "openapi-types";
 
 const APP_ROLES = ["investigator", "coordinator", "monitor"];
 
+const EXAMPLES = {
+  login: { email: "demo@screening.local", password: "demo123" },
+  waitlist: { email: "coordinador@clinica.com", source: "landing" },
+  patientImport: {
+    patients: [
+      {
+        first_name: "María",
+        last_name: "García",
+        birth_date: "1985-03-15",
+        gender: "female",
+        conditions: ["diabetes tipo 2"],
+        medications: ["metformina"],
+        laboratories: { glucosa: 110 },
+      },
+    ],
+  },
+  audit: {
+    tableName: "patients",
+    recordId: "00000000-0000-0000-0000-000000000001",
+    description: "Aprobación de criterio de inclusión por investigador principal.",
+    metadata: { protocol_id: "00000000-0000-0000-0000-000000000002", criterion: "Edad 18-75" },
+  },
+  assignRole: {
+    userId: "00000000-0000-0000-0000-000000000003",
+    role: "coordinator",
+  },
+  stripeCheckout: { planId: "pro" },
+  chat: {
+    messages: [
+      {
+        id: "msg-1",
+        role: "user",
+        parts: [{ type: "text", text: "¿Qué pacientes tienen diabetes?" }],
+      },
+    ],
+  },
+} as const;
+
 /** Especificación OpenAPI 3.0 — Screening Intelligence REST API. */
 export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
   const errorSchema: OpenAPIV3.SchemaObject = {
@@ -59,6 +97,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
             email: { type: "string", format: "email", example: "demo@screening.local" },
             password: { type: "string", format: "password", example: "demo123" },
           },
+          example: EXAMPLES.login,
         },
         LoginResponse: {
           type: "object",
@@ -82,6 +121,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
             email: { type: "string", format: "email" },
             source: { type: "string", example: "landing" },
           },
+          example: EXAMPLES.waitlist,
         },
         PatientRow: {
           type: "object",
@@ -110,6 +150,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
               items: { $ref: "#/components/schemas/PatientRow" },
             },
           },
+          example: EXAMPLES.patientImport,
         },
         PatientImportResponse: {
           type: "object",
@@ -132,6 +173,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
             metadata: { type: "object", additionalProperties: true },
             userId: { type: "string", format: "uuid", nullable: true },
           },
+          example: EXAMPLES.audit,
         },
         AuditLog: {
           type: "object",
@@ -153,6 +195,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
             userId: { type: "string", format: "uuid" },
             role: appRoleSchema,
           },
+          example: EXAMPLES.assignRole,
         },
         Icd11SearchResult: {
           type: "object",
@@ -167,6 +210,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           properties: {
             planId: { type: "string", example: "pro" },
           },
+          example: EXAMPLES.stripeCheckout,
         },
         ChatRequest: {
           type: "object",
@@ -179,6 +223,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
               description: "Mensajes UI (Vercel AI SDK UIMessage[])",
             },
           },
+          example: EXAMPLES.chat,
         },
       },
     },
@@ -193,6 +238,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/LoginRequest" },
+                example: EXAMPLES.login,
               },
             },
           },
@@ -259,6 +305,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/ChatRequest" },
+                example: EXAMPLES.chat,
               },
             },
           },
@@ -277,6 +324,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/WaitlistRequest" },
+                example: EXAMPLES.waitlist,
               },
             },
           },
@@ -307,6 +355,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/PatientImportRequest" },
+                example: EXAMPLES.patientImport,
               },
             },
           },
@@ -386,6 +435,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/CustomAuditRequest" },
+                example: EXAMPLES.audit,
               },
             },
           },
@@ -424,6 +474,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/AssignRoleRequest" },
+                example: EXAMPLES.assignRole,
               },
             },
           },
@@ -488,6 +539,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/StripeCheckoutRequest" },
+                example: EXAMPLES.stripeCheckout,
               },
             },
           },
