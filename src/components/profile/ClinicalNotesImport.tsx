@@ -69,8 +69,8 @@ export function ClinicalNotesImport({
         Notas clínicas → perfil estructurado (IA)
       </p>
       <p className="mt-1 text-xs text-cyan-800">
-        Pegá texto libre de la consulta o el EMR. GPT-4o-mini extrae condiciones,
-        medicación y laboratorios para pre-rellenar el formulario.
+        Pegá texto libre para rellenar el formulario de condiciones, medicación
+        y laboratorios. Revisá y editá antes de guardar.
       </p>
 
       <textarea
