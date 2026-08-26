@@ -172,7 +172,8 @@ npm run mcp:icd11
 
 | Rol | Permisos |
 |-----|----------|
-| **investigator** | Protocolos, aprobaciones, randomización, gestión de roles |
+| **investigator** | Protocolos, aprobaciones, randomización, gestión de roles y facturación |
+| **sub_investigator** | Igual que PI en clínica (protocolos, randomización, aprobaciones); sin roles ni billing |
 | **coordinator** | Pacientes, screening operativo (sin marcar Apto) |
 | **monitor** | Solo lectura (CRA / auditoría farmacéutica) |
 
