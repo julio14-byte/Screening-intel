@@ -125,18 +125,58 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Nada para actualizar." }, { status: 400 });
   }
 
-  const { data: org, error } = await supabase
+  let org: {
+    id: string;
+    name: string;
+    slug: string | null;
+    portal_enabled: boolean;
+  } | null = null;
+  let updateError: { message: string; code?: string } | null = null;
+
+  const { data: userOrg, error: userUpdateError } = await supabase
     .from("organizations")
     .update(updates)
     .eq("id", membership.organization_id)
     .select("id, name, slug, portal_enabled")
     .single();
 
-  if (error) {
-    if (error.code === "23505") {
+  if (!userUpdateError && userOrg) {
+    org = userOrg;
+  } else {
+    updateError = userUpdateError;
+    try {
+      const { createSupabaseAdminClient } = await import("@/lib/supabase/server");
+      const admin = createSupabaseAdminClient();
+      const { data: adminOrg, error: adminError } = await admin
+        .from("organizations")
+        .update(updates)
+        .eq("id", membership.organization_id)
+        .select("id, name, slug, portal_enabled")
+        .single();
+      if (!adminError && adminOrg) {
+        org = adminOrg;
+        updateError = null;
+      } else if (adminError) {
+        updateError = adminError;
+      }
+    } catch {
+      /* admin no configurado */
+    }
+  }
+
+  if (updateError || !org) {
+    const err = updateError;
+    if (err?.code === "23505") {
       return NextResponse.json({ error: "Ese slug ya está en uso." }, { status: 409 });
     }
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      {
+        error:
+          err?.message ??
+          "No se pudo guardar. Verifica permisos de investigador y migración 0013.",
+      },
+      { status: 500 }
+    );
   }
 
   const { data: protocols } = await supabase

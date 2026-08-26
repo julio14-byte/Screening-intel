@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getServiceSupabase } from "@/lib/screening-services";
+import { loadPortalOrganization } from "@/lib/candidato/load-portal-org";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -10,33 +11,42 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Parámetro org requerido." }, { status: 400 });
   }
 
-  const supabase = getServiceSupabase();
-  const { data: org, error } = await supabase
-    .from("organizations")
-    .select("id, name, slug, portal_enabled")
-    .eq("slug", orgSlug)
-    .maybeSingle();
+  const portal = await loadPortalOrganization(orgSlug);
 
-  if (error || !org) {
+  if (portal.status === "not_found") {
     return NextResponse.json(
-      { error: "Centro de investigación no encontrado." },
+      { error: "Centro no encontrado. Revisá el código con tu coordinador." },
       { status: 404 }
     );
   }
 
-  if (!org.portal_enabled) {
+  if (portal.status === "portal_disabled") {
     return NextResponse.json(
-      { error: "El portal de candidatos no está activo para este centro." },
+      {
+        error:
+          "El portal de candidatos no está activo. El investigador debe activarlo y guardar en Configuración → Portal de candidatos.",
+      },
       { status: 403 }
     );
   }
 
-  const { data: protocols } = await supabase
+  if (portal.status === "error") {
+    return NextResponse.json({ error: portal.message }, { status: 503 });
+  }
+
+  const org = portal.org;
+  const supabase = await createClient();
+
+  const { data: protocols, error: protocolsError } = await supabase
     .from("protocols")
     .select("id, title, code_name, status")
     .eq("clinic_id", org.id)
     .eq("status", "active")
     .order("title");
+
+  if (protocolsError) {
+    return NextResponse.json({ error: protocolsError.message }, { status: 500 });
+  }
 
   let protocol = null;
   if (protocolCode) {

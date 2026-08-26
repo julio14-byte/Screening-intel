@@ -1,6 +1,6 @@
-import { notFound } from "next/navigation";
 import { CandidatoIntakeForm } from "@/components/candidato/CandidatoIntakeForm";
-import { getServiceSupabase } from "@/lib/screening-services";
+import { CandidatoPortalError } from "@/components/candidato/CandidatoPortalError";
+import { loadPortalOrganization } from "@/lib/candidato/load-portal-org";
 
 export default async function CandidatoSitePage({
   params,
@@ -8,17 +8,23 @@ export default async function CandidatoSitePage({
   params: Promise<{ orgSlug: string }>;
 }) {
   const { orgSlug } = await params;
-  const supabase = getServiceSupabase();
+  const result = await loadPortalOrganization(orgSlug);
 
-  const { data: org } = await supabase
-    .from("organizations")
-    .select("id, name, slug, portal_enabled")
-    .eq("slug", orgSlug.toLowerCase())
-    .maybeSingle();
-
-  if (!org || !org.portal_enabled) {
-    notFound();
+  if (result.status === "not_found") {
+    return <CandidatoPortalError kind="not_found" orgSlug={orgSlug} />;
   }
+
+  if (result.status === "portal_disabled") {
+    return <CandidatoPortalError kind="portal_disabled" orgSlug={orgSlug} />;
+  }
+
+  if (result.status === "error") {
+    return (
+      <CandidatoPortalError kind="error" orgSlug={orgSlug} detail={result.message} />
+    );
+  }
+
+  const org = result.org;
 
   return (
     <div className="space-y-6">

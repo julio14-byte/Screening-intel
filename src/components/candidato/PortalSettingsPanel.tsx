@@ -149,6 +149,9 @@ export function PortalSettingsPanel() {
       {enabled && data.links.siteUrl ? (
         <div className="rounded-xl border border-violet-100 bg-white p-5 shadow-sm space-y-4">
           <h3 className="text-sm font-semibold text-indigo-950">Links para compartir</h3>
+          <p className="text-xs text-indigo-600">
+            Los pacientes deben usar este código exacto en /candidato (o el link copiado).
+          </p>
 
           <div>
             <p className="text-xs font-medium text-indigo-600">Centro (todos los estudios)</p>

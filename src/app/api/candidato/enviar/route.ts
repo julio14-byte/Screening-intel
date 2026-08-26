@@ -46,6 +46,19 @@ export async function POST(request: Request) {
     );
   }
 
+  let supabase;
+  try {
+    supabase = getServiceSupabase();
+  } catch (e) {
+    return NextResponse.json(
+      {
+        error:
+          "El servidor no está configurado para recibir candidatos. Falta SUPABASE_SERVICE_ROLE_KEY en Vercel.",
+      },
+      { status: 503 }
+    );
+  }
+
   let body: unknown;
   try {
     body = await request.json();
@@ -60,7 +73,6 @@ export async function POST(request: Request) {
   }
 
   const data = parsed.data;
-  const supabase = getServiceSupabase();
 
   const { data: org, error: orgError } = await supabase
     .from("organizations")
