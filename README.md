@@ -298,4 +298,4 @@ Antes de producción con datos reales de pacientes: revisá políticas RLS, rot�
 
 ## Autor
 
-Desarrollado por [**julio14-byte**](https://github.com/julio14-byte) — Screening Intelligence para research sites.
+Desarrollado por [**julio14-byte**](https://github.com/julio14-byte) — Screenlane para clinical research sites.
