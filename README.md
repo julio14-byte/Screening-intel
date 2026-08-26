@@ -1,4 +1,4 @@
-# Screening Intelligence
+# Screenlane
 
 Plataforma **HealthTech** para **research sites** y clínicas de investigación. Optimiza el **pre-screening**, el **matching** paciente–protocolo y el **re-matching** cuando un paciente cae en screen failure — con trazabilidad clínica, RBAC y asistente IA.
 
