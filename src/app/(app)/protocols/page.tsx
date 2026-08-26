@@ -26,7 +26,7 @@ export default function ProtocolsPage() {
     <>
       <PageHeader
         title="Protocol Matcher"
-        description="Protocolos de estudio con criterios estructurados. Seleccioná uno para cruzarlo contra la base de pacientes."
+        description="Protocolos con criterios estructurados. Seleccioná uno para cruzarlo contra pacientes."
         actions={
           <RoleGuard permission="protocols:write">
             <Button onClick={() => setModalOpen(true)}>
@@ -52,9 +52,9 @@ export default function ProtocolsPage() {
         <div className="space-y-3">
           {protocols.map((protocol) => (
             <Card key={protocol.id}>
-              <div className="flex flex-wrap items-start justify-between gap-3 p-4">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0 w-full">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-slate-600">
                       {protocol.code_name}
                     </span>
@@ -69,17 +69,18 @@ export default function ProtocolsPage() {
                       {protocol.status === "active" ? "Activo" : "Cerrado"}
                     </span>
                   </div>
-                  <h2 className="mt-1.5 text-sm font-semibold text-slate-900">
+                  <h2 className="mt-1.5 text-sm font-semibold text-slate-900 break-words">
                     {protocol.title}
                   </h2>
                   <div className="mt-2">
                     <CriteriaSummary protocol={protocol} />
                   </div>
                 </div>
-                <div className="flex shrink-0 items-center gap-2">
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:shrink-0 sm:flex-row sm:items-center">
                   <RoleGuard permission="protocols:write">
                     <Button
                       variant="secondary"
+                      className="w-full justify-center sm:w-auto"
                       onClick={() =>
                         setProtocolStatus(
                           protocol.id,
@@ -100,10 +101,14 @@ export default function ProtocolsPage() {
                       )}
                     </Button>
                   </RoleGuard>
-                  <Link href={`/protocols/${protocol.id}/match`}>
-                    <Button>
+                  <Link
+                    href={`/protocols/${protocol.id}/match`}
+                    className="w-full sm:w-auto"
+                  >
+                    <Button className="w-full justify-center sm:w-auto">
                       <Target className="h-4 w-4" aria-hidden />
-                      Ejecutar matching
+                      <span className="sm:hidden">Matching</span>
+                      <span className="hidden sm:inline">Ejecutar matching</span>
                     </Button>
                   </Link>
                 </div>

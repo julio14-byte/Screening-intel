@@ -6,8 +6,8 @@ function Chip({ text, tone }: { text: string; tone: "in" | "ex" }) {
     <span
       className={
         tone === "in"
-          ? "rounded bg-emerald-50 px-1.5 py-0.5 text-[11px] font-medium text-emerald-700"
-          : "rounded bg-rose-50 px-1.5 py-0.5 text-[11px] font-medium text-rose-700"
+          ? "max-w-full break-words rounded bg-emerald-50 px-1.5 py-0.5 text-[11px] font-medium text-emerald-700"
+          : "max-w-full break-words rounded bg-rose-50 px-1.5 py-0.5 text-[11px] font-medium text-rose-700"
       }
     >
       {text}
