@@ -32,12 +32,6 @@ export default function DocsPage() {
             ← Landing
           </Link>
           <Link
-            href={routes.app.apiDocs}
-            className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-cyan-400/40 px-4 py-2 text-sm text-cyan-200 hover:bg-cyan-500/10"
-          >
-            Swagger API
-          </Link>
-          <Link
             href={enterHref}
             className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-4 py-2 text-sm font-semibold text-white"
           >

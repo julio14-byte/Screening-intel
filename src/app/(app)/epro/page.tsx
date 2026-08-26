@@ -30,7 +30,7 @@ export default function EproPage() {
         <Card>
           <EmptyState
             title="Sin formularios ePRO"
-            description="Todavía no hay formularios configurados para este research site. El investigador principal puede habilitarlos desde la administración del sitio."
+            description="Todavía no hay formularios configurados para este clinical research site. El investigador principal puede habilitarlos desde la administración del sitio."
           />
         </Card>
       ) : (

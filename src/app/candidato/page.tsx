@@ -72,7 +72,7 @@ export default function CandidatoHubPage() {
       </form>
 
       <p className="text-xs text-indigo-500">
-        Coordinadores de research sites:{" "}
+        Coordinadores de clinical research sites:{" "}
         <a href="/login" className="text-violet-600 underline">
           iniciar sesión aquí
         </a>

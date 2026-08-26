@@ -54,7 +54,7 @@ export function AppSidebar({
               {config.app.name}
             </span>
             <span className="block text-[11px] text-violet-300">
-              Research Sites
+              {config.brand.tagline}
             </span>
           </span>
         </Link>
@@ -98,7 +98,7 @@ export function AppSidebar({
       <div className="border-t border-white/10 p-4">
         <p className="flex items-center gap-1.5 text-[11px] text-violet-400">
           <ClipboardList className="h-3.5 w-3.5 shrink-0" aria-hidden />
-          {role ? APP_ROLE_LABELS[role] : "Research site"}
+          {role ? APP_ROLE_LABELS[role] : "Clinical research site"}
         </p>
       </div>
     </aside>

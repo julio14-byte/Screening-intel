@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { OrganizationRow } from "./plans";
 
-/** Organización principal del usuario (Fase 1: un research site por owner). */
+/** Organización principal del usuario (Fase 1: un clinical research site por owner). */
 export async function getOrganizationForUser(
   userId: string
 ): Promise<OrganizationRow | null> {

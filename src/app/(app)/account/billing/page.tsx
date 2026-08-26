@@ -88,7 +88,7 @@ export default async function BillingPage({
               <dd className="font-medium break-all sm:text-right">{user.email}</dd>
             </div>
             <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:gap-4">
-              <dt className="text-slate-500">Research site</dt>
+              <dt className="text-slate-500">Clinical research site</dt>
               <dd className="font-medium sm:text-right">
                 {organization?.name ?? "—"}
               </dd>

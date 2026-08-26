@@ -1,6 +1,6 @@
 import config from "@/config";
 
-/** Límites por plan — Fase 1 SaaS (research sites). */
+/** Límites por plan — Fase 1 SaaS (clinical research sites). */
 export const SAAS_PLAN_LIMITS = {
   free: { patientLimit: 50, protocolLimit: 3, userLimit: 1 },
   starter: { patientLimit: 50, protocolLimit: 3, userLimit: 1 },

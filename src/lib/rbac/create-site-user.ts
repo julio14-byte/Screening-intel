@@ -18,7 +18,7 @@ export class CreateSiteUserError extends Error {
 }
 
 /**
- * Crea un usuario en Supabase Auth y lo vincula al research site del investigador.
+ * Crea un usuario en Supabase Auth y lo vincula al clinical research site del investigador.
  * Requiere SUPABASE_SERVICE_ROLE_KEY (solo servidor).
  */
 export async function createSiteUser(

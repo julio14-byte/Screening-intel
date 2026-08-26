@@ -63,7 +63,7 @@ export function DashboardSidebar({
                 {config.app.name}
               </span>
               <span className="block text-[11px] text-violet-300">
-                Research Sites
+                {config.brand.tagline}
               </span>
             </span>
           </Link>

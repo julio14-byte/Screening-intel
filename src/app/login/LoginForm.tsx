@@ -87,7 +87,7 @@ export function LoginForm({
             Screening Intelligence
           </h1>
           <p className="mt-1 text-sm text-violet-200">
-            Acceso de prueba para el equipo de research
+            Acceso de prueba para el equipo del clinical research site
           </p>
         </div>
 

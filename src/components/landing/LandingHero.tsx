@@ -46,7 +46,7 @@ export function LandingHero() {
             href="#pricing"
             className="text-sm font-medium text-violet-300 underline-offset-4 hover:text-white hover:underline"
           >
-            Ver planes para research sites
+            Ver planes para clinical research sites
           </a>
         </div>
         <p className="mt-3 text-xs text-violet-400 sm:text-sm">

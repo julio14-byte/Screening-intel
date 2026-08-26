@@ -59,7 +59,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
       title: "Screening Intelligence API",
       version: "1.0.0",
       description:
-        "API REST de Screening Intelligence (HealthTech / research sites). " +
+        "API REST de Screening Intelligence (HealthTech / clinical research sites). " +
         "La mayoría de endpoints requieren sesión Supabase vía cookies (`sb-*`). " +
         "Iniciá sesión con `POST /api/auth/login` desde el mismo navegador antes de probar endpoints protegidos en Swagger UI.",
       contact: {

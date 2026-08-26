@@ -1,4 +1,4 @@
-/** Roles clínicos del research site (alineado con enum `app_role` en Postgres). */
+/** Roles clínicos del clinical research site (alineado con enum `app_role` en Postgres). */
 export type AppRole =
   | "investigator"
   | "sub_investigator"
