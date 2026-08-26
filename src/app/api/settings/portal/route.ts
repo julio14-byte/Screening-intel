@@ -5,6 +5,7 @@ import {
   requirePermission,
 } from "@/lib/rbac/require-permission";
 import { portalLinksForOrg } from "@/lib/candidato/paths";
+import { createPortalReadClient } from "@/lib/candidato/portal-supabase";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 
@@ -54,12 +55,18 @@ export async function GET() {
     return NextResponse.json({ error: "Organización no encontrada." }, { status: 404 });
   }
 
-  const { data: protocols } = await supabase
+  const { data: protocols, error: protocolsError } = await (
+    await createPortalReadClient()
+  )
     .from("protocols")
     .select("code_name, title, status")
     .eq("clinic_id", org.id)
     .eq("status", "active")
     .order("title");
+
+  if (protocolsError) {
+    return NextResponse.json({ error: protocolsError.message }, { status: 500 });
+  }
 
   const slug = org.slug ?? "";
   const links = slug
@@ -179,7 +186,7 @@ export async function PATCH(request: Request) {
     );
   }
 
-  const { data: protocols } = await supabase
+  const { data: protocols } = await (await createPortalReadClient())
     .from("protocols")
     .select("code_name")
     .eq("clinic_id", org.id)

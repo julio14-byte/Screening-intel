@@ -1,3 +1,4 @@
+import { createPortalReadClient } from "@/lib/candidato/portal-supabase";
 import { createClient } from "@/lib/supabase/server";
 
 export type PortalOrgLoadResult =
@@ -23,7 +24,7 @@ export async function loadPortalOrganization(
   }
 
   try {
-    const supabase = await createClient();
+    const supabase = await createPortalReadClient();
 
     const { data, error } = await supabase
       .from("organizations")

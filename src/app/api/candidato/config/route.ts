@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { loadPortalOrganization } from "@/lib/candidato/load-portal-org";
-import { createClient } from "@/lib/supabase/server";
+import { createPortalReadClient } from "@/lib/candidato/portal-supabase";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
   }
 
   const org = portal.org;
-  const supabase = await createClient();
+  const supabase = await createPortalReadClient();
 
   const { data: protocols, error: protocolsError } = await supabase
     .from("protocols")

@@ -1,7 +1,7 @@
 import { CandidatoIntakeForm } from "@/components/candidato/CandidatoIntakeForm";
 import { CandidatoPortalError } from "@/components/candidato/CandidatoPortalError";
 import { loadPortalOrganization } from "@/lib/candidato/load-portal-org";
-import { createClient } from "@/lib/supabase/server";
+import { createPortalReadClient } from "@/lib/candidato/portal-supabase";
 
 export default async function CandidatoProtocolPage({
   params,
@@ -26,7 +26,7 @@ export default async function CandidatoProtocolPage({
   }
 
   const org = result.org;
-  const supabase = await createClient();
+  const supabase = await createPortalReadClient();
 
   const { data: protocol } = await supabase
     .from("protocols")
