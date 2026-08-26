@@ -32,7 +32,7 @@ export async function createCheckoutSession({
   const organization = await getOrganizationForUser(user.id);
   if (!organization) {
     throw new StripeCheckoutError(
-      "No se encontró tu research site. Vuelve a iniciar sesión.",
+      "No se encontró tu clinical research site. Vuelve a iniciar sesión.",
       400
     );
   }

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import config from "@/config";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Screening Intelligence · Research Sites",
+  title: `Screening Intelligence · ${config.brand.tagline}`,
   description:
     "Pre-screening y re-matching de pacientes para protocolos de investigación clínica",
 };

@@ -64,6 +64,8 @@ const config = {
   brand: {
     primary: "#7c3aed",
     logoText: "Screening Intelligence",
+    /** Subtítulo bajo el logo (nav, sidebar, metadata). */
+    tagline: "Clinical Research Sites",
     logoSrc: null as string | null,
     radius: "0.75rem",
   },
@@ -163,7 +165,7 @@ const config = {
       { label: "Entrar", href: "#entrar" },
     ],
     hero: {
-      eyebrow: "Research sites · Pre-screening clínico",
+      eyebrow: "Clinical research sites · Pre-screening clínico",
       title: "Encuentra candidatos al protocolo correcto, más rápido.",
       subtitle:
         "Pre-screening y re-matching de pacientes para protocolos de investigación clínica.",
@@ -171,7 +173,7 @@ const config = {
     enterApp: {
       eyebrow: "Acceso",
       title: "¿Listo para usar la app?",
-      subtitle: "Inicia sesión con tu cuenta de research site.",
+      subtitle: "Inicia sesión con tu cuenta de clinical research site.",
     },
     problem: {
       eyebrow: "El problema",
@@ -182,7 +184,7 @@ const config = {
         {
           icon: "Timer",
           title: "Screening lento",
-          body: "Revisar criterios uno por uno contra cada paciente consume días del equipo de research.",
+          body: "Revisar criterios uno por uno contra cada paciente consume días del equipo del clinical research site.",
         },
         {
           icon: "FileSpreadsheet",
@@ -200,7 +202,7 @@ const config = {
       eyebrow: "Plataforma",
       title: "Todo el funnel de screening en un solo lugar.",
       subtitle:
-        "Diseñado para coordinadores de research sites con protocolos activos y cohortes en crecimiento.",
+        "Diseñado para coordinadores de clinical research sites con protocolos activos y cohortes en crecimiento.",
       items: [
         {
           icon: "Users",
@@ -231,7 +233,7 @@ const config = {
     },
     faq: {
       eyebrow: "Preguntas frecuentes",
-      title: "Lo que preguntan los research sites.",
+      title: "Lo que preguntan los clinical research sites.",
       items: [
         {
           q: "¿Necesito integrar con mi EHR?",
@@ -247,7 +249,7 @@ const config = {
         },
         {
           q: "¿Los datos están aislados por sitio?",
-          a: "Sí. Cada research site es una organización con RLS en Supabase; solo tu equipo ve tus pacientes y protocolos.",
+          a: "Sí. Cada clinical research site es una organización con RLS en Supabase; solo tu equipo ve tus pacientes y protocolos.",
         },
       ],
     },
@@ -259,7 +261,7 @@ const config = {
         {
           quote:
             "Dejamos de perder candidatos en hojas de cálculo. El matcher nos dice en minutos quién califica.",
-          author: "Coordinadora de research",
+          author: "Coordinadora de clinical research site",
           role: "Site piloto · Oncología",
         },
         {
@@ -272,13 +274,13 @@ const config = {
           quote:
             "El asistente IA acelera la revisión de criterios de exclusión sin abrir cada protocolo completo.",
           author: "Study coordinator",
-          role: "Research site regional",
+          role: "Clinical research site regional",
         },
       ],
     },
     finalCta: {
       eyebrow: "Tu turno",
-      title: "Empieza el trial en tu research site.",
+      title: "Empieza el trial en tu clinical research site.",
       subtitle:
         "Crea tu cuenta, registra pacientes y activa tu primer protocolo en la misma tarde.",
       cta: { label: "Entrar a la app", href: "/login?from=/dashboard" },
@@ -294,7 +296,7 @@ const config = {
       placeholder: "tu@researchsite.com",
     },
     footer: {
-      tagline: "Pre-screening inteligente para research sites.",
+      tagline: "Pre-screening inteligente para clinical research sites.",
       links: [
         { label: "Precios", href: "#pricing" },
         { label: "Waitlist", href: "#waitlist" },
@@ -306,7 +308,7 @@ const config = {
   pricing: {
     eyebrow: "Suscripciones",
     title: "Elige tu plan",
-    subtitle: "Free para empezar. Pro y Pro+ para research sites en crecimiento.",
+    subtitle: "Free para empezar. Pro y Pro+ para clinical research sites en crecimiento.",
     plans: [
       {
         id: "free",

@@ -15,9 +15,9 @@ export default function CandidatoLayout({ children }: { children: ReactNode }) {
           </Link>
           <Link
             href={config.auth.loginUrl}
-            className="text-xs text-violet-600 hover:text-violet-800"
+            className="shrink-0 rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:from-cyan-400 hover:to-violet-400 sm:text-sm"
           >
-            Acceso coordinadores
+            Entrar
           </Link>
         </div>
       </header>

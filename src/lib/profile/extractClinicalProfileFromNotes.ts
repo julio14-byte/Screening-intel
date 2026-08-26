@@ -57,7 +57,7 @@ export async function extractClinicalProfileFromNotes(
         {
           role: "system",
           content:
-            "Sos un asistente clínico para research sites. Extraé de notas en español " +
+            "Sos un asistente clínico para clinical research sites. Extraé de notas en español " +
             "condiciones, medicación y laboratorios numéricos. " +
             "Usá términos clínicos claros (ej. 'hipertensión arterial', 'metformina'). " +
             "No inventes datos que no estén en el texto. " +

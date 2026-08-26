@@ -77,7 +77,7 @@ export async function createSiteUserAction(input: {
     if (!organizationId) {
       return {
         ok: false,
-        error: "No se encontró la organización del research site.",
+        error: "No se encontró la organización del clinical research site.",
       };
     }
 
