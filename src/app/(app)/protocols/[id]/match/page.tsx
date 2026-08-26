@@ -51,9 +51,9 @@ export default function ProtocolMatchPage({
       />
 
       <Card className="mb-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 p-3">
+        <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">
           <CriteriaSummary protocol={protocol} />
-          <div className="flex items-center gap-4 text-xs text-slate-600">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 sm:gap-4">
             <span className="flex items-center gap-1.5">
               <VerdictDot verdict="eligible" />
               {counts.eligible} cumplen

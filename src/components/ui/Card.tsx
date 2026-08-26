@@ -30,14 +30,14 @@ export function CardHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-violet-100 bg-gradient-to-r from-indigo-50/50 to-violet-50/30 px-4 py-3">
-      <div>
-        <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
+    <div className="flex flex-col gap-2 border-b border-violet-100 bg-gradient-to-r from-indigo-50/50 to-violet-50/30 px-4 py-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+      <div className="min-w-0">
+        <h2 className="text-sm font-semibold text-slate-900 break-words">{title}</h2>
         {description ? (
-          <p className="mt-0.5 text-xs text-slate-500">{description}</p>
+          <p className="mt-0.5 text-xs text-slate-500 break-words">{description}</p>
         ) : null}
       </div>
-      {actions}
+      {actions ? <div className="shrink-0 self-start">{actions}</div> : null}
     </div>
   );
 }
