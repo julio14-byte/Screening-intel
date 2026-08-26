@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: `Screening Intelligence · ${config.brand.tagline}`,
+  title: `${config.app.name} · ${config.brand.tagline}`,
   description:
     "Pre-screening y re-matching de pacientes para protocolos de investigación clínica",
 };
