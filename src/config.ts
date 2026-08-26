@@ -4,9 +4,9 @@
  */
 const config = {
   app: {
-    name: "Screening Intelligence",
+    name: "Screenlane",
     description:
-      "Pre-screening y re-matching de pacientes para protocolos de investigación clínica.",
+      "Pre-screening y re-matching de pacientes para protocolos de investigación clínica en clinical research sites.",
     domain: "screening-intel.vercel.app",
     locale: "es",
     defaultUrl: "http://localhost:3000",
@@ -63,7 +63,7 @@ const config = {
 
   brand: {
     primary: "#7c3aed",
-    logoText: "Screening Intelligence",
+    logoText: "Screenlane",
     /** Subtítulo bajo el logo (nav, sidebar, metadata). */
     tagline: "Clinical Research Sites",
     logoSrc: null as string | null,

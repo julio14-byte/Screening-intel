@@ -4,7 +4,7 @@
 export const productDocs = {
   title: "Documentación",
   subtitle:
-    "Guía rápida para coordinadores de clinical research sites que usan Screening Intelligence.",
+    "Guía rápida para coordinadores de clinical research sites que usan Screenlane.",
   sections: [
     {
       id: "inicio",

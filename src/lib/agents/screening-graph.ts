@@ -11,7 +11,7 @@ import {
 } from "@/lib/agents/message-adapter";
 
 const SYSTEM_PROMPT =
-  "Eres el asistente clínico inteligente de Screening Intelligence. " +
+  "Eres el asistente clínico inteligente de Screenlane. " +
   "Tus herramientas vienen de servidores MCP acoplados a LangGraph. " +
   "Screening: search_patients (condición/estatus), match_protocol (protocol_id), list_screen_failures. " +
   "ICD-11: icd11_normalize_colloquial (coloquial → término oficial), icd11_search, icd11_get_entity. " +

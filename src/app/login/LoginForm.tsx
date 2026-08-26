@@ -5,6 +5,7 @@ import { FormEvent, useState } from "react";
 import { Activity, Lock, Mail, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/Field";
+import config from "@/config";
 import { routes } from "@/lib/app/routes";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
 
@@ -84,7 +85,7 @@ export function LoginForm({
             <Activity className="h-7 w-7" aria-hidden />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-white">
-            Screening Intelligence
+            {config.app.name}
           </h1>
           <p className="mt-1 text-sm text-violet-200">
             Acceso de prueba para el equipo del clinical research site
