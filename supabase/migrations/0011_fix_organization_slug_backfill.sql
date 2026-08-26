@@ -1,15 +1,12 @@
 -- =============================================================================
--- Portal de candidatos (pre-screen público) — rutas en español /candidato/*
+-- Reparación: slugs duplicados en organizations (error 23505 slug=demo)
 -- =============================================================================
--- Ejecutar después de 0007_rbac.sql (y 0008 si aplica tenant RLS)
+-- Ejecutar si 0009_patient_portal.sql falló en el backfill de slug.
+-- Idempotente: solo asigna slug a orgs sin slug válido.
 
 alter table public.organizations
   add column if not exists portal_enabled boolean not null default false;
 
-comment on column public.organizations.portal_enabled is
-  'Si true, el link público /candidato/[slug] acepta envíos de candidatos.';
-
--- Backfill slug único (evita duplicate key cuando varios sites tienen el mismo nombre)
 with candidates as (
   select
     id,
@@ -54,11 +51,11 @@ set slug = r.new_slug
 from resolved r
 where o.id = r.id;
 
--- Fallback si quedó algún slug vacío
 update public.organizations
 set slug = 'site-' || left(id::text, 8)
 where slug is null or trim(slug) = '';
 
+-- Resto de 0009 si aún no existe la tabla de submissions
 create table if not exists public.pre_screen_submissions (
   id                  uuid primary key default gen_random_uuid(),
   organization_id     uuid not null references public.organizations (id) on delete cascade,
@@ -126,5 +123,3 @@ create policy "tenant_update_pre_screen"
         and om.user_id = auth.uid()
     )
   );
-
--- Inserción pública solo vía service role en API
