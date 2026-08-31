@@ -81,6 +81,7 @@ export default function ProtocolMatchPage({
             results={results}
             existing={existing}
             onEnroll={enroll}
+            protocol={protocol}
           />
         )}
       </Card>

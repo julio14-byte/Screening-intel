@@ -13,7 +13,8 @@ import {
 } from "lucide-react";
 import { ScoreBar } from "@/components/ui/ScoreBar";
 import { VerdictBadge } from "@/components/ui/VerdictBadge";
-import type { CriterionResult, MatchResult, Screening } from "@/lib/types";
+import { MatchRationalePanel } from "@/components/matching/MatchRationalePanel";
+import type { CriterionResult, MatchResult, Protocol, Screening } from "@/lib/types";
 import {
   calculateAge,
   cn,
@@ -103,14 +104,49 @@ function EnrollAction({
   );
 }
 
+function ExpandedDetails({
+  result,
+  protocol,
+}: {
+  result: MatchResult;
+  protocol: Pick<Protocol, "code_name" | "title">;
+}) {
+  return (
+    <div className="space-y-3">
+      <DetailsList details={result.details} />
+      <MatchRationalePanel
+        compact
+        input={{
+          protocol: {
+            code_name: protocol.code_name,
+            title: protocol.title,
+          },
+          patient: {
+            first_name: result.patient.first_name,
+            last_name: result.patient.last_name,
+            birth_date: result.patient.birth_date,
+            gender: result.patient.gender,
+          },
+          verdict: result.verdict,
+          score: result.score,
+          details: result.details,
+          context: "match",
+        }}
+      />
+    </div>
+  );
+}
+
 export function MatchResultsTable({
   results,
   existing,
   onEnroll,
+  protocol,
 }: {
   results: MatchResult[];
   existing: Map<string, Screening>;
   onEnroll: (result: MatchResult) => Promise<void>;
+  protocol: Pick<Protocol, "code_name" | "title">;
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [enrolling, setEnrolling] = useState<string | null>(null);
@@ -191,7 +227,7 @@ export function MatchResultsTable({
               </div>
               {isOpen ? (
                 <div className="mt-3 border-t border-violet-100 pt-3">
-                  <DetailsList details={result.details} />
+                  <ExpandedDetails result={result} protocol={protocol} />
                 </div>
               ) : null}
             </li>
@@ -266,7 +302,7 @@ export function MatchResultsTable({
                   {isOpen ? (
                     <tr className="border-b border-violet-50 bg-violet-50/30">
                       <td colSpan={6} className="px-10 py-2">
-                        <DetailsList details={result.details} />
+                        <ExpandedDetails result={result} protocol={protocol} />
                       </td>
                     </tr>
                   ) : null}
