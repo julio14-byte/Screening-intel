@@ -73,6 +73,7 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | `/candidato` | Portal público de pre-registro (pacientes) |
 | `/candidatos` | Inbox de leads del portal (coordinadores) |
 | `/settings/portal` | Configuración del portal (investigator) |
+| `/settings/ehr` | Integración EHR — sync batch y webhooks (investigator) |
 | `/chat` | Asistente clínico IA |
 | `/epro` | Formularios ePRO |
 | `/settings/roles` | Creación de usuarios y roles (investigator) |
@@ -133,6 +134,7 @@ supabase/migrations/0010_sub_investigator.sql      ← ejecutar solo (enum)
 supabase/migrations/0012_sub_investigator_rbac.sql ← después de 0010
 supabase/migrations/0013_portal_public_read.sql
 supabase/migrations/0014_fix_protocols_portal_grants.sql
+supabase/migrations/0015_ehr_integration.sql
 ```
 
 Si el slug `demo` falló en 0009, aplicá también `0011_fix_organization_slug_backfill.sql`.
@@ -254,6 +256,51 @@ El resto requiere sesión Supabase (cookies).
 
 ---
 
+## Integración EHR
+
+Screenlane soporta conectar un **EHR** (historia clínica electrónica) en dos fases:
+
+| Fase | Endpoint | Uso |
+|------|----------|-----|
+| **1 — Batch** | `POST /api/ehr/sync` | Sync 1–2 veces al día. Upsert por `ehr_patient_id` + perfil clínico. Requiere sesión + `patients:write`. |
+| **2 — Tiempo real** | `POST /api/webhooks/ehr` | Labs o diagnósticos nuevos → actualiza perfil y recalcula matching/re-match. Firma HMAC. |
+
+Configuración en **`/settings/ehr`** (investigator): habilitar webhooks, copiar URL, organization ID y secreto.
+
+**Webhook — headers:**
+
+```http
+X-Organization-Id: <uuid del site>
+X-EHR-Signature: sha256=<hmac-sha256 del body>
+Content-Type: application/json
+```
+
+**Batch — ejemplo de body:**
+
+```json
+{
+  "ehr_source": "epic",
+  "patients": [
+    {
+      "ehr_patient_id": "EHR-12345",
+      "first_name": "María",
+      "last_name": "García",
+      "birth_date": "1975-03-12",
+      "gender": "female",
+      "conditions": ["Diabetes tipo 2"],
+      "medications": ["Metformina"],
+      "laboratories": { "glucosa": 128, "hba1c": 7.1 }
+    }
+  ]
+}
+```
+
+También se acepta un **Bundle FHIR** en webhooks (`resourceType: "Bundle"` con Patient, Condition, Observation).
+
+Migración: `0015_ehr_integration.sql`
+
+---
+
 ## SaaS y Stripe
 
 - Trial 14 días por organization
@@ -297,6 +344,7 @@ src/
     audit/                   # Audit trail
     agents/                  # LangGraph + MCP
     candidato/               # Portal público
+    ehr/                     # Sync batch + webhook EHR
     openapi/                 # Spec OpenAPI
   plugins/stripe/            # Checkout, portal, paywall
 mcp/                         # Servidores MCP (screening, icd11)

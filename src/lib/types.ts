@@ -17,6 +17,9 @@ export interface Patient {
   last_name: string;
   birth_date: string; // ISO date (YYYY-MM-DD)
   gender: Gender;
+  ehr_patient_id?: string | null;
+  ehr_source?: string | null;
+  ehr_last_synced_at?: string | null;
   created_at: string;
 }
 

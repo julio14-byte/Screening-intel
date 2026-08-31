@@ -75,12 +75,15 @@ export const WRITE_API_PREFIXES = [
   "/api/rbac",
   "/api/candidatos",
   "/api/settings/portal",
+  "/api/settings/ehr",
+  "/api/ehr/sync",
 ] as const;
 
 /** Rutas de app restringidas por rol. */
 export const ROLE_RESTRICTED_ROUTES: Record<string, AppRole[]> = {
   "/settings/roles": ["investigator"],
   "/settings/portal": ["investigator"],
+  "/settings/ehr": ["investigator"],
   "/account/billing": ["investigator"],
 };
 

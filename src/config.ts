@@ -100,6 +100,7 @@ const config = {
       "/settings",
       "/settings/roles",
       "/settings/portal",
+      "/settings/ehr",
       "/candidatos",
       "/semaforos",
       "/devices",
@@ -110,6 +111,7 @@ const config = {
       "/api/auth/session",
       "/api/waitlist",
       "/api/webhooks/stripe",
+      "/api/webhooks/ehr",
       "/api/openapi",
       "/api/candidato/config",
       "/api/candidato/enviar",
@@ -131,6 +133,7 @@ const config = {
       billing: "/account/billing",
       roles: "/settings/roles",
       portalSettings: "/settings/portal",
+      ehrSettings: "/settings/ehr",
       candidatos: "/candidatos",
       docs: "/docs",
       apiDocs: "/docs/api",
@@ -145,6 +148,8 @@ const config = {
       stripeCheckout: "/api/stripe/checkout",
       stripePortal: "/api/stripe/portal",
       stripeWebhook: "/api/webhooks/stripe",
+      ehrSync: "/api/ehr/sync",
+      ehrWebhook: "/api/webhooks/ehr",
       icd11Search: "/api/icd11/search",
       icd11Normalize: "/api/icd11/normalize",
     },
@@ -237,7 +242,7 @@ const config = {
       items: [
         {
           q: "¿Necesito integrar con mi EHR?",
-          a: "El MVP funciona como registro independiente. Puedes importar datos manualmente o vía APIs en fases posteriores.",
+          a: "No para arrancar: registro manual, CSV y portal de candidatos. Fase 1 (sync batch) y Fase 2 (webhook en tiempo real) están disponibles en Configuración → Integración EHR.",
         },
         {
           q: "¿Cuánto dura el trial?",
