@@ -1,11 +1,24 @@
 # Screenlane
 
-Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-screening**, el **matching** paciente–protocolo y el **re-matching** cuando un paciente cae en screen failure — con portal de candidatos, trazabilidad clínica, RBAC y asistente IA.
+Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-screening**, el **matching** paciente–protocolo y el **re-matching** cuando un paciente cae en screen failure — con portal de candidatos, **integración EHR** (batch + webhook), trazabilidad clínica, RBAC y asistente IA.
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-000?style=flat&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?style=flat&logo=supabase&logoColor=white)](https://supabase.com/)
 [![Stripe](https://img.shields.io/badge/Stripe-SaaS-635BFF?style=flat&logo=stripe&logoColor=white)](https://stripe.com/)
+
+---
+
+## Novedades recientes
+
+| Feature | Descripción |
+|---------|-------------|
+| **Integración EHR** | Fase 1: sync batch (`POST /api/ehr/sync`). Fase 2: webhook en tiempo real con HMAC (`POST /api/webhooks/ehr`). Config en `/settings/ehr`. |
+| **Justificación clínica IA** | Texto en español que explica el veredicto del matching sin alterar la elegibilidad (`POST /api/matching/rationale`). |
+| **Portal de candidatos** | Pre-registro público en `/candidato`, inbox en `/candidatos` y settings en `/settings/portal`. |
+| **Re-Match nativo** | Propone protocolos alternativos tras un screen failure; se refresca automáticamente cuando el EHR envía labs o diagnósticos nuevos. |
+| **Sub-investigator** | Rol clínico con permisos de PI excepto roles y facturación. |
+| **Screenlane** | Rebrand completo del producto (antes Screening Intelligence). |
 
 ---
 
@@ -21,7 +34,7 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | **Matching explicable** | Motor de reglas con semáforo 🟢🟡🔴 + detalle criterio por criterio + **justificación clínica IA** que narra el resultado sin cambiar la elegibilidad |
 | **IA con herramientas reales** | LangGraph + MCP: buscar pacientes, matchear protocolos, screen failures e ICD-11 — no solo chat genérico |
 | **RBAC + audit trail** | Roles clínicos (investigator, sub-investigator, coordinator, monitor) y bitácora orientada a 21 CFR Part 11 |
-| **LATAM-first, sin EHR obligatorio** | UI en español; el MVP funciona con registro manual y portal — ideal para sitios que arrancan sin integración hospitalaria |
+| **LATAM-first, sin EHR obligatorio** | UI en español; el MVP funciona con registro manual y portal — **integración EHR opcional** (batch + webhook) cuando el site conecta su hospital |
 | **SaaS self-serve** | Trial 14 días, planes por volumen y Stripe — pensado para sitios medianos, no solo enterprise |
 
 **En una frase:** del candidato al protocolo correcto, sin perder pacientes tras un screen failure.
@@ -39,6 +52,7 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | **Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure |
 | **Re-Match** | Propone protocolos alternativos para pacientes con screen failure |
 | **Portal candidatos** | Pre-registro público (`/candidato`) + inbox (`/candidatos`) + settings del portal |
+| **Integración EHR** | Sync batch + webhook FHIR/HMAC; upsert por `ehr_patient_id`; recálculo de matching y re-match |
 | **Asistente IA** | Chat clínico (LangGraph + GPT-4o-mini) con herramientas MCP |
 | **Audit Trail** | Bitácora inmutable alineada a 21 CFR Part 11 |
 | **RBAC clínico** | Investigator / Sub-investigator / Coordinator / Monitor |
@@ -110,12 +124,12 @@ Mínimo para desarrollo:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...          # creación de usuarios demo / admin / portal
+SUPABASE_SERVICE_ROLE_KEY=eyJ...          # demo, portal, sync EHR y webhooks
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 OPENAI_API_KEY=sk-...                     # chat IA, extracción PDF/notas, justificación matching
 ```
 
-Ver [`.env.example`](.env.example) para Stripe, ICD-11 y login demo. Guía Stripe: [`docs/STRIPE_SETUP.md`](docs/STRIPE_SETUP.md).
+Ver [`.env.example`](.env.example) para Stripe, ICD-11 y login demo. Guías: [`docs/STRIPE_SETUP.md`](docs/STRIPE_SETUP.md).
 
 ### 3. Base de datos (Supabase)
 
@@ -163,6 +177,7 @@ yarn dev
 | http://localhost:3000 | Landing |
 | http://localhost:3000/login | Login |
 | http://localhost:3000/candidato | Portal pacientes |
+| http://localhost:3000/settings/ehr | Configuración integración EHR |
 | http://localhost:3000/docs/api | Swagger UI |
 
 **Usuario demo** (auto-provisión si existe `SUPABASE_SERVICE_ROLE_KEY`):
@@ -250,6 +265,8 @@ POST /api/auth/login
 POST /api/waitlist
 GET  /api/openapi
 POST /api/candidato/enviar
+POST /api/webhooks/stripe
+POST /api/webhooks/ehr
 ```
 
 El resto requiere sesión Supabase (cookies).
@@ -297,6 +314,25 @@ Content-Type: application/json
 
 También se acepta un **Bundle FHIR** en webhooks (`resourceType: "Bundle"` con Patient, Condition, Observation).
 
+**Webhook — ejemplo de body (Fase 2):**
+
+```json
+{
+  "event_id": "evt-2026-001",
+  "event_type": "observation.created",
+  "patient": {
+    "ehr_patient_id": "EHR-12345",
+    "first_name": "María",
+    "last_name": "García",
+    "birth_date": "1975-03-12",
+    "gender": "female",
+    "laboratories": { "glucosa": 132 }
+  }
+}
+```
+
+Tablas: `ehr_sync_logs`, `ehr_webhook_events`. Columnas en `patients`: `ehr_patient_id`, `ehr_source`, `ehr_last_synced_at`.
+
 Migración: `0015_ehr_integration.sql`
 
 ---
@@ -317,7 +353,9 @@ Detalle: [`docs/STRIPE_SETUP.md`](docs/STRIPE_SETUP.md).
 
 1. Importá el repositorio en [Vercel](https://vercel.com).
 2. Configurá las variables de `.env.example`.
-3. Webhook Stripe → `https://tu-dominio/api/webhooks/stripe`
+3. Webhooks:
+   - Stripe → `https://tu-dominio/api/webhooks/stripe`
+   - EHR → `https://tu-dominio/api/webhooks/ehr`
 4. `NEXT_PUBLIC_APP_URL` → URL de producción
 
 ```bash
@@ -372,6 +410,7 @@ docs/                        # STRIPE_SETUP.md, etc.
 - RLS en PostgreSQL + RBAC clínico
 - Validación Zod en APIs críticas
 - Portal público con rate limiting y políticas RLS dedicadas
+- Webhooks EHR con firma HMAC (`X-EHR-Signature`) e idempotencia por `event_id`
 
 Antes de producción con datos reales de pacientes: revisá políticas RLS, rotá claves y completá evaluación de cumplimiento (HIPAA / GDPR según jurisdicción).
 
