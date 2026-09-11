@@ -14,7 +14,9 @@ import { useScreenings } from "@/hooks/useScreenings";
 import type { ScreeningStatus } from "@/lib/types";
 
 export default function TrackerPage() {
-  const { screenings, loading, error, updateStatus } = useScreenings();
+  const { screenings, loading, error, updateStatus } = useScreenings({
+    includeMatchDetails: false,
+  });
   const [moveError, setMoveError] = useState<string | null>(null);
 
   const handleMove = async (id: string, status: ScreeningStatus) => {

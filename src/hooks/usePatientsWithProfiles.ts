@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import { PATIENT_WITH_PROFILE_COLUMNS } from "@/lib/supabase/query-columns";
 import type {
   ClinicalProfile,
   Patient,
@@ -26,7 +27,7 @@ export function usePatientsWithProfiles() {
       const supabase = getSupabaseClient();
       const { data, error } = await supabase
         .from("patients")
-        .select("*, clinical_profiles(*)")
+        .select(PATIENT_WITH_PROFILE_COLUMNS)
         .order("last_name");
       if (error) throw error;
       const rows = (data ?? []) as unknown as PatientWithProfile[];

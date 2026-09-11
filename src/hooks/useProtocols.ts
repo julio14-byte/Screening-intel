@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import { PROTOCOL_LIST_COLUMNS } from "@/lib/supabase/query-columns";
 import { useSupabaseReady } from "@/hooks/useSupabaseReady";
 import type {
   ExclusionCriteria,
@@ -31,7 +32,7 @@ export function useProtocols() {
       const supabase = getSupabaseClient();
       const { data, error } = await supabase
         .from("protocols")
-        .select("*")
+        .select(PROTOCOL_LIST_COLUMNS)
         .order("created_at", { ascending: false });
       if (error) throw error;
       setProtocols((data ?? []) as Protocol[]);
