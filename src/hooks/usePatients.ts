@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import { PATIENT_LIST_COLUMNS } from "@/lib/supabase/query-columns";
 import { useSupabaseReady } from "@/hooks/useSupabaseReady";
 import type { Gender, Patient } from "@/lib/types";
 
@@ -25,7 +26,7 @@ export function usePatients() {
       const supabase = getSupabaseClient();
       const { data, error } = await supabase
         .from("patients")
-        .select("*")
+        .select(PATIENT_LIST_COLUMNS)
         .order("created_at", { ascending: false });
       if (error) throw error;
       setPatients((data ?? []) as Patient[]);

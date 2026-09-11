@@ -28,8 +28,17 @@ export function useProtocolMatch(protocolId: string) {
     try {
       const supabase = getSupabaseClient();
       const [protocolRes, screeningsRes] = await Promise.all([
-        supabase.from("protocols").select("*").eq("id", protocolId).single(),
-        supabase.from("screenings").select("*").eq("protocol_id", protocolId),
+        supabase
+          .from("protocols")
+          .select(
+            "id, clinic_id, title, code_name, inclusion_criteria, exclusion_criteria, status, created_at"
+          )
+          .eq("id", protocolId)
+          .single(),
+        supabase
+          .from("screenings")
+          .select("id, patient_id, protocol_id, status, match_score")
+          .eq("protocol_id", protocolId),
       ]);
       if (protocolRes.error) throw protocolRes.error;
       if (screeningsRes.error) throw screeningsRes.error;

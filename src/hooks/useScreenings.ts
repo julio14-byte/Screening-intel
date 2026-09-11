@@ -5,21 +5,23 @@ import { useRole } from "@/contexts/role-context";
 import { useSupabaseReady } from "@/hooks/useSupabaseReady";
 import { canSetScreeningStatus } from "@/lib/rbac/screening-transitions";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import {
+  SCREENING_LIST_COLUMNS,
+  SCREENING_LIST_WITH_DETAILS,
+} from "@/lib/supabase/query-columns";
 import type {
   CriterionResult,
   ScreeningStatus,
   ScreeningWithRelations,
 } from "@/lib/types";
 
-const SCREENING_SELECT =
-  "*, patients(*), protocols(id, title, code_name, status)";
-
-export function useScreenings() {
+export function useScreenings(options?: { includeMatchDetails?: boolean }) {
   const [screenings, setScreenings] = useState<ScreeningWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const supabaseReady = useSupabaseReady();
   const { role, isReadOnly } = useRole();
+  const includeMatchDetails = options?.includeMatchDetails !== false;
 
   const fetchScreenings = useCallback(async () => {
     setLoading(true);
@@ -28,7 +30,11 @@ export function useScreenings() {
       const supabase = getSupabaseClient();
       const { data, error } = await supabase
         .from("screenings")
-        .select(SCREENING_SELECT)
+        .select(
+          includeMatchDetails
+            ? SCREENING_LIST_WITH_DETAILS
+            : SCREENING_LIST_COLUMNS
+        )
         .order("updated_at", { ascending: false });
       if (error) throw error;
       setScreenings((data ?? []) as unknown as ScreeningWithRelations[]);
@@ -37,7 +43,7 @@ export function useScreenings() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [includeMatchDetails]);
 
   useEffect(() => {
     if (!supabaseReady) return;

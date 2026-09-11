@@ -18,7 +18,7 @@ export function useEproForms() {
       const supabase = getSupabaseClient();
       const { data, error } = await supabase
         .from("epro_forms")
-        .select("*")
+        .select("id, title, description, protocol_id, questions, active, created_at, updated_at")
         .eq("active", true)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -51,17 +51,23 @@ export function useEproForm(formId: string) {
     try {
       const supabase = getSupabaseClient();
       const [formRes, respRes] = await Promise.all([
-        supabase.from("epro_forms").select("*").eq("id", formId).single(),
+        supabase
+          .from("epro_forms")
+          .select(
+            "id, title, description, protocol_id, questions, active, created_at, updated_at"
+          )
+          .eq("id", formId)
+          .single(),
         supabase
           .from("epro_responses")
-          .select("*, patients(id, first_name, last_name)")
+          .select("id, form_id, patient_id, answers, submitted_at, patients(id, first_name, last_name)")
           .eq("form_id", formId)
           .order("submitted_at", { ascending: false }),
       ]);
 
       if (formRes.error) throw formRes.error;
       setForm(formRes.data as EproForm);
-      setResponses((respRes.data ?? []) as EproResponseWithPatient[]);
+      setResponses((respRes.data ?? []) as unknown as EproResponseWithPatient[]);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error al cargar ePRO");
     } finally {
