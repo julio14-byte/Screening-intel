@@ -5,7 +5,10 @@ import {
   AuthorizationError,
   requirePermission,
 } from "@/lib/rbac/require-permission";
-import type { ParsedPatientRow } from "@/lib/import/parsePatientCsv";
+import {
+  patientImportBodySchema,
+  safeParseBody,
+} from "@/lib/security/schemas";
 
 export async function POST(request: Request) {
   try {
@@ -23,12 +26,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No autenticado." }, { status: 401 });
   }
 
-  const body = (await request.json()) as { patients?: ParsedPatientRow[] };
-  const rows = body.patients ?? [];
-
-  if (!rows.length) {
-    return NextResponse.json({ error: "No hay filas para importar." }, { status: 400 });
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "JSON inválido." }, { status: 400 });
   }
+
+  const parsed = safeParseBody(patientImportBodySchema, body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
+  }
+
+  const rows = parsed.data.patients;
 
   const supabase = await createClient();
   let imported = 0;

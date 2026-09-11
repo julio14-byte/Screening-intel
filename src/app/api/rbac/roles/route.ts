@@ -8,7 +8,7 @@ import {
   AuthorizationError,
   requirePermission,
 } from "@/lib/rbac/require-permission";
-import type { AppRole } from "@/lib/rbac/types";
+import { assignRoleSchema, safeParseBody } from "@/lib/security/schemas";
 
 export async function GET() {
   try {
@@ -28,22 +28,22 @@ export async function PUT(request: Request) {
   try {
     await requirePermission("roles:manage");
 
-    const body = (await request.json()) as {
-      userId?: string;
-      role?: AppRole;
-    };
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "JSON inválido." }, { status: 400 });
+    }
 
-    if (!body.userId || !body.role) {
-      return NextResponse.json(
-        { error: "Campos requeridos: userId, role" },
-        { status: 400 }
-      );
+    const parsed = safeParseBody(assignRoleSchema, body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 });
     }
 
     const supabase = await createClient();
     const { error } = await supabase.rpc("assign_user_clinical_role", {
-      p_user_id: body.userId,
-      p_role: body.role,
+      p_user_id: parsed.data.userId,
+      p_role: parsed.data.role,
     });
 
     if (error) {

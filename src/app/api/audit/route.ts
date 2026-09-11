@@ -7,6 +7,11 @@ import {
   AuthorizationError,
   requirePermission,
 } from "@/lib/rbac/require-permission";
+import {
+  auditQuerySchema,
+  customAuditEventSchema,
+  safeParseBody,
+} from "@/lib/security/schemas";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 export async function GET(request: Request) {
@@ -18,17 +23,18 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const tableName = searchParams.get("table_name");
-  const recordId = searchParams.get("record_id");
-  const limitRaw = searchParams.get("limit");
-  const limit = limitRaw ? Number.parseInt(limitRaw, 10) : 100;
+  const parsed = safeParseBody(auditQuerySchema, {
+    table_name: searchParams.get("table_name"),
+    record_id: searchParams.get("record_id"),
+    limit: searchParams.get("limit") ?? undefined,
+  });
 
-  if (!tableName || !recordId) {
-    return NextResponse.json(
-      { error: "Parámetros requeridos: table_name, record_id" },
-      { status: 400 }
-    );
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
+
+  const { table_name: tableName, record_id: recordId, limit = 100 } =
+    parsed.data;
 
   try {
     const logs = await fetchAuditLogs({ tableName, recordId, limit });
@@ -59,23 +65,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   }
 
-  const payload = body as {
-    tableName?: string;
-    recordId?: string;
-    description?: string;
-    metadata?: Record<string, unknown>;
-    userId?: string | null;
-  };
-
-  if (!payload.tableName || !payload.recordId || !payload.description) {
-    return NextResponse.json(
-      {
-        error:
-          "Campos requeridos: tableName, recordId, description",
-      },
-      { status: 400 }
-    );
+  const parsed = safeParseBody(customAuditEventSchema, body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
+
+  const payload = parsed.data;
 
   try {
     await requirePermission("audit:write");

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { safeParseBody, waitlistBodySchema } from "@/lib/security/schemas";
 
 /** Insert público en waitlist (anon). */
 export async function POST(request: Request) {
@@ -11,12 +12,19 @@ export async function POST(request: Request) {
     );
   }
 
-  const body = (await request.json()) as { email?: string; source?: string };
-  const email = body.email?.trim().toLowerCase() ?? "";
-
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return NextResponse.json({ error: "Email inválido." }, { status: 400 });
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "JSON inválido." }, { status: 400 });
   }
+
+  const parsed = safeParseBody(waitlistBodySchema, body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
+  }
+
+  const { email, source = "landing" } = parsed.data;
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -25,7 +33,7 @@ export async function POST(request: Request) {
 
   const { error } = await supabase.from("waitlist").insert({
     email,
-    source: body.source ?? "landing",
+    source,
   });
 
   if (error) {

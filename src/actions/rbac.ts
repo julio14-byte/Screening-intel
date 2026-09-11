@@ -12,6 +12,11 @@ import {
 } from "@/lib/rbac/get-user-role";
 import { requirePermission } from "@/lib/rbac/require-permission";
 import type { AppRole, OrganizationMemberWithRole } from "@/lib/rbac/types";
+import {
+  assignRoleSchema,
+  createSiteUserSchema,
+  safeParseBody,
+} from "@/lib/security/schemas";
 
 export async function getMembersWithRolesAction(): Promise<
   | { ok: true; members: OrganizationMemberWithRole[] }
@@ -36,10 +41,15 @@ export async function assignClinicalRoleAction(input: {
   try {
     await requirePermission("roles:manage");
 
+    const parsed = safeParseBody(assignRoleSchema, input);
+    if (!parsed.success) {
+      return { ok: false, error: parsed.error };
+    }
+
     const supabase = await createClient();
     const { error } = await supabase.rpc("assign_user_clinical_role", {
-      p_user_id: input.userId,
-      p_role: input.role,
+      p_user_id: parsed.data.userId,
+      p_role: parsed.data.role,
     });
 
     if (error) throw new Error(error.message);
@@ -73,6 +83,11 @@ export async function createSiteUserAction(input: {
   try {
     const { user } = await requirePermission("roles:manage");
 
+    const parsed = safeParseBody(createSiteUserSchema, input);
+    if (!parsed.success) {
+      return { ok: false, error: parsed.error };
+    }
+
     const organizationId = await getOrganizationIdForUser(user.id);
     if (!organizationId) {
       return {
@@ -82,10 +97,10 @@ export async function createSiteUserAction(input: {
     }
 
     const result = await createSiteUser({
-      email: input.email,
-      password: input.password,
-      fullName: input.fullName,
-      clinicalRole: input.clinicalRole,
+      email: parsed.data.email,
+      password: parsed.data.password,
+      fullName: parsed.data.fullName,
+      clinicalRole: parsed.data.clinicalRole,
       organizationId,
       invitedByUserId: user.id,
     });

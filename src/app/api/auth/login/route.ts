@@ -3,6 +3,10 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getDemoCredentials } from "@/lib/auth/constants";
 import { ensureDemoPatientData } from "@/lib/auth/demo-seed";
 import { provisionDemoUserIfNeeded } from "@/lib/auth/demo-user";
+import {
+  loginBodySchema,
+  safeParseBody,
+} from "@/lib/security/schemas";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 type SessionCookie = {
@@ -21,16 +25,19 @@ function applySessionCookies(
 }
 
 export async function POST(request: NextRequest) {
-  const body = (await request.json()) as { email?: string; password?: string };
-  const email = body.email?.trim().toLowerCase() ?? "";
-  const password = body.password ?? "";
-
-  if (!email || !password) {
-    return NextResponse.json(
-      { error: "Email y contraseña requeridos." },
-      { status: 400 }
-    );
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "JSON inválido." }, { status: 400 });
   }
+
+  const parsed = safeParseBody(loginBodySchema, body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
+  }
+
+  const { email, password } = parsed.data;
 
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
