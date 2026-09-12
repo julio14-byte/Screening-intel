@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { ErrorState } from "@/components/ui/StateMessage";
 import { ConditionsEditor } from "@/components/profile/ConditionsEditor";
 import { ClinicalNotesImport } from "@/components/profile/ClinicalNotesImport";
+import { ClinicalDocumentImport } from "@/components/profile/ClinicalDocumentImport";
 import { RoleGuard } from "@/components/rbac/RoleGuard";
 import { useRole } from "@/contexts/role-context";
 import { LabsEditor } from "@/components/profile/LabsEditor";
@@ -112,7 +113,8 @@ export function ClinicalProfileEditor({
       ) : null}
 
       {canEdit ? (
-        <div className="mb-4">
+        <div className="mb-4 space-y-3">
+          <ClinicalDocumentImport onExtracted={applyNotesDraft} />
           <ClinicalNotesImport onExtracted={applyNotesDraft} />
         </div>
       ) : null}

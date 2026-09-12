@@ -22,6 +22,7 @@ Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-sc
 | **Re-Match nativo** | Propone protocolos alternativos tras un screen failure; se refresca automáticamente cuando el EHR envía labs o diagnósticos nuevos. |
 | **Sub-investigator** | Rol clínico con permisos de PI excepto roles y facturación. |
 | **Privacidad y regulaciones** | Páginas públicas `/privacidad` (HIPAA/GDPR/LatAm, 21 CFR Part 11) y `/integraciones` (ETL clínico, EHR, API). |
+| **PDF de lab / foto de receta** | Extract al expediente en `/patients/[id]`: PDF digital o foto JPEG/PNG. `POST /api/patients/profile/extract-document`. |
 | **Screenlane** | Rebrand completo del producto (antes Screening Intelligence). |
 
 ---
@@ -39,7 +40,7 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | **IA con herramientas reales** | LangGraph + MCP: buscar pacientes, matchear protocolos, screen failures e ICD-11 — no solo chat genérico |
 | **RBAC + audit trail** | Roles clínicos (investigator, sub-investigator, coordinator, monitor) y bitácora orientada a 21 CFR Part 11 |
 | **LATAM-first, sin EHR obligatorio** | UI en español; el MVP funciona con registro manual y portal — **integración EHR opcional** (batch + webhook) cuando el site conecta su hospital |
-| **ETL clínico documentado** | Extract (CSV/portal/EHR) → Transform (perfil + ICD-11 + reglas) → Load (screening y re-match), sin EHR obligatorio |
+| **ETL clínico documentado** | Extract (CSV/portal/EHR/PDF de lab/foto de receta) → Transform (perfil + ICD-11 + reglas) → Load (screening y re-match), sin EHR obligatorio |
 | **SaaS self-serve** | Trial 14 días, planes por volumen y Stripe — pensado para sitios medianos, no solo enterprise |
 
 **En una frase:** del candidato al protocolo correcto, sin perder pacientes tras un screen failure.
@@ -51,7 +52,7 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | Área | Qué hace |
 |------|----------|
 | **Patient Registry** | Alta, búsqueda e importación CSV de pacientes |
-| **Clinical Profile** | Condiciones, medicación, laboratorios + búsqueda ICD-11 + extracción IA desde notas |
+| **Clinical Profile** | Condiciones, medicación, laboratorios + ICD-11 + notas IA + **PDF de lab / foto de receta** |
 | **Protocol Matcher** | Criterios de inclusión/exclusión; extracción NLP desde PDF |
 | **Motor de elegibilidad** | Semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple + `match_score` + justificación IA |
 | **Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure |
@@ -219,6 +220,7 @@ Cada screening guarda `match_score` (0–100) y `match_details` (trazabilidad cr
 | Chat clínico | `/chat` · `POST /api/auth/chats` | GPT-4o-mini + LangGraph |
 | Extracción de protocolos PDF | `POST /api/protocols/extract` | GPT-4o-mini |
 | Perfil clínico desde notas | `POST /api/patients/profile/extract` | GPT-4o-mini |
+| PDF de laboratorio / foto de receta | `POST /api/patients/profile/extract-document` | GPT-4o-mini (+ visión en fotos) |
 | Justificación del matching | `POST /api/matching/rationale` | GPT-4o-mini |
 | Normalización ICD-11 | `GET /api/icd11/normalize` | API WHO (no LLM) |
 | Matching / Re-Match | Motor de reglas | Sin LLM |

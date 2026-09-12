@@ -64,7 +64,7 @@ export const privacyPage: TrustPage = {
       id: "ia",
       title: "Inteligencia artificial",
       paragraphs: [
-        "El matching lo decide un motor de reglas, no un LLM. GPT-4o-mini se usa para justificar un veredicto ya calculado, extraer criterios de un PDF o un perfil desde notas, y para el asistente clínico.",
+        "El matching lo decide un motor de reglas, no un LLM. GPT-4o-mini se usa para justificar un veredicto ya calculado, extraer criterios de un PDF, un perfil desde notas, un lab en PDF o una foto de receta, y para el asistente clínico.",
         "Esas llamadas salen hacia OpenAI. No envíes PHI nominativo en notas o chats si tu SOP lo prohíbe; el producto está pensado para trabajar con iniciales y criterios, no con historia clínica completa.",
       ],
     },
@@ -106,9 +106,24 @@ export const integrationsPage: TrustPage = {
         "Screenlane no exige un EHR para arrancar. Cuando lo conectas, el flujo es un ETL acotado al screening — no un data warehouse hospitalario.",
       ],
       bullets: [
-        "Extract: CSV, alta manual, portal de candidatos, sync batch del EHR o webhook en tiempo real (JSON / FHIR Bundle).",
+        "Extract: CSV, alta manual, portal, PDF de laboratorio, foto de receta, sync batch del EHR o webhook en tiempo real (JSON / FHIR Bundle).",
         "Transform: perfil clínico (condiciones, medicación, labs), normalización ICD-11 y evaluación con el motor de reglas.",
         "Load: pacientes y perfiles del centro, screenings, re-match y bitácora. Cada fila queda atada a tu organization_id / clinic_id.",
+      ],
+    },
+    {
+      id: "documentos",
+      title: "PDF de laboratorio y foto de receta",
+      paragraphs: [
+        "Cuando el resultado aún no llega por EHR, el Extract del expediente es el documento que trae el paciente: un PDF de laboratorio o la receta fotografiada en consultorio.",
+        "El flujo es el mismo ETL: extraes texto o imagen, transformas a condiciones / medicación / labs, y cargas al perfil al guardar. Un humano revisa el borrador. El matching no cambia: sigue siendo el motor de reglas.",
+      ],
+      bullets: [
+        "PDF digital (texto seleccionable): se lee la capa de texto y GPT-4o-mini estructura el perfil.",
+        "Foto de receta o de un lab impreso: JPEG, PNG o WebP; visión de GPT-4o-mini. HEIC no está soportado.",
+        "PDF escaneado sin texto: fotografía las páginas con «Tomar foto». No inferimos OCR de páginas rasterizadas.",
+        "No se copian nombres, DNI, direcciones ni firmas. Solo condiciones, medicación y valores numéricos.",
+        "En /patients/[id] o POST /api/patients/profile/extract-document (permiso profiles:write). Revisa y pulsa Guardar perfil.",
       ],
     },
     {
@@ -133,6 +148,7 @@ export const integrationsPage: TrustPage = {
       bullets: [
         "CSV de pacientes: importación masiva en el registro.",
         "Portal /candidato: pre-registro público del centro (slug + protocolos activos).",
+        "PDF de laboratorio y foto de receta: ver la sección anterior. Carga en /patients/[id].",
         "PDF de protocolo: extracción de criterios (el texto del sponsor no se traduce).",
         "ICD-11 (OMS): búsqueda y normalización de términos coloquiales.",
         "OpenAI GPT-4o-mini: justificación del matching, notas y asistente — sin cambiar elegibilidad.",

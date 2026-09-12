@@ -157,6 +157,8 @@ const config = {
       ehrWebhook: "/api/webhooks/ehr",
       icd11Search: "/api/icd11/search",
       icd11Normalize: "/api/icd11/normalize",
+      profileExtract: "/api/patients/profile/extract",
+      profileExtractDocument: "/api/patients/profile/extract-document",
     },
   },
 
@@ -243,7 +245,7 @@ const config = {
         {
           icon: "Cable",
           title: "ETL e integraciones",
-          body: "EHR opcional (batch + webhook), CSV, ICD-11 y Stripe. El matching sigue siendo un motor de reglas.",
+          body: "EHR opcional (batch + webhook), CSV, PDF de lab, foto de receta, ICD-11 y Stripe. El matching sigue siendo un motor de reglas.",
         },
         {
           icon: "Shield",
@@ -273,7 +275,7 @@ const config = {
         {
           icon: "Workflow",
           title: "ETL clínico",
-          body: "Extract (CSV, portal, EHR) → Transform (perfil + ICD-11 + reglas) → Load (pacientes, screening y re-match).",
+          body: "Extract (CSV, portal, EHR, PDF de lab, foto de receta) → Transform (perfil + ICD-11 + reglas) → Load (pacientes, screening y re-match).",
           href: "/integraciones#etl",
         },
         {
@@ -310,7 +312,11 @@ const config = {
         },
         {
           q: "¿Qué es el ETL de Screenlane?",
-          a: "El pipeline Extract → Transform → Load del screening: entra CSV, portal o EHR; se normaliza el perfil; se carga en tu centro y se recalcula matching/re-match. Guía en /integraciones.",
+          a: "El pipeline Extract → Transform → Load del screening: entra CSV, portal, EHR, PDF de laboratorio o foto de receta; se normaliza el perfil; se carga en tu centro. Guía en /integraciones.",
+        },
+        {
+          q: "¿Puedo cargar un PDF de laboratorio o una foto de receta?",
+          a: "Sí. En el expediente del paciente: sube el PDF digital o fotografía la receta. La IA pre-rellena labs y medicación; tú revisas y guardas. Un PDF escaneado sin texto se fotografía. El matching sigue siendo el motor de reglas.",
         },
       ],
     },

@@ -445,6 +445,39 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           },
         },
       },
+      "/api/patients/profile/extract-document": {
+        post: {
+          tags: ["Patients"],
+          summary: "Extraer perfil desde PDF de laboratorio o foto de receta",
+          description:
+            "ETL del expediente: PDF con texto o imagen JPEG/PNG/WebP. GPT-4o-mini (visión en fotos). No cambia elegibilidad; el staff revisa y guarda el perfil.",
+          security: [{ cookieAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "multipart/form-data": {
+                schema: {
+                  type: "object",
+                  required: ["file"],
+                  properties: {
+                    file: { type: "string", format: "binary" },
+                    kind: {
+                      type: "string",
+                      enum: ["lab", "prescription", "auto"],
+                      default: "auto",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Borrador de perfil (conditions, medications, laboratories)" },
+            "400": { description: "Archivo inválido o PDF sin texto", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+            "403": { description: "Sin permiso", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+      },
       "/api/audit": {
         get: {
           tags: ["Audit"],
