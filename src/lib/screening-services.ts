@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { evaluatePatientAgainstProtocol } from "@/lib/matching";
 import type { ClinicalProfile, Patient, Protocol } from "@/lib/types";
-import { normalizeTerm } from "@/lib/utils";
+import { normalizeTerm, toPatientInitials } from "@/lib/utils";
 
 let serviceClient: SupabaseClient | null = null;
 
@@ -25,6 +25,18 @@ type ProfileRow = ClinicalProfile & {
   patients: Patient;
 };
 
+type ScreeningFailureRow = {
+  patients: Patient | null;
+};
+
+function requireOrganizationId(organizationId: string | undefined): string | { error: string } {
+  const id = organizationId?.trim();
+  if (!id) {
+    return { error: "Falta organizationId para consultar datos clínicos." };
+  }
+  return id;
+}
+
 function matchesCondition(conditions: string[], search: string): boolean {
   const term = normalizeTerm(search);
   return conditions.some(
@@ -34,9 +46,8 @@ function matchesCondition(conditions: string[], search: string): boolean {
   );
 }
 
-function patientName(row: ProfileRow): string {
-  const { patients: patient } = row;
-  return `${patient.first_name} ${patient.last_name}`;
+function patientLabel(patient: Patient): string {
+  return toPatientInitials(patient.first_name, patient.last_name);
 }
 
 export type ScreeningStatusFilter =
@@ -46,13 +57,18 @@ export type ScreeningStatusFilter =
   | "screen_failure";
 
 export async function searchPatientsByCriteria(input: {
+  organizationId: string;
   condition?: string;
   status?: ScreeningStatusFilter;
 }) {
+  const organizationId = requireOrganizationId(input.organizationId);
+  if (typeof organizationId !== "string") return organizationId;
+
   const supabase = getServiceSupabase();
   const { data, error } = await supabase
     .from("clinical_profiles")
-    .select("*, patients(*)");
+    .select("*, patients!inner(*)")
+    .eq("patients.clinic_id", organizationId);
 
   if (error) return { error: error.message };
 
@@ -67,8 +83,9 @@ export async function searchPatientsByCriteria(input: {
   if (input.status) {
     const { data: screenings, error: screeningError } = await supabase
       .from("screenings")
-      .select("patient_id")
-      .eq("status", input.status);
+      .select("patient_id, patients!inner(clinic_id)")
+      .eq("status", input.status)
+      .eq("patients.clinic_id", organizationId);
 
     if (screeningError) return { error: screeningError.message };
 
@@ -78,23 +95,31 @@ export async function searchPatientsByCriteria(input: {
     rows = rows.filter((row) => patientIds.has(row.patient_id));
   }
 
-  const names = rows.map(patientName);
+  const names = rows.map((row) => patientLabel(row.patients));
   return { count: names.length, names };
 }
 
-export async function matchPatientsToProtocol(input: { protocol_id: string }) {
+export async function matchPatientsToProtocol(input: {
+  organizationId: string;
+  protocol_id: string;
+}) {
+  const organizationId = requireOrganizationId(input.organizationId);
+  if (typeof organizationId !== "string") return organizationId;
+
   const supabase = getServiceSupabase();
   const { data: protocol, error: protoError } = await supabase
     .from("protocols")
     .select("*")
     .eq("id", input.protocol_id)
+    .eq("clinic_id", organizationId)
     .single();
 
   if (protoError || !protocol) return { error: "Protocolo no encontrado" };
 
   const { data: profiles, error: profError } = await supabase
     .from("clinical_profiles")
-    .select("*, patients(*)");
+    .select("*, patients!inner(*)")
+    .eq("patients.clinic_id", organizationId);
 
   if (profError) return { error: profError.message };
 
@@ -107,7 +132,7 @@ export async function matchPatientsToProtocol(input: { protocol_id: string }) {
     );
 
     return {
-      patient_name: `${patient.first_name} ${patient.last_name}`,
+      patient_name: patientLabel(patient),
       status:
         match.verdict === "eligible"
           ? "CUMPLE"
@@ -125,19 +150,26 @@ export async function matchPatientsToProtocol(input: { protocol_id: string }) {
   };
 }
 
-export async function getScreenFailuresForRematch() {
+export async function getScreenFailuresForRematch(input: {
+  organizationId: string;
+}) {
+  const organizationId = requireOrganizationId(input.organizationId);
+  if (typeof organizationId !== "string") return organizationId;
+
   const supabase = getServiceSupabase();
   const { data, error } = await supabase
     .from("screenings")
-    .select("*, patients(*), protocols(*)")
-    .eq("status", "screen_failure");
+    .select("*, patients!inner(*), protocols(*)")
+    .eq("status", "screen_failure")
+    .eq("patients.clinic_id", organizationId);
 
   if (error) return { error: error.message };
 
-  const names = (data ?? []).map(
-    (screening) =>
-      `${screening.patients.first_name} ${screening.patients.last_name}`
-  );
+  const names = ((data ?? []) as ScreeningFailureRow[])
+    .map((screening) =>
+      screening.patients ? patientLabel(screening.patients) : null
+    )
+    .filter((name): name is string => Boolean(name));
 
   return { count: names.length, names };
 }

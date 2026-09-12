@@ -154,9 +154,11 @@ supabase/migrations/0013_portal_public_read.sql
 supabase/migrations/0014_fix_protocols_portal_grants.sql
 supabase/migrations/0015_ehr_integration.sql
 supabase/migrations/0016_reduce_rls_disk_io.sql
+supabase/migrations/0017_secure_patient_data.sql
+supabase/migrations/0018_tenant_rls_portal_sites.sql
 ```
 
-Si el slug `demo` falló en 0009, aplicá también `0011_fix_organization_slug_backfill.sql`.
+Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
 
 Opcional — datos de demo o activar Pro sin Stripe:
 
@@ -202,7 +204,7 @@ La lógica central está en [`src/lib/matching.ts`](src/lib/matching.ts):
 
 Cada screening guarda `match_score` (0–100) y `match_details` (trazabilidad criterio por criterio).
 
-**Justificación clínica (IA):** en matching y re-match, `POST /api/matching/rationale` genera un texto en español que explica el veredicto usando solo esos datos — **sin modificar la elegibilidad**.
+**Justificación clínica (IA):** en matching y re-match, `POST /api/matching/rationale` genera un texto en español que explica el veredicto usando solo esos datos — **sin modificar la elegibilidad**. OpenAI recibe iniciales del paciente, no el nombre completo.
 
 ---
 
@@ -217,10 +219,10 @@ Cada screening guarda `match_score` (0–100) y `match_details` (trazabilidad cr
 | Normalización ICD-11 | `GET /api/icd11/normalize` | API WHO (no LLM) |
 | Matching / Re-Match | Motor de reglas | Sin LLM |
 
-Servidores MCP locales (opcional):
+Servidores MCP locales (opcional). El de screening **exige** el UUID del centro:
 
 ```bash
-yarn mcp:screening
+SCREENLANE_ORGANIZATION_ID=<uuid-del-centro> yarn mcp:screening
 yarn mcp:icd11
 ```
 
@@ -407,7 +409,7 @@ docs/                        # STRIPE_SETUP.md, BACKUP.md, etc.
 | `yarn build` | Build de producción |
 | `yarn start` | Servidor de producción |
 | `yarn lint` | ESLint |
-| `yarn mcp:screening` | MCP servidor screening |
+| `yarn mcp:screening` | MCP servidor screening (`SCREENLANE_ORGANIZATION_ID` obligatorio) |
 | `yarn mcp:icd11` | MCP servidor ICD-11 |
 
 ---
@@ -415,13 +417,16 @@ docs/                        # STRIPE_SETUP.md, BACKUP.md, etc.
 ## Seguridad
 
 - Autenticación Supabase SSR con middleware
+- **Next.js 16.3.5** (parche de RCE de agosto 2026: Image Optimization / AVIF y Windows; cache de imágenes vacías)
 - **MFA TOTP** obligatorio en producción para investigator y sub-investigator (activar TOTP en Authentication → MFA)
 - Sesión: 30 min de inactividad y 8 h absolutas (`AUTH_IDLE_MINUTES`, `AUTH_SESSION_HOURS`); las cookies de `@supabase/ssr` no se usan como único límite
 - Login demo (`demo@screening.local`) **deshabilitado** cuando `NODE_ENV=production`, salvo `ALLOW_DEMO_LOGIN=true`
-- RLS en PostgreSQL + RBAC clínico
+- RLS en PostgreSQL + RBAC clínico: las políticas `using (true)` se eliminan en `0018`; el aislamiento es por `get_user_organization_ids()`
 - Validación Zod en APIs críticas
-- Portal público con rate limiting y políticas RLS dedicadas
-- Webhooks EHR con firma HMAC (`X-EHR-Signature`) e idempotencia por `event_id`
+- Portal público con rate limiting, vista `portal_sites` (sin secretos) y `anon` sin `SELECT` sobre `organizations`
+- Webhooks EHR con firma HMAC (`X-EHR-Signature`) e idempotencia por `event_id`; `GET /api/settings/ehr` no devuelve el secreto (solo al generar o regenerar)
+- ePRO aislado por centro; bitácora sin acceso `anon`; `ehr_webhook_secret` no legible por el cliente
+- Herramientas de IA y MCP de screening filtradas por organización; OpenAI recibe iniciales, no nombres; `thread_id` por usuario
 
 Backups y restore (PITR): [`docs/BACKUP.md`](docs/BACKUP.md).
 

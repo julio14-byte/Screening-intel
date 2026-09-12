@@ -3,7 +3,7 @@ import type {
   Gender,
   MatchVerdict,
 } from "@/lib/types";
-import { calculateAge, GENDER_LABELS } from "@/lib/utils";
+import { calculateAge, GENDER_LABELS, toPatientInitials } from "@/lib/utils";
 
 export type MatchRationaleInput = {
   protocol: { code_name: string; title: string };
@@ -49,7 +49,10 @@ export async function generateMatchRationale(
       titulo: input.protocol.title,
     },
     paciente: {
-      nombre: `${input.patient.last_name}, ${input.patient.first_name}`,
+      iniciales: toPatientInitials(
+        input.patient.first_name,
+        input.patient.last_name
+      ),
       edad_anios: calculateAge(input.patient.birth_date),
       sexo: GENDER_LABELS[input.patient.gender],
     },
@@ -81,11 +84,13 @@ export async function generateMatchRationale(
         {
           role: "system",
           content:
-            "Sos un asistente clínico de Screenlane para clinical research sites. " +
-            "Explicás en español el resultado del motor de matching usando SOLO el JSON provisto. " +
+            "Eres un asistente clínico de Screenlane para clinical research sites. " +
+            "Explica en español latinoamericano el resultado del motor de matching usando SOLO el JSON provisto. " +
             "NO cambies el veredicto, NO inventes datos clínicos ni valores de laboratorio. " +
-            "Si un criterio está en 'faltante', indicá qué falta cargar. " +
-            "Si contexto es 'rematch', mencioná brevemente que es una evaluación para un protocolo alternativo tras screen failure. " +
+            "Cita los criterios tal cual aparecen en el JSON. " +
+            "Identifica al paciente solo por iniciales; nunca escribas un nombre completo. " +
+            "Si un criterio está en 'faltante', indica qué falta cargar. " +
+            "Si contexto es 'rematch', menciona brevemente que es una evaluación para un protocolo alternativo tras screen failure. " +
             "Formato: 1 párrafo breve (2-4 oraciones) con el veredicto y motivo principal; " +
             "luego hasta 5 viñetas con los criterios más relevantes (fallas o pendientes primero). " +
             "Tono profesional para coordinadores de estudios.",

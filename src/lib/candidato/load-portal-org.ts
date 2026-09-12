@@ -1,5 +1,4 @@
 import { createPortalReadClient } from "@/lib/candidato/portal-supabase";
-import { createClient } from "@/lib/supabase/server";
 
 export type PortalOrgLoadResult =
   | {
@@ -27,13 +26,25 @@ export async function loadPortalOrganization(
     const supabase = await createPortalReadClient();
 
     const { data, error } = await supabase
-      .from("organizations")
+      .from("portal_sites")
       .select("id, name, slug, portal_enabled")
       .eq("slug", normalized)
       .maybeSingle();
 
     if (error) {
       const msg = error.message ?? "Error al buscar el centro.";
+      if (
+        msg.includes("portal_sites") ||
+        msg.includes("schema cache") ||
+        msg.includes("does not exist") ||
+        error.code === "42P01"
+      ) {
+        return {
+          status: "error",
+          message:
+            "Falta la migración del portal seguro (0018). Ejecútala en Supabase.",
+        };
+      }
       if (
         msg.includes("portal_enabled") ||
         msg.includes("column") ||
@@ -42,7 +53,7 @@ export async function loadPortalOrganization(
         return {
           status: "error",
           message:
-            "Falta la migración del portal (0009 / 0011). Ejecutala en Supabase.",
+            "Falta la migración del portal (0009 / 0011 / 0018). Ejecútala en Supabase.",
         };
       }
       return { status: "error", message: msg };
@@ -50,10 +61,6 @@ export async function loadPortalOrganization(
 
     if (!data) {
       return { status: "not_found" };
-    }
-
-    if (!data.portal_enabled) {
-      return { status: "portal_disabled", name: data.name };
     }
 
     return { status: "ok", org: data };

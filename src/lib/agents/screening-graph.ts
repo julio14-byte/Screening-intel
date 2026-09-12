@@ -3,7 +3,8 @@ import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { MemorySaver } from "@langchain/langgraph";
 import type { UIMessage } from "ai";
 import { generateId, type UIMessageStreamWriter } from "ai";
-import { loadMcpToolsForLangGraph, MCP_TOOL_NAMES } from "@/lib/agents/mcp-bridge";
+import { createScreeningLangChainTools } from "@/lib/agents/langchain-tools";
+import { MCP_TOOL_NAMES } from "@/lib/agents/mcp-bridge";
 import {
   extractTextFromLangChainMessage,
   isAssistantStreamChunk,
@@ -11,19 +12,21 @@ import {
 } from "@/lib/agents/message-adapter";
 
 const SYSTEM_PROMPT =
-  "Eres el asistente clínico inteligente de Screenlane. " +
-  "Tus herramientas vienen de servidores MCP acoplados a LangGraph. " +
-  "Screening: search_patients (condición/estatus), match_protocol (protocol_id), list_screen_failures. " +
+  "Eres el asistente clínico de Screenlane. " +
+  "Tus herramientas de screening están limitadas al centro del usuario. " +
+  "Screening: searchPatientsByCriteria (condición/estatus), matchPatientsToProtocol (protocol_id), getScreenFailuresForRematch. " +
   "ICD-11: icd11_normalize_colloquial (coloquial → término oficial), icd11_search, icd11_get_entity. " +
   "Cuando el usuario use lenguaje coloquial (ej. 'presión alta', 'azúcar', 'tiroides lenta'), " +
-  "usá icd11_normalize_colloquial antes de responder o buscar pacientes. " +
-  "Presentá la conversión: coloquial → término ICD-11. " +
-  "Responde en español, claro y conciso. Al listar pacientes o diagnósticos, muestra solo nombres.";
+  "usa icd11_normalize_colloquial antes de responder o buscar pacientes. " +
+  "Presenta la conversión: coloquial → término ICD-11. " +
+  "Responde en español latinoamericano, claro y conciso. " +
+  "Al listar pacientes muestra solo iniciales (nunca nombre completo).";
 
-let agentPromise: Promise<ReturnType<typeof createReactAgent>> | null = null;
+const checkpointer = new MemorySaver();
+const agents = new Map<string, Promise<ReturnType<typeof createReactAgent>>>();
 
-async function buildScreeningAgent() {
-  const tools = await loadMcpToolsForLangGraph();
+async function buildScreeningAgent(organizationId: string) {
+  const tools = createScreeningLangChainTools(organizationId);
   const model = new ChatOpenAI({
     model: "gpt-4o-mini",
     temperature: 0,
@@ -33,20 +36,23 @@ async function buildScreeningAgent() {
     llm: model,
     tools,
     prompt: SYSTEM_PROMPT,
-    checkpointer: new MemorySaver(),
+    checkpointer,
   });
 }
 
-async function getScreeningAgent() {
-  if (!agentPromise) {
-    agentPromise = buildScreeningAgent();
+async function getScreeningAgent(organizationId: string) {
+  let pending = agents.get(organizationId);
+  if (!pending) {
+    pending = buildScreeningAgent(organizationId);
+    agents.set(organizationId, pending);
   }
-  return agentPromise;
+  return pending;
 }
 
 export async function streamScreeningAgentToUI(
   messages: UIMessage[],
-  writer: UIMessageStreamWriter
+  writer: UIMessageStreamWriter,
+  context: { userId: string; organizationId: string }
 ): Promise<string> {
   const textId = generateId();
   const langChainMessages = uiMessagesToLangChain(messages);
@@ -54,12 +60,12 @@ export async function streamScreeningAgentToUI(
 
   writer.write({ type: "text-start", id: textId });
 
-  const graph = await getScreeningAgent();
+  const graph = await getScreeningAgent(context.organizationId);
   const stream = await graph.stream(
     { messages: langChainMessages },
     {
       streamMode: "messages",
-      configurable: { thread_id: "screening-chat" },
+      configurable: { thread_id: `screening:${context.userId}` },
     }
   );
 

@@ -9,6 +9,7 @@ import {
   persistChatExchange,
   textFromUIMessage,
 } from "@/lib/ai/persistConversation";
+import { getOrganizationIdForUser } from "@/lib/rbac/create-site-user";
 import { getUser } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -19,6 +20,14 @@ export async function POST(req: Request) {
     return NextResponse.json(
       { error: "Debes iniciar sesión para usar el asistente." },
       { status: 401 }
+    );
+  }
+
+  const organizationId = await getOrganizationIdForUser(user.id);
+  if (!organizationId) {
+    return NextResponse.json(
+      { error: "Tu usuario no pertenece a un centro. No se pueden consultar pacientes." },
+      { status: 403 }
     );
   }
 
@@ -40,7 +49,10 @@ export async function POST(req: Request) {
   const stream = createUIMessageStream({
     originalMessages: messages,
     execute: async ({ writer }) => {
-      assistantText = await streamScreeningAgentToUI(messages, writer);
+      assistantText = await streamScreeningAgentToUI(messages, writer, {
+        userId: user.id,
+        organizationId,
+      });
     },
   });
 
