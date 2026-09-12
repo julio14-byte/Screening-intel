@@ -69,8 +69,9 @@ export function ClinicalNotesImport({
         Notas clínicas → perfil estructurado (IA)
       </p>
       <p className="mt-1 text-xs text-cyan-800">
-        Pegá texto libre para rellenar el formulario de condiciones, medicación
-        y laboratorios. Revisá y editá antes de guardar.
+        Pegá texto libre para rellenar condiciones, medicación y laboratorios.
+        Para un PDF de laboratorio o una foto de receta usa el bloque de arriba.
+        Revisá y editá antes de guardar.
       </p>
 
       <textarea

@@ -44,7 +44,9 @@ function isPublicMarketingPath(pathname: string) {
   return (
     pathname === config.auth.landingUrl ||
     pathname === routes.app.docs ||
-    pathname.startsWith("/docs/")
+    pathname.startsWith("/docs/") ||
+    pathname === routes.app.privacy ||
+    pathname === routes.app.integrations
   );
 }
 

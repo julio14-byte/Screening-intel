@@ -77,6 +77,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
       { name: "AI", description: "Asistente clínico" },
       { name: "Stripe", description: "Facturación SaaS" },
       { name: "Waitlist", description: "Landing / captación" },
+      { name: "EHR", description: "ETL clínico: sync batch y webhook HMAC" },
     ],
     components: {
       securitySchemes: {
@@ -158,6 +159,50 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
             imported: { type: "integer" },
             failed: { type: "integer" },
             errors: { type: "array", items: { type: "string" } },
+          },
+        },
+        EhrPatientPayload: {
+          type: "object",
+          required: ["ehr_patient_id", "first_name", "last_name", "birth_date", "gender"],
+          properties: {
+            ehr_patient_id: { type: "string" },
+            first_name: { type: "string" },
+            last_name: { type: "string" },
+            birth_date: { type: "string", format: "date" },
+            gender: { type: "string", enum: ["male", "female", "other"] },
+            conditions: { type: "array", items: { type: "string" } },
+            medications: { type: "array", items: { type: "string" } },
+            laboratories: {
+              type: "object",
+              additionalProperties: { type: "number" },
+            },
+          },
+        },
+        EhrBatchSyncRequest: {
+          type: "object",
+          required: ["patients"],
+          properties: {
+            ehr_source: { type: "string", example: "epic" },
+            patients: {
+              type: "array",
+              minItems: 1,
+              maxItems: 500,
+              items: { $ref: "#/components/schemas/EhrPatientPayload" },
+            },
+          },
+        },
+        EhrWebhookRequest: {
+          type: "object",
+          required: ["event_id", "event_type", "patient"],
+          properties: {
+            event_id: { type: "string" },
+            event_type: {
+              type: "string",
+              enum: ["patient.upsert", "profile.update", "observation.created"],
+            },
+            organization_id: { type: "string", format: "uuid" },
+            ehr_source: { type: "string" },
+            patient: { $ref: "#/components/schemas/EhrPatientPayload" },
           },
         },
         CustomAuditRequest: {
@@ -400,6 +445,39 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           },
         },
       },
+      "/api/patients/profile/extract-document": {
+        post: {
+          tags: ["Patients"],
+          summary: "Extraer perfil desde PDF de laboratorio o foto de receta",
+          description:
+            "ETL del expediente: PDF con texto o imagen JPEG/PNG/WebP. GPT-4o-mini (visión en fotos). No cambia elegibilidad; el staff revisa y guarda el perfil.",
+          security: [{ cookieAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "multipart/form-data": {
+                schema: {
+                  type: "object",
+                  required: ["file"],
+                  properties: {
+                    file: { type: "string", format: "binary" },
+                    kind: {
+                      type: "string",
+                      enum: ["lab", "prescription", "auto"],
+                      default: "auto",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Borrador de perfil (conditions, medications, laboratories)" },
+            "400": { description: "Archivo inválido o PDF sin texto", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+            "403": { description: "Sin permiso", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+      },
       "/api/audit": {
         get: {
           tags: ["Audit"],
@@ -602,6 +680,67 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           responses: {
             "200": { description: "Evento procesado" },
             "400": { description: "Firma inválida", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+      },
+      "/api/webhooks/ehr": {
+        post: {
+          tags: ["EHR"],
+          summary: "Webhook EHR en tiempo real (Fase 2)",
+          description:
+            "Servidor a servidor. Headers `X-Organization-Id` y `X-EHR-Signature: sha256=<hex>`. Idempotente por `event_id`. Recalcula matching/re-match.",
+          parameters: [
+            {
+              name: "X-Organization-Id",
+              in: "header",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+            {
+              name: "X-EHR-Signature",
+              in: "header",
+              required: true,
+              schema: { type: "string", example: "sha256=…" },
+            },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/EhrWebhookRequest" },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Evento procesado o duplicado" },
+            "401": {
+              description: "Firma o centro inválido",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } },
+            },
+          },
+        },
+      },
+      "/api/ehr/sync": {
+        post: {
+          tags: ["EHR"],
+          summary: "Sync batch desde EHR (Fase 1)",
+          description:
+            "Upsert por ehr_patient_id y recálculo de matching. Requiere sesión y permiso patients:write.",
+          security: [{ cookieAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/EhrBatchSyncRequest" },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Sync completado o parcial" },
+            "401": {
+              description: "No autenticado",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } },
+            },
           },
         },
       },

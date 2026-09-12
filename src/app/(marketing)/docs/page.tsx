@@ -37,6 +37,18 @@ export default function DocsPage() {
           >
             Entrar a la app
           </Link>
+          <Link
+            href={routes.app.privacy}
+            className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-white/20 px-4 py-2 text-sm text-violet-200 hover:bg-white/10"
+          >
+            Privacidad
+          </Link>
+          <Link
+            href={routes.app.integrations}
+            className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-white/20 px-4 py-2 text-sm text-violet-200 hover:bg-white/10"
+          >
+            Integraciones
+          </Link>
         </div>
 
         <div className="mt-10 space-y-8 sm:mt-12 sm:space-y-10">

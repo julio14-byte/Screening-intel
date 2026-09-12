@@ -1,15 +1,20 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Cable,
   CreditCard,
   FileSpreadsheet,
   FlaskConical,
+  Hospital,
   KanbanSquare,
   MessageSquare,
   RefreshCw,
+  Scale,
+  Shield,
   Square,
   Timer,
   UserX,
   Users,
+  Workflow,
 } from "lucide-react";
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -22,6 +27,11 @@ const ICON_MAP: Record<string, LucideIcon> = {
   RefreshCw,
   MessageSquare,
   CreditCard,
+  Shield,
+  Scale,
+  Workflow,
+  Cable,
+  Hospital,
   Square,
 };
 

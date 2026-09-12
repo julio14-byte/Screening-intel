@@ -21,6 +21,8 @@ Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-sc
 | **Portal de candidatos** | Pre-registro público en `/candidato`, inbox en `/candidatos` y settings en `/settings/portal`. |
 | **Re-Match nativo** | Propone protocolos alternativos tras un screen failure; se refresca automáticamente cuando el EHR envía labs o diagnósticos nuevos. |
 | **Sub-investigator** | Rol clínico con permisos de PI excepto roles y facturación. |
+| **Privacidad y regulaciones** | Páginas públicas `/privacidad` (HIPAA/GDPR/LatAm, 21 CFR Part 11) y `/integraciones` (ETL clínico, EHR, API). |
+| **PDF de lab / foto de receta** | Extract al expediente en `/patients/[id]`: PDF digital o foto JPEG/PNG. `POST /api/patients/profile/extract-document`. |
 | **Screenlane** | Rebrand completo del producto (antes Screening Intelligence). |
 
 ---
@@ -38,6 +40,7 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | **IA con herramientas reales** | LangGraph + MCP: buscar pacientes, matchear protocolos, screen failures e ICD-11 — no solo chat genérico |
 | **RBAC + audit trail** | Roles clínicos (investigator, sub-investigator, coordinator, monitor) y bitácora orientada a 21 CFR Part 11 |
 | **LATAM-first, sin EHR obligatorio** | UI en español; el MVP funciona con registro manual y portal — **integración EHR opcional** (batch + webhook) cuando el site conecta su hospital |
+| **ETL clínico documentado** | Extract (CSV/portal/EHR/PDF de lab/foto de receta) → Transform (perfil + ICD-11 + reglas) → Load (screening y re-match), sin EHR obligatorio |
 | **SaaS self-serve** | Trial 14 días, planes por volumen y Stripe — pensado para sitios medianos, no solo enterprise |
 
 **En una frase:** del candidato al protocolo correcto, sin perder pacientes tras un screen failure.
@@ -49,7 +52,7 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | Área | Qué hace |
 |------|----------|
 | **Patient Registry** | Alta, búsqueda e importación CSV de pacientes |
-| **Clinical Profile** | Condiciones, medicación, laboratorios + búsqueda ICD-11 + extracción IA desde notas |
+| **Clinical Profile** | Condiciones, medicación, laboratorios + ICD-11 + notas IA + **PDF de lab / foto de receta** |
 | **Protocol Matcher** | Criterios de inclusión/exclusión; extracción NLP desde PDF |
 | **Motor de elegibilidad** | Semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple + `match_score` + justificación IA |
 | **Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure |
@@ -62,6 +65,8 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | **SaaS** | Organizations, trial 14 días, Stripe Checkout + Portal |
 | **ePRO** | Formularios electrónicos del paciente (Fase A) |
 | **API Docs** | Swagger UI en [`/docs/api`](http://localhost:3000/docs/api) |
+| **Privacidad** | Cómo se tratan los datos y marcos regulatorios: [`/privacidad`](http://localhost:3000/privacidad) |
+| **ETL e integraciones** | Pipeline y conectores (EHR, Stripe, ICD-11): [`/integraciones`](http://localhost:3000/integraciones) |
 
 ---
 
@@ -184,6 +189,8 @@ yarn dev
 | http://localhost:3000/candidato | Portal pacientes |
 | http://localhost:3000/settings/ehr | Configuración integración EHR |
 | http://localhost:3000/docs/api | Swagger UI |
+| http://localhost:3000/privacidad | Privacidad y regulaciones |
+| http://localhost:3000/integraciones | ETL e integraciones |
 
 **Usuario demo** (solo desarrollo; en production está apagado salvo `ALLOW_DEMO_LOGIN=true`):
 
@@ -213,6 +220,7 @@ Cada screening guarda `match_score` (0–100) y `match_details` (trazabilidad cr
 | Chat clínico | `/chat` · `POST /api/auth/chats` | GPT-4o-mini + LangGraph |
 | Extracción de protocolos PDF | `POST /api/protocols/extract` | GPT-4o-mini |
 | Perfil clínico desde notas | `POST /api/patients/profile/extract` | GPT-4o-mini |
+| PDF de laboratorio / foto de receta | `POST /api/patients/profile/extract-document` | GPT-4o-mini (+ visión en fotos) |
 | Justificación del matching | `POST /api/matching/rationale` | GPT-4o-mini |
 | Normalización ICD-11 | `GET /api/icd11/normalize` | API WHO (no LLM) |
 | Matching / Re-Match | Motor de reglas | Sin LLM |
@@ -425,7 +433,7 @@ docs/                        # STRIPE_SETUP.md, BACKUP.md, etc.
 
 Backups y restore (PITR): [`docs/BACKUP.md`](docs/BACKUP.md).
 
-Antes de producción con datos reales de pacientes: revisá políticas RLS, rotá claves, activá MFA en el dashboard de Auth, configurá PITR en Pro y completá evaluación de cumplimiento (HIPAA / GDPR según jurisdicción).
+Antes de producción con datos reales de pacientes: revisa políticas RLS, rota claves, activa MFA en el dashboard de Auth, configura PITR en Pro y completa evaluación de cumplimiento (HIPAA / GDPR según jurisdicción). Resumen para sponsors y sites: [`/privacidad`](http://localhost:3000/privacidad). Pipeline EHR y API: [`/integraciones`](http://localhost:3000/integraciones).
 
 ---
 
