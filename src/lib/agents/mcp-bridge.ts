@@ -1,7 +1,7 @@
 import { MultiServerMCPClient } from "@langchain/mcp-adapters";
 import type { DynamicStructuredTool } from "@langchain/core/tools";
 import { loadIcd11Env } from "@/lib/icd11/env";
-import { screeningLangChainTools } from "@/lib/agents/langchain-tools";
+import { createScreeningLangChainTools } from "@/lib/agents/langchain-tools";
 
 const MCP_SERVERS = {
   screening: "screening",
@@ -54,7 +54,9 @@ function createMcpClient(): MultiServerMCPClient {
 
 /**
  * Carga herramientas MCP (screening + ICD-11) como StructuredTool[] para LangGraph.
- * Si MCP no está disponible, usa las tools locales como fallback.
+ * El chat HTTP no debe usar este puente: el MCP de screening es de proceso
+ * completo y requiere SCREENLANE_ORGANIZATION_ID. Si MCP no está disponible,
+ * el fallback local también exige esa variable.
  */
 export async function loadMcpToolsForLangGraph(): Promise<DynamicStructuredTool[]> {
   if (!mcpToolsPromise) {
@@ -82,7 +84,13 @@ async function loadMcpToolsForLangGraphInternal(): Promise<
       "[LangGraph MCP] No se pudo conectar a los servidores MCP; usando tools locales.",
       error
     );
-    return screeningLangChainTools;
+    const organizationId = process.env.SCREENLANE_ORGANIZATION_ID?.trim();
+    if (!organizationId) {
+      throw new Error(
+        "MCP screening no disponible y falta SCREENLANE_ORGANIZATION_ID para el fallback local."
+      );
+    }
+    return createScreeningLangChainTools(organizationId);
   }
 }
 

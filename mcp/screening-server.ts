@@ -11,7 +11,7 @@ import {
  * MCP server de Screening Intelligence.
  *
  * Uso local (Cursor / Claude Desktop):
- *   yarn mcp:screening
+ *   SCREENLANE_ORGANIZATION_ID=<uuid> yarn mcp:screening
  *
  * Config Cursor (~/.cursor/mcp.json):
  * {
@@ -22,12 +22,22 @@ import {
  *       "cwd": "/ruta/a/Screening-intel",
  *       "env": {
  *         "NEXT_PUBLIC_SUPABASE_URL": "...",
- *         "SUPABASE_SERVICE_ROLE_KEY": "..."
+ *         "SUPABASE_SERVICE_ROLE_KEY": "...",
+ *         "SCREENLANE_ORGANIZATION_ID": "uuid-del-centro"
  *       }
  *     }
  *   }
  * }
  */
+
+const organizationId = process.env.SCREENLANE_ORGANIZATION_ID?.trim();
+if (!organizationId) {
+  console.error(
+    "Falta SCREENLANE_ORGANIZATION_ID. El MCP de screening no puede listar pacientes de todos los centros."
+  );
+  process.exit(1);
+}
+
 const server = new McpServer(
   {
     name: "screening-intelligence",
@@ -35,7 +45,7 @@ const server = new McpServer(
   },
   {
     instructions:
-      "Herramientas clínicas para pre-screening, matching de protocolos y re-match en research sites.",
+      "Herramientas clínicas para pre-screening, matching de protocolos y re-match en un clinical research site. Los resultados usan iniciales, no nombres completos.",
   }
 );
 
@@ -60,7 +70,11 @@ server.registerTool(
       {
         type: "text",
         text: JSON.stringify(
-          await searchPatientsByCriteria({ condition, status }),
+          await searchPatientsByCriteria({
+            organizationId,
+            condition,
+            status,
+          }),
           null,
           2
         ),
@@ -72,7 +86,7 @@ server.registerTool(
 server.registerTool(
   "match_protocol",
   {
-    description: "Evalúa elegibilidad de pacientes contra un protocolo UUID.",
+    description: "Evalúa elegibilidad de pacientes contra un protocolo UUID del mismo centro.",
     inputSchema: {
       protocol_id: z.string(),
     },
@@ -82,7 +96,7 @@ server.registerTool(
       {
         type: "text",
         text: JSON.stringify(
-          await matchPatientsToProtocol({ protocol_id }),
+          await matchPatientsToProtocol({ organizationId, protocol_id }),
           null,
           2
         ),
@@ -101,7 +115,11 @@ server.registerTool(
     content: [
       {
         type: "text",
-        text: JSON.stringify(await getScreenFailuresForRematch(), null, 2),
+        text: JSON.stringify(
+          await getScreenFailuresForRematch({ organizationId }),
+          null,
+          2
+        ),
       },
     ],
   })

@@ -1,7 +1,21 @@
 import { NextResponse } from "next/server";
 import { runIcd11NormalizeColloquial } from "@/lib/icd11/services";
+import {
+  AuthorizationError,
+  requirePermission,
+} from "@/lib/rbac/require-permission";
 
 export async function GET(request: Request) {
+  try {
+    await requirePermission("patients:read");
+  } catch (e) {
+    if (e instanceof AuthorizationError) {
+      const status = e.code === "UNAUTHENTICATED" ? 401 : 403;
+      return NextResponse.json({ error: e.message }, { status });
+    }
+    throw e;
+  }
+
   const colloquial = new URL(request.url).searchParams.get("q")?.trim();
 
   if (!colloquial) {

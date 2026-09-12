@@ -75,7 +75,7 @@ export async function POST(request: Request) {
   const data = parsed.data;
 
   const { data: org, error: orgError } = await supabase
-    .from("organizations")
+    .from("portal_sites")
     .select("id, name, slug, portal_enabled")
     .eq("slug", data.orgSlug.toLowerCase())
     .maybeSingle();

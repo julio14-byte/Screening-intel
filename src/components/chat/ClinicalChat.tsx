@@ -18,9 +18,9 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { cn } from "@/lib/utils";
 
 const SUGGESTED_PROMPTS = [
-  "Convertí 'presión alta' a terminología ICD-11",
+  "Convierte 'presión alta' a terminología ICD-11",
   "¿Qué pacientes tenemos con diabetes?",
-  "Normalizá 'azúcar alta' según ICD-11",
+  "Normaliza 'azúcar alta' según ICD-11",
   "Muéstrame los screen failures para re-match",
 ];
 

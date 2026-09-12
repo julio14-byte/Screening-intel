@@ -77,7 +77,7 @@ export async function GET() {
       ehr_enabled: org.ehr_enabled,
       ehr_source: org.ehr_source,
       has_webhook_secret: Boolean(org.ehr_webhook_secret),
-      webhook_secret: org.ehr_webhook_secret,
+      webhook_secret: null,
     },
     webhookUrl: `${baseUrl.replace(/\/$/, "")}/api/webhooks/ehr`,
     batchSyncUrl: `${baseUrl.replace(/\/$/, "")}/api/ehr/sync`,
@@ -144,6 +144,11 @@ export async function PATCH(request: Request) {
     }
   }
 
+  const generatedSecret =
+    typeof updates.ehr_webhook_secret === "string"
+      ? (updates.ehr_webhook_secret as string)
+      : null;
+
   if (!Object.keys(updates).length) {
     return NextResponse.json({ error: "Nada para actualizar." }, { status: 400 });
   }
@@ -172,7 +177,7 @@ export async function PATCH(request: Request) {
       ehr_enabled: org.ehr_enabled,
       ehr_source: org.ehr_source,
       has_webhook_secret: Boolean(org.ehr_webhook_secret),
-      webhook_secret: org.ehr_webhook_secret,
+      webhook_secret: generatedSecret,
     },
     webhookUrl: `${baseUrl.replace(/\/$/, "")}/api/webhooks/ehr`,
     batchSyncUrl: `${baseUrl.replace(/\/$/, "")}/api/ehr/sync`,

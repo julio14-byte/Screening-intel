@@ -1,10 +1,26 @@
 -- =============================================================================
 -- Paso 1 — asegurar datos: ePRO tenant, bitácora sin anon, secreto EHR oculto
 -- =============================================================================
--- Si el SQL Editor corta la conexión, ejecutá las 3 secciones por separado.
+-- Si el SQL Editor corta la conexión, ejecuta las secciones por separado.
+-- get_user_organization_ids() también se crea (idempotente) en 0018.
 
 set statement_timeout = '30s';
 set lock_timeout = '8s';
+
+create or replace function public.get_user_organization_ids()
+returns setof uuid
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select om.organization_id
+  from public.organization_members om
+  where om.user_id = auth.uid();
+$$;
+
+revoke all on function public.get_user_organization_ids() from public;
+grant execute on function public.get_user_organization_ids() to authenticated;
 
 -- -----------------------------------------------------------------------------
 -- 1) ePRO: nadie anónimo; solo el centro del paciente / protocolo

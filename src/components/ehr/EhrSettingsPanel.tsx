@@ -63,29 +63,50 @@ export function EhrSettingsPanel() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
+  const applySettings = useCallback((json: EhrSettingsData) => {
+    setData(json);
+    setEnabled(json.organization.ehr_enabled);
+    setSource(json.organization.ehr_source ?? "");
+  }, []);
+
+  const fetchSettings = useCallback(async () => {
+    const res = await fetch("/api/settings/ehr");
+    const json = await readJsonResponse<EhrSettingsData & { error?: string }>(
+      res
+    );
+    if (!res.ok) throw new Error(json?.error ?? "Error al cargar.");
+    if (!json) throw new Error("Respuesta vacía.");
+    return json;
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/settings/ehr");
-      const json = await readJsonResponse<EhrSettingsData & { error?: string }>(
-        res
-      );
-      if (!res.ok) throw new Error(json?.error ?? "Error al cargar.");
-      if (!json) throw new Error("Respuesta vacía.");
-      setData(json);
-      setEnabled(json.organization.ehr_enabled);
-      setSource(json.organization.ehr_source ?? "");
+      applySettings(await fetchSettings());
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [applySettings, fetchSettings]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    let cancelled = false;
+    void fetchSettings()
+      .then((json) => {
+        if (!cancelled) applySettings(json);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Error");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [applySettings, fetchSettings]);
 
   const save = async (extra?: { regenerate_secret?: boolean }) => {
     setSaving(true);
@@ -106,22 +127,27 @@ export function EhrSettingsPanel() {
       >(res);
       if (!res.ok) throw new Error(json?.error ?? "Error al guardar.");
       if (!json) throw new Error("Respuesta vacía.");
-      setData((prev) =>
-        prev
-          ? {
-              ...prev,
-              organization: json.organization,
-              webhookUrl: json.webhookUrl,
-              batchSyncUrl: json.batchSyncUrl,
-            }
-          : json
-      );
+      setData((prev) => {
+        const nextSecret =
+          json.organization.webhook_secret ??
+          prev?.organization.webhook_secret ??
+          null;
+        return {
+          ...(prev ?? json),
+          organization: {
+            ...json.organization,
+            webhook_secret: nextSecret,
+          },
+          webhookUrl: json.webhookUrl,
+          batchSyncUrl: json.batchSyncUrl,
+          recentLogs: prev?.recentLogs ?? json.recentLogs ?? [],
+        };
+      });
       setMessage(
         extra?.regenerate_secret
-          ? "Secreto regenerado. Actualizá el middleware del EHR."
+          ? "Secreto regenerado. Actualiza el middleware del EHR."
           : "Configuración EHR guardada."
       );
-      await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
     } finally {
@@ -226,7 +252,7 @@ export function EhrSettingsPanel() {
           </div>
         ) : (
           <p className="text-xs text-amber-600">
-            Guardá con webhooks habilitados para generar el secreto.
+            Guarda con webhooks habilitados para generar el secreto.
           </p>
         )}
       </section>
