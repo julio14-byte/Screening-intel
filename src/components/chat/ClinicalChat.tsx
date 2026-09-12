@@ -18,9 +18,9 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { cn } from "@/lib/utils";
 
 const SUGGESTED_PROMPTS = [
-  "Convertí 'presión alta' a terminología ICD-11",
+  "Convierte 'presión alta' a terminología ICD-11",
   "¿Qué pacientes tenemos con diabetes?",
-  "Normalizá 'azúcar alta' según ICD-11",
+  "Normaliza 'azúcar alta' según ICD-11",
   "Muéstrame los screen failures para re-match",
 ];
 
@@ -212,7 +212,7 @@ export function ClinicalChat() {
 
           <form onSubmit={handleSubmit} className="flex items-end gap-2">
             <label htmlFor="chat-input" className="sr-only">
-              Escribí tu mensaje
+              Escribe tu mensaje
             </label>
             <textarea
               id="chat-input"
@@ -225,7 +225,7 @@ export function ClinicalChat() {
                   void handleSubmit(event);
                 }
               }}
-              placeholder="Ej: convertí 'azúcar alta' a terminología ICD-11"
+              placeholder="Ej: convierte 'azúcar alta' a terminología ICD-11"
               disabled={isBusy}
               className="min-h-[3rem] flex-1 resize-none rounded-xl border border-violet-200 bg-white px-3 py-2 text-sm text-indigo-950 placeholder:text-violet-300 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 disabled:opacity-60"
             />

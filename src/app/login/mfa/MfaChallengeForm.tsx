@@ -71,7 +71,7 @@ export function MfaChallengeForm() {
       router.replace(routes.afterLogin);
       router.refresh();
     } catch {
-      setError("Error de conexión. Intentá de nuevo.");
+      setError("Error de conexión. Intenta de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -88,7 +88,7 @@ export function MfaChallengeForm() {
             Verificación MFA
           </h1>
           <p className="mt-1 text-sm text-violet-200">
-            Ingresá el código de 6 dígitos de tu autenticador para {config.app.name}.
+            Ingresa el código de 6 dígitos de tu autenticador para {config.app.name}.
           </p>
         </div>
 

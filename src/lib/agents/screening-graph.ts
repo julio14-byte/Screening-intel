@@ -16,9 +16,11 @@ const SYSTEM_PROMPT =
   "Screening: search_patients (condición/estatus), match_protocol (protocol_id), list_screen_failures. " +
   "ICD-11: icd11_normalize_colloquial (coloquial → término oficial), icd11_search, icd11_get_entity. " +
   "Cuando el usuario use lenguaje coloquial (ej. 'presión alta', 'azúcar', 'tiroides lenta'), " +
-  "usá icd11_normalize_colloquial antes de responder o buscar pacientes. " +
-  "Presentá la conversión: coloquial → término ICD-11. " +
-  "Responde en español, claro y conciso. Al listar pacientes o diagnósticos, muestra solo nombres.";
+  "usa icd11_normalize_colloquial antes de responder o buscar pacientes. " +
+  "Presenta la conversión: coloquial → término ICD-11. " +
+  "Responde en español latinoamericano (tú, no vos), claro y conciso. " +
+  "Si citas criterios o el título de un protocolo, déjalos en el idioma original (no traduzcas el texto del sponsor). " +
+  "Al listar pacientes o diagnósticos, muestra solo nombres.";
 
 let agentPromise: Promise<ReturnType<typeof createReactAgent>> | null = null;
 

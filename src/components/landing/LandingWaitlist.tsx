@@ -44,7 +44,7 @@ export function LandingWaitlist() {
       setEmail("");
     } catch {
       setStatus("error");
-      setMessage("Error de conexión. Intentá de nuevo.");
+      setMessage("Error de conexión. Intenta de nuevo.");
     }
   }
 

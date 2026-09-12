@@ -155,6 +155,8 @@ const config = {
       ehrWebhook: "/api/webhooks/ehr",
       icd11Search: "/api/icd11/search",
       icd11Normalize: "/api/icd11/normalize",
+      matchingRationale: "/api/matching/rationale",
+      rematchCompare: "/api/matching/rematch-compare",
     },
   },
 
@@ -230,7 +232,7 @@ const config = {
         {
           icon: "RefreshCw",
           title: "Re-Match",
-          body: "Re-evalúa cohortes cuando cambian protocolos o criterios.",
+          body: "Re-evalúa cohortes cuando cambian protocolos o criterios, y compara alternativas tras un screen failure.",
         },
         {
           icon: "MessageSquare",

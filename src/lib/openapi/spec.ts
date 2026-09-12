@@ -61,7 +61,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
       description:
         "API REST de Screenlane (HealthTech / clinical research sites). " +
         "La mayoría de endpoints requieren sesión Supabase vía cookies (`sb-*`). " +
-        "Iniciá sesión con `POST /api/auth/login` desde el mismo navegador antes de probar endpoints protegidos en Swagger UI.",
+        "Inicia sesión con `POST /api/auth/login` desde el mismo navegador antes de probar endpoints protegidos en Swagger UI.",
       contact: {
         name: "Screenlane",
       },
@@ -74,7 +74,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
       { name: "Audit", description: "Bitácora CFR Part 11" },
       { name: "RBAC", description: "Roles clínicos" },
       { name: "ICD-11", description: "Terminología WHO ICD-11" },
-      { name: "AI", description: "Asistente clínico" },
+      { name: "AI", description: "Justificación y comparación clínica (GPT-4o-mini)" },
       { name: "Stripe", description: "Facturación SaaS" },
       { name: "Waitlist", description: "Landing / captación" },
     ],
@@ -85,7 +85,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           in: "cookie",
           name: "sb-access-token",
           description:
-            "Sesión Supabase SSR (cookies HttpOnly). Usá «Authorize» tras login en /login o probá endpoints desde este mismo origen.",
+            "Sesión Supabase SSR (cookies HttpOnly). Usa «Authorize» tras login en /login o prueba endpoints desde este mismo origen.",
         },
       },
       schemas: {
@@ -315,6 +315,45 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           },
         },
       },
+      "/api/matching/rematch-compare": {
+        post: {
+          tags: ["AI"],
+          summary: "Comparar protocolos de re-match",
+          description:
+            "Tras un screen failure, resume qué protocolo alternativo priorizar. No cambia el veredicto del motor.",
+          security: [{ cookieAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["patient", "failures", "alternatives"],
+                  properties: {
+                    patient: { type: "object" },
+                    failures: { type: "array", items: { type: "object" } },
+                    alternatives: { type: "array", items: { type: "object" } },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": {
+              description: "Texto de comparación",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: { comparison: { type: "string" } },
+                  },
+                },
+              },
+            },
+            "401": { description: "No autenticado", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+      },
       "/api/waitlist": {
         post: {
           tags: ["Waitlist"],
@@ -377,7 +416,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
         post: {
           tags: ["Protocols"],
           summary: "Extraer criterios de protocolo (PDF/TXT + IA)",
-          description: "Sube PDF o TXT; GPT-4o-mini devuelve criterios estructurados.",
+          description: "Sube PDF o TXT; GPT-4o-mini estructura criterios en el idioma original del documento (no traduce).",
           security: [{ cookieAuth: [] }],
           requestBody: {
             required: true,

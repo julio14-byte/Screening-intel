@@ -57,14 +57,19 @@ export async function extractProtocolCriteriaFromText(
         {
           role: "system",
           content:
-            "Extraé criterios de inclusión y exclusión de protocolos clínicos en español. " +
-            "Respondé SOLO JSON válido con esta forma:\n" +
+            "Extrae título, código y criterios de inclusión/exclusión de un protocolo clínico. " +
+            "Copia title, required_conditions, excluded_conditions, excluded_medications, " +
+            "nombres de labs y units en el IDIOMA ORIGINAL del documento. " +
+            "NO traduzcas: un PDF en inglés (sponsor de EUA) debe quedar en inglés. " +
+            "Solo estructura el JSON; no reescribas términos clínicos. " +
+            "Responde SOLO JSON válido con esta forma:\n" +
             EXTRACTION_SCHEMA,
         },
         {
           role: "user",
           content:
-            "Extraé título, código sugerido y criterios estructurados de este protocolo:\n\n" +
+            "Extrae título, código sugerido y criterios estructurados de este protocolo. " +
+            "No traduzcas el texto clínico.\n\n" +
             trimmed,
         },
       ],

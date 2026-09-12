@@ -77,7 +77,7 @@ begin
   v_caller_role := public.get_user_app_role();
 
   if p_user_id = auth.uid() and p_role <> v_caller_role then
-    raise exception 'No podés cambiar tu propio rol; otro investigador debe hacerlo.';
+    raise exception 'No puedes cambiar tu propio rol; otro investigador debe hacerlo.';
   end if;
 
   insert into public.user_roles (user_id, role, assigned_by)

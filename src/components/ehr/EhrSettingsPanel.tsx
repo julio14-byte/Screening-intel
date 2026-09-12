@@ -118,7 +118,7 @@ export function EhrSettingsPanel() {
       );
       setMessage(
         extra?.regenerate_secret
-          ? "Secreto regenerado. Actualizá el middleware del EHR."
+          ? "Secreto regenerado. Actualiza el middleware del EHR."
           : "Configuración EHR guardada."
       );
       await load();
@@ -226,7 +226,7 @@ export function EhrSettingsPanel() {
           </div>
         ) : (
           <p className="text-xs text-amber-600">
-            Guardá con webhooks habilitados para generar el secreto.
+            Guarda con webhooks habilitados para generar el secreto.
           </p>
         )}
       </section>

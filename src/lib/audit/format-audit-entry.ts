@@ -92,7 +92,7 @@ export function formatAuditEntry(log: AuditLog): FormattedAuditEntry {
 
 export function formatAuditTimestamp(iso: string): string {
   try {
-    return new Intl.DateTimeFormat("es-AR", {
+    return new Intl.DateTimeFormat("es-419", {
       dateStyle: "medium",
       timeStyle: "medium",
       timeZone: "UTC",

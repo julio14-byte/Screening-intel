@@ -8,7 +8,7 @@ let tokenCache = null;
 function getEnv(name) {
     const value = process.env[name]?.trim();
     if (!value) {
-        throw new Error(`Falta ${name}. Copiá mcp-icd11/.env.example a mcp-icd11/.env y completá tus credenciales WHO.`);
+        throw new Error(`Falta ${name}. Copia mcp-icd11/.env.example a mcp-icd11/.env y completa tus credenciales WHO.`);
     }
     return value;
 }

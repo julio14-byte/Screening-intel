@@ -3,81 +3,70 @@
 import { useState } from "react";
 import { Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import type { MatchRationaleInput } from "@/lib/matching/generateMatchRationale";
+import type { RematchCompareInput } from "@/lib/matching/generateRematchCompare";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
-import { cn } from "@/lib/utils";
 
-export function MatchRationalePanel({
-  input,
-  compact = false,
-  className,
-}: {
-  input: MatchRationaleInput;
-  compact?: boolean;
-  className?: string;
-}) {
-  const [rationale, setRationale] = useState<string | null>(null);
+const MAX_ALTERNATIVES = 5;
+
+export function RematchComparePanel({ input }: { input: RematchCompareInput }) {
+  const [comparison, setComparison] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  if (input.alternatives.length === 0) return null;
 
   async function handleGenerate() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/matching/rationale", {
+      const res = await fetch("/api/matching/rematch-compare", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(input),
+        body: JSON.stringify({
+          ...input,
+          alternatives: input.alternatives.slice(0, MAX_ALTERNATIVES),
+        }),
       });
-      const data = await readJsonResponse<{ rationale?: string; error?: string }>(
-        res
-      );
+      const data = await readJsonResponse<{
+        comparison?: string;
+        error?: string;
+      }>(res);
       if (!res.ok) {
         setError(data?.error ?? `Error ${res.status}`);
         return;
       }
-      setRationale(data?.rationale ?? null);
+      setComparison(data?.comparison ?? null);
     } catch {
-      setError("Error de conexión al generar la justificación.");
+      setError("Error de conexión al comparar protocolos.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div
-      className={cn(
-        "rounded-lg border border-violet-200/80 bg-violet-50/40",
-        compact ? "p-2.5" : "p-3",
-        className
-      )}
-      onClick={(e) => e.stopPropagation()}
-    >
+    <div className="rounded-lg border border-emerald-200/80 bg-emerald-50/40 p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="flex items-center gap-1.5 text-xs font-medium text-violet-900">
-          <Sparkles className="h-3.5 w-3.5 text-violet-600" aria-hidden />
-          Justificación clínica (IA)
+        <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-900">
+          <Sparkles className="h-3.5 w-3.5 text-emerald-600" aria-hidden />
+          Qué protocolo llamar primero (IA)
         </p>
         <Button
           type="button"
           variant="secondary"
-          className={cn(
-            "text-xs",
-            compact && "h-8 px-2.5 py-1"
-          )}
+          className="text-xs"
           disabled={loading}
           onClick={() => void handleGenerate()}
         >
           {loading ? (
             <>
               <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
-              Generando…
+              Comparando…
             </>
-          ) : rationale ? (
+          ) : comparison ? (
             "Regenerar"
           ) : (
-            "Generar explicación"
+            "Comparar alternativas"
           )}
         </Button>
       </div>
@@ -88,15 +77,14 @@ export function MatchRationalePanel({
         </p>
       ) : null}
 
-      {rationale ? (
+      {comparison ? (
         <div className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-indigo-900">
-          {rationale}
+          {comparison}
         </div>
       ) : !error && !loading ? (
         <p className="mt-2 text-[11px] text-indigo-500">
-          Resume el veredicto del motor en español. Los criterios del
-          protocolo se citan tal cual (no se traducen). No modifica la
-          elegibilidad.
+          Ordena los protocolos según el motor (elegible primero) e indica qué
+          falta para la llamada. No cambia el semáforo.
         </p>
       ) : null}
     </div>

@@ -150,7 +150,7 @@ export function ScreeningFunnelDashboard({
         <Card>
           <EmptyState
             title="El embudo está vacío"
-            description="Ejecutá matching en un protocolo para poblar el pipeline de screening."
+            description="Ejecuta matching en un protocolo para poblar el pipeline de screening."
             action={
               <Link href={routes.app.protocols} className="text-xs font-medium text-indigo-700">
                 Ir a Protocol Matcher →

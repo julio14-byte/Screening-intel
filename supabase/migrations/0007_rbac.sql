@@ -208,7 +208,7 @@ begin
   end if;
 
   if p_user_id = auth.uid() and p_role <> 'investigator'::public.app_role then
-    raise exception 'No podés degradarte a vos mismo; otro investigador debe hacerlo.';
+    raise exception 'No puedes degradarte a ti mismo; otro investigador debe hacerlo.';
   end if;
 
   insert into public.user_roles (user_id, role, assigned_by)

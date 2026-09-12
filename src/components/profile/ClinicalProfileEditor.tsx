@@ -78,7 +78,7 @@ export function ClinicalProfileEditor({
           <div className="flex items-center gap-3">
             {savedAt && !dirty ? (
               <span className="text-xs text-emerald-600">
-                Guardado {savedAt.toLocaleTimeString("es-AR")}
+                Guardado {savedAt.toLocaleTimeString("es-419")}
               </span>
             ) : null}
             <RoleGuard permission="profiles:write">
@@ -99,14 +99,14 @@ export function ClinicalProfileEditor({
 
       {!profile && canEdit ? (
         <p className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-          Este paciente todavía no tiene perfil clínico. Cargá sus datos y
-          guardá para habilitar el matching contra protocolos.
+          Este paciente todavía no tiene perfil clínico. Carga sus datos y
+          guarda para habilitar el matching contra protocolos.
         </p>
       ) : null}
 
       {isReadOnly ? (
         <p className="mb-4 rounded-md border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-800">
-          Modo solo lectura (Monitor CRA). Podés revisar el expediente y la
+          Modo solo lectura (Monitor CRA). Puedes revisar el expediente y la
           bitácora de auditoría, sin modificar datos clínicos.
         </p>
       ) : null}

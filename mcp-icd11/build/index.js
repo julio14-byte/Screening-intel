@@ -80,7 +80,7 @@ server.registerTool("icd11_get_entity", {
 });
 async function main() {
     if (!process.env.ICD11_CLIENT_ID || !process.env.ICD11_CLIENT_SECRET) {
-        throw new Error("Faltan ICD11_CLIENT_ID e ICD11_CLIENT_SECRET. Copiá mcp-icd11/.env.example a mcp-icd11/.env");
+        throw new Error("Faltan ICD11_CLIENT_ID e ICD11_CLIENT_SECRET. Copia mcp-icd11/.env.example a mcp-icd11/.env");
     }
     const transport = new StdioServerTransport();
     await server.connect(transport);

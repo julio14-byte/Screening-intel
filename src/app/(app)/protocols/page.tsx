@@ -26,7 +26,7 @@ export default function ProtocolsPage() {
     <>
       <PageHeader
         title="Protocol Matcher"
-        description="Protocolos con criterios estructurados. Seleccioná uno para cruzarlo contra pacientes."
+        description="Protocolos con criterios estructurados. Se guardan en el idioma del sponsor (p. ej. inglés). Selecciona uno para cruzarlo contra pacientes."
         actions={
           <RoleGuard permission="protocols:write">
             <Button onClick={() => setModalOpen(true)}>
@@ -45,7 +45,7 @@ export default function ProtocolsPage() {
         <Card>
           <EmptyState
             title="Todavía no hay protocolos"
-            description="Dá de alta un protocolo con sus criterios de inclusión y exclusión para empezar a matchear pacientes."
+            description="Da de alta un protocolo con sus criterios de inclusión y exclusión para empezar a matchear pacientes."
           />
         </Card>
       ) : (
