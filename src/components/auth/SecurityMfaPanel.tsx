@@ -86,7 +86,7 @@ export function SecurityMfaPanel({ forceEnroll = false }: { forceEnroll?: boolea
       if (enrollError || !data || data.type !== "totp") {
         setError(
           enrollError?.message ??
-            "No se pudo iniciar el alta de MFA. Habilitá TOTP en Supabase → Authentication → MFA."
+            "No se pudo iniciar el alta de MFA. Habilita TOTP en Supabase → Authentication → MFA."
         );
         return;
       }
@@ -120,7 +120,7 @@ export function SecurityMfaPanel({ forceEnroll = false }: { forceEnroll?: boolea
       setSecret(null);
       setFactorId(null);
       setCode("");
-      setInfo("MFA activado. Ya podés usar la app con el código de tu autenticador.");
+      setInfo("MFA activado. Ya puedes usar la app con el código de tu autenticador.");
       await refreshFactors();
       router.replace("/dashboard");
       router.refresh();
@@ -177,7 +177,7 @@ export function SecurityMfaPanel({ forceEnroll = false }: { forceEnroll?: boolea
 
       {needsEnroll && verified.length === 0 ? (
         <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-          Tu rol clínico requiere MFA. Escaneá el QR y confirmá un código para
+          Tu rol clínico requiere MFA. Escanea el QR y confirma un código para
           continuar.
         </p>
       ) : null}

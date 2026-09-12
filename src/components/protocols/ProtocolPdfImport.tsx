@@ -43,7 +43,7 @@ export function ProtocolPdfImport({
 
       onExtracted(data.draft);
       setInfo(
-        `Criterios extraídos (${data.textLength ?? 0} caracteres analizados). Revisá y editá antes de guardar.`
+        `Criterios extraídos (${data.textLength ?? 0} caracteres analizados). Revisa y edita antes de guardar.`
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al procesar archivo.");
@@ -61,8 +61,9 @@ export function ProtocolPdfImport({
             Importar criterios con IA (Fase A)
           </p>
           <p className="mt-1 text-xs text-violet-700">
-            Subí un PDF o TXT del protocolo. GPT-4o-mini extrae inclusión/exclusión
-            y pre-rellena el formulario.
+            Sube un PDF o TXT del protocolo. La IA extrae inclusión/exclusión
+            y deja los criterios en el idioma del sponsor (inglés si el PDF
+            está en inglés). Revisa antes de guardar.
           </p>
         </div>
         <Button

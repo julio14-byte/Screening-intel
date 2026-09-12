@@ -23,7 +23,7 @@ export function ClinicalNotesImport({
   async function handleExtract() {
     const text = notes.trim();
     if (!text) {
-      setError("Pegá o escribí notas clínicas antes de extraer.");
+      setError("Pega o escribe notas clínicas antes de extraer.");
       return;
     }
 
@@ -51,7 +51,7 @@ export function ClinicalNotesImport({
 
       onExtracted(data.draft);
       setInfo(
-        `Perfil pre-rellenado (${data.charCount ?? text.length} caracteres analizados). Revisá y editá antes de guardar.`
+        `Perfil pre-rellenado (${data.charCount ?? text.length} caracteres analizados). Revisa y edita antes de guardar.`
       );
     } catch (err) {
       setError(
@@ -69,8 +69,8 @@ export function ClinicalNotesImport({
         Notas clínicas → perfil estructurado (IA)
       </p>
       <p className="mt-1 text-xs text-cyan-800">
-        Pegá texto libre para rellenar el formulario de condiciones, medicación
-        y laboratorios. Revisá y editá antes de guardar.
+        Pega texto libre para rellenar el formulario de condiciones, medicación
+        y laboratorios. Revisa y edita antes de guardar.
       </p>
 
       <textarea

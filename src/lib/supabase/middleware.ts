@@ -136,7 +136,7 @@ async function runUpdateSession(request: NextRequest) {
       await supabase.auth.signOut();
       if (pathname.startsWith("/api/")) {
         const json = NextResponse.json(
-          { error: "Sesión expirada. Volvé a iniciar sesión." },
+          { error: "Sesión expirada. Vuelve a iniciar sesión." },
           { status: 401 }
         );
         applyBufferedCookies(json, sessionCookies);
@@ -186,7 +186,7 @@ async function runUpdateSession(request: NextRequest) {
                 {
                   error: enrolled
                     ? "Se requiere el código MFA de tu autenticador."
-                    : "Debés activar MFA (TOTP) para continuar.",
+                    : "Debes activar MFA (TOTP) para continuar.",
                 },
                 { status: 403 }
               )

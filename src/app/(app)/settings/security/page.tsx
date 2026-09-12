@@ -13,7 +13,7 @@ export default async function SecuritySettingsPage({
     <>
       <PageHeader
         title="Seguridad de la cuenta"
-        description="Activá MFA TOTP para proteger el acceso a datos clínicos. En producción es obligatorio para investigator y sub-investigator."
+        description="Activa MFA TOTP para proteger el acceso a datos clínicos. En producción es obligatorio para investigator y sub-investigator."
       />
       <SecurityMfaPanel forceEnroll={enroll} />
     </>

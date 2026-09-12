@@ -81,8 +81,8 @@ export default function PatientsPage() {
             title={query ? "Sin resultados" : "Todavía no hay pacientes"}
             description={
               query
-                ? "Probá con otro término de búsqueda."
-                : "Agregá el primer paciente para comenzar el pre-screening."
+                ? "Prueba con otro término de búsqueda."
+                : "Agrega el primer paciente para comenzar el pre-screening."
             }
           />
         ) : (

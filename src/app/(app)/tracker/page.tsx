@@ -34,7 +34,7 @@ export default function TrackerPage() {
     <>
       <PageHeader
         title="Screening Tracker"
-        description="Pipeline de screening: arrastrá las tarjetas (o usá las flechas) para mover pacientes entre etapas."
+        description="Pipeline de screening: arrastra las tarjetas (o usa las flechas) para mover pacientes entre etapas."
       />
 
       {moveError ? (
@@ -51,7 +51,7 @@ export default function TrackerPage() {
         <Card>
           <EmptyState
             title="El pipeline está vacío"
-            description="Ejecutá el matching de un protocolo y agregá pacientes a pre-screening para verlos acá."
+            description="Ejecuta el matching de un protocolo y agrega pacientes a pre-screening para verlos aquí."
             action={
               <Link
                 href="/protocols"

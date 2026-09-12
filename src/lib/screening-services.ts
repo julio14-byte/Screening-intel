@@ -1,7 +1,11 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { evaluatePatientAgainstProtocol } from "@/lib/matching";
 import type { ClinicalProfile, Patient, Protocol } from "@/lib/types";
+<<<<<<< HEAD
 import { normalizeTerm, toPatientInitials } from "@/lib/utils";
+=======
+import { clinicalTermsMatch } from "@/lib/matching/clinicalTerms";
+>>>>>>> origin/cursor/rematch-compare-ai-4921
 
 let serviceClient: SupabaseClient | null = null;
 
@@ -38,11 +42,8 @@ function requireOrganizationId(organizationId: string | undefined): string | { e
 }
 
 function matchesCondition(conditions: string[], search: string): boolean {
-  const term = normalizeTerm(search);
-  return conditions.some(
-    (condition) =>
-      normalizeTerm(condition).includes(term) ||
-      term.includes(normalizeTerm(condition))
+  return conditions.some((condition) =>
+    clinicalTermsMatch(condition, search, "condition")
   );
 }
 

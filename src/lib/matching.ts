@@ -6,7 +6,11 @@ import type {
   Patient,
   Protocol,
 } from "./types";
-import { calculateAge, GENDER_LABELS, normalizeTerm } from "./utils";
+import {
+  findLabValue,
+  someTermMatches,
+} from "./matching/clinicalTerms";
+import { calculateAge, GENDER_LABELS } from "./utils";
 
 /**
  * Motor de reglas de elegibilidad.
@@ -17,6 +21,10 @@ import { calculateAge, GENDER_LABELS, normalizeTerm } from "./utils";
  *    o "excluded" (🔴 activa una exclusión o falla un criterio duro).
  *  - score: % de criterios superados sobre el total de criterios evaluados.
  *  - details: resultado criterio por criterio para trazabilidad.
+ *
+ * Los criterios se comparan con sinónimos clínicos ES/EN (p. ej.
+ * "type 2 diabetes mellitus" ↔ "diabetes tipo 2") sin reescribir el texto
+ * del protocolo.
  */
 export function evaluatePatientAgainstProtocol(
   patient: Patient,
@@ -27,12 +35,9 @@ export function evaluatePatientAgainstProtocol(
   const inclusion = protocol.inclusion_criteria ?? {};
   const exclusion = protocol.exclusion_criteria ?? {};
 
-  const conditions = (profile?.conditions ?? []).map(normalizeTerm);
-  const medications = (profile?.medications ?? []).map(normalizeTerm);
+  const conditions = profile?.conditions ?? [];
+  const medications = profile?.medications ?? [];
   const labs = profile?.laboratories ?? {};
-  const normalizedLabs = new Map<string, number>(
-    Object.entries(labs).map(([k, v]) => [normalizeTerm(k), Number(v)])
-  );
 
   // --- Inclusión: edad -------------------------------------------------------
   const age = calculateAge(patient.birth_date);
@@ -62,7 +67,6 @@ export function evaluatePatientAgainstProtocol(
 
   // --- Inclusión: condiciones requeridas ------------------------------------
   for (const required of inclusion.required_conditions ?? []) {
-    const target = normalizeTerm(required);
     if (!profile) {
       details.push({
         type: "inclusion",
@@ -72,9 +76,7 @@ export function evaluatePatientAgainstProtocol(
       });
       continue;
     }
-    const pass = conditions.some(
-      (c) => c.includes(target) || target.includes(c)
-    );
+    const pass = someTermMatches(conditions, required, "condition");
     details.push({
       type: "inclusion",
       criterion: `Diagnóstico requerido: ${required}`,
@@ -94,7 +96,7 @@ export function evaluatePatientAgainstProtocol(
       .filter(Boolean)
       .join(" y ");
     const label = `Lab ${lab.name} ${range}${lab.unit ? ` ${lab.unit}` : ""}`;
-    const value = normalizedLabs.get(normalizeTerm(lab.name));
+    const value = findLabValue(labs, lab.name);
 
     if (value == null || Number.isNaN(value)) {
       details.push({
@@ -118,7 +120,6 @@ export function evaluatePatientAgainstProtocol(
 
   // --- Exclusión: condiciones prohibidas -------------------------------------
   for (const excluded of exclusion.excluded_conditions ?? []) {
-    const target = normalizeTerm(excluded);
     if (!profile) {
       details.push({
         type: "exclusion",
@@ -128,9 +129,7 @@ export function evaluatePatientAgainstProtocol(
       });
       continue;
     }
-    const triggered = conditions.some(
-      (c) => c.includes(target) || target.includes(c)
-    );
+    const triggered = someTermMatches(conditions, excluded, "condition");
     details.push({
       type: "exclusion",
       criterion: `Condición excluyente: ${excluded}`,
@@ -143,7 +142,6 @@ export function evaluatePatientAgainstProtocol(
 
   // --- Exclusión: medicamentos prohibidos -------------------------------------
   for (const excluded of exclusion.excluded_medications ?? []) {
-    const target = normalizeTerm(excluded);
     if (!profile) {
       details.push({
         type: "exclusion",
@@ -153,9 +151,7 @@ export function evaluatePatientAgainstProtocol(
       });
       continue;
     }
-    const triggered = medications.some(
-      (m) => m.includes(target) || target.includes(m)
-    );
+    const triggered = someTermMatches(medications, excluded, "medication");
     details.push({
       type: "exclusion",
       criterion: `Medicación excluyente: ${excluded}`,

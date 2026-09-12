@@ -17,7 +17,12 @@ Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-sc
 | **MFA TOTP** | Obligatorio en producción para investigator y sub-investigator (`/settings/security`, `/login/mfa`). |
 | **Sesión** | Timeout de inactividad (30 min) y tope absoluto (8 h); login demo apagado en production. |
 | **Backups** | Procedimiento de restore PITR en [`docs/BACKUP.md`](docs/BACKUP.md). |
+<<<<<<< HEAD
 | **Triage IA de candidatos** | Briefing para la llamada de pre-screening desde el inbox (`POST /api/candidatos/:id/triage`). |
+=======
+| **Comparador Re-Match IA** | Tras un screen failure, indica qué protocolo alternativo llamar primero (`POST /api/matching/rematch-compare`). |
+| **Idioma** | App y portal en español latinoamericano. Criterios del protocolo se conservan en el idioma del sponsor; el matching unifica sinónimos ES/EN. |
+>>>>>>> origin/cursor/rematch-compare-ai-4921
 | **Justificación clínica IA** | Texto en español que explica el veredicto del matching sin alterar la elegibilidad (`POST /api/matching/rationale`). |
 | **Portal de candidatos** | Pre-registro público en `/candidato`, inbox en `/candidatos` y settings en `/settings/portal`. |
 | **Re-Match nativo** | Propone protocolos alternativos tras un screen failure; se refresca automáticamente cuando el EHR envía labs o diagnósticos nuevos. |
@@ -86,7 +91,7 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | `/protocols` | Gestión de protocolos |
 | `/protocols/[id]/match` | Cruce masivo paciente ↔ protocolo + justificación IA |
 | `/tracker` | Pipeline Kanban con drag & drop |
-| `/rematch` | Re-matching automático post screen failure |
+| `/rematch` | Re-matching automático post screen failure + comparador IA de alternativas |
 | `/candidato` | Portal público de pre-registro (pacientes) |
 | `/candidatos` | Inbox de leads del portal + briefing IA para la llamada |
 | `/settings/portal` | Configuración del portal (investigator) |
@@ -136,7 +141,7 @@ Ver [`.env.example`](.env.example) para Stripe, ICD-11, MFA/sesión y login demo
 
 ### 3. Base de datos (Supabase)
 
-Ejecutá las migraciones **en orden** en el SQL Editor o con la CLI:
+Ejecuta las migraciones **en orden** en el SQL Editor o con la CLI:
 
 ```text
 supabase/migrations/0001_initial_schema.sql
@@ -157,7 +162,11 @@ supabase/migrations/0017_secure_patient_data.sql
 supabase/migrations/0018_tenant_rls_portal_sites.sql
 ```
 
+<<<<<<< HEAD
 Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
+=======
+Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
+>>>>>>> origin/cursor/rematch-compare-ai-4921
 
 Opcional — datos de demo o activar Pro sin Stripe:
 
@@ -203,7 +212,13 @@ La lógica central está en [`src/lib/matching.ts`](src/lib/matching.ts):
 
 Cada screening guarda `match_score` (0–100) y `match_details` (trazabilidad criterio por criterio).
 
+<<<<<<< HEAD
 **Justificación clínica (IA):** en matching y re-match, `POST /api/matching/rationale` genera un texto en español que explica el veredicto usando solo esos datos — **sin modificar la elegibilidad**. OpenAI recibe iniciales del paciente, no el nombre completo.
+=======
+**Idioma:** la app (UI, portal, IA operativa) está en **español latinoamericano**. Título y criterios del protocolo se guardan **en el idioma del sponsor** (p. ej. inglés en PDFs de farmacéuticas de EUA). `POST /api/protocols/extract` no traduce esos textos. El motor unifica sinónimos clínicos ES/EN al comparar (`src/lib/matching/clinicalTerms.ts`): `hypertension` ↔ `hipertensión`, `HbA1c` ↔ `hemoglobina glicosilada`. No cruza hermanos (`type 1 diabetes` ↛ `diabetes tipo 2`).
+
+**Justificación clínica (IA):** en matching, `POST /api/matching/rationale` explica un cruce. En Re-Match, `POST /api/matching/rematch-compare` compara alternativas tras un screen failure. Ninguna modifica la elegibilidad ni traduce los criterios del protocolo.
+>>>>>>> origin/cursor/rematch-compare-ai-4921
 
 ---
 
@@ -214,6 +229,7 @@ Cada screening guarda `match_score` (0–100) y `match_details` (trazabilidad cr
 | Triage de candidatos | `/candidatos` · `POST /api/candidatos/:id/triage` | GPT-4o-mini |
 | Extracción de protocolos PDF | `POST /api/protocols/extract` | GPT-4o-mini |
 | Perfil clínico desde notas | `POST /api/patients/profile/extract` | GPT-4o-mini |
+| Comparar alternativas (Re-Match) | `/rematch` · `POST /api/matching/rematch-compare` | GPT-4o-mini |
 | Justificación del matching | `POST /api/matching/rationale` | GPT-4o-mini |
 | Normalización ICD-11 | `GET /api/icd11/normalize` | API WHO (no LLM) |
 | Matching / Re-Match | Motor de reglas | Sin LLM |
@@ -352,14 +368,14 @@ Detalle: [`docs/STRIPE_SETUP.md`](docs/STRIPE_SETUP.md).
 
 ## Deploy en Vercel
 
-1. Importá el repositorio en [Vercel](https://vercel.com).
-2. Configurá las variables de `.env.example`.
+1. Importa el repositorio en [Vercel](https://vercel.com).
+2. Configura las variables de `.env.example`.
 3. Webhooks:
    - Stripe → `https://tu-dominio/api/webhooks/stripe`
    - EHR → `https://tu-dominio/api/webhooks/ehr`
 4. `NEXT_PUBLIC_APP_URL` → URL de producción
 5. **Authentication → MFA** → Enable TOTP (si no, investigator/sub-PI no pueden enrolar)
-6. **Database → Backups** → activá PITR en Pro (ver [`docs/BACKUP.md`](docs/BACKUP.md))
+6. **Database → Backups** → activa PITR en Pro (ver [`docs/BACKUP.md`](docs/BACKUP.md))
 7. No definas `ALLOW_DEMO_LOGIN=true` en el proyecto de producción
 
 ```bash
@@ -420,7 +436,7 @@ docs/                        # STRIPE_SETUP.md, BACKUP.md, etc.
 
 Backups y restore (PITR): [`docs/BACKUP.md`](docs/BACKUP.md).
 
-Antes de producción con datos reales de pacientes: revisá políticas RLS, rotá claves, activá MFA en el dashboard de Auth, configurá PITR en Pro y completá evaluación de cumplimiento (HIPAA / GDPR según jurisdicción).
+Antes de producción con datos reales de pacientes: revisa políticas RLS, rota claves, activa MFA en el dashboard de Auth, configura PITR en Pro y completa evaluación de cumplimiento (HIPAA / GDPR según jurisdicción).
 
 ---
 

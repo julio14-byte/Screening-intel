@@ -2,8 +2,8 @@
 -- Sub-investigador — PASO 1: agregar valor al enum
 -- =============================================================================
 -- Ejecutar después de 0007_rbac.sql
--- IMPORTANTE: en el SQL Editor de Supabase, ejecutá SOLO este archivo primero.
--- Luego ejecutá 0012_sub_investigator_rbac.sql (PostgreSQL exige commit del enum).
+-- IMPORTANTE: en el SQL Editor de Supabase, ejecuta SOLO este archivo primero.
+-- Luego ejecuta 0012_sub_investigator_rbac.sql (PostgreSQL exige commit del enum).
 
 do $$
 begin

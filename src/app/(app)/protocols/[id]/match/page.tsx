@@ -74,7 +74,7 @@ export default function ProtocolMatchPage({
         {results.length === 0 ? (
           <EmptyState
             title="No hay pacientes para evaluar"
-            description="Cargá pacientes en el registro para ejecutar el matching."
+            description="Carga pacientes en el registro para ejecutar el matching."
           />
         ) : (
           <MatchResultsTable
