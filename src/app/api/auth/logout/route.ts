@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { clearSessionActivityCookies } from "@/lib/auth/session-policy";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 export async function POST(request: NextRequest) {
@@ -36,6 +37,7 @@ export async function POST(request: NextRequest) {
   sessionCookies.forEach(({ name, value, options }) =>
     jsonResponse.cookies.set(name, value, options)
   );
+  clearSessionActivityCookies(jsonResponse);
 
   return jsonResponse;
 }

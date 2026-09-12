@@ -1,4 +1,5 @@
 import { getDemoCredentials } from "@/lib/auth/constants";
+import { isDemoLoginEnabled } from "@/lib/auth/session-policy";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 function isDemoLogin(email: string, password: string): boolean {
@@ -19,6 +20,13 @@ export async function provisionDemoUserIfNeeded(
 ): Promise<{ ok: true } | { ok: false; reason: string }> {
   if (!isDemoLogin(email, password)) {
     return { ok: false, reason: "not_demo" };
+  }
+
+  if (!isDemoLoginEnabled()) {
+    return {
+      ok: false,
+      reason: "El acceso demo no está disponible en este entorno.",
+    };
   }
 
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {

@@ -12,7 +12,8 @@ export async function getPaywallRedirect(
   if (!config.features.payments) return null;
 
   const isAccountPath = pathname.startsWith("/account");
-  if (isAccountPath) return null;
+  const isSecurityPath = pathname.startsWith("/settings/security");
+  if (isAccountPath || isSecurityPath) return null;
 
   try {
     const organization = await getOrganizationForUser(userId);

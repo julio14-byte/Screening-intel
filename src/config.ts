@@ -87,6 +87,7 @@ const config = {
   routes: {
     landing: "/",
     login: "/login",
+    loginMfa: "/login/mfa",
     afterLogin: "/dashboard",
     protected: [
       "/dashboard",
@@ -101,6 +102,7 @@ const config = {
       "/settings/roles",
       "/settings/portal",
       "/settings/ehr",
+      "/settings/security",
       "/candidatos",
       "/semaforos",
       "/devices",
@@ -134,6 +136,7 @@ const config = {
       roles: "/settings/roles",
       portalSettings: "/settings/portal",
       ehrSettings: "/settings/ehr",
+      security: "/settings/security",
       candidatos: "/candidatos",
       docs: "/docs",
       apiDocs: "/docs/api",

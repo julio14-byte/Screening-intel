@@ -1,8 +1,10 @@
 import { Suspense } from "react";
 import { getDemoCredentials } from "@/lib/auth/constants";
+import { isDemoLoginEnabled } from "@/lib/auth/session-policy";
 import { LoginForm } from "./LoginForm";
 
 export default function LoginPage() {
+  const demoEnabled = isDemoLoginEnabled();
   const demo = getDemoCredentials();
 
   return (
@@ -14,9 +16,9 @@ export default function LoginPage() {
       }
     >
       <LoginForm
-        demoEmail={demo.email}
-        demoPassword={demo.password}
-        showDemoHint={process.env.NODE_ENV !== "production"}
+        demoEmail={demoEnabled ? demo.email : ""}
+        demoPassword={demoEnabled ? demo.password : ""}
+        showDemoHint={demoEnabled}
       />
     </Suspense>
   );

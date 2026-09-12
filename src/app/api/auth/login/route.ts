@@ -1,8 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { getDemoCredentials } from "@/lib/auth/constants";
+import { getDemoCredentials, isDemoEmail } from "@/lib/auth/constants";
 import { ensureDemoPatientData } from "@/lib/auth/demo-seed";
 import { provisionDemoUserIfNeeded } from "@/lib/auth/demo-user";
+import {
+  applySessionActivityCookies,
+  isDemoLoginEnabled,
+  shouldSkipMfaForUser,
+} from "@/lib/auth/session-policy";
+import type { AppRole } from "@/lib/rbac/types";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 type SessionCookie = {
@@ -39,6 +45,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (isDemoEmail(email) && !isDemoLoginEnabled()) {
+    return NextResponse.json(
+      { error: "El acceso demo no está disponible en este entorno." },
+      { status: 403 }
+    );
+  }
+
   const sessionCookies: SessionCookie[] = [];
 
   const supabase = createServerClient(
@@ -69,10 +82,7 @@ export async function POST(request: NextRequest) {
       error = retry.error;
     } else if (provision.reason !== "not_demo") {
       const demo = getDemoCredentials();
-      if (
-        email === demo.email.toLowerCase() &&
-        password === demo.password
-      ) {
+      if (email === demo.email.toLowerCase() && password === demo.password) {
         return NextResponse.json({ error: provision.reason }, { status: 401 });
       }
     }
@@ -80,10 +90,7 @@ export async function POST(request: NextRequest) {
 
   if (error) {
     const demo = getDemoCredentials();
-    if (
-      email === demo.email.toLowerCase() &&
-      password === demo.password
-    ) {
+    if (email === demo.email.toLowerCase() && password === demo.password) {
       return NextResponse.json(
         {
           error:
@@ -96,8 +103,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 401 });
   }
 
-  const demo = getDemoCredentials();
-  if (email === demo.email.toLowerCase()) {
+  if (isDemoEmail(email) && isDemoLoginEnabled()) {
     try {
       await ensureDemoPatientData();
     } catch (seedErr) {
@@ -105,8 +111,40 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const jsonResponse = NextResponse.json({ email });
+  let mfaRequired = false;
+  let mfaEnrollmentRequired = false;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    const { data: roleRow } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    const role = (roleRow?.role as AppRole | undefined) ?? "coordinator";
+
+    if (!shouldSkipMfaForUser(user.email, role)) {
+      const { data: aal } =
+        await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aal && aal.currentLevel !== "aal2") {
+        if (aal.nextLevel === "aal2") mfaRequired = true;
+        else mfaEnrollmentRequired = true;
+      }
+    }
+  }
+
+  const jsonResponse = NextResponse.json({
+    email,
+    mfaRequired,
+    mfaEnrollmentRequired,
+  });
   applySessionCookies(jsonResponse, sessionCookies);
+  applySessionActivityCookies(jsonResponse, request, Date.now(), {
+    resetAbsolute: true,
+  });
 
   return jsonResponse;
 }
