@@ -67,7 +67,7 @@ function OpportunityCard({
         {candidates.length === 0 ? (
           <p className="rounded-md bg-slate-50 px-3 py-2 text-xs text-slate-500">
             No hay otros protocolos activos compatibles por el momento.
-            Revisá el perfil clínico o esperá nuevos protocolos.
+            Revisa el perfil clínico o espera nuevos protocolos.
           </p>
         ) : (
           <>
@@ -168,7 +168,7 @@ export default function RematchPage() {
     <>
       <PageHeader
         title="Re-Match & Follow-up"
-        description="Screen failures y protocolos alternativos. Compará con IA cuál llamar primero; el semáforo lo sigue marcando el motor de reglas."
+        description="Screen failures y protocolos alternativos. Compara con IA cuál llamar primero; el semáforo lo sigue marcando el motor de reglas."
       />
 
       {loading ? (

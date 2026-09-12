@@ -51,7 +51,7 @@ export async function generateRematchCompare(
   if (!input.alternatives.length) {
     return (
       "No hay protocolos activos alternativos para comparar. " +
-      "Revisá el perfil clínico o esperá un protocolo nuevo."
+      "Revisa el perfil clínico o espera un protocolo nuevo."
     );
   }
 
@@ -92,15 +92,16 @@ export async function generateRematchCompare(
         {
           role: "system",
           content:
-            "Sos un coordinador de estudios de Screenlane. " +
+            "Eres un coordinador de estudios de Screenlane. " +
             "El paciente tuvo screen failure y hay que elegir el próximo protocolo a llamar. " +
-            "Usá SOLO el JSON. NO inventes criterios, labs ni diagnósticos. " +
+            "Usa SOLO el JSON. NO inventes criterios, labs ni diagnósticos. " +
             "NO cambies los veredictos ni los scores del motor. " +
             "No uses el nombre completo: las iniciales ya vienen en el JSON. " +
-            "Formato en español: " +
+            "Escribe en español latinoamericano (tú, no vos). " +
+            "Formato: " +
             "1) 2-4 oraciones: qué protocolo priorizar y por qué, frente a los screen failure; " +
             "2) hasta 5 viñetas: orden de llamada o qué dato falta para pasar de pendiente a elegible. " +
-            "Si hay empate, preferí eligible sobre pending. Tono operativo, no médico prescriptivo.",
+            "Si hay empate, prefiere elegible sobre pendiente. Tono operativo, no médico prescriptivo.",
         },
         {
           role: "user",

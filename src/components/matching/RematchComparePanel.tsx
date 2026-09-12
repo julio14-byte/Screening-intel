@@ -83,7 +83,7 @@ export function RematchComparePanel({ input }: { input: RematchCompareInput }) {
         </div>
       ) : !error && !loading ? (
         <p className="mt-2 text-[11px] text-indigo-500">
-          Ordena los protocolos según el motor (eligible primero) y dice qué
+          Ordena los protocolos según el motor (elegible primero) e indica qué
           falta para la llamada. No cambia el semáforo.
         </p>
       ) : null}
