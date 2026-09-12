@@ -4,8 +4,8 @@ import {
   FileSpreadsheet,
   FlaskConical,
   KanbanSquare,
-  MessageSquare,
   RefreshCw,
+  Sparkles,
   Square,
   Timer,
   UserX,
@@ -20,7 +20,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   FlaskConical,
   KanbanSquare,
   RefreshCw,
-  MessageSquare,
+  Sparkles,
   CreditCard,
   Square,
 };

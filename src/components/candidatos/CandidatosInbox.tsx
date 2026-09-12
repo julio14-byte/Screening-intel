@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { ErrorState } from "@/components/ui/StateMessage";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
+import { CandidatoTriagePanel } from "@/components/candidatos/CandidatoTriagePanel";
 import { routes } from "@/lib/app/routes";
 
 type SubmissionRow = {
@@ -150,6 +151,8 @@ export function CandidatosInbox() {
                     Medicación: {row.extracted_profile.medications?.join(", ")}
                   </p>
                 ) : null}
+
+                <CandidatoTriagePanel submissionId={row.id} />
 
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Button

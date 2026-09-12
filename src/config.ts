@@ -47,12 +47,6 @@ const config = {
         icon: "RefreshCw",
       },
       {
-        href: "/chat",
-        label: "Asistente IA",
-        icon: "MessageSquare",
-        feature: "aiChat" as const,
-      },
-      {
         href: "/account/billing",
         label: "Facturación",
         icon: "CreditCard",
@@ -73,7 +67,6 @@ const config = {
   features: {
     waitlist: true,
     emailLogin: true,
-    aiChat: true,
     pricing: true,
     payments: true,
   },
@@ -96,7 +89,6 @@ const config = {
       "/tracker",
       "/epro",
       "/rematch",
-      "/chat",
       "/account",
       "/settings",
       "/settings/roles",
@@ -131,7 +123,6 @@ const config = {
       tracker: "/tracker",
       epro: "/epro",
       rematch: "/rematch",
-      chat: "/chat",
       billing: "/account/billing",
       roles: "/settings/roles",
       portalSettings: "/settings/portal",
@@ -147,7 +138,6 @@ const config = {
       authLogin: "/api/auth/login",
       authLogout: "/api/auth/logout",
       authSession: "/api/auth/session",
-      authChats: "/api/auth/chats",
       stripeCheckout: "/api/stripe/checkout",
       stripePortal: "/api/stripe/portal",
       stripeWebhook: "/api/webhooks/stripe",
@@ -233,9 +223,9 @@ const config = {
           body: "Re-evalúa cohortes cuando cambian protocolos o criterios.",
         },
         {
-          icon: "MessageSquare",
-          title: "Asistente IA",
-          body: "Consulta criterios y resúmenes clínicos en chat contextual.",
+          icon: "Sparkles",
+          title: "Triage IA de candidatos",
+          body: "Resume notas del portal y el matching para preparar la llamada de pre-screening.",
         },
       ],
     },
@@ -253,7 +243,7 @@ const config = {
         },
         {
           q: "¿Cómo funciona Site Pro?",
-          a: "Plan con mayor volumen de pacientes y protocolos, más re-match y asistente IA.",
+          a: "Plan con mayor volumen de pacientes y protocolos, más re-match y triage IA de candidatos.",
         },
         {
           q: "¿Los datos están aislados por sitio?",
@@ -280,7 +270,7 @@ const config = {
         },
         {
           quote:
-            "El asistente IA acelera la revisión de criterios de exclusión sin abrir cada protocolo completo.",
+            "La justificación clínica IA explica el semáforo criterio por criterio sin cambiar la elegibilidad.",
           author: "Study coordinator",
           role: "Clinical research site regional",
         },
@@ -346,7 +336,7 @@ const config = {
           "50 protocolos activos",
           "3 usuarios",
           "Re-match automático",
-          "Asistente IA clínico",
+          "Triage IA de candidatos",
         ],
         cta: "Suscribirse a Pro",
         highlighted: true,
@@ -364,7 +354,7 @@ const config = {
           "100 protocolos activos",
           "10 usuarios",
           "Re-match prioritario",
-          "Asistente IA + soporte dedicado",
+          "Triage IA + soporte dedicado",
         ],
         cta: "Suscribirse a Pro+",
         stripePriceId: "",
