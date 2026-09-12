@@ -46,8 +46,8 @@ export async function GET() {
     return NextResponse.json({ error: "Sin organización." }, { status: 404 });
   }
 
-  const supabase = await createClient();
-  const { data: org, error } = await supabase
+  const admin = createSupabaseAdminClient();
+  const { data: org, error } = await admin
     .from("organizations")
     .select("id, name, ehr_enabled, ehr_source, ehr_webhook_secret")
     .eq("id", orgId)
@@ -57,6 +57,7 @@ export async function GET() {
     return NextResponse.json({ error: "Organización no encontrada." }, { status: 404 });
   }
 
+  const supabase = await createClient();
   const { data: logs } = await supabase
     .from("ehr_sync_logs")
     .select(

@@ -154,6 +154,7 @@ supabase/migrations/0013_portal_public_read.sql
 supabase/migrations/0014_fix_protocols_portal_grants.sql
 supabase/migrations/0015_ehr_integration.sql
 supabase/migrations/0016_reduce_rls_disk_io.sql
+supabase/migrations/0017_secure_patient_data.sql
 ```
 
 Si el slug `demo` falló en 0009, aplicá también `0011_fix_organization_slug_backfill.sql`.
