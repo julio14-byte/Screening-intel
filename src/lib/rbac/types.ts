@@ -38,6 +38,11 @@ export interface OrganizationMemberWithRole {
   clinical_role: AppRole;
 }
 
+export interface ProtocolAssignmentMember extends OrganizationMemberWithRole {
+  assigned: boolean;
+  assigned_at: string | null;
+}
+
 export const APP_ROLE_LABELS: Record<AppRole, string> = {
   investigator: "Investigador Principal",
   sub_investigator: "Sub-investigador",
@@ -47,13 +52,13 @@ export const APP_ROLE_LABELS: Record<AppRole, string> = {
 
 export const APP_ROLE_DESCRIPTIONS: Record<AppRole, string> = {
   investigator:
-    "Control total: aprobaciones médicas, protocolos, firmas y gestión de roles.",
+    "Control total del centro: protocolos, asignaciones de equipo, aprobaciones, roles y facturación.",
   sub_investigator:
-    "Casi igual al PI: aprobaciones, protocolos y screening; sin gestión de roles ni facturación.",
+    "Aprobaciones y screening en los protocolos asignados; sin gestión de roles ni facturación.",
   coordinator:
-    "Registro de pacientes, captura de datos clínicos y screening operativo.",
+    "Registro de pacientes y screening operativo. Solo ve los protocolos que el PI le asigna.",
   monitor:
-    "Solo lectura: revisión de expedientes y bitácora de auditoría (CRA).",
+    "Solo lectura del expediente y bitácora, limitado a los protocolos asignados (CRA).",
 };
 
 /** Roles con autoridad clínica (PI y sub-PI). */

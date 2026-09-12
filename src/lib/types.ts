@@ -108,6 +108,24 @@ export interface ScreeningWithRelations extends Screening {
   protocols: Pick<Protocol, "id" | "title" | "code_name" | "status">;
 }
 
+export type ClinicalDocumentKind = "lab_pdf" | "prescription_photo" | "other";
+
+export type DocumentEncryption = "aes-256-gcm" | "storage_at_rest";
+
+export interface ClinicalDocument {
+  id: string;
+  clinic_id: string;
+  patient_id: string;
+  kind: ClinicalDocumentKind;
+  original_filename: string;
+  content_type: string;
+  byte_size: number;
+  sha256: string;
+  encryption: DocumentEncryption;
+  uploaded_by: string | null;
+  created_at: string;
+}
+
 // ---------------------------------------------------------------------------
 // ePRO — Fase A
 // ---------------------------------------------------------------------------

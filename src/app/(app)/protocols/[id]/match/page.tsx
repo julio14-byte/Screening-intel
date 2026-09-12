@@ -13,6 +13,8 @@ import {
 import { VerdictDot } from "@/components/ui/VerdictBadge";
 import { CriteriaSummary } from "@/components/protocols/CriteriaSummary";
 import { MatchResultsTable } from "@/components/protocols/MatchResultsTable";
+import { ProtocolAssignmentPanel } from "@/components/protocols/ProtocolAssignmentPanel";
+import { RoleGuard } from "@/components/rbac/RoleGuard";
 import { useProtocolMatch } from "@/hooks/useProtocolMatch";
 
 export default function ProtocolMatchPage({
@@ -49,6 +51,10 @@ export default function ProtocolMatchPage({
         title={`Matching · ${protocol.code_name}`}
         description={protocol.title}
       />
+
+      <RoleGuard permission="roles:manage">
+        <ProtocolAssignmentPanel protocolId={protocol.id} />
+      </RoleGuard>
 
       <Card className="mb-4">
         <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">

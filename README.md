@@ -26,6 +26,8 @@ Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-sc
 | **Sub-investigator** | Rol clínico con permisos de PI excepto roles y facturación. |
 | **Privacidad y regulaciones** | Páginas públicas `/privacidad` (HIPAA/GDPR/LatAm, 21 CFR Part 11) y `/integraciones` (ETL clínico, EHR, API). |
 | **PDF de lab / foto de receta** | Extract al expediente en `/patients/[id]`: PDF digital o foto JPEG/PNG. `POST /api/patients/profile/extract-document`. |
+| **ACL por protocolo** | El PI asigna coordinadores / sub-I / CRA a cada estudio; RLS oculta el resto. |
+| **Documentos cifrados** | PDF de lab y foto de receta en Storage privado + AES-256-GCM (`DOCUMENT_ENCRYPTION_KEY`). |
 | **Screenlane** | Rebrand completo del producto (antes Screening Intelligence). |
 
 ---
@@ -55,8 +57,8 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | Área | Qué hace |
 |------|----------|
 | **Patient Registry** | Alta, búsqueda e importación CSV de pacientes |
-| **Clinical Profile** | Condiciones, medicación, laboratorios + ICD-11 + notas IA + **PDF de lab / foto de receta** |
-| **Protocol Matcher** | Criterios de inclusión/exclusión; extracción NLP desde PDF |
+| **Clinical Profile** | Condiciones, medicación, laboratorios + ICD-11 + notas IA + **PDF de lab / foto de receta** (extract) + **documentos cifrados** |
+| **Protocol Matcher** | Criterios de inclusión/exclusión; extracción NLP desde PDF; **equipo asignado por estudio** |
 | **Motor de elegibilidad** | Semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple + `match_score` + justificación IA |
 | **Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure |
 | **Re-Match** | Propone protocolos alternativos para pacientes con screen failure |
@@ -89,9 +91,9 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 |------|-------------|
 | `/dashboard` | Embudo de screening y métricas del site |
 | `/patients` | Registro de pacientes |
-| `/patients/[id]` | Perfil clínico + timeline de auditoría |
-| `/protocols` | Gestión de protocolos |
-| `/protocols/[id]/match` | Cruce masivo paciente ↔ protocolo + justificación IA |
+| `/patients/[id]` | Perfil clínico + documentos cifrados + timeline de auditoría |
+| `/protocols` | Gestión de protocolos (visibles según asignación) |
+| `/protocols/[id]/match` | Cruce masivo + equipo del protocolo (PI) + justificación IA |
 | `/tracker` | Pipeline Kanban con drag & drop |
 | `/rematch` | Re-matching automático post screen failure + comparador IA de alternativas |
 | `/candidato` | Portal público de pre-registro (pacientes) |
@@ -137,6 +139,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...          # demo, portal, sync EHR y webhooks
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 OPENAI_API_KEY=sk-...                     # PDF, notas, justificación matching, triage candidatos
+DOCUMENT_ENCRYPTION_KEY=                  # 32 bytes hex/base64; obligatorio en production
 ```
 
 Ver [`.env.example`](.env.example) para Stripe, ICD-11, MFA/sesión y login demo. Guías: [`docs/STRIPE_SETUP.md`](docs/STRIPE_SETUP.md), [`docs/BACKUP.md`](docs/BACKUP.md).
@@ -162,9 +165,10 @@ supabase/migrations/0015_ehr_integration.sql
 supabase/migrations/0016_reduce_rls_disk_io.sql
 supabase/migrations/0017_secure_patient_data.sql
 supabase/migrations/0018_tenant_rls_portal_sites.sql
+supabase/migrations/0019_protocol_assignments_encrypted_docs.sql
 ```
 
-Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
+Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. **0019** (ACL por protocolo + bucket de documentos) va después de 0018: no uses el `0017_protocol_assignments_encrypted_docs.sql` de PRs anteriores — ese número ya lo ocupa `0017_secure_patient_data.sql`. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
 
 Opcional — datos de demo o activar Pro sin Stripe:
 
@@ -239,10 +243,10 @@ La IA **no** decide inclusión: el motor de reglas marca el semáforo y el inves
 
 | Rol | Permisos |
 |-----|----------|
-| **investigator** | Protocolos, aprobaciones, randomización, gestión de roles y facturación |
-| **sub_investigator** | Igual que PI en clínica; sin roles ni billing |
-| **coordinator** | Pacientes, screening operativo (sin marcar Apto) |
-| **monitor** | Solo lectura (CRA / auditoría farmacéutica) |
+| **investigator** | Protocolos, asignar equipo por estudio, aprobaciones, roles y facturación |
+| **sub_investigator** | Clínica en protocolos asignados; sin roles ni billing |
+| **coordinator** | Pacientes + screening de los protocolos asignados |
+| **monitor** | Solo lectura de protocolos asignados (CRA) |
 
 Administración en `/settings/roles` (solo investigator).
 
@@ -425,11 +429,13 @@ docs/                        # STRIPE_SETUP.md, BACKUP.md, etc.
 - Sesión: 30 min de inactividad y 8 h absolutas (`AUTH_IDLE_MINUTES`, `AUTH_SESSION_HOURS`); las cookies de `@supabase/ssr` no se usan como único límite
 - Login demo (`demo@screening.local`) **deshabilitado** cuando `NODE_ENV=production`, salvo `ALLOW_DEMO_LOGIN=true`
 - RLS en PostgreSQL + RBAC clínico: las políticas `using (true)` se eliminan en `0018`; el aislamiento es por `get_user_organization_ids()`
+- ACL por protocolo (`0019`): sub-I / coordinador / CRA solo ven estudios asignados; PI ve todo el centro
+- Documentos clínicos en Storage privado + AES-256-GCM (`DOCUMENT_ENCRYPTION_KEY`)
 - Validación Zod en APIs críticas
 - Portal público con rate limiting, vista `portal_sites` (sin secretos) y `anon` sin `SELECT` sobre `organizations`
 - Webhooks EHR con firma HMAC (`X-EHR-Signature`) e idempotencia por `event_id`; `GET /api/settings/ehr` no devuelve el secreto (solo al generar o regenerar)
 - ePRO aislado por centro; bitácora sin acceso `anon`; `ehr_webhook_secret` no legible por el cliente
-- Herramientas de IA y MCP de screening filtradas por organización; OpenAI recibe iniciales, no nombres; `thread_id` por usuario
+- Herramientas de IA filtradas por organización; OpenAI recibe iniciales, no nombres
 
 Backups y restore (PITR): [`docs/BACKUP.md`](docs/BACKUP.md).
 

@@ -151,6 +151,8 @@ const config = {
       rematchCompare: "/api/matching/rematch-compare",
       profileExtract: "/api/patients/profile/extract",
       profileExtractDocument: "/api/patients/profile/extract-document",
+      patientDocuments: "/api/patients/{id}/documents",
+      protocolAssignments: "/api/protocols/{id}/assignments",
     },
   },
 

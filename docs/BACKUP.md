@@ -13,6 +13,7 @@ Documentación oficial: [Database Backups](https://supabase.com/docs/guides/plat
 |---------|-----------|--------------|
 | **Backups diarios** (Pro / Team / Enterprise) | Snapshot del Postgres, incluido el esquema `auth` | Objetos de Storage (solo metadata en DB); contraseñas de roles custom |
 | **PITR** (add-on Pro+) | Restaurar a un segundo concreto (RPO ~2 min) | Lo mismo: no restaura archivos de Storage borrados |
+| **Bucket `clinical-documents`** | PDFs y fotos del expediente (objetos cifrados) | Hay que replicar Storage aparte; PITR no recupera un archivo ya borrado |
 | **`supabase db dump` / `pg_dump`** | Copia lógica off-site que controlas tú | Hay que cifrarla y rotarla; no reemplaza PITR |
 | **Vercel** | Código y env vars | Datos clínicos |
 

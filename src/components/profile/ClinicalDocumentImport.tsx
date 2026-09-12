@@ -78,7 +78,8 @@ export function ClinicalDocumentImport({
       <p className="mt-1 text-xs text-violet-800">
         Extract del documento, transform a condiciones / medicación / labs, y
         load al perfil cuando guardes. La IA no cambia la elegibilidad. Un PDF
-        escaneado sin texto: usa «Tomar foto».
+        escaneado sin texto: usa «Tomar foto». El archivo original se guarda
+        cifrado más abajo, en Documentos del expediente.
       </p>
 
       <fieldset className="mt-3 flex flex-wrap gap-3 text-xs text-violet-900">

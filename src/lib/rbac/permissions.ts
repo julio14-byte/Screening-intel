@@ -70,7 +70,9 @@ export function roleHasAnyPermission(
 export const WRITE_API_PREFIXES = [
   "/api/patients/import",
   "/api/patients/profile/extract",
+  "/api/patients/",
   "/api/protocols/extract",
+  "/api/protocols/",
   "/api/audit",
   "/api/rbac",
   "/api/candidatos",
