@@ -129,14 +129,19 @@ async function upsertClinicalProfile(
 
   const conditions =
     mode === "merge" && existingProfile
-      ? mergeStringArrays(existingProfile.conditions ?? [], payload.conditions)
+      ? mergeStringArrays(
+          existingProfile.conditions ?? [],
+          payload.conditions,
+          "condition"
+        )
       : (payload.conditions ?? []);
 
   const medications =
     mode === "merge" && existingProfile
       ? mergeStringArrays(
           existingProfile.medications ?? [],
-          payload.medications
+          payload.medications,
+          "medication"
         )
       : (payload.medications ?? []);
 

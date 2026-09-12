@@ -23,7 +23,7 @@ export const productDocs = {
         {
           heading: "3. Define protocolos",
           body:
-            "Crea estudios con los criterios en el idioma del protocolo (inglés si el sponsor es de EUA). La app opera en español; no traduzcas inclusión/exclusión.",
+            "Crea estudios con los criterios en el idioma del protocolo (inglés si el sponsor es de EUA). La app opera en español; el matching unifica sinónimos ES/EN sin traducir inclusión/exclusión.",
         },
         {
           heading: "4. Ejecuta matching y tracking",

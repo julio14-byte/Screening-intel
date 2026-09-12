@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { evaluatePatientAgainstProtocol } from "@/lib/matching";
 import type { ClinicalProfile, Patient, Protocol } from "@/lib/types";
-import { normalizeTerm } from "@/lib/utils";
+import { clinicalTermsMatch } from "@/lib/matching/clinicalTerms";
 
 let serviceClient: SupabaseClient | null = null;
 
@@ -26,11 +26,8 @@ type ProfileRow = ClinicalProfile & {
 };
 
 function matchesCondition(conditions: string[], search: string): boolean {
-  const term = normalizeTerm(search);
-  return conditions.some(
-    (condition) =>
-      normalizeTerm(condition).includes(term) ||
-      term.includes(normalizeTerm(condition))
+  return conditions.some((condition) =>
+    clinicalTermsMatch(condition, search, "condition")
   );
 }
 
