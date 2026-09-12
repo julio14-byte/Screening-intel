@@ -29,15 +29,6 @@ const EXAMPLES = {
     role: "coordinator",
   },
   stripeCheckout: { planId: "pro" },
-  chat: {
-    messages: [
-      {
-        id: "msg-1",
-        role: "user",
-        parts: [{ type: "text", text: "¿Qué pacientes tienen diabetes?" }],
-      },
-    ],
-  },
 } as const;
 
 /** Especificación OpenAPI 3.0 — Screenlane REST API. */
@@ -74,7 +65,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
       { name: "Audit", description: "Bitácora CFR Part 11" },
       { name: "RBAC", description: "Roles clínicos" },
       { name: "ICD-11", description: "Terminología WHO ICD-11" },
-      { name: "AI", description: "Asistente clínico" },
+      { name: "AI", description: "Extracción y justificación clínica (GPT-4o-mini)" },
       { name: "Stripe", description: "Facturación SaaS" },
       { name: "Waitlist", description: "Landing / captación" },
     ],
@@ -212,19 +203,6 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           },
           example: EXAMPLES.stripeCheckout,
         },
-        ChatRequest: {
-          type: "object",
-          required: ["messages"],
-          properties: {
-            conversationId: { type: "string", format: "uuid" },
-            messages: {
-              type: "array",
-              items: { type: "object", additionalProperties: true },
-              description: "Mensajes UI (Vercel AI SDK UIMessage[])",
-            },
-          },
-          example: EXAMPLES.chat,
-        },
       },
     },
     paths: {
@@ -293,25 +271,35 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           },
         },
       },
-      "/api/auth/chats": {
+      "/api/candidatos/{id}/triage": {
         post: {
           tags: ["AI"],
-          summary: "Chat con asistente clínico (streaming)",
+          summary: "Briefing IA de un candidato del portal",
           description:
-            "Stream de respuesta del agente LangGraph (GPT-4o-mini). Content-Type de respuesta: stream UI message.",
+            "Resume notas y matching para la llamada de pre-screening. No cambia el veredicto del motor.",
           security: [{ cookieAuth: [] }],
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: { $ref: "#/components/schemas/ChatRequest" },
-                example: EXAMPLES.chat,
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+          ],
+          responses: {
+            "200": {
+              description: "Texto de triage",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: { triage: { type: "string" } },
+                  },
+                },
               },
             },
-          },
-          responses: {
-            "200": { description: "Stream de mensajes del asistente" },
             "401": { description: "No autenticado", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+            "404": { description: "Candidato no encontrado", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
           },
         },
       },

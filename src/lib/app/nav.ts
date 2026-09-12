@@ -8,7 +8,6 @@ import {
   KanbanSquare,
   LayoutDashboard,
   LogOut,
-  MessageSquare,
   RefreshCw,
   Settings,
   ListChecks,
@@ -23,7 +22,6 @@ export const APP_ICONS: Record<string, LucideIcon> = {
   FlaskConical,
   KanbanSquare,
   RefreshCw,
-  MessageSquare,
   CreditCard,
   Settings,
   Activity,
@@ -39,7 +37,7 @@ export type AppNavItem = {
   icon: string;
   activeClass: string;
   idleClass: string;
-  feature?: "aiChat" | "payments";
+  feature?: "payments";
 };
 
 /** Estilos por módulo — sidebar Screening Intelligence */
@@ -81,10 +79,6 @@ export const APP_NAV_STYLES: Record<
   },
   "/rematch": {
     activeClass: "bg-emerald-400/20 text-emerald-100 ring-1 ring-emerald-300/30",
-    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
-  },
-  "/chat": {
-    activeClass: "bg-violet-400/25 text-violet-100 ring-1 ring-violet-300/40",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
   "/account/billing": {

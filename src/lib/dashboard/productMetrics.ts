@@ -13,8 +13,8 @@ export interface ProductMetrics {
   waitlistWeek: number;
   signupsTotal: number;
   signupsWeek: number;
-  chatSessionsTotal: number;
-  chatSessionsWeek: number;
+  candidatosTotal: number;
+  candidatosWeek: number;
 }
 
 /** ¿Puede este usuario ver métricas globales del producto? */
@@ -44,8 +44,8 @@ export async function getProductMetrics(): Promise<
       waitlistWeek,
       signupsAll,
       signupsWeek,
-      chatAll,
-      chatWeek,
+      candidatosAll,
+      candidatosWeek,
     ] = await Promise.all([
       supabase.from("waitlist").select("*", { count: "exact", head: true }),
       supabase
@@ -58,10 +58,10 @@ export async function getProductMetrics(): Promise<
         .select("*", { count: "exact", head: true })
         .gte("created_at", since),
       supabase
-        .from("ai_conversations")
+        .from("pre_screen_submissions")
         .select("*", { count: "exact", head: true }),
       supabase
-        .from("ai_conversations")
+        .from("pre_screen_submissions")
         .select("*", { count: "exact", head: true })
         .gte("created_at", since),
     ]);
@@ -71,8 +71,8 @@ export async function getProductMetrics(): Promise<
       waitlistWeek.error ||
       signupsAll.error ||
       signupsWeek.error ||
-      chatAll.error ||
-      chatWeek.error;
+      candidatosAll.error ||
+      candidatosWeek.error;
 
     if (firstError) {
       return { error: firstError.message };
@@ -83,8 +83,8 @@ export async function getProductMetrics(): Promise<
       waitlistWeek: waitlistWeek.count ?? 0,
       signupsTotal: signupsAll.count ?? 0,
       signupsWeek: signupsWeek.count ?? 0,
-      chatSessionsTotal: chatAll.count ?? 0,
-      chatSessionsWeek: chatWeek.count ?? 0,
+      candidatosTotal: candidatosAll.count ?? 0,
+      candidatosWeek: candidatosWeek.count ?? 0,
     };
   } catch (err) {
     return {
