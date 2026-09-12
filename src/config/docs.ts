@@ -32,5 +32,47 @@ export const productDocs = {
         },
       ],
     },
+    {
+      id: "privacidad",
+      title: "Privacidad y regulaciones",
+      items: [
+        {
+          heading: "Datos por centro",
+          body:
+            "Cada clinical research site es una organización. RLS y RBAC evitan que un equipo vea pacientes de otro. El portal público no expone secretos del centro.",
+        },
+        {
+          heading: "IA sin decidir elegibilidad",
+          body:
+            "El motor de reglas define cumple / pendiente / no cumple. La IA explica el veredicto con iniciales, extrae criterios o notas, y no debe recibir el nombre completo.",
+        },
+        {
+          heading: "Marcos de referencia",
+          body:
+            "Bitácora orientada a 21 CFR Part 11 e ICH-GCP. Controles alineados a HIPAA, GDPR y leyes de datos de LatAm. Screenlane no emite la certificación de tu site. Ver /privacidad.",
+        },
+      ],
+    },
+    {
+      id: "integraciones",
+      title: "ETL e integraciones",
+      items: [
+        {
+          heading: "ETL clínico",
+          body:
+            "Extract (CSV, portal, EHR) → Transform (perfil, ICD-11, reglas) → Load (pacientes, screenings, re-match). No hace falta EHR para el MVP.",
+        },
+        {
+          heading: "EHR batch y webhook",
+          body:
+            "POST /api/ehr/sync (sesión) y POST /api/webhooks/ehr (HMAC). Upsert por ehr_patient_id. Configura en /settings/ehr. Detalle en /integraciones.",
+        },
+        {
+          heading: "API",
+          body:
+            "OpenAPI y Swagger en /docs/api. Stripe, ICD-11 y webhooks EHR están documentados ahí.",
+        },
+      ],
+    },
   ],
 };

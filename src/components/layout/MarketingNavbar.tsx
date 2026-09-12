@@ -45,6 +45,22 @@ export function MarketingNavbar() {
               </li>
               <li>
                 <Link
+                  href={routes.app.privacy}
+                  className="block rounded-lg px-3 py-2 text-sm text-violet-200 hover:bg-white/10 hover:text-white"
+                >
+                  Privacidad
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={routes.app.integrations}
+                  className="block rounded-lg px-3 py-2 text-sm text-violet-200 hover:bg-white/10 hover:text-white"
+                >
+                  Integraciones
+                </Link>
+              </li>
+              <li>
+                <Link
                   href={candidatoHref}
                   className="block rounded-lg px-3 py-2 text-sm text-violet-200 hover:bg-white/10 hover:text-white"
                 >
@@ -74,6 +90,12 @@ export function MarketingNavbar() {
             className="hidden rounded-lg px-3 py-2 text-sm font-medium text-violet-200 transition-colors hover:text-white md:inline"
           >
             Docs
+          </Link>
+          <Link
+            href={routes.app.integrations}
+            className="hidden rounded-lg px-3 py-2 text-sm font-medium text-violet-200 transition-colors hover:text-white lg:inline"
+          >
+            Integraciones
           </Link>
           <Link
             href={pricingHref}

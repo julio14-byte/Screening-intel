@@ -140,6 +140,8 @@ const config = {
       candidatos: "/candidatos",
       docs: "/docs",
       apiDocs: "/docs/api",
+      privacy: "/privacidad",
+      integrations: "/integraciones",
     },
     apis: {
       openApi: "/api/openapi",
@@ -168,6 +170,7 @@ const config = {
   landing: {
     nav: [
       { label: "Documentación", href: "#docs" },
+      { label: "Confianza", href: "#confianza" },
       { label: "Precios", href: "#pricing" },
       { label: "Waitlist", href: "#waitlist" },
       { label: "Entrar", href: "#entrar" },
@@ -237,6 +240,48 @@ const config = {
           title: "Asistente IA",
           body: "Consulta criterios y resúmenes clínicos en chat contextual.",
         },
+        {
+          icon: "Cable",
+          title: "ETL e integraciones",
+          body: "EHR opcional (batch + webhook), CSV, ICD-11 y Stripe. El matching sigue siendo un motor de reglas.",
+        },
+        {
+          icon: "Shield",
+          title: "Privacidad y regulaciones",
+          body: "Datos por centro, RBAC, bitácora 21 CFR Part 11 y controles alineados a HIPAA / GDPR / LatAm.",
+        },
+      ],
+    },
+    trust: {
+      eyebrow: "Confianza",
+      title: "Privacidad, regulaciones, ETL e integraciones.",
+      subtitle:
+        "Pensado para sponsors de EE. UU. y sites en LatAm: el funnel opera sin EHR obligatorio, y cuando lo conectas el dato queda aislado por centro.",
+      items: [
+        {
+          icon: "Shield",
+          title: "Privacidad",
+          body: "El site es responsable del tratamiento. Aislamiento por organización, MFA, sesiones cortas y minimización hacia la IA (iniciales, no nombre completo).",
+          href: "/privacidad",
+        },
+        {
+          icon: "Scale",
+          title: "Regulaciones",
+          body: "Controles alineados a 21 CFR Part 11, ICH-GCP, HIPAA, GDPR y leyes de datos de LatAm. No sustituye la certificación de tu centro.",
+          href: "/privacidad#regulaciones",
+        },
+        {
+          icon: "Workflow",
+          title: "ETL clínico",
+          body: "Extract (CSV, portal, EHR) → Transform (perfil + ICD-11 + reglas) → Load (pacientes, screening y re-match).",
+          href: "/integraciones#etl",
+        },
+        {
+          icon: "Cable",
+          title: "Integraciones",
+          body: "EHR batch y webhook HMAC, Stripe, ICD-11, OpenAI y API OpenAPI. Configuración en la app, sin marketplace genérico.",
+          href: "/integraciones",
+        },
       ],
     },
     faq: {
@@ -257,7 +302,15 @@ const config = {
         },
         {
           q: "¿Los datos están aislados por sitio?",
-          a: "Sí. Cada clinical research site es una organización con RLS en Supabase; solo tu equipo ve tus pacientes y protocolos.",
+          a: "Sí. Cada clinical research site es una organización con RLS en Supabase; solo tu equipo ve tus pacientes y protocolos. Detalle en /privacidad.",
+        },
+        {
+          q: "¿Están certificados HIPAA o GDPR?",
+          a: "El producto tiene controles alineados (acceso, cifrado en tránsito, bitácora, minimización). La certificación y el BAA los cierra tu organización. Ver /privacidad#regulaciones.",
+        },
+        {
+          q: "¿Qué es el ETL de Screenlane?",
+          a: "El pipeline Extract → Transform → Load del screening: entra CSV, portal o EHR; se normaliza el perfil; se carga en tu centro y se recalcula matching/re-match. Guía en /integraciones.",
         },
       ],
     },
@@ -309,6 +362,8 @@ const config = {
         { label: "Precios", href: "#pricing" },
         { label: "Waitlist", href: "#waitlist" },
         { label: "Documentación", href: "/docs" },
+        { label: "Privacidad", href: "/privacidad" },
+        { label: "Integraciones", href: "/integraciones" },
       ],
     },
   },
