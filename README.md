@@ -17,6 +17,7 @@ Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-sc
 | **MFA TOTP** | Obligatorio en producción para investigator y sub-investigator (`/settings/security`, `/login/mfa`). |
 | **Sesión** | Timeout de inactividad (30 min) y tope absoluto (8 h); login demo apagado en production. |
 | **Backups** | Procedimiento de restore PITR en [`docs/BACKUP.md`](docs/BACKUP.md). |
+| **Comparador Re-Match IA** | Tras un screen failure, indica qué protocolo alternativo llamar primero (`POST /api/matching/rematch-compare`). |
 | **Justificación clínica IA** | Texto en español que explica el veredicto del matching sin alterar la elegibilidad (`POST /api/matching/rationale`). |
 | **Portal de candidatos** | Pre-registro público en `/candidato`, inbox en `/candidatos` y settings en `/settings/portal`. |
 | **Re-Match nativo** | Propone protocolos alternativos tras un screen failure; se refresca automáticamente cuando el EHR envía labs o diagnósticos nuevos. |
@@ -86,7 +87,7 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | `/protocols` | Gestión de protocolos |
 | `/protocols/[id]/match` | Cruce masivo paciente ↔ protocolo + justificación IA |
 | `/tracker` | Pipeline Kanban con drag & drop |
-| `/rematch` | Re-matching automático post screen failure |
+| `/rematch` | Re-matching automático post screen failure + comparador IA de alternativas |
 | `/candidato` | Portal público de pre-registro (pacientes) |
 | `/candidatos` | Inbox de leads del portal (coordinadores) |
 | `/settings/portal` | Configuración del portal (investigator) |
@@ -202,7 +203,7 @@ La lógica central está en [`src/lib/matching.ts`](src/lib/matching.ts):
 
 Cada screening guarda `match_score` (0–100) y `match_details` (trazabilidad criterio por criterio).
 
-**Justificación clínica (IA):** en matching y re-match, `POST /api/matching/rationale` genera un texto en español que explica el veredicto usando solo esos datos — **sin modificar la elegibilidad**.
+**Justificación clínica (IA):** en matching, `POST /api/matching/rationale` explica un cruce. En Re-Match, `POST /api/matching/rematch-compare` compara alternativas tras un screen failure. Ninguna modifica la elegibilidad.
 
 ---
 
@@ -213,6 +214,7 @@ Cada screening guarda `match_score` (0–100) y `match_details` (trazabilidad cr
 | Chat clínico | `/chat` · `POST /api/auth/chats` | GPT-4o-mini + LangGraph |
 | Extracción de protocolos PDF | `POST /api/protocols/extract` | GPT-4o-mini |
 | Perfil clínico desde notas | `POST /api/patients/profile/extract` | GPT-4o-mini |
+| Comparar alternativas (Re-Match) | `/rematch` · `POST /api/matching/rematch-compare` | GPT-4o-mini |
 | Justificación del matching | `POST /api/matching/rationale` | GPT-4o-mini |
 | Normalización ICD-11 | `GET /api/icd11/normalize` | API WHO (no LLM) |
 | Matching / Re-Match | Motor de reglas | Sin LLM |
