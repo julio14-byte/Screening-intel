@@ -65,11 +65,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
       { name: "Audit", description: "Bitácora CFR Part 11" },
       { name: "RBAC", description: "Roles clínicos" },
       { name: "ICD-11", description: "Terminología WHO ICD-11" },
-<<<<<<< HEAD
-      { name: "AI", description: "Extracción y justificación clínica (GPT-4o-mini)" },
-=======
-      { name: "AI", description: "Justificación y comparación clínica (GPT-4o-mini)" },
->>>>>>> origin/cursor/rematch-compare-ai-4921
+      { name: "AI", description: "Triage, justificación y comparación clínica (GPT-4o-mini)" },
       { name: "Stripe", description: "Facturación SaaS" },
       { name: "Waitlist", description: "Landing / captación" },
     ],

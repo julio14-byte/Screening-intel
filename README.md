@@ -17,12 +17,9 @@ Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-sc
 | **MFA TOTP** | Obligatorio en producción para investigator y sub-investigator (`/settings/security`, `/login/mfa`). |
 | **Sesión** | Timeout de inactividad (30 min) y tope absoluto (8 h); login demo apagado en production. |
 | **Backups** | Procedimiento de restore PITR en [`docs/BACKUP.md`](docs/BACKUP.md). |
-<<<<<<< HEAD
 | **Triage IA de candidatos** | Briefing para la llamada de pre-screening desde el inbox (`POST /api/candidatos/:id/triage`). |
-=======
 | **Comparador Re-Match IA** | Tras un screen failure, indica qué protocolo alternativo llamar primero (`POST /api/matching/rematch-compare`). |
 | **Idioma** | App y portal en español latinoamericano. Criterios del protocolo se conservan en el idioma del sponsor; el matching unifica sinónimos ES/EN. |
->>>>>>> origin/cursor/rematch-compare-ai-4921
 | **Justificación clínica IA** | Texto en español que explica el veredicto del matching sin alterar la elegibilidad (`POST /api/matching/rationale`). |
 | **Portal de candidatos** | Pre-registro público en `/candidato`, inbox en `/candidatos` y settings en `/settings/portal`. |
 | **Re-Match nativo** | Propone protocolos alternativos tras un screen failure; se refresca automáticamente cuando el EHR envía labs o diagnósticos nuevos. |
@@ -162,11 +159,7 @@ supabase/migrations/0017_secure_patient_data.sql
 supabase/migrations/0018_tenant_rls_portal_sites.sql
 ```
 
-<<<<<<< HEAD
 Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
-=======
-Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
->>>>>>> origin/cursor/rematch-compare-ai-4921
 
 Opcional — datos de demo o activar Pro sin Stripe:
 
@@ -212,13 +205,9 @@ La lógica central está en [`src/lib/matching.ts`](src/lib/matching.ts):
 
 Cada screening guarda `match_score` (0–100) y `match_details` (trazabilidad criterio por criterio).
 
-<<<<<<< HEAD
-**Justificación clínica (IA):** en matching y re-match, `POST /api/matching/rationale` genera un texto en español que explica el veredicto usando solo esos datos — **sin modificar la elegibilidad**. OpenAI recibe iniciales del paciente, no el nombre completo.
-=======
-**Idioma:** la app (UI, portal, IA operativa) está en **español latinoamericano**. Título y criterios del protocolo se guardan **en el idioma del sponsor** (p. ej. inglés en PDFs de farmacéuticas de EUA). `POST /api/protocols/extract` no traduce esos textos. El motor unifica sinónimos clínicos ES/EN al comparar (`src/lib/matching/clinicalTerms.ts`): `hypertension` ↔ `hipertensión`, `HbA1c` ↔ `hemoglobina glicosilada`. No cruza hermanos (`type 1 diabetes` ↛ `diabetes tipo 2`).
+**Idioma:** la app (UI, portal, IA operativa) está en **español latinoamericano**. Título y criterios del protocolo se guardan **en el idioma del sponsor**. El motor unifica sinónimos clínicos ES/EN (`src/lib/matching/clinicalTerms.ts`). OpenAI recibe iniciales del paciente, no el nombre completo.
 
 **Justificación clínica (IA):** en matching, `POST /api/matching/rationale` explica un cruce. En Re-Match, `POST /api/matching/rematch-compare` compara alternativas tras un screen failure. Ninguna modifica la elegibilidad ni traduce los criterios del protocolo.
->>>>>>> origin/cursor/rematch-compare-ai-4921
 
 ---
 

@@ -1,11 +1,8 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { evaluatePatientAgainstProtocol } from "@/lib/matching";
 import type { ClinicalProfile, Patient, Protocol } from "@/lib/types";
-<<<<<<< HEAD
-import { normalizeTerm, toPatientInitials } from "@/lib/utils";
-=======
+import { toPatientInitials } from "@/lib/utils";
 import { clinicalTermsMatch } from "@/lib/matching/clinicalTerms";
->>>>>>> origin/cursor/rematch-compare-ai-4921
 
 let serviceClient: SupabaseClient | null = null;
 

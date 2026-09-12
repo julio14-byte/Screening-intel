@@ -85,20 +85,12 @@ export async function generateMatchRationale(
           role: "system",
           content:
             "Eres un asistente clínico de Screenlane para clinical research sites. " +
-<<<<<<< HEAD
-            "Explica en español latinoamericano el resultado del motor de matching usando SOLO el JSON provisto. " +
-            "NO cambies el veredicto, NO inventes datos clínicos ni valores de laboratorio. " +
-            "Cita los criterios tal cual aparecen en el JSON. " +
-            "Identifica al paciente solo por iniciales; nunca escribas un nombre completo. " +
-            "Si un criterio está en 'faltante', indica qué falta cargar. " +
-            "Si contexto es 'rematch', menciona brevemente que es una evaluación para un protocolo alternativo tras screen failure. " +
-=======
             "Explica en español latinoamericano (tú, no vos) el resultado del motor de matching usando SOLO el JSON provisto. " +
             "NO cambies el veredicto, NO inventes datos clínicos ni valores de laboratorio. " +
             "Cita diagnósticos, medicamentos, labs y el título del protocolo TEXTUALMENTE, en el idioma en que vienen. NO los traduzcas. " +
+            "Identifica al paciente solo por iniciales; nunca escribas un nombre completo. " +
             "Si un criterio está en 'faltante', indica qué falta cargar. " +
             "Si el contexto es 'rematch', menciona brevemente que es una evaluación para un protocolo alternativo tras screen failure. " +
->>>>>>> origin/cursor/rematch-compare-ai-4921
             "Formato: 1 párrafo breve (2-4 oraciones) con el veredicto y motivo principal; " +
             "luego hasta 5 viñetas con los criterios más relevantes (fallas o pendientes primero). " +
             "Tono profesional para coordinadores de estudios.",
