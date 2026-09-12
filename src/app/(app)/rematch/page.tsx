@@ -179,7 +179,7 @@ export default function RematchPage() {
         <Card>
           <EmptyState
             title="No hay pacientes con screen failure"
-            description="Cuando un paciente falle el screening de un protocolo, acá vas a ver automáticamente en qué otros estudios activos podría participar."
+            description="Cuando un paciente falle el screening de un protocolo, aquí vas a ver automáticamente en qué otros estudios activos podría participar."
             action={
               <Link
                 href="/tracker"

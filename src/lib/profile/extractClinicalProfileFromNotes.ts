@@ -57,16 +57,16 @@ export async function extractClinicalProfileFromNotes(
         {
           role: "system",
           content:
-            "Sos un asistente clínico para clinical research sites. Extraé de notas en español " +
+            "Eres un asistente clínico para clinical research sites. Extrae de notas en español latinoamericano " +
             "condiciones, medicación y laboratorios numéricos. " +
-            "Usá términos clínicos claros (ej. 'hipertensión arterial', 'metformina'). " +
+            "Usa términos clínicos claros (ej. 'hipertensión arterial', 'metformina'). " +
             "No inventes datos que no estén en el texto. " +
-            "Respondé SOLO JSON válido con esta forma:\n" +
+            "Responde SOLO JSON válido con esta forma:\n" +
             EXTRACTION_SCHEMA,
         },
         {
           role: "user",
-          content: "Extraé el perfil clínico de estas notas:\n\n" + trimmed,
+          content: "Extrae el perfil clínico de estas notas:\n\n" + trimmed,
         },
       ],
     }),

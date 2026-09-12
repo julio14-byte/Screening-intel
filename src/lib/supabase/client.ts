@@ -16,7 +16,7 @@ export function getSupabaseClient(): SupabaseClient {
   if (!url || !anonKey) {
     throw new Error(
       "Faltan las variables de entorno NEXT_PUBLIC_SUPABASE_URL y/o NEXT_PUBLIC_SUPABASE_ANON_KEY. " +
-        "Copiá .env.example a .env.local y completá los valores de tu proyecto de Supabase."
+        "Copia .env.example a .env.local y completa los valores de tu proyecto de Supabase."
     );
   }
 

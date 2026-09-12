@@ -26,9 +26,9 @@ function intakeMessage(verdict: string): string {
     return "Según lo que nos contaste, podrías ser candidato. Un coordinador te contactará.";
   }
   if (verdict === "excluded") {
-    return "Por lo que indicaste, este estudio probablemente no es para vos. Un coordinador puede revisar tu caso.";
+    return "Por lo que indicaste, este estudio probablemente no es para ti. Un coordinador puede revisar tu caso.";
   }
-  return "Necesitamos hablar con vos para confirmar algunos puntos. Un coordinador te contactará.";
+  return "Necesitamos hablar contigo para confirmar algunos puntos. Un coordinador te contactará.";
 }
 
 export async function POST(request: Request) {
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
   const limited = checkPublicRateLimit(`candidato:ip:${ip}`, 5, 3600);
   if (!limited.allowed) {
     return NextResponse.json(
-      { error: "Demasiados envíos. Intentá más tarde." },
+      { error: "Demasiados envíos. Intenta más tarde." },
       {
         status: 429,
         headers: {

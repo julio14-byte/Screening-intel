@@ -98,6 +98,7 @@ export async function generateRematchCompare(
             "NO cambies los veredictos ni los scores del motor. " +
             "No uses el nombre completo: las iniciales ya vienen en el JSON. " +
             "Escribe en español latinoamericano (tú, no vos). " +
+            "Cita códigos, títulos y criterios del protocolo TEXTUALMENTE; no los traduzcas. " +
             "Formato: " +
             "1) 2-4 oraciones: qué protocolo priorizar y por qué, frente a los screen failure; " +
             "2) hasta 5 viñetas: orden de llamada o qué dato falta para pasar de pendiente a elegible. " +

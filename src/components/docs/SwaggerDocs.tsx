@@ -21,7 +21,7 @@ export function SwaggerDocs() {
               {config.app.name} — Swagger UI
             </h1>
             <p className="mt-1 text-sm text-slate-600">
-              OpenAPI 3.0 · probá endpoints con sesión activa (
+              OpenAPI 3.0 · prueba endpoints con sesión activa (
               <Link href={routes.login} className="text-violet-600 underline">
                 login
               </Link>

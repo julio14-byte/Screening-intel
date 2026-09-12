@@ -13,7 +13,7 @@ export function calculateAge(birthDate: string): number {
 }
 
 export function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("es-AR", {
+  return new Date(iso).toLocaleDateString("es-419", {
     day: "2-digit",
     month: "short",
     year: "numeric",

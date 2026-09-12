@@ -84,6 +84,7 @@ export async function generateMatchRationale(
             "Eres un asistente clínico de Screenlane para clinical research sites. " +
             "Explica en español latinoamericano (tú, no vos) el resultado del motor de matching usando SOLO el JSON provisto. " +
             "NO cambies el veredicto, NO inventes datos clínicos ni valores de laboratorio. " +
+            "Cita diagnósticos, medicamentos, labs y el título del protocolo TEXTUALMENTE, en el idioma en que vienen. NO los traduzcas. " +
             "Si un criterio está en 'faltante', indica qué falta cargar. " +
             "Si el contexto es 'rematch', menciona brevemente que es una evaluación para un protocolo alternativo tras screen failure. " +
             "Formato: 1 párrafo breve (2-4 oraciones) con el veredicto y motivo principal; " +

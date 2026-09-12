@@ -18,6 +18,7 @@ Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-sc
 | **Sesión** | Timeout de inactividad (30 min) y tope absoluto (8 h); login demo apagado en production. |
 | **Backups** | Procedimiento de restore PITR en [`docs/BACKUP.md`](docs/BACKUP.md). |
 | **Comparador Re-Match IA** | Tras un screen failure, indica qué protocolo alternativo llamar primero (`POST /api/matching/rematch-compare`). |
+| **Idioma** | App y portal en español latinoamericano. Criterios del protocolo se conservan en el idioma del sponsor (p. ej. inglés). |
 | **Justificación clínica IA** | Texto en español que explica el veredicto del matching sin alterar la elegibilidad (`POST /api/matching/rationale`). |
 | **Portal de candidatos** | Pre-registro público en `/candidato`, inbox en `/candidatos` y settings en `/settings/portal`. |
 | **Re-Match nativo** | Propone protocolos alternativos tras un screen failure; se refresca automáticamente cuando el EHR envía labs o diagnósticos nuevos. |
@@ -138,7 +139,7 @@ Ver [`.env.example`](.env.example) para Stripe, ICD-11, MFA/sesión y login demo
 
 ### 3. Base de datos (Supabase)
 
-Ejecutá las migraciones **en orden** en el SQL Editor o con la CLI:
+Ejecuta las migraciones **en orden** en el SQL Editor o con la CLI:
 
 ```text
 supabase/migrations/0001_initial_schema.sql
@@ -157,7 +158,7 @@ supabase/migrations/0015_ehr_integration.sql
 supabase/migrations/0016_reduce_rls_disk_io.sql
 ```
 
-Si el slug `demo` falló en 0009, aplicá también `0011_fix_organization_slug_backfill.sql`.
+Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
 
 Opcional — datos de demo o activar Pro sin Stripe:
 
@@ -203,7 +204,9 @@ La lógica central está en [`src/lib/matching.ts`](src/lib/matching.ts):
 
 Cada screening guarda `match_score` (0–100) y `match_details` (trazabilidad criterio por criterio).
 
-**Justificación clínica (IA):** en matching, `POST /api/matching/rationale` explica un cruce. En Re-Match, `POST /api/matching/rematch-compare` compara alternativas tras un screen failure. Ninguna modifica la elegibilidad.
+**Idioma:** la app (UI, portal, IA operativa) está en **español latinoamericano**. Título y criterios del protocolo se guardan **en el idioma del sponsor** (p. ej. inglés en PDFs de farmacéuticas de EUA). `POST /api/protocols/extract` no traduce esos textos.
+
+**Justificación clínica (IA):** en matching, `POST /api/matching/rationale` explica un cruce. En Re-Match, `POST /api/matching/rematch-compare` compara alternativas tras un screen failure. Ninguna modifica la elegibilidad ni traduce los criterios del protocolo.
 
 ---
 
@@ -358,14 +361,14 @@ Detalle: [`docs/STRIPE_SETUP.md`](docs/STRIPE_SETUP.md).
 
 ## Deploy en Vercel
 
-1. Importá el repositorio en [Vercel](https://vercel.com).
-2. Configurá las variables de `.env.example`.
+1. Importa el repositorio en [Vercel](https://vercel.com).
+2. Configura las variables de `.env.example`.
 3. Webhooks:
    - Stripe → `https://tu-dominio/api/webhooks/stripe`
    - EHR → `https://tu-dominio/api/webhooks/ehr`
 4. `NEXT_PUBLIC_APP_URL` → URL de producción
 5. **Authentication → MFA** → Enable TOTP (si no, investigator/sub-PI no pueden enrolar)
-6. **Database → Backups** → activá PITR en Pro (ver [`docs/BACKUP.md`](docs/BACKUP.md))
+6. **Database → Backups** → activa PITR en Pro (ver [`docs/BACKUP.md`](docs/BACKUP.md))
 7. No definas `ALLOW_DEMO_LOGIN=true` en el proyecto de producción
 
 ```bash
@@ -427,7 +430,7 @@ docs/                        # STRIPE_SETUP.md, BACKUP.md, etc.
 
 Backups y restore (PITR): [`docs/BACKUP.md`](docs/BACKUP.md).
 
-Antes de producción con datos reales de pacientes: revisá políticas RLS, rotá claves, activá MFA en el dashboard de Auth, configurá PITR en Pro y completá evaluación de cumplimiento (HIPAA / GDPR según jurisdicción).
+Antes de producción con datos reales de pacientes: revisa políticas RLS, rota claves, activa MFA en el dashboard de Auth, configura PITR en Pro y completa evaluación de cumplimiento (HIPAA / GDPR según jurisdicción).
 
 ---
 

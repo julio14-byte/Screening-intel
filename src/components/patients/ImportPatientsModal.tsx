@@ -77,7 +77,7 @@ export function ImportPatientsModal({
     <Modal open={open} title="Importar pacientes (CSV)" onClose={onClose} wide>
       <div className="space-y-4">
         <p className="text-sm text-slate-600">
-          Subí un CSV con columnas{" "}
+          Sube un CSV con columnas{" "}
           <code className="rounded bg-slate-100 px-1">first_name, last_name, birth_date, gender</code>
           . Opcional: <code className="rounded bg-slate-100 px-1">conditions</code>,{" "}
           <code className="rounded bg-slate-100 px-1">medications</code> y labs numéricos (

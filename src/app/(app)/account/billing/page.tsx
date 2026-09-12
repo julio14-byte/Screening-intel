@@ -125,7 +125,7 @@ export default async function BillingPage({
                 <dt className="text-slate-500">Prueba hasta</dt>
                 <dd className="tabular-nums">
                   {new Date(organization.trial_ends_at).toLocaleDateString(
-                    "es-AR"
+                    "es-419"
                   )}
                 </dd>
               </div>

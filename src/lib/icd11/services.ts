@@ -51,7 +51,7 @@ function pickBestMatch(
 export async function runIcd11NormalizeColloquial(colloquial: string) {
   const term = colloquial.trim();
   if (!term) {
-    return { error: "Indicá un término coloquial para normalizar." };
+    return { error: "Indica un término coloquial para normalizar." };
   }
 
   const results = await searchIcd11(term);

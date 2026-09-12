@@ -61,7 +61,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
       description:
         "API REST de Screenlane (HealthTech / clinical research sites). " +
         "La mayoría de endpoints requieren sesión Supabase vía cookies (`sb-*`). " +
-        "Iniciá sesión con `POST /api/auth/login` desde el mismo navegador antes de probar endpoints protegidos en Swagger UI.",
+        "Inicia sesión con `POST /api/auth/login` desde el mismo navegador antes de probar endpoints protegidos en Swagger UI.",
       contact: {
         name: "Screenlane",
       },
@@ -85,7 +85,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           in: "cookie",
           name: "sb-access-token",
           description:
-            "Sesión Supabase SSR (cookies HttpOnly). Usá «Authorize» tras login en /login o probá endpoints desde este mismo origen.",
+            "Sesión Supabase SSR (cookies HttpOnly). Usa «Authorize» tras login en /login o prueba endpoints desde este mismo origen.",
         },
       },
       schemas: {
@@ -416,7 +416,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
         post: {
           tags: ["Protocols"],
           summary: "Extraer criterios de protocolo (PDF/TXT + IA)",
-          description: "Sube PDF o TXT; GPT-4o-mini devuelve criterios estructurados.",
+          description: "Sube PDF o TXT; GPT-4o-mini estructura criterios en el idioma original del documento (no traduce).",
           security: [{ cookieAuth: [] }],
           requestBody: {
             required: true,

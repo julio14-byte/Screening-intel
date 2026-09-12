@@ -19,7 +19,7 @@ export function CandidatoPortalError({
 
   const messages: Record<string, string> = {
     not_found:
-      "Revisá el código con tu coordinador. Usá el link completo que te enviaron o el slug exacto (ej. demo o demo-a1b2c3d4).",
+      "Revisa el código con tu coordinador. Usa el link completo que te enviaron o el slug exacto (ej. demo o demo-a1b2c3d4).",
     portal_disabled:
       "Este centro existe pero el portal de candidatos no está activado. El investigador debe activarlo en Configuración → Portal de candidatos y guardar.",
     error:

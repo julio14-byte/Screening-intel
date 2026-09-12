@@ -77,7 +77,7 @@ export function ConditionsEditor({
         value={text}
         onChange={(event) => updateText(event.target.value)}
         placeholder={
-          "Escribí patologías y diagnósticos activos en texto libre.\n" +
+          "Escribe patologías y diagnósticos activos en texto libre.\n" +
           "Una condición por línea. Ej:\n" +
           "Diabetes mellitus tipo 2\n" +
           "Hipertensión esencial"
@@ -85,7 +85,7 @@ export function ConditionsEditor({
         className="w-full resize-y rounded-xl border border-violet-200 bg-white px-3 py-2.5 text-sm leading-relaxed text-indigo-950 placeholder:text-violet-300 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
       />
       <p className="text-[11px] text-indigo-500">
-        Texto libre compatible con ICD-11. Podés escribir a mano o buscar
+        Texto libre compatible con ICD-11. Puedes escribir a mano o buscar
         diagnósticos oficiales abajo.
       </p>
 
