@@ -423,6 +423,7 @@ docs/                        # STRIPE_SETUP.md, BACKUP.md, etc.
 - Validación Zod en APIs críticas
 - Portal público con rate limiting y políticas RLS dedicadas
 - Webhooks EHR con firma HMAC (`X-EHR-Signature`) e idempotencia por `event_id`
+- ePRO aislado por centro; bitácora sin acceso `anon`; `ehr_webhook_secret` no legible por el cliente
 
 Backups y restore (PITR): [`docs/BACKUP.md`](docs/BACKUP.md).
 
