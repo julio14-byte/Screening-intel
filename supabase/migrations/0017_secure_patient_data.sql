@@ -14,6 +14,12 @@ revoke all on table public.epro_responses from anon;
 
 drop policy if exists "mvp full access epro_forms" on public.epro_forms;
 drop policy if exists "mvp full access epro_responses" on public.epro_responses;
+drop policy if exists "tenant_select_epro_forms" on public.epro_forms;
+drop policy if exists "tenant_write_epro_forms" on public.epro_forms;
+drop policy if exists "tenant_select_epro_responses" on public.epro_responses;
+drop policy if exists "tenant_write_epro_responses" on public.epro_responses;
+drop policy if exists "tenant_update_epro_responses" on public.epro_responses;
+drop policy if exists "tenant_delete_epro_responses" on public.epro_responses;
 
 create policy "tenant_select_epro_forms"
   on public.epro_forms for select to authenticated
