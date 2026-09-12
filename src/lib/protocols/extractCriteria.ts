@@ -1,11 +1,6 @@
-import { extractText, getDocumentProxy } from "unpdf";
 import type { ExclusionCriteria, InclusionCriteria } from "@/lib/types";
 
-export async function extractTextFromPdf(buffer: ArrayBuffer): Promise<string> {
-  const pdf = await getDocumentProxy(new Uint8Array(buffer));
-  const { text } = await extractText(pdf, { mergePages: true });
-  return text.trim();
-}
+export { extractTextFromPdf } from "@/lib/documents/pdfText";
 
 export type ExtractedProtocolDraft = {
   title: string;
