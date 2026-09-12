@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { ErrorState } from "@/components/ui/StateMessage";
 import { ConditionsEditor } from "@/components/profile/ConditionsEditor";
 import { ClinicalNotesImport } from "@/components/profile/ClinicalNotesImport";
+import { ClinicalDocumentVault } from "@/components/profile/ClinicalDocumentVault";
 import { RoleGuard } from "@/components/rbac/RoleGuard";
 import { useRole } from "@/contexts/role-context";
 import { LabsEditor } from "@/components/profile/LabsEditor";
@@ -116,6 +117,8 @@ export function ClinicalProfileEditor({
           <ClinicalNotesImport onExtracted={applyNotesDraft} />
         </div>
       ) : null}
+
+      <ClinicalDocumentVault patientId={patient.id} />
 
       <div className={`grid gap-4 lg:grid-cols-2 ${!canEdit ? "pointer-events-none opacity-80" : ""}`}>
         <Card>

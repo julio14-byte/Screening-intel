@@ -21,6 +21,8 @@ Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-sc
 | **Portal de candidatos** | Pre-registro público en `/candidato`, inbox en `/candidatos` y settings en `/settings/portal`. |
 | **Re-Match nativo** | Propone protocolos alternativos tras un screen failure; se refresca automáticamente cuando el EHR envía labs o diagnósticos nuevos. |
 | **Sub-investigator** | Rol clínico con permisos de PI excepto roles y facturación. |
+| **ACL por protocolo** | El PI asigna coordinadores / sub-I / CRA a cada estudio; RLS oculta el resto. |
+| **Documentos cifrados** | PDF de lab y foto de receta en Storage privado + AES-256-GCM (`DOCUMENT_ENCRYPTION_KEY`). |
 | **Screenlane** | Rebrand completo del producto (antes Screening Intelligence). |
 
 ---
@@ -49,8 +51,8 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | Área | Qué hace |
 |------|----------|
 | **Patient Registry** | Alta, búsqueda e importación CSV de pacientes |
-| **Clinical Profile** | Condiciones, medicación, laboratorios + búsqueda ICD-11 + extracción IA desde notas |
-| **Protocol Matcher** | Criterios de inclusión/exclusión; extracción NLP desde PDF |
+| **Clinical Profile** | Condiciones, medicación, laboratorios + ICD-11 + notas IA + **documentos cifrados** (PDF / foto) |
+| **Protocol Matcher** | Criterios de inclusión/exclusión; extracción NLP desde PDF; **equipo asignado por estudio** |
 | **Motor de elegibilidad** | Semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple + `match_score` + justificación IA |
 | **Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure |
 | **Re-Match** | Propone protocolos alternativos para pacientes con screen failure |
@@ -82,9 +84,9 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 |------|-------------|
 | `/dashboard` | Embudo de screening y métricas del site |
 | `/patients` | Registro de pacientes |
-| `/patients/[id]` | Perfil clínico + timeline de auditoría |
-| `/protocols` | Gestión de protocolos |
-| `/protocols/[id]/match` | Cruce masivo paciente ↔ protocolo + justificación IA |
+| `/patients/[id]` | Perfil clínico + documentos cifrados + timeline de auditoría |
+| `/protocols` | Gestión de protocolos (visibles según asignación) |
+| `/protocols/[id]/match` | Cruce masivo + equipo del protocolo (PI) + justificación IA |
 | `/tracker` | Pipeline Kanban con drag & drop |
 | `/rematch` | Re-matching automático post screen failure |
 | `/candidato` | Portal público de pre-registro (pacientes) |
@@ -131,6 +133,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...          # demo, portal, sync EHR y webhooks
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 OPENAI_API_KEY=sk-...                     # chat IA, extracción PDF/notas, justificación matching
+DOCUMENT_ENCRYPTION_KEY=                  # 32 bytes hex/base64; obligatorio en production
 ```
 
 Ver [`.env.example`](.env.example) para Stripe, ICD-11, MFA/sesión y login demo. Guías: [`docs/STRIPE_SETUP.md`](docs/STRIPE_SETUP.md), [`docs/BACKUP.md`](docs/BACKUP.md).
@@ -154,6 +157,7 @@ supabase/migrations/0013_portal_public_read.sql
 supabase/migrations/0014_fix_protocols_portal_grants.sql
 supabase/migrations/0015_ehr_integration.sql
 supabase/migrations/0016_reduce_rls_disk_io.sql
+supabase/migrations/0017_protocol_assignments_encrypted_docs.sql
 ```
 
 Si el slug `demo` falló en 0009, aplicá también `0011_fix_organization_slug_backfill.sql`.
@@ -230,10 +234,10 @@ yarn mcp:icd11
 
 | Rol | Permisos |
 |-----|----------|
-| **investigator** | Protocolos, aprobaciones, randomización, gestión de roles y facturación |
-| **sub_investigator** | Igual que PI en clínica; sin roles ni billing |
-| **coordinator** | Pacientes, screening operativo (sin marcar Apto) |
-| **monitor** | Solo lectura (CRA / auditoría farmacéutica) |
+| **investigator** | Protocolos, asignar equipo por estudio, aprobaciones, roles y facturación |
+| **sub_investigator** | Clínica en protocolos asignados; sin roles ni billing |
+| **coordinator** | Pacientes + screening de los protocolos asignados |
+| **monitor** | Solo lectura de protocolos asignados (CRA) |
 
 Administración en `/settings/roles` (solo investigator).
 

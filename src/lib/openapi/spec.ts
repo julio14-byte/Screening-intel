@@ -400,6 +400,110 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           },
         },
       },
+      "/api/protocols/{id}/assignments": {
+        get: {
+          tags: ["Protocols"],
+          summary: "Listar equipo asignado a un protocolo",
+          description: "Solo investigador principal. Coordinador y sub-I solo ven los protocolos a los que están asignados.",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          ],
+          responses: {
+            "200": { description: "Miembros y flag assigned" },
+            "403": { description: "Solo investigator", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+        put: {
+          tags: ["Protocols"],
+          summary: "Asignar o quitar staff de un protocolo",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["userId", "assigned"],
+                  properties: {
+                    userId: { type: "string", format: "uuid" },
+                    assigned: { type: "boolean" },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "OK" },
+            "400": { description: "Datos inválidos", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+      },
+      "/api/patients/{id}/documents": {
+        get: {
+          tags: ["Patients"],
+          summary: "Listar documentos cifrados del expediente",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          ],
+          responses: { "200": { description: "Metadatos (sin binario)" } },
+        },
+        post: {
+          tags: ["Patients"],
+          summary: "Guardar PDF de laboratorio o foto de receta cifrados",
+          description:
+            "Multipart file. AES-256-GCM si DOCUMENT_ENCRYPTION_KEY está configurada; si no, solo cifrado en reposo de Storage. No usa BYTEA en Postgres.",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "multipart/form-data": {
+                schema: {
+                  type: "object",
+                  required: ["file"],
+                  properties: {
+                    file: { type: "string", format: "binary" },
+                    kind: { type: "string", enum: ["lab_pdf", "prescription_photo", "other"] },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Metadatos del documento" },
+            "400": { description: "Archivo inválido", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+      },
+      "/api/patients/{id}/documents/{docId}": {
+        get: {
+          tags: ["Patients"],
+          summary: "Descargar (descifrar) un documento del expediente",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+            { name: "docId", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          ],
+          responses: { "200": { description: "Binario descifrado" } },
+        },
+        delete: {
+          tags: ["Patients"],
+          summary: "Borrar documento del expediente",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+            { name: "docId", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          ],
+          responses: { "200": { description: "OK" } },
+        },
+      },
       "/api/audit": {
         get: {
           tags: ["Audit"],
