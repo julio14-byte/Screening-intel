@@ -14,6 +14,7 @@ import {
 import { CriteriaSummary } from "@/components/protocols/CriteriaSummary";
 import { NewProtocolModal } from "@/components/protocols/NewProtocolModal";
 import { RoleGuard } from "@/components/rbac/RoleGuard";
+import { useRole } from "@/contexts/role-context";
 import { useProtocols } from "@/hooks/useProtocols";
 import { cn } from "@/lib/utils";
 
@@ -21,12 +22,18 @@ export default function ProtocolsPage() {
   const { protocols, loading, error, addProtocol, setProtocolStatus } =
     useProtocols();
   const [modalOpen, setModalOpen] = useState(false);
+  const { hasRole } = useRole();
+  const isPi = hasRole(["investigator"]);
 
   return (
     <>
       <PageHeader
         title="Protocol Matcher"
-        description="Protocolos con criterios estructurados. Seleccioná uno para cruzarlo contra pacientes."
+        description={
+          isPi
+            ? "Protocolos con criterios estructurados. Asigna coordinadores e investigadores a cada estudio."
+            : "Solo ves los protocolos que el investigador principal te asignó."
+        }
         actions={
           <RoleGuard permission="protocols:write">
             <Button onClick={() => setModalOpen(true)}>
@@ -45,7 +52,11 @@ export default function ProtocolsPage() {
         <Card>
           <EmptyState
             title="Todavía no hay protocolos"
-            description="Dá de alta un protocolo con sus criterios de inclusión y exclusión para empezar a matchear pacientes."
+            description={
+              isPi
+                ? "Da de alta un protocolo con sus criterios de inclusión y exclusión para empezar a matchear pacientes."
+                : "El investigador principal debe asignarte a un protocolo. Hasta entonces no ves estudios de otros equipos."
+            }
           />
         </Card>
       ) : (

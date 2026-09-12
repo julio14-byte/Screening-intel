@@ -155,6 +155,8 @@ const config = {
       ehrWebhook: "/api/webhooks/ehr",
       icd11Search: "/api/icd11/search",
       icd11Normalize: "/api/icd11/normalize",
+      patientDocuments: "/api/patients/{id}/documents",
+      protocolAssignments: "/api/protocols/{id}/assignments",
     },
   },
 
