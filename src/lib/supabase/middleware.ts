@@ -1,6 +1,16 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import config from "@/config";
+import { isMfaExemptPath } from "@/lib/auth/mfa-paths";
+import {
+  applySessionActivityCookies,
+  AUTH_AT_COOKIE,
+  clearSessionActivityCookies,
+  getSessionExpiryReason,
+  IDLE_AT_COOKIE,
+  parseEpochCookie,
+  shouldSkipMfaForUser,
+} from "@/lib/auth/session-policy";
 import { routes } from "@/lib/app/routes";
 import { isProtectedPath, isPublicApiPath } from "@/lib/app/routes";
 import {
@@ -10,6 +20,12 @@ import {
 import type { AppRole } from "@/lib/rbac/types";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { getPaywallRedirect } from "@/plugins/stripe/paywall";
+
+type CookieToSet = {
+  name: string;
+  value: string;
+  options?: Parameters<NextResponse["cookies"]["set"]>[2];
+};
 
 async function fetchUserClinicalRole(
   supabase: ReturnType<typeof createServerClient>,
@@ -32,6 +48,15 @@ function isPublicMarketingPath(pathname: string) {
   );
 }
 
+function applyBufferedCookies(
+  target: NextResponse,
+  cookiesToSet: CookieToSet[]
+) {
+  cookiesToSet.forEach(({ name, value, options }) =>
+    target.cookies.set(name, value, options)
+  );
+}
+
 export async function updateSession(request: NextRequest) {
   try {
     return await runUpdateSession(request);
@@ -43,11 +68,16 @@ export async function updateSession(request: NextRequest) {
 
 async function runUpdateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
+  const sessionCookies: CookieToSet[] = [];
   const { pathname } = request.nextUrl;
 
   const isLogin = pathname === config.auth.loginUrl;
+  const isMfaChallenge = pathname === routes.loginMfa;
   const isPublic =
-    isPublicMarketingPath(pathname) || isLogin || isPublicApiPath(pathname);
+    isPublicMarketingPath(pathname) ||
+    isLogin ||
+    isMfaChallenge ||
+    isPublicApiPath(pathname);
 
   if (!isSupabaseConfigured()) {
     if (!isPublic && !isLogin) {
@@ -68,9 +98,10 @@ async function runUpdateSession(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
+          cookiesToSet.forEach(({ name, value, options }) => {
+            request.cookies.set(name, value);
+            sessionCookies.push({ name, value, options });
+          });
           response = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
@@ -84,7 +115,114 @@ async function runUpdateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  function finish(res: NextResponse, options?: { resetAbsolute?: boolean }) {
+    applyBufferedCookies(res, sessionCookies);
+    if (user) {
+      applySessionActivityCookies(res, request, Date.now(), options);
+    }
+    res.headers.set("x-pathname", pathname);
+    return res;
+  }
+
+  if (user) {
+    const now = Date.now();
+    const expired = getSessionExpiryReason(
+      now,
+      parseEpochCookie(request.cookies.get(IDLE_AT_COOKIE)?.value),
+      parseEpochCookie(request.cookies.get(AUTH_AT_COOKIE)?.value)
+    );
+
+    if (expired) {
+      await supabase.auth.signOut();
+      if (pathname.startsWith("/api/")) {
+        const json = NextResponse.json(
+          { error: "Sesión expirada. Volvé a iniciar sesión." },
+          { status: 401 }
+        );
+        applyBufferedCookies(json, sessionCookies);
+        clearSessionActivityCookies(json);
+        return json;
+      }
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = config.auth.loginUrl;
+      loginUrl.search = "";
+      loginUrl.searchParams.set("reason", "timeout");
+      const redirect = NextResponse.redirect(loginUrl);
+      applyBufferedCookies(redirect, sessionCookies);
+      clearSessionActivityCookies(redirect);
+      return redirect;
+    }
+  }
+
   response.headers.set("x-pathname", pathname);
+
+  let role: AppRole | null = null;
+
+  if (user) {
+    role = await fetchUserClinicalRole(supabase, user.id);
+    const skipMfa = shouldSkipMfaForUser(user.email, role);
+
+    if (!skipMfa) {
+      const { data: aal, error: aalError } =
+        await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+      if (aalError) {
+        console.error("[middleware] MFA AAL:", aalError.message);
+      } else if (aal) {
+        const hasAal2 = aal.currentLevel === "aal2";
+        const enrolled = aal.nextLevel === "aal2";
+
+        if (hasAal2 && isMfaChallenge) {
+          const url = request.nextUrl.clone();
+          url.pathname = config.auth.afterLoginUrl;
+          url.search = "";
+          return finish(NextResponse.redirect(url));
+        }
+
+        if (!hasAal2 && !isMfaExemptPath(pathname)) {
+          if (pathname.startsWith("/api/")) {
+            return finish(
+              NextResponse.json(
+                {
+                  error: enrolled
+                    ? "Se requiere el código MFA de tu autenticador."
+                    : "Debés activar MFA (TOTP) para continuar.",
+                },
+                { status: 403 }
+              )
+            );
+          }
+
+          const url = request.nextUrl.clone();
+          if (enrolled) {
+            url.pathname = routes.loginMfa;
+            url.search = "";
+          } else {
+            url.pathname = routes.app.security;
+            url.search = "enroll=1";
+          }
+          return finish(NextResponse.redirect(url));
+        }
+
+        if (!hasAal2 && isMfaChallenge && !enrolled) {
+          const url = request.nextUrl.clone();
+          url.pathname = routes.app.security;
+          url.search = "enroll=1";
+          return finish(NextResponse.redirect(url));
+        }
+      }
+    } else if (isMfaChallenge) {
+      const url = request.nextUrl.clone();
+      url.pathname = config.auth.afterLoginUrl;
+      url.search = "";
+      return finish(NextResponse.redirect(url));
+    }
+  } else if (isMfaChallenge) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = config.auth.loginUrl;
+    loginUrl.search = "";
+    return NextResponse.redirect(loginUrl);
+  }
 
   if (user && isLogin) {
     const url = request.nextUrl.clone();
@@ -96,13 +234,13 @@ async function runUpdateSession(request: NextRequest) {
       config.auth.afterLoginUrl;
     url.pathname = redirectPath;
     url.search = "";
-    return NextResponse.redirect(url);
+    return finish(NextResponse.redirect(url));
   }
 
   if (user && isPublicMarketingPath(pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = config.auth.afterLoginUrl;
-    return NextResponse.redirect(url);
+    return finish(NextResponse.redirect(url));
   }
 
   if (isProtectedPath(pathname) && !user) {
@@ -119,27 +257,21 @@ async function runUpdateSession(request: NextRequest) {
       url.pathname = paywallRedirect.split("?")[0];
       const qs = paywallRedirect.split("?")[1];
       if (qs) {
-        new URLSearchParams(qs).forEach((v, k) =>
-          url.searchParams.set(k, v)
-        );
+        new URLSearchParams(qs).forEach((v, k) => url.searchParams.set(k, v));
       }
-      return NextResponse.redirect(url);
+      return finish(NextResponse.redirect(url));
     }
   }
 
-  if (user) {
-    const role = await fetchUserClinicalRole(supabase, user.id);
-
+  if (user && role) {
     if (!isRouteAllowedForRole(pathname, role)) {
       const url = request.nextUrl.clone();
       url.pathname = routes.app.dashboard;
       url.searchParams.set("rbac", "denied");
-      return NextResponse.redirect(url);
+      return finish(NextResponse.redirect(url));
     }
 
-    const isWriteMethod = !["GET", "HEAD", "OPTIONS"].includes(
-      request.method
-    );
+    const isWriteMethod = !["GET", "HEAD", "OPTIONS"].includes(request.method);
     const isWriteApi = WRITE_API_PREFIXES.some((prefix) =>
       pathname.startsWith(prefix)
     );
@@ -152,5 +284,5 @@ async function runUpdateSession(request: NextRequest) {
     }
   }
 
-  return response;
+  return finish(response);
 }

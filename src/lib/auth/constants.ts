@@ -10,3 +10,10 @@ export function getDemoCredentials() {
     password: process.env.DEMO_LOGIN_PASSWORD ?? DEFAULT_DEMO_PASSWORD,
   };
 }
+
+export function isDemoEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  return (
+    email.trim().toLowerCase() === getDemoCredentials().email.toLowerCase()
+  );
+}

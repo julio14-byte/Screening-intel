@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown, CreditCard, LogOut, Shield, User } from "lucide-react";
+import { ChevronDown, CreditCard, KeyRound, LogOut, Shield, User } from "lucide-react";
 import { routes } from "@/lib/app/routes";
 import type { AppRole } from "@/lib/rbac/types";
 import { APP_ROLE_LABELS } from "@/lib/rbac/types";
@@ -76,6 +76,15 @@ export function AccountMenu({
             ) : null}
           </li>
         ) : null}
+        <li>
+          <Link
+            href={routes.app.security}
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-indigo-800 transition hover:bg-violet-50"
+          >
+            <KeyRound className="h-4 w-4 shrink-0 text-violet-500" aria-hidden />
+            Seguridad y MFA
+          </Link>
+        </li>
         {role === "investigator" ? (
           <li>
             <Link

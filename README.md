@@ -14,6 +14,9 @@ Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-sc
 | Feature | Descripción |
 |---------|-------------|
 | **Integración EHR** | Fase 1: sync batch (`POST /api/ehr/sync`). Fase 2: webhook en tiempo real con HMAC (`POST /api/webhooks/ehr`). Config en `/settings/ehr`. |
+| **MFA TOTP** | Obligatorio en producción para investigator y sub-investigator (`/settings/security`, `/login/mfa`). |
+| **Sesión** | Timeout de inactividad (30 min) y tope absoluto (8 h); login demo apagado en production. |
+| **Backups** | Procedimiento de restore PITR en [`docs/BACKUP.md`](docs/BACKUP.md). |
 | **Justificación clínica IA** | Texto en español que explica el veredicto del matching sin alterar la elegibilidad (`POST /api/matching/rationale`). |
 | **Portal de candidatos** | Pre-registro público en `/candidato`, inbox en `/candidatos` y settings en `/settings/portal`. |
 | **Re-Match nativo** | Propone protocolos alternativos tras un screen failure; se refresca automáticamente cuando el EHR envía labs o diagnósticos nuevos. |
@@ -88,6 +91,7 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | `/candidatos` | Inbox de leads del portal (coordinadores) |
 | `/settings/portal` | Configuración del portal (investigator) |
 | `/settings/ehr` | Integración EHR — sync batch y webhooks (investigator) |
+| `/settings/security` | MFA TOTP (obligatorio en prod para PI / sub-PI) |
 | `/chat` | Asistente clínico IA |
 | `/epro` | Formularios ePRO |
 | `/settings/roles` | Creación de usuarios y roles (investigator) |
@@ -129,7 +133,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 OPENAI_API_KEY=sk-...                     # chat IA, extracción PDF/notas, justificación matching
 ```
 
-Ver [`.env.example`](.env.example) para Stripe, ICD-11 y login demo. Guías: [`docs/STRIPE_SETUP.md`](docs/STRIPE_SETUP.md).
+Ver [`.env.example`](.env.example) para Stripe, ICD-11, MFA/sesión y login demo. Guías: [`docs/STRIPE_SETUP.md`](docs/STRIPE_SETUP.md), [`docs/BACKUP.md`](docs/BACKUP.md).
 
 ### 3. Base de datos (Supabase)
 
@@ -181,7 +185,7 @@ yarn dev
 | http://localhost:3000/settings/ehr | Configuración integración EHR |
 | http://localhost:3000/docs/api | Swagger UI |
 
-**Usuario demo** (auto-provisión si existe `SUPABASE_SERVICE_ROLE_KEY`):
+**Usuario demo** (solo desarrollo; en production está apagado salvo `ALLOW_DEMO_LOGIN=true`):
 
 - Email: `demo@screening.local`
 - Password: `demo123`
@@ -358,6 +362,9 @@ Detalle: [`docs/STRIPE_SETUP.md`](docs/STRIPE_SETUP.md).
    - Stripe → `https://tu-dominio/api/webhooks/stripe`
    - EHR → `https://tu-dominio/api/webhooks/ehr`
 4. `NEXT_PUBLIC_APP_URL` → URL de producción
+5. **Authentication → MFA** → Enable TOTP (si no, investigator/sub-PI no pueden enrolar)
+6. **Database → Backups** → activá PITR en Pro (ver [`docs/BACKUP.md`](docs/BACKUP.md))
+7. No definas `ALLOW_DEMO_LOGIN=true` en el proyecto de producción
 
 ```bash
 yarn build
@@ -387,7 +394,7 @@ src/
     openapi/                 # Spec OpenAPI
   plugins/stripe/            # Checkout, portal, paywall
 mcp/                         # Servidores MCP (screening, icd11)
-docs/                        # STRIPE_SETUP.md, etc.
+docs/                        # STRIPE_SETUP.md, BACKUP.md, etc.
 ```
 
 ---
@@ -408,12 +415,17 @@ docs/                        # STRIPE_SETUP.md, etc.
 ## Seguridad
 
 - Autenticación Supabase SSR con middleware
+- **MFA TOTP** obligatorio en producción para investigator y sub-investigator (activar TOTP en Authentication → MFA)
+- Sesión: 30 min de inactividad y 8 h absolutas (`AUTH_IDLE_MINUTES`, `AUTH_SESSION_HOURS`); las cookies de `@supabase/ssr` no se usan como único límite
+- Login demo (`demo@screening.local`) **deshabilitado** cuando `NODE_ENV=production`, salvo `ALLOW_DEMO_LOGIN=true`
 - RLS en PostgreSQL + RBAC clínico
 - Validación Zod en APIs críticas
 - Portal público con rate limiting y políticas RLS dedicadas
 - Webhooks EHR con firma HMAC (`X-EHR-Signature`) e idempotencia por `event_id`
 
-Antes de producción con datos reales de pacientes: revisá políticas RLS, rotá claves y completá evaluación de cumplimiento (HIPAA / GDPR según jurisdicción).
+Backups y restore (PITR): [`docs/BACKUP.md`](docs/BACKUP.md).
+
+Antes de producción con datos reales de pacientes: revisá políticas RLS, rotá claves, activá MFA en el dashboard de Auth, configurá PITR en Pro y completá evaluación de cumplimiento (HIPAA / GDPR según jurisdicción).
 
 ---
 
