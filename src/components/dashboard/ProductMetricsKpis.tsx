@@ -1,4 +1,4 @@
-import { Bot, Mail, Users } from "lucide-react";
+import { Mail, UserPlus, Users } from "lucide-react";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import {
   formatWeekTrend,
@@ -18,7 +18,7 @@ export function ProductMetricsKpis({
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           <p className="font-semibold">Métricas de tu producto</p>
           <p className="mt-1">
-            No pudimos leer waitlist, signups ni chat: {error}. Configura{" "}
+            No pudimos leer waitlist, signups ni candidatos: {error}. Configura{" "}
             <code className="text-xs">SUPABASE_SERVICE_ROLE_KEY</code> en el
             servidor.
           </p>
@@ -34,8 +34,8 @@ export function ProductMetricsKpis({
     waitlistWeek,
     signupsTotal,
     signupsWeek,
-    chatSessionsTotal,
-    chatSessionsWeek,
+    candidatosTotal,
+    candidatosWeek,
   } = productMetrics;
 
   return (
@@ -48,8 +48,8 @@ export function ProductMetricsKpis({
           Métricas reales de tu producto
         </h2>
         <p className="mt-1 text-sm text-indigo-600/70">
-          Datos vivos de Supabase para tu pitch: waitlist, registros y sesiones
-          de chat IA.
+          Datos vivos de Supabase para tu pitch: waitlist, registros y
+          candidatos del portal.
         </p>
       </div>
 
@@ -71,11 +71,11 @@ export function ProductMetricsKpis({
           accent="steel"
         />
         <KpiCard
-          title="Sesiones de chat IA"
-          value={chatSessionsTotal}
-          subtitle="Conversaciones guardadas (asistente clínico)"
-          trend={formatWeekTrend(chatSessionsWeek)}
-          icon={Bot}
+          title="Candidatos del portal"
+          value={candidatosTotal}
+          subtitle="Pre-registros públicos (inbox)"
+          trend={formatWeekTrend(candidatosWeek)}
+          icon={UserPlus}
           accent="success"
         />
       </div>

@@ -22,7 +22,7 @@ export function LandingDocs() {
         </div>
 
         <div className="mt-8 space-y-6 sm:mt-12 sm:space-y-8">
-          {productDocs.sections.map((section) => (
+          {productDocs.sections.slice(0, 1).map((section) => (
             <div
               key={section.id}
               className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm sm:p-6"
@@ -47,13 +47,25 @@ export function LandingDocs() {
           ))}
         </div>
 
-        <div className="mt-8 text-center sm:mt-10">
+        <div className="mt-8 flex flex-col items-center justify-center gap-3 text-center sm:mt-10 sm:flex-row sm:flex-wrap">
           <Link
             href="/docs"
             className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15 sm:w-auto sm:px-6"
           >
             Ver documentación completa
             <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+          </Link>
+          <Link
+            href="/privacidad"
+            className="inline-flex w-full items-center justify-center rounded-xl border border-white/20 px-5 py-3 text-sm font-medium text-violet-100 transition hover:bg-white/10 sm:w-auto"
+          >
+            Privacidad
+          </Link>
+          <Link
+            href="/integraciones"
+            className="inline-flex w-full items-center justify-center rounded-xl border border-white/20 px-5 py-3 text-sm font-medium text-violet-100 transition hover:bg-white/10 sm:w-auto"
+          >
+            Integraciones
           </Link>
         </div>
       </div>

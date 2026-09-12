@@ -47,12 +47,6 @@ const config = {
         icon: "RefreshCw",
       },
       {
-        href: "/chat",
-        label: "Asistente IA",
-        icon: "MessageSquare",
-        feature: "aiChat" as const,
-      },
-      {
         href: "/account/billing",
         label: "Facturación",
         icon: "CreditCard",
@@ -73,7 +67,6 @@ const config = {
   features: {
     waitlist: true,
     emailLogin: true,
-    aiChat: true,
     pricing: true,
     payments: true,
   },
@@ -96,7 +89,6 @@ const config = {
       "/tracker",
       "/epro",
       "/rematch",
-      "/chat",
       "/account",
       "/settings",
       "/settings/roles",
@@ -131,7 +123,6 @@ const config = {
       tracker: "/tracker",
       epro: "/epro",
       rematch: "/rematch",
-      chat: "/chat",
       billing: "/account/billing",
       roles: "/settings/roles",
       portalSettings: "/settings/portal",
@@ -140,6 +131,8 @@ const config = {
       candidatos: "/candidatos",
       docs: "/docs",
       apiDocs: "/docs/api",
+      privacy: "/privacidad",
+      integrations: "/integraciones",
     },
     apis: {
       openApi: "/api/openapi",
@@ -147,7 +140,6 @@ const config = {
       authLogin: "/api/auth/login",
       authLogout: "/api/auth/logout",
       authSession: "/api/auth/session",
-      authChats: "/api/auth/chats",
       stripeCheckout: "/api/stripe/checkout",
       stripePortal: "/api/stripe/portal",
       stripeWebhook: "/api/webhooks/stripe",
@@ -155,6 +147,12 @@ const config = {
       ehrWebhook: "/api/webhooks/ehr",
       icd11Search: "/api/icd11/search",
       icd11Normalize: "/api/icd11/normalize",
+      matchingRationale: "/api/matching/rationale",
+      rematchCompare: "/api/matching/rematch-compare",
+      profileExtract: "/api/patients/profile/extract",
+      profileExtractDocument: "/api/patients/profile/extract-document",
+      patientDocuments: "/api/patients/{id}/documents",
+      protocolAssignments: "/api/protocols/{id}/assignments",
     },
   },
 
@@ -168,6 +166,7 @@ const config = {
   landing: {
     nav: [
       { label: "Documentación", href: "#docs" },
+      { label: "Confianza", href: "#confianza" },
       { label: "Precios", href: "#pricing" },
       { label: "Waitlist", href: "#waitlist" },
       { label: "Entrar", href: "#entrar" },
@@ -230,12 +229,54 @@ const config = {
         {
           icon: "RefreshCw",
           title: "Re-Match",
-          body: "Re-evalúa cohortes cuando cambian protocolos o criterios.",
+          body: "Re-evalúa cohortes cuando cambian protocolos o criterios, y compara alternativas tras un screen failure.",
         },
         {
-          icon: "MessageSquare",
-          title: "Asistente IA",
-          body: "Consulta criterios y resúmenes clínicos en chat contextual.",
+          icon: "Sparkles",
+          title: "Triage IA de candidatos",
+          body: "Resume notas del portal y el matching para preparar la llamada de pre-screening.",
+        },
+        {
+          icon: "Cable",
+          title: "ETL e integraciones",
+          body: "EHR opcional (batch + webhook), CSV, PDF de lab, foto de receta, ICD-11 y Stripe. El matching sigue siendo un motor de reglas.",
+        },
+        {
+          icon: "Shield",
+          title: "Privacidad y regulaciones",
+          body: "Datos por centro, RBAC, bitácora 21 CFR Part 11 y controles alineados a HIPAA / GDPR / LatAm.",
+        },
+      ],
+    },
+    trust: {
+      eyebrow: "Confianza",
+      title: "Privacidad, regulaciones, ETL e integraciones.",
+      subtitle:
+        "Pensado para sponsors de EE. UU. y sites en LatAm: el funnel opera sin EHR obligatorio, y cuando lo conectas el dato queda aislado por centro.",
+      items: [
+        {
+          icon: "Shield",
+          title: "Privacidad",
+          body: "El site es responsable del tratamiento. Aislamiento por organización, MFA, sesiones cortas y minimización hacia la IA (iniciales, no nombre completo).",
+          href: "/privacidad",
+        },
+        {
+          icon: "Scale",
+          title: "Regulaciones",
+          body: "Controles alineados a 21 CFR Part 11, ICH-GCP, HIPAA, GDPR y leyes de datos de LatAm. No sustituye la certificación de tu centro.",
+          href: "/privacidad#regulaciones",
+        },
+        {
+          icon: "Workflow",
+          title: "ETL clínico",
+          body: "Extract (CSV, portal, EHR, PDF de lab, foto de receta) → Transform (perfil + ICD-11 + reglas) → Load (pacientes, screening y re-match).",
+          href: "/integraciones#etl",
+        },
+        {
+          icon: "Cable",
+          title: "Integraciones",
+          body: "EHR batch y webhook HMAC, Stripe, ICD-11, OpenAI y API OpenAPI. Configuración en la app, sin marketplace genérico.",
+          href: "/integraciones",
         },
       ],
     },
@@ -253,11 +294,23 @@ const config = {
         },
         {
           q: "¿Cómo funciona Site Pro?",
-          a: "Plan con mayor volumen de pacientes y protocolos, más re-match y asistente IA.",
+          a: "Plan con mayor volumen de pacientes y protocolos, más re-match y triage IA de candidatos.",
         },
         {
           q: "¿Los datos están aislados por sitio?",
-          a: "Sí. Cada clinical research site es una organización con RLS en Supabase; solo tu equipo ve tus pacientes y protocolos.",
+          a: "Sí. Cada clinical research site es una organización con RLS en Supabase; solo tu equipo ve tus pacientes y protocolos. Detalle en /privacidad.",
+        },
+        {
+          q: "¿Están certificados HIPAA o GDPR?",
+          a: "El producto tiene controles alineados (acceso, cifrado en tránsito, bitácora, minimización). La certificación y el BAA los cierra tu organización. Ver /privacidad#regulaciones.",
+        },
+        {
+          q: "¿Qué es el ETL de Screenlane?",
+          a: "El pipeline Extract → Transform → Load del screening: entra CSV, portal, EHR, PDF de laboratorio o foto de receta; se normaliza el perfil; se carga en tu centro. Guía en /integraciones.",
+        },
+        {
+          q: "¿Puedo cargar un PDF de laboratorio o una foto de receta?",
+          a: "Sí. En el expediente del paciente: sube el PDF digital o fotografía la receta. La IA pre-rellena labs y medicación; tú revisas y guardas. Un PDF escaneado sin texto se fotografía. El matching sigue siendo el motor de reglas.",
         },
       ],
     },
@@ -280,7 +333,7 @@ const config = {
         },
         {
           quote:
-            "El asistente IA acelera la revisión de criterios de exclusión sin abrir cada protocolo completo.",
+            "La justificación clínica IA explica el semáforo criterio por criterio sin cambiar la elegibilidad.",
           author: "Study coordinator",
           role: "Clinical research site regional",
         },
@@ -309,6 +362,8 @@ const config = {
         { label: "Precios", href: "#pricing" },
         { label: "Waitlist", href: "#waitlist" },
         { label: "Documentación", href: "/docs" },
+        { label: "Privacidad", href: "/privacidad" },
+        { label: "Integraciones", href: "/integraciones" },
       ],
     },
   },
@@ -346,7 +401,7 @@ const config = {
           "50 protocolos activos",
           "3 usuarios",
           "Re-match automático",
-          "Asistente IA clínico",
+          "Triage IA de candidatos",
         ],
         cta: "Suscribirse a Pro",
         highlighted: true,
@@ -364,7 +419,7 @@ const config = {
           "100 protocolos activos",
           "10 usuarios",
           "Re-match prioritario",
-          "Asistente IA + soporte dedicado",
+          "Triage IA + soporte dedicado",
         ],
         cta: "Suscribirse a Pro+",
         stripePriceId: "",

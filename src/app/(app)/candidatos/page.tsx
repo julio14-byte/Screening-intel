@@ -8,7 +8,7 @@ export default function CandidatosPage() {
     <>
       <PageHeader
         title="Candidatos (portal)"
-        description="Leads del pre-registro público. Convierte a paciente cuando confirmes los datos en llamada o visita."
+        description="Leads del pre-registro público. Usá el briefing IA para la llamada y convertí a paciente cuando confirmes los datos."
       />
       <p className="mb-4 text-sm text-indigo-600">
         <Link href={routes.app.portalSettings} className="text-violet-600 underline">

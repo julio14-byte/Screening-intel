@@ -111,7 +111,7 @@ export function NewProtocolModal({
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Estudio fase III de…"
+              placeholder="Phase III study of…"
             />
           </div>
           <TextInput
@@ -164,7 +164,7 @@ export function NewProtocolModal({
               label="condiciones requeridas"
               items={requiredConditions}
               onChange={setRequiredConditions}
-              placeholder="ej: diabetes tipo 2"
+              placeholder="ej: type 2 diabetes mellitus"
               emptyText="Sin condiciones requeridas."
             />
           </div>
@@ -188,7 +188,7 @@ export function NewProtocolModal({
               label="condiciones prohibidas"
               items={excludedConditions}
               onChange={setExcludedConditions}
-              placeholder="ej: insuficiencia renal"
+              placeholder="ej: chronic kidney disease"
               emptyText="Sin condiciones excluyentes."
             />
           </div>
@@ -200,7 +200,7 @@ export function NewProtocolModal({
               label="medicamentos prohibidos"
               items={excludedMedications}
               onChange={setExcludedMedications}
-              placeholder="ej: insulina"
+              placeholder="ej: insulin"
               emptyText="Sin medicación excluyente."
             />
           </div>

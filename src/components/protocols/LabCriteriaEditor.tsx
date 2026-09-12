@@ -84,7 +84,7 @@ export function LabCriteriaEditor({
 
       {labs.length === 0 ? (
         <p className="text-xs text-slate-400">
-          Sin criterios de laboratorio. Cargá al menos mín o máx.
+          Sin criterios de laboratorio. Carga al menos mín o máx.
         </p>
       ) : (
         <ul className="space-y-1">

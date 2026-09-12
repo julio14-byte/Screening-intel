@@ -46,7 +46,7 @@ export function LoginForm({
         const data = await readJsonResponse<{ error?: string }>(response);
         setError(
           data?.error ??
-            `No se pudo iniciar sesión (${response.status}). Revisá las variables en Vercel.`
+            `No se pudo iniciar sesión (${response.status}). Revisa las variables en Vercel.`
         );
         return;
       }
@@ -74,7 +74,7 @@ export function LoginForm({
       router.refresh();
       window.location.assign(from);
     } catch {
-      setError("Error de conexión. Intentá de nuevo.");
+      setError("Error de conexión. Intenta de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -113,7 +113,7 @@ export function LoginForm({
         <div className="rounded-2xl border border-white/15 bg-white/95 p-6 shadow-2xl shadow-indigo-950/40 backdrop-blur-sm">
           {timedOut ? (
             <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-              Tu sesión expiró por inactividad o tiempo máximo. Volvé a iniciar
+              Tu sesión expiró por inactividad o tiempo máximo. Vuelve a iniciar
               sesión.
             </div>
           ) : null}

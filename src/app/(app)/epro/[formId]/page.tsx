@@ -117,7 +117,7 @@ export default function EproFormPage() {
     <>
       <PageHeader
         title={form.title}
-        description={form.description ?? "Completá en nombre del paciente (demo Fase A)."}
+        description={form.description ?? "Completa en nombre del paciente (demo Fase A)."}
         actions={
           <Link href="/epro">
             <Button variant="secondary">

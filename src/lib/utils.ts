@@ -1,5 +1,14 @@
 import type { Gender, ScreeningStatus } from "./types";
 
+/** Iniciales para enviar a modelos externos (no PHI nominativo). */
+export function toPatientInitials(firstName: string, lastName: string): string {
+  const initial = (value: string) => {
+    const ch = Array.from(value.trim())[0];
+    return ch ? ch.toUpperCase() : "?";
+  };
+  return `${initial(firstName)}. ${initial(lastName)}.`;
+}
+
 /** Edad en años cumplidos a partir de una fecha ISO (YYYY-MM-DD). */
 export function calculateAge(birthDate: string): number {
   const birth = new Date(birthDate + "T00:00:00");
@@ -13,7 +22,7 @@ export function calculateAge(birthDate: string): number {
 }
 
 export function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("es-AR", {
+  return new Date(iso).toLocaleDateString("es-419", {
     day: "2-digit",
     month: "short",
     year: "numeric",

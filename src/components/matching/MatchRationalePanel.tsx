@@ -94,8 +94,9 @@ export function MatchRationalePanel({
         </div>
       ) : !error && !loading ? (
         <p className="mt-2 text-[11px] text-indigo-500">
-          Resume el veredicto del motor de reglas en lenguaje clínico. No
-          modifica la elegibilidad.
+          Resume el veredicto del motor en español. Los criterios del
+          protocolo se citan tal cual (no se traducen). No modifica la
+          elegibilidad.
         </p>
       ) : null}
     </div>

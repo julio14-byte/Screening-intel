@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       text = await file.text();
     } else {
       return NextResponse.json(
-        { error: "Formato no soportado. Usá PDF o TXT." },
+        { error: "Formato no soportado. Usa PDF o TXT." },
         { status: 400 }
       );
     }

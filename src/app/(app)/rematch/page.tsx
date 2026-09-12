@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight, CircleX, RefreshCw, UserPlus } from "lucide-react";
 import { MatchRationalePanel } from "@/components/matching/MatchRationalePanel";
+import { RematchComparePanel } from "@/components/matching/RematchComparePanel";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ScoreBar } from "@/components/ui/ScoreBar";
@@ -66,10 +67,34 @@ function OpportunityCard({
         {candidates.length === 0 ? (
           <p className="rounded-md bg-slate-50 px-3 py-2 text-xs text-slate-500">
             No hay otros protocolos activos compatibles por el momento.
-            Revisá el perfil clínico o esperá nuevos protocolos.
+            Revisa el perfil clínico o espera nuevos protocolos.
           </p>
         ) : (
-          <ul className="divide-y divide-slate-100">
+          <>
+            <RematchComparePanel
+              input={{
+                patient: {
+                  first_name: patient.first_name,
+                  last_name: patient.last_name,
+                  birth_date: patient.birth_date,
+                  gender: patient.gender,
+                },
+                failures: failures.map((f) => ({
+                  protocol_code: f.protocols.code_name,
+                  score: f.match_score,
+                })),
+                alternatives: candidates.map(({ protocol, result }) => ({
+                  protocol: {
+                    code_name: protocol.code_name,
+                    title: protocol.title,
+                  },
+                  verdict: result.verdict,
+                  score: result.score,
+                  details: result.details,
+                })),
+              }}
+            />
+            <ul className="divide-y divide-slate-100">
             {candidates.map(({ protocol, result }) => (
               <li key={protocol.id} className="space-y-3 py-3">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -128,7 +153,8 @@ function OpportunityCard({
                 />
               </li>
             ))}
-          </ul>
+            </ul>
+          </>
         )}
       </CardBody>
     </Card>
@@ -142,7 +168,7 @@ export default function RematchPage() {
     <>
       <PageHeader
         title="Re-Match & Follow-up"
-        description="Screen failures y protocolos alternativos donde el paciente podría encajar."
+        description="Screen failures y protocolos alternativos. Compara con IA cuál llamar primero; el semáforo lo sigue marcando el motor de reglas."
       />
 
       {loading ? (
@@ -153,7 +179,7 @@ export default function RematchPage() {
         <Card>
           <EmptyState
             title="No hay pacientes con screen failure"
-            description="Cuando un paciente falle el screening de un protocolo, acá vas a ver automáticamente en qué otros estudios activos podría participar."
+            description="Cuando un paciente falle el screening de un protocolo, aquí vas a ver automáticamente en qué otros estudios activos podría participar."
             action={
               <Link
                 href="/tracker"

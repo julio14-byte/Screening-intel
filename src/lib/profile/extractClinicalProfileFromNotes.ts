@@ -29,6 +29,19 @@ function normalizeLabs(value: unknown): Record<string, number> {
   return out;
 }
 
+export function parseExtractedProfileDraft(
+  content: string
+): ExtractedClinicalProfileDraft {
+  const parsed = JSON.parse(content) as Partial<ExtractedClinicalProfileDraft>;
+  return {
+    conditions: normalizeStringList(parsed.conditions),
+    medications: normalizeStringList(parsed.medications),
+    laboratories: normalizeLabs(parsed.laboratories),
+  };
+}
+
+export const CLINICAL_PROFILE_EXTRACTION_SCHEMA = EXTRACTION_SCHEMA;
+
 /** Extrae perfil clínico estructurado desde notas libres (GPT-4o-mini). */
 export async function extractClinicalProfileFromNotes(
   notes: string
@@ -57,16 +70,16 @@ export async function extractClinicalProfileFromNotes(
         {
           role: "system",
           content:
-            "Sos un asistente clínico para clinical research sites. Extraé de notas en español " +
+            "Eres un asistente clínico para clinical research sites. Extrae de notas en español latinoamericano " +
             "condiciones, medicación y laboratorios numéricos. " +
-            "Usá términos clínicos claros (ej. 'hipertensión arterial', 'metformina'). " +
+            "Usa términos clínicos claros (ej. 'hipertensión arterial', 'metformina'). " +
             "No inventes datos que no estén en el texto. " +
-            "Respondé SOLO JSON válido con esta forma:\n" +
+            "Responde SOLO JSON válido con esta forma:\n" +
             EXTRACTION_SCHEMA,
         },
         {
           role: "user",
-          content: "Extraé el perfil clínico de estas notas:\n\n" + trimmed,
+          content: "Extrae el perfil clínico de estas notas:\n\n" + trimmed,
         },
       ],
     }),
@@ -84,11 +97,5 @@ export async function extractClinicalProfileFromNotes(
   const content = data.choices?.[0]?.message?.content;
   if (!content) throw new Error("OpenAI no devolvió contenido.");
 
-  const parsed = JSON.parse(content) as Partial<ExtractedClinicalProfileDraft>;
-
-  return {
-    conditions: normalizeStringList(parsed.conditions),
-    medications: normalizeStringList(parsed.medications),
-    laboratories: normalizeLabs(parsed.laboratories),
-  };
+  return parseExtractedProfileDraft(content);
 }

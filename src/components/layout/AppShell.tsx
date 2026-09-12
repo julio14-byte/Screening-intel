@@ -17,20 +17,18 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [email, setEmail] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const { role, isReadOnly } = useRole();
+  const { role } = useRole();
 
   const navItems = useMemo(() => {
     return config.app.nav
       .filter((item) => {
-        if (item.feature === "aiChat" && !config.features.aiChat) return false;
         if (item.feature === "payments" && !config.features.payments)
           return false;
         if (item.href === routes.app.billing) return false;
-        if (isReadOnly && item.href === routes.app.chat) return false;
         return true;
       })
       .map(({ href, label, icon }) => ({ href, label, icon }));
-  }, [isReadOnly]);
+  }, []);
 
   useEffect(() => {
     setMenuOpen(false);

@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
   if (portal.status === "not_found") {
     return NextResponse.json(
-      { error: "Centro no encontrado. Revisá el código con tu coordinador." },
+      { error: "Centro no encontrado. Revisa el código con tu coordinador." },
       { status: 404 }
     );
   }

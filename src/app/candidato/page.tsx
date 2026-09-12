@@ -35,7 +35,7 @@ export default function CandidatoHubPage() {
 
       router.push(candidatoPaths.site(s));
     } catch {
-      setError("No se pudo verificar el código. Intentá de nuevo.");
+      setError("No se pudo verificar el código. Intenta de nuevo.");
     } finally {
       setChecking(false);
     }

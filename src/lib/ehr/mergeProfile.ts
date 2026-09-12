@@ -1,22 +1,23 @@
-/** Une arrays de texto sin duplicados (case-insensitive). */
+import { clinicalTermsMatch } from "@/lib/matching/clinicalTerms";
+
+/** Une arrays de texto sin duplicados (sinónimos ES/EN cuentan como el mismo término). */
 export function mergeStringArrays(
   existing: string[],
-  incoming: string[] | undefined
+  incoming: string[] | undefined,
+  kind: "condition" | "medication" = "condition"
 ): string[] {
   if (!incoming?.length) return existing;
-  const seen = new Set(existing.map((v) => v.toLowerCase()));
   const merged = [...existing];
   for (const item of incoming) {
-    const key = item.toLowerCase();
-    if (!seen.has(key)) {
-      seen.add(key);
-      merged.push(item);
-    }
+    const already = merged.some((current) =>
+      clinicalTermsMatch(current, item, kind)
+    );
+    if (!already) merged.push(item);
   }
   return merged;
 }
 
-/** Merge de laboratorios: valores entrantes pisan claves existentes. */
+/** Merge de laboratorios: valores entrantes pisan claves sinónimas. */
 export function mergeLaboratories(
   existing: Record<string, number>,
   incoming: Record<string, number> | undefined,
@@ -28,5 +29,13 @@ export function mergeLaboratories(
   if (mode === "replace") {
     return { ...incoming };
   }
-  return { ...existing, ...incoming };
+  const result = { ...existing };
+  for (const [key, value] of Object.entries(incoming)) {
+    const synonymKey = Object.keys(result).find((current) =>
+      clinicalTermsMatch(current, key, "lab")
+    );
+    if (synonymKey) result[synonymKey] = value;
+    else result[key] = value;
+  }
+  return result;
 }

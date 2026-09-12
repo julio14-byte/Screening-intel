@@ -216,7 +216,7 @@ export function RoleAdminPanel() {
 
               {members.length === 0 ? (
                 <p className="mt-4 text-center text-xs text-slate-500">
-                  No hay miembros. Creá el primer usuario arriba.
+                  No hay miembros. Crea el primer usuario arriba.
                 </p>
               ) : null}
 

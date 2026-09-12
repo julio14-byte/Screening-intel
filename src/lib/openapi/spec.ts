@@ -29,15 +29,6 @@ const EXAMPLES = {
     role: "coordinator",
   },
   stripeCheckout: { planId: "pro" },
-  chat: {
-    messages: [
-      {
-        id: "msg-1",
-        role: "user",
-        parts: [{ type: "text", text: "¿Qué pacientes tienen diabetes?" }],
-      },
-    ],
-  },
 } as const;
 
 /** Especificación OpenAPI 3.0 — Screenlane REST API. */
@@ -61,7 +52,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
       description:
         "API REST de Screenlane (HealthTech / clinical research sites). " +
         "La mayoría de endpoints requieren sesión Supabase vía cookies (`sb-*`). " +
-        "Iniciá sesión con `POST /api/auth/login` desde el mismo navegador antes de probar endpoints protegidos en Swagger UI.",
+        "Inicia sesión con `POST /api/auth/login` desde el mismo navegador antes de probar endpoints protegidos en Swagger UI.",
       contact: {
         name: "Screenlane",
       },
@@ -74,9 +65,10 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
       { name: "Audit", description: "Bitácora CFR Part 11" },
       { name: "RBAC", description: "Roles clínicos" },
       { name: "ICD-11", description: "Terminología WHO ICD-11" },
-      { name: "AI", description: "Asistente clínico" },
+      { name: "AI", description: "Triage, justificación y comparación clínica (GPT-4o-mini)" },
       { name: "Stripe", description: "Facturación SaaS" },
       { name: "Waitlist", description: "Landing / captación" },
+      { name: "EHR", description: "ETL clínico: sync batch y webhook HMAC" },
     ],
     components: {
       securitySchemes: {
@@ -85,7 +77,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           in: "cookie",
           name: "sb-access-token",
           description:
-            "Sesión Supabase SSR (cookies HttpOnly). Usá «Authorize» tras login en /login o probá endpoints desde este mismo origen.",
+            "Sesión Supabase SSR (cookies HttpOnly). Usa «Authorize» tras login en /login o prueba endpoints desde este mismo origen.",
         },
       },
       schemas: {
@@ -160,6 +152,50 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
             errors: { type: "array", items: { type: "string" } },
           },
         },
+        EhrPatientPayload: {
+          type: "object",
+          required: ["ehr_patient_id", "first_name", "last_name", "birth_date", "gender"],
+          properties: {
+            ehr_patient_id: { type: "string" },
+            first_name: { type: "string" },
+            last_name: { type: "string" },
+            birth_date: { type: "string", format: "date" },
+            gender: { type: "string", enum: ["male", "female", "other"] },
+            conditions: { type: "array", items: { type: "string" } },
+            medications: { type: "array", items: { type: "string" } },
+            laboratories: {
+              type: "object",
+              additionalProperties: { type: "number" },
+            },
+          },
+        },
+        EhrBatchSyncRequest: {
+          type: "object",
+          required: ["patients"],
+          properties: {
+            ehr_source: { type: "string", example: "epic" },
+            patients: {
+              type: "array",
+              minItems: 1,
+              maxItems: 500,
+              items: { $ref: "#/components/schemas/EhrPatientPayload" },
+            },
+          },
+        },
+        EhrWebhookRequest: {
+          type: "object",
+          required: ["event_id", "event_type", "patient"],
+          properties: {
+            event_id: { type: "string" },
+            event_type: {
+              type: "string",
+              enum: ["patient.upsert", "profile.update", "observation.created"],
+            },
+            organization_id: { type: "string", format: "uuid" },
+            ehr_source: { type: "string" },
+            patient: { $ref: "#/components/schemas/EhrPatientPayload" },
+          },
+        },
         CustomAuditRequest: {
           type: "object",
           required: ["tableName", "recordId", "description"],
@@ -211,19 +247,6 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
             planId: { type: "string", example: "pro" },
           },
           example: EXAMPLES.stripeCheckout,
-        },
-        ChatRequest: {
-          type: "object",
-          required: ["messages"],
-          properties: {
-            conversationId: { type: "string", format: "uuid" },
-            messages: {
-              type: "array",
-              items: { type: "object", additionalProperties: true },
-              description: "Mensajes UI (Vercel AI SDK UIMessage[])",
-            },
-          },
-          example: EXAMPLES.chat,
         },
       },
     },
@@ -293,24 +316,73 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           },
         },
       },
-      "/api/auth/chats": {
+      "/api/candidatos/{id}/triage": {
         post: {
           tags: ["AI"],
-          summary: "Chat con asistente clínico (streaming)",
+          summary: "Briefing IA de un candidato del portal",
           description:
-            "Stream de respuesta del agente LangGraph (GPT-4o-mini). Content-Type de respuesta: stream UI message.",
+            "Resume notas y matching para la llamada de pre-screening. No cambia el veredicto del motor.",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+          ],
+          responses: {
+            "200": {
+              description: "Texto de triage",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: { triage: { type: "string" } },
+                  },
+                },
+              },
+            },
+            "401": { description: "No autenticado", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+            "404": { description: "Candidato no encontrado", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+      },
+      "/api/matching/rematch-compare": {
+        post: {
+          tags: ["AI"],
+          summary: "Comparar protocolos de re-match",
+          description:
+            "Tras un screen failure, resume qué protocolo alternativo priorizar. No cambia el veredicto del motor.",
           security: [{ cookieAuth: [] }],
           requestBody: {
             required: true,
             content: {
               "application/json": {
-                schema: { $ref: "#/components/schemas/ChatRequest" },
-                example: EXAMPLES.chat,
+                schema: {
+                  type: "object",
+                  required: ["patient", "failures", "alternatives"],
+                  properties: {
+                    patient: { type: "object" },
+                    failures: { type: "array", items: { type: "object" } },
+                    alternatives: { type: "array", items: { type: "object" } },
+                  },
+                },
               },
             },
           },
           responses: {
-            "200": { description: "Stream de mensajes del asistente" },
+            "200": {
+              description: "Texto de comparación",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: { comparison: { type: "string" } },
+                  },
+                },
+              },
+            },
             "401": { description: "No autenticado", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
           },
         },
@@ -377,7 +449,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
         post: {
           tags: ["Protocols"],
           summary: "Extraer criterios de protocolo (PDF/TXT + IA)",
-          description: "Sube PDF o TXT; GPT-4o-mini devuelve criterios estructurados.",
+          description: "Sube PDF o TXT; GPT-4o-mini estructura criterios en el idioma original del documento (no traduce).",
           security: [{ cookieAuth: [] }],
           requestBody: {
             required: true,
@@ -398,6 +470,143 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
             "400": { description: "Archivo inválido", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
             "403": { description: "Sin permiso", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
           },
+        },
+      },
+      "/api/patients/profile/extract-document": {
+        post: {
+          tags: ["Patients"],
+          summary: "Extraer perfil desde PDF de laboratorio o foto de receta",
+          description:
+            "ETL del expediente: PDF con texto o imagen JPEG/PNG/WebP. GPT-4o-mini (visión en fotos). No cambia elegibilidad; el staff revisa y guarda el perfil.",
+          security: [{ cookieAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "multipart/form-data": {
+                schema: {
+                  type: "object",
+                  required: ["file"],
+                  properties: {
+                    file: { type: "string", format: "binary" },
+                    kind: {
+                      type: "string",
+                      enum: ["lab", "prescription", "auto"],
+                      default: "auto",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Borrador de perfil (conditions, medications, laboratories)" },
+            "400": { description: "Archivo inválido o PDF sin texto", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+            "403": { description: "Sin permiso", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+      },
+      "/api/protocols/{id}/assignments": {
+        get: {
+          tags: ["Protocols"],
+          summary: "Listar equipo asignado a un protocolo",
+          description: "Solo investigador principal. Coordinador y sub-I solo ven los protocolos a los que están asignados.",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          ],
+          responses: {
+            "200": { description: "Miembros y flag assigned" },
+            "403": { description: "Solo investigator", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+        put: {
+          tags: ["Protocols"],
+          summary: "Asignar o quitar staff de un protocolo",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["userId", "assigned"],
+                  properties: {
+                    userId: { type: "string", format: "uuid" },
+                    assigned: { type: "boolean" },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "OK" },
+            "400": { description: "Datos inválidos", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+      },
+      "/api/patients/{id}/documents": {
+        get: {
+          tags: ["Patients"],
+          summary: "Listar documentos cifrados del expediente",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          ],
+          responses: { "200": { description: "Metadatos (sin binario)" } },
+        },
+        post: {
+          tags: ["Patients"],
+          summary: "Guardar PDF de laboratorio o foto de receta cifrados",
+          description:
+            "Multipart file. AES-256-GCM si DOCUMENT_ENCRYPTION_KEY está configurada; si no, solo cifrado en reposo de Storage. No usa BYTEA en Postgres.",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "multipart/form-data": {
+                schema: {
+                  type: "object",
+                  required: ["file"],
+                  properties: {
+                    file: { type: "string", format: "binary" },
+                    kind: { type: "string", enum: ["lab_pdf", "prescription_photo", "other"] },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Metadatos del documento" },
+            "400": { description: "Archivo inválido", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+      },
+      "/api/patients/{id}/documents/{docId}": {
+        get: {
+          tags: ["Patients"],
+          summary: "Descargar (descifrar) un documento del expediente",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+            { name: "docId", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          ],
+          responses: { "200": { description: "Binario descifrado" } },
+        },
+        delete: {
+          tags: ["Patients"],
+          summary: "Borrar documento del expediente",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+            { name: "docId", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          ],
+          responses: { "200": { description: "OK" } },
         },
       },
       "/api/audit": {
@@ -602,6 +811,67 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           responses: {
             "200": { description: "Evento procesado" },
             "400": { description: "Firma inválida", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+      },
+      "/api/webhooks/ehr": {
+        post: {
+          tags: ["EHR"],
+          summary: "Webhook EHR en tiempo real (Fase 2)",
+          description:
+            "Servidor a servidor. Headers `X-Organization-Id` y `X-EHR-Signature: sha256=<hex>`. Idempotente por `event_id`. Recalcula matching/re-match.",
+          parameters: [
+            {
+              name: "X-Organization-Id",
+              in: "header",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+            {
+              name: "X-EHR-Signature",
+              in: "header",
+              required: true,
+              schema: { type: "string", example: "sha256=…" },
+            },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/EhrWebhookRequest" },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Evento procesado o duplicado" },
+            "401": {
+              description: "Firma o centro inválido",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } },
+            },
+          },
+        },
+      },
+      "/api/ehr/sync": {
+        post: {
+          tags: ["EHR"],
+          summary: "Sync batch desde EHR (Fase 1)",
+          description:
+            "Upsert por ehr_patient_id y recálculo de matching. Requiere sesión y permiso patients:write.",
+          security: [{ cookieAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/EhrBatchSyncRequest" },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Sync completado o parcial" },
+            "401": {
+              description: "No autenticado",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } },
+            },
           },
         },
       },

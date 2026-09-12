@@ -22,7 +22,7 @@ export default function AppError({
       <ErrorState
         message={
           error.message ||
-          "Ocurrió un error inesperado. Podés reintentar o volver al inicio."
+          "Ocurrió un error inesperado. Puedes reintentar o volver al inicio."
         }
       />
       <div className="flex flex-wrap justify-center gap-2">
