@@ -6,6 +6,7 @@ import { Menu } from "lucide-react";
 import config from "@/config";
 import { AccountMenu } from "@/components/layout/AccountMenu";
 import { AppSidebar } from "@/components/layout/AppSidebar";
+import { Logo } from "@/components/Logo";
 import { useRole } from "@/contexts/role-context";
 import { routes } from "@/lib/app/routes";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
@@ -95,7 +96,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       {/* Barra superior móvil */}
-      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-violet-200/60 bg-white/90 px-4 py-3 backdrop-blur-md lg:hidden">
+      <header className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b border-violet-200/60 bg-white/90 px-4 py-3 backdrop-blur-md lg:hidden">
         <button
           type="button"
           onClick={() => setMenuOpen(true)}
@@ -105,8 +106,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         >
           <Menu className="h-6 w-6" aria-hidden />
         </button>
-        <span className="truncate text-sm font-semibold text-indigo-950">
-          {config.app.name}
+        <span className="flex min-w-0 flex-1 items-center justify-center gap-2">
+          <Logo className="h-8 w-8" />
+          <span className="truncate text-sm font-semibold text-indigo-950">
+            {config.app.name}
+          </span>
         </span>
         <AccountMenu
           email={email}

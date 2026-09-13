@@ -70,7 +70,7 @@ const config = {
     logoText: "Crisvia",
     /** Subtítulo bajo el logo (nav, sidebar, metadata). */
     tagline: "Clinical Research Sites",
-    logoSrc: "/brand/crisvia-mark.png" as string | null,
+    logoSrc: "/brand/crisvia-mark.svg" as string | null,
     radius: "0.75rem",
   },
 

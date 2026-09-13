@@ -98,7 +98,10 @@ export function LoginForm({
 
       <div className="relative w-full max-w-md">
         <div className="mb-6 text-center">
-          <Logo className="mx-auto mb-4 h-14 w-14 rounded-2xl shadow-lg shadow-violet-500/30" />
+          <Logo
+            alt={config.app.name}
+            className="mx-auto mb-4 h-14 w-14 rounded-2xl shadow-lg shadow-violet-500/30"
+          />
           <h1 className="text-2xl font-bold tracking-tight text-white">
             {config.app.name}
           </h1>
