@@ -1,12 +1,13 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
+  CalendarDays,
   ClipboardList,
   CreditCard,
-  Cpu,
   FlaskConical,
   KanbanSquare,
   LayoutDashboard,
+  ListTodo,
   LogOut,
   RefreshCw,
   Settings,
@@ -28,7 +29,8 @@ export const APP_ICONS: Record<string, LucideIcon> = {
   ClipboardList,
   LogOut,
   TrafficLight: ListChecks,
-  Cpu,
+  CalendarDays,
+  ListTodo,
 };
 
 export type AppNavItem = {
@@ -65,8 +67,12 @@ export const APP_NAV_STYLES: Record<
     activeClass: "bg-amber-400/20 text-amber-100 ring-1 ring-amber-300/30",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
-  "/devices": {
+  "/agenda": {
     activeClass: "bg-sky-400/20 text-sky-100 ring-1 ring-sky-300/30",
+    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
+  },
+  "/pendientes": {
+    activeClass: "bg-orange-400/20 text-orange-100 ring-1 ring-orange-300/30",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
   "/tracker": {

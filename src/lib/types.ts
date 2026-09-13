@@ -108,7 +108,11 @@ export interface ScreeningWithRelations extends Screening {
   protocols: Pick<Protocol, "id" | "title" | "code_name" | "status">;
 }
 
-export type ClinicalDocumentKind = "lab_pdf" | "prescription_photo" | "other";
+export type ClinicalDocumentKind =
+  | "lab_pdf"
+  | "prescription_photo"
+  | "informed_consent"
+  | "other";
 
 export type DocumentEncryption = "aes-256-gcm" | "storage_at_rest";
 
@@ -161,4 +165,69 @@ export interface EproResponse {
 
 export interface EproResponseWithPatient extends EproResponse {
   patients: Pick<Patient, "id" | "first_name" | "last_name">;
+}
+
+// ---------------------------------------------------------------------------
+// Agenda de visitas + consentimiento informado
+// ---------------------------------------------------------------------------
+
+export type VisitType =
+  | "pre_screening"
+  | "consent"
+  | "labs"
+  | "screening"
+  | "randomization"
+  | "other";
+
+export type VisitStatus =
+  | "scheduled"
+  | "completed"
+  | "no_show"
+  | "cancelled";
+
+export interface StudyVisit {
+  id: string;
+  clinic_id: string;
+  patient_id: string;
+  protocol_id: string | null;
+  visit_type: VisitType;
+  scheduled_at: string;
+  status: VisitStatus;
+  notes: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+  patients?: Pick<Patient, "id" | "first_name" | "last_name">;
+  protocols?: Pick<Protocol, "id" | "title" | "code_name"> | null;
+}
+
+export type InformedConsentStatus = "obtained" | "withdrawn";
+
+export interface InformedConsent {
+  id: string;
+  clinic_id: string;
+  patient_id: string;
+  protocol_id: string;
+  icf_version: string;
+  consented_at: string;
+  captured_by: string | null;
+  document_id: string | null;
+  status: InformedConsentStatus;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  protocols?: Pick<Protocol, "id" | "title" | "code_name"> | null;
+}
+
+export type PendingKind = "missing_criterion" | "overdue_visit" | "missing_consent";
+
+export interface PendingItem {
+  id: string;
+  kind: PendingKind;
+  title: string;
+  detail: string;
+  href: string;
+  patientName: string;
+  protocolLabel: string | null;
+  dueAt: string | null;
 }

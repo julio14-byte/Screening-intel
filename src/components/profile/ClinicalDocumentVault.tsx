@@ -11,6 +11,7 @@ import type { ClinicalDocument } from "@/lib/types";
 const KIND_LABEL: Record<ClinicalDocument["kind"], string> = {
   lab_pdf: "PDF de laboratorio",
   prescription_photo: "Foto de receta",
+  informed_consent: "Consentimiento informado",
   other: "Otro",
 };
 

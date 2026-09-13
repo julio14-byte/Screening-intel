@@ -92,7 +92,12 @@ export async function storeClinicalDocument(input: {
 }): Promise<ClinicalDocumentRow> {
   const mime = mimeOf(input.file);
   const kind = input.kind ?? kindFromMime(mime);
-  if (kind === "other") {
+  const allowed: ClinicalDocumentKind[] = [
+    "lab_pdf",
+    "prescription_photo",
+    "informed_consent",
+  ];
+  if (!allowed.includes(kind)) {
     throw new Error("Usa PDF, JPEG, PNG o WebP. HEIC no está soportado.");
   }
   if (input.file.size === 0) {

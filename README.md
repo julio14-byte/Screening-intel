@@ -28,6 +28,9 @@ Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-sc
 | **PDF de lab / foto de receta** | Extract al expediente en `/patients/[id]`: PDF digital o foto JPEG/PNG. `POST /api/patients/profile/extract-document`. |
 | **ACL por protocolo** | El PI asigna coordinadores / sub-I / CRA a cada estudio; RLS oculta el resto. |
 | **Documentos cifrados** | PDF de lab y foto de receta en Storage privado + AES-256-GCM (`DOCUMENT_ENCRYPTION_KEY`). |
+| **Agenda de visitas** | Calendario de pre-screening, ICF, labs, screening y randomización (`/agenda`). |
+| **Pendientes** | Cola de visitas vencidas, ICF faltante y criterios 🟡 (`/pendientes`). |
+| **Consentimiento informado** | Versión, fecha, responsable y PDF cifrado en el expediente. |
 | **Screenlane** | Rebrand completo del producto (antes Screening Intelligence). |
 
 ---
@@ -59,6 +62,8 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | **Patient Registry** | Alta, búsqueda e importación CSV de pacientes |
 | **Clinical Profile** | Condiciones, medicación, laboratorios + ICD-11 + notas IA + **PDF de lab / foto de receta** (extract) + **documentos cifrados** |
 | **Protocol Matcher** | Criterios de inclusión/exclusión; extracción NLP desde PDF; **equipo asignado por estudio** |
+| **Agenda** | Visitas de screening, ICF, labs y randomización |
+| **Pendientes** | Labs faltantes, visitas vencidas y consentimiento pendiente |
 | **Motor de elegibilidad** | Semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple + `match_score` + justificación IA |
 | **Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure |
 | **Re-Match** | Propone protocolos alternativos para pacientes con screen failure |
@@ -94,6 +99,8 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | `/patients/[id]` | Perfil clínico + documentos cifrados + timeline de auditoría |
 | `/protocols` | Gestión de protocolos (visibles según asignación) |
 | `/protocols/[id]/match` | Cruce masivo + equipo del protocolo (PI) + justificación IA |
+| `/agenda` | Calendario de visitas del site |
+| `/pendientes` | Cola: visitas vencidas, ICF faltante, labs/criterios 🟡 |
 | `/tracker` | Pipeline Kanban con drag & drop |
 | `/rematch` | Re-matching automático post screen failure + comparador IA de alternativas |
 | `/candidato` | Portal público de pre-registro (pacientes) |
@@ -166,9 +173,10 @@ supabase/migrations/0016_reduce_rls_disk_io.sql
 supabase/migrations/0017_secure_patient_data.sql
 supabase/migrations/0018_tenant_rls_portal_sites.sql
 supabase/migrations/0019_protocol_assignments_encrypted_docs.sql
+supabase/migrations/0020_visits_consent.sql
 ```
 
-Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. **0019** (ACL por protocolo + bucket de documentos) va después de 0018: no uses el `0017_protocol_assignments_encrypted_docs.sql` de PRs anteriores — ese número ya lo ocupa `0017_secure_patient_data.sql`. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
+Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. **0019** (ACL por protocolo + bucket de documentos) va después de 0018. **0020** (agenda + ICF) va después de 0019. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
 
 Opcional — datos de demo o activar Pro sin Stripe:
 

@@ -32,6 +32,16 @@ const config = {
         icon: "FlaskConical",
       },
       {
+        href: "/agenda",
+        label: "Agenda",
+        icon: "CalendarDays",
+      },
+      {
+        href: "/pendientes",
+        label: "Pendientes",
+        icon: "ListTodo",
+      },
+      {
         href: "/tracker",
         label: "Tracker",
         icon: "KanbanSquare",
@@ -97,7 +107,8 @@ const config = {
       "/settings/security",
       "/candidatos",
       "/semaforos",
-      "/devices",
+      "/agenda",
+      "/pendientes",
     ],
     publicApis: [
       "/api/auth/login",
@@ -119,7 +130,8 @@ const config = {
       patients: "/patients",
       protocols: "/protocols",
       semaforos: "/semaforos",
-      devices: "/devices",
+      agenda: "/agenda",
+      pendientes: "/pendientes",
       tracker: "/tracker",
       epro: "/epro",
       rematch: "/rematch",
@@ -153,6 +165,9 @@ const config = {
       profileExtractDocument: "/api/patients/profile/extract-document",
       patientDocuments: "/api/patients/{id}/documents",
       protocolAssignments: "/api/protocols/{id}/assignments",
+      visits: "/api/visits",
+      pendientes: "/api/pendientes",
+      patientConsents: "/api/patients/{id}/consents",
     },
   },
 

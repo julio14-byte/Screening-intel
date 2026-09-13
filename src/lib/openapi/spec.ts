@@ -69,6 +69,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
       { name: "Stripe", description: "Facturación SaaS" },
       { name: "Waitlist", description: "Landing / captación" },
       { name: "EHR", description: "ETL clínico: sync batch y webhook HMAC" },
+      { name: "Visits", description: "Agenda de visitas del clinical research site" },
     ],
     components: {
       securitySchemes: {
@@ -575,7 +576,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
                   required: ["file"],
                   properties: {
                     file: { type: "string", format: "binary" },
-                    kind: { type: "string", enum: ["lab_pdf", "prescription_photo", "other"] },
+                    kind: { type: "string", enum: ["lab_pdf", "prescription_photo", "informed_consent", "other"] },
                   },
                 },
               },
@@ -607,6 +608,75 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
             { name: "docId", in: "path", required: true, schema: { type: "string", format: "uuid" } },
           ],
           responses: { "200": { description: "OK" } },
+        },
+      },
+      "/api/visits": {
+        get: {
+          tags: ["Visits"],
+          summary: "Listar visitas de la agenda",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            { name: "from", in: "query", schema: { type: "string", format: "date-time" } },
+            { name: "to", in: "query", schema: { type: "string", format: "date-time" } },
+            { name: "patientId", in: "query", schema: { type: "string", format: "uuid" } },
+          ],
+          responses: { "200": { description: "Visitas del rango" } },
+        },
+        post: {
+          tags: ["Visits"],
+          summary: "Programar una visita",
+          security: [{ cookieAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["patientId", "visitType", "scheduledAt"],
+                  properties: {
+                    patientId: { type: "string", format: "uuid" },
+                    protocolId: { type: "string", format: "uuid", nullable: true },
+                    visitType: {
+                      type: "string",
+                      enum: ["pre_screening", "consent", "labs", "screening", "randomization", "other"],
+                    },
+                    scheduledAt: { type: "string", format: "date-time" },
+                    notes: { type: "string" },
+                  },
+                },
+              },
+            },
+          },
+          responses: { "200": { description: "Visita creada" } },
+        },
+      },
+      "/api/pendientes": {
+        get: {
+          tags: ["Visits"],
+          summary: "Cola de pendientes (visitas vencidas, ICF, labs faltantes)",
+          security: [{ cookieAuth: [] }],
+          responses: { "200": { description: "Items operativos" } },
+        },
+      },
+      "/api/patients/{id}/consents": {
+        get: {
+          tags: ["Patients"],
+          summary: "Listar consentimientos informados del paciente",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          ],
+          responses: { "200": { description: "ICF registrados" } },
+        },
+        post: {
+          tags: ["Patients"],
+          summary: "Registrar consentimiento informado",
+          description: "Multipart: protocolo, versión, fecha y PDF/foto opcional (cifrado).",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          ],
+          responses: { "200": { description: "ICF creado" } },
         },
       },
       "/api/audit": {

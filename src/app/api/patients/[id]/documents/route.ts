@@ -81,6 +81,7 @@ export async function POST(
     const kind =
       kindRaw === "lab_pdf" ||
       kindRaw === "prescription_photo" ||
+      kindRaw === "informed_consent" ||
       kindRaw === "other"
         ? kindRaw
         : kindFromMime(mimeOf(file));

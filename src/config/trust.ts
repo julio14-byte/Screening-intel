@@ -153,7 +153,6 @@ export const integrationsPage: TrustPage = {
         "ICD-11 (OMS): búsqueda y normalización de términos coloquiales.",
         "OpenAI GPT-4o-mini: justificación del matching, notas y asistente — sin cambiar elegibilidad.",
         "Stripe: trial, Checkout y portal de facturación.",
-        "Dispositivos ESP32: vista de demostración en /devices; telemetría aún no está en producción.",
       ],
     },
     {
