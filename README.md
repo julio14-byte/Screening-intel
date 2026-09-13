@@ -33,6 +33,7 @@ Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-sc
 | **Consentimiento informado** | Versión, fecha, responsable y PDF cifrado en el expediente. |
 | **WhatsApp / SMS** | Plantillas al candidato desde `/candidatos`: te llamamos, trae receta, link del portal. |
 | **Crisvia** | Rebrand del producto (antes Screenlane / Screening Intelligence). |
+| **Logo** | Isotipo (pulso + dos vías) en nav, login, portal y favicon. Archivos: [`public/brand/`](public/brand/). |
 
 ---
 
@@ -54,7 +55,7 @@ Crisvia no compite como un módulo aislado de “AI sobre EHR”. Es el **funnel
 
 **En una frase:** del candidato al protocolo correcto, sin perder pacientes tras un screen failure.
 
-**One-pager (pitch):** página imprimible en [`/one-pager`](https://screening-intel.vercel.app/one-pager) (español) y [`/one-pager?lang=en`](https://screening-intel.vercel.app/one-pager?lang=en). Texto para Notion/PDF: [`docs/ONE_PAGER.md`](docs/ONE_PAGER.md).
+**One-pager (pitch):** página imprimible en [`/one-pager`](https://screening-intel.vercel.app/one-pager) (español) y [`/one-pager?lang=en`](https://screening-intel.vercel.app/one-pager?lang=en). Texto para Notion/PDF: [`docs/ONE_PAGER.md`](docs/ONE_PAGER.md). Logo: [`public/brand/crisvia-mark.svg`](public/brand/crisvia-mark.svg) y wordmark [`public/brand/crisvia-wordmark.png`](public/brand/crisvia-wordmark.png).
 
 ---
 

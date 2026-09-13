@@ -2,7 +2,8 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { Activity, Lock, Mail, Sparkles } from "lucide-react";
+import { Lock, Mail, Sparkles } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/Field";
 import config from "@/config";
@@ -97,9 +98,10 @@ export function LoginForm({
 
       <div className="relative w-full max-w-md">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 to-violet-500 text-white shadow-lg shadow-violet-500/30">
-            <Activity className="h-7 w-7" aria-hidden />
-          </div>
+          <Logo
+            alt={config.app.name}
+            className="mx-auto mb-4 h-14 w-14 rounded-2xl shadow-lg shadow-violet-500/30"
+          />
           <h1 className="text-2xl font-bold tracking-tight text-white">
             {config.app.name}
           </h1>

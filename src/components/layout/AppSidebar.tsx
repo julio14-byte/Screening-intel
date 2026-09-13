@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, ClipboardList, X } from "lucide-react";
+import { ClipboardList, X } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import config from "@/config";
 import { APP_ROLE_LABELS } from "@/lib/rbac/types";
 import type { AppRole } from "@/lib/rbac/types";
@@ -46,9 +47,7 @@ export function AppSidebar({
           onClick={onNavigate}
           className="flex min-w-0 items-center gap-3"
         >
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-violet-500 shadow-lg shadow-violet-900/50">
-            <Activity className="h-5 w-5" aria-hidden />
-          </span>
+          <Logo className="h-10 w-10 shrink-0 shadow-lg shadow-violet-900/50" />
           <span className="leading-tight">
             <span className="block truncate text-sm font-semibold">
               {config.app.name}

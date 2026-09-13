@@ -1,6 +1,6 @@
-import { Activity } from "lucide-react";
 import type { OnePagerCopy } from "@/config/onePager";
 import config from "@/config";
+import { Logo } from "@/components/Logo";
 
 export function OnePagerDocument({ copy }: { copy: OnePagerCopy }) {
   const demoUrl = `https://${config.app.domain}`;
@@ -10,9 +10,7 @@ export function OnePagerDocument({ copy }: { copy: OnePagerCopy }) {
       <header className="border-b-2 border-violet-700 px-7 pb-4 pt-6 sm:px-8">
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-violet-500 text-white">
-              <Activity className="h-5 w-5" aria-hidden />
-            </span>
+            <Logo className="h-10 w-10 shrink-0" />
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-violet-700">
                 {copy.kicker}

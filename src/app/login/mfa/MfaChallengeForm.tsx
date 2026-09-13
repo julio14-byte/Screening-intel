@@ -2,9 +2,9 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/Field";
+import { Logo } from "@/components/Logo";
 import config from "@/config";
 import { routes } from "@/lib/app/routes";
 import { getSupabaseClient } from "@/lib/supabase/client";
@@ -81,9 +81,10 @@ export function MfaChallengeForm() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-950 via-violet-900 to-fuchsia-900 px-4 py-10">
       <div className="relative w-full max-w-md">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 to-violet-500 text-white shadow-lg shadow-violet-500/30">
-            <ShieldCheck className="h-7 w-7" aria-hidden />
-          </div>
+          <Logo
+            alt={config.app.name}
+            className="mx-auto mb-4 h-14 w-14 rounded-2xl shadow-lg shadow-violet-500/30"
+          />
           <h1 className="text-2xl font-bold tracking-tight text-white">
             Verificación MFA
           </h1>
