@@ -1,4 +1,4 @@
-# Screenlane
+# Crisvia
 
 Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-screening**, el **matching** paciente–protocolo y el **re-matching** cuando un paciente cae en screen failure — con portal de candidatos, **integración EHR** (batch + webhook), trazabilidad clínica, RBAC e IA embebida en el funnel.
 
@@ -32,13 +32,13 @@ Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-sc
 | **Pendientes** | Cola de visitas vencidas, ICF faltante y criterios 🟡 (`/pendientes`). |
 | **Consentimiento informado** | Versión, fecha, responsable y PDF cifrado en el expediente. |
 | **WhatsApp / SMS** | Plantillas al candidato desde `/candidatos`: te llamamos, trae receta, link del portal. |
-| **Screenlane** | Rebrand completo del producto (antes Screening Intelligence). |
+| **Crisvia** | Rebrand del producto (antes Screenlane / Screening Intelligence). |
 
 ---
 
 ## Qué nos diferencia
 
-Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **funnel operativo completo del clinical research site** en un solo producto SaaS accesible.
+Crisvia no compite como un módulo aislado de “AI sobre EHR”. Es el **funnel operativo completo del clinical research site** en un solo producto SaaS accesible.
 
 | Diferencial | Qué significa en la práctica |
 |-------------|------------------------------|
@@ -305,7 +305,7 @@ El resto requiere sesión Supabase (cookies).
 
 ## Integración EHR
 
-Screenlane soporta conectar un **EHR** (historia clínica electrónica) en dos fases:
+Crisvia soporta conectar un **EHR** (historia clínica electrónica) en dos fases:
 
 | Fase | Endpoint | Uso |
 |------|----------|-----|
@@ -466,4 +466,4 @@ Antes de producción con datos reales de pacientes: revisa políticas RLS, rota 
 
 ## Autor
 
-Desarrollado por [**julio14-byte**](https://github.com/julio14-byte) — Screenlane para clinical research sites.
+Desarrollado por [**julio14-byte**](https://github.com/julio14-byte) — Crisvia para clinical research sites.

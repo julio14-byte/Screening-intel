@@ -6,6 +6,7 @@ import { KeyRound, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/Field";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import config from "@/config";
 
 type TotpFactor = {
   id: string;
@@ -81,7 +82,7 @@ export function SecurityMfaPanel({ forceEnroll = false }: { forceEnroll?: boolea
 
       const { data, error: enrollError } = await supabase.auth.mfa.enroll({
         factorType: "totp",
-        friendlyName: "Screenlane",
+        friendlyName: config.app.name,
       });
       if (enrollError || !data || data.type !== "totp") {
         setError(

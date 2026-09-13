@@ -4,7 +4,7 @@
 export const productDocs = {
   title: "Documentación",
   subtitle:
-    "Guía rápida para coordinadores de clinical research sites que usan Screenlane.",
+    "Guía rápida para coordinadores de clinical research sites que usan Crisvia.",
   sections: [
     {
       id: "inicio",
@@ -54,7 +54,7 @@ export const productDocs = {
         {
           heading: "Marcos de referencia",
           body:
-            "Bitácora orientada a 21 CFR Part 11 e ICH-GCP. Controles alineados a HIPAA, GDPR y leyes de datos de LatAm. Screenlane no emite la certificación de tu site. Ver /privacidad.",
+            "Bitácora orientada a 21 CFR Part 11 e ICH-GCP. Controles alineados a HIPAA, GDPR y leyes de datos de LatAm. Crisvia no emite la certificación de tu site. Ver /privacidad.",
         },
       ],
     },

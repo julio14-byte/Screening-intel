@@ -20,15 +20,15 @@ export type TrustPage = {
 export const privacyPage: TrustPage = {
   title: "Privacidad y regulaciones",
   subtitle:
-    "Cómo Screenlane trata datos de screening en clinical research sites, y con qué marcos se alinea el producto.",
+    "Cómo Crisvia trata datos de screening en clinical research sites, y con qué marcos se alinea el producto.",
   updated: "12 de septiembre de 2026",
   sections: [
     {
       id: "responsable",
       title: "Quién es el responsable",
       paragraphs: [
-        "El clinical research site (tu organización) es el responsable del tratamiento de los datos de pacientes y candidatos. Screenlane opera como plataforma SaaS: aloja, procesa y muestra esa información para pre-screening, matching y re-match.",
-        "Los pacientes que se pre-registran en el portal público lo hacen frente a tu centro, no como usuarios de una red social de Screenlane.",
+        "El clinical research site (tu organización) es el responsable del tratamiento de los datos de pacientes y candidatos. Crisvia opera como plataforma SaaS: aloja, procesa y muestra esa información para pre-screening, matching y re-match.",
+        "Los pacientes que se pre-registran en el portal público lo hacen frente a tu centro, no como usuarios de una red social de Crisvia.",
       ],
     },
     {
@@ -73,13 +73,13 @@ export const privacyPage: TrustPage = {
       id: "regulaciones",
       title: "Regulaciones (alineación, no certificación)",
       paragraphs: [
-        "Screenlane no sustituye el programa de cumplimiento de tu site ni emite una certificación HIPAA, GDPR o COFEPRIS. Los controles del producto están diseñados para que un clinical research site pueda operar estudios con sponsors de EE. UU. y de LatAm.",
+        "Crisvia no sustituye el programa de cumplimiento de tu site ni emite una certificación HIPAA, GDPR o COFEPRIS. Los controles del producto están diseñados para que un clinical research site pueda operar estudios con sponsors de EE. UU. y de LatAm.",
       ],
       bullets: [
         "21 CFR Part 11: bitácora append-only, autoría, fecha/hora y eventos clínicos trazables.",
         "ICH-GCP / BPC: separación de roles (PI, sub-investigator, coordinator, monitor/CRA) y decisión de elegibilidad auditable.",
         "HIPAA (EE. UU.): controles técnicos de acceso, cifrado en tránsito (HTTPS) y minimización hacia proveedores de IA. El BAA y el análisis de riesgo los cierra tu organización con sus asesores.",
-        "GDPR (UE/EEE): el site es responsable; Screenlane actúa como encargado. Derechos de acceso y borrado se ejercen a través del centro.",
+        "GDPR (UE/EEE): el site es responsable; Crisvia actúa como encargado. Derechos de acceso y borrado se ejercen a través del centro.",
         "LatAm: LFPDPPP (México), Ley 25.326 (Argentina), Ley 1581 (Colombia) y leyes equivalentes. Residencia de datos: el proyecto Supabase que configures (elige región al provisionar).",
       ],
     },
@@ -87,7 +87,7 @@ export const privacyPage: TrustPage = {
       id: "conservacion",
       title: "Conservación y contacto",
       paragraphs: [
-        "Los datos permanecen mientras tu organización tenga cuenta activa y según el periodo de retención que exija el protocolo o el sponsor. Al cerrar el site, coordina export y borrado con quien opera Screenlane.",
+        "Los datos permanecen mientras tu organización tenga cuenta activa y según el periodo de retención que exija el protocolo o el sponsor. Al cerrar el site, coordina export y borrado con quien opera Crisvia.",
         "Para ejercer derechos ARCO/GDPR o reportar un incidente, escribe al investigador principal de tu centro o al contacto de privacidad que te indiquen. Esta página describe el producto; no es un dictamen legal.",
       ],
     },
@@ -104,7 +104,7 @@ export const integrationsPage: TrustPage = {
       id: "etl",
       title: "ETL clínico (Extract → Transform → Load)",
       paragraphs: [
-        "Screenlane no exige un EHR para arrancar. Cuando lo conectas, el flujo es un ETL acotado al screening — no un data warehouse hospitalario.",
+        "Crisvia no exige un EHR para arrancar. Cuando lo conectas, el flujo es un ETL acotado al screening — no un data warehouse hospitalario.",
       ],
       bullets: [
         "Extract: CSV, alta manual, portal, PDF de laboratorio, foto de receta, sync batch del EHR o webhook en tiempo real (JSON / FHIR Bundle).",

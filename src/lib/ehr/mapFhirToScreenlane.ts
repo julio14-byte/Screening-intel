@@ -72,7 +72,7 @@ function isLabObservation(obs: FhirObservation): boolean {
 
 /**
  * Convierte un Bundle FHIR (Patient + Conditions + Meds + Observations)
- * al formato interno de Screenlane.
+ * al formato interno de Crisvia.
  */
 export function mapFhirBundleToPatient(
   bundle: FhirBundle,

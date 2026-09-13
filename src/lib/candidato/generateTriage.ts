@@ -1,5 +1,6 @@
 import type { Gender } from "@/lib/types";
 import { calculateAge, GENDER_LABELS } from "@/lib/utils";
+import config from "@/config";
 
 export type CandidatoTriageMatch = {
   protocol_code: string;
@@ -68,7 +69,7 @@ export async function generateCandidatoTriage(
         {
           role: "system",
           content:
-            "Sos un coordinador de estudios de Screenlane. " +
+            `Sos un coordinador de estudios de ${config.app.name}. ` +
             "Preparás un briefing de 30 segundos para la llamada de pre-screening. " +
             "Usá SOLO el JSON. NO inventes diagnósticos, labs ni criterios. " +
             "NO cambies los veredictos del motor de matching. " +
