@@ -71,6 +71,7 @@ export const WRITE_API_PREFIXES = [
   "/api/patients/import",
   "/api/patients/profile/extract",
   "/api/patients/",
+  "/api/visits",
   "/api/protocols/extract",
   "/api/protocols/",
   "/api/audit",
