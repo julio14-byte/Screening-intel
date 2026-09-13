@@ -1,6 +1,6 @@
 # Copias de seguridad y restauración
 
-Screenlane no guarda estado de pacientes en el servidor de la app (Vercel es
+Crisvia no guarda estado de pacientes en el servidor de la app (Vercel es
 stateless). La fuente de verdad es el **proyecto de Supabase** (PostgreSQL +
 Auth + Storage metadata). Recuperar un incidente de datos implica restaurar
 ese proyecto, no redesplegar Next.js.

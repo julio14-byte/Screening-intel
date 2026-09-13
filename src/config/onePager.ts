@@ -1,5 +1,5 @@
 /**
- * Copy del one-pager de Screenlane (ES / EN).
+ * Copy del one-pager de Crisvia (ES / EN).
  * Pensado para imprimir 1 hoja A4 o pegar en Notion / PDF.
  */
 export type OnePagerLang = "es" | "en";
@@ -37,7 +37,7 @@ export type OnePagerCopy = {
 
 export const onePagerCopy: Record<OnePagerLang, OnePagerCopy> = {
   es: {
-    metaTitle: "Screenlane — one-pager",
+    metaTitle: "Crisvia — one-pager",
     metaDescription:
       "SaaS para clinical research sites: del candidato al protocolo correcto, y de vuelta al funnel cuando hay screen failure.",
     kicker: "HealthTech SaaS · Clinical research sites",
@@ -54,7 +54,7 @@ export const onePagerCopy: Record<OnePagerLang, OnePagerCopy> = {
     ],
     productTitle: "El producto",
     productLead:
-      "Screenlane es el funnel operativo del clinical research site. La IA explica y acelera; el motor de reglas decide la elegibilidad.",
+      "Crisvia es el funnel operativo del clinical research site. La IA explica y acelera; el motor de reglas decide la elegibilidad.",
     steps: [
       {
         n: "1",
@@ -77,11 +77,11 @@ export const onePagerCopy: Record<OnePagerLang, OnePagerCopy> = {
         body: "Screen failure → Re-Match nativo al siguiente protocolo activo del centro.",
       },
     ],
-    whyTitle: "Por qué Screenlane",
+    whyTitle: "Por qué Crisvia",
     whyItems: [
       {
         title: "Hecho para el site",
-        body: "El CTMS sirve al sponsor. Screenlane cubre el día a día del coordinador y del PI.",
+        body: "El CTMS sirve al sponsor. Crisvia cubre el día a día del coordinador y del PI.",
       },
       {
         title: "Re-Match nativo",
@@ -116,7 +116,7 @@ export const onePagerCopy: Record<OnePagerLang, OnePagerCopy> = {
     askBody:
       "3 clinical research sites · piloto de 90 días · 1 protocolo real. Métrica: tiempo a pre-screening y % de screen failures reasignados a otro estudio.",
     disclaimer:
-      "Controles alineados a HIPAA, GDPR, leyes de datos de LatAm y 21 CFR Part 11. Screenlane no emite la certificación de tu centro ni sustituye el BAA / DPA legal.",
+      "Controles alineados a HIPAA, GDPR, leyes de datos de LatAm y 21 CFR Part 11. Crisvia no emite la certificación de tu centro ni sustituye el BAA / DPA legal.",
     printLabel: "Imprimir / PDF",
     langEs: "ES",
     langEn: "EN",
@@ -124,7 +124,7 @@ export const onePagerCopy: Record<OnePagerLang, OnePagerCopy> = {
     demoUrlLabel: "Demo",
   },
   en: {
-    metaTitle: "Screenlane — one-pager",
+    metaTitle: "Crisvia — one-pager",
     metaDescription:
       "SaaS for clinical research sites: from candidate to the right protocol — and back into the funnel after a screen failure.",
     kicker: "HealthTech SaaS · Clinical research sites",
@@ -141,7 +141,7 @@ export const onePagerCopy: Record<OnePagerLang, OnePagerCopy> = {
     ],
     productTitle: "The product",
     productLead:
-      "Screenlane is the operational funnel for the clinical research site. AI explains and speeds up work; a rules engine decides eligibility.",
+      "Crisvia is the operational funnel for the clinical research site. AI explains and speeds up work; a rules engine decides eligibility.",
     steps: [
       {
         n: "1",
@@ -164,11 +164,11 @@ export const onePagerCopy: Record<OnePagerLang, OnePagerCopy> = {
         body: "Screen failure → native Re-Match to the next active protocol at the site.",
       },
     ],
-    whyTitle: "Why Screenlane",
+    whyTitle: "Why Crisvia",
     whyItems: [
       {
         title: "Built for the site",
-        body: "CTMS serves the sponsor. Screenlane covers the coordinator and PI’s day-to-day.",
+        body: "CTMS serves the sponsor. Crisvia covers the coordinator and PI’s day-to-day.",
       },
       {
         title: "Native Re-Match",
@@ -203,7 +203,7 @@ export const onePagerCopy: Record<OnePagerLang, OnePagerCopy> = {
     askBody:
       "3 clinical research sites · 90-day pilot · 1 live protocol. Metric: time-to-prescreen and % of screen failures reassigned to another study.",
     disclaimer:
-      "Controls aligned with HIPAA, GDPR, LatAm data laws, and 21 CFR Part 11. Screenlane does not certify your site and does not replace a BAA / DPA.",
+      "Controls aligned with HIPAA, GDPR, LatAm data laws, and 21 CFR Part 11. Crisvia does not certify your site and does not replace a BAA / DPA.",
     printLabel: "Print / PDF",
     langEs: "ES",
     langEn: "EN",

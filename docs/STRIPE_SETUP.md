@@ -18,7 +18,7 @@
 ## Stripe Dashboard
 
 1. **Productos → Precios**  
-   - Crear producto "Screenlane Pro" → precio mensual recurrente  
+   - Crear producto "Crisvia Pro" → precio mensual recurrente  
    - Copiar **Price ID** → `STRIPE_PRICE_ID_PRO`  
    - (Opcional) Pro+ → `STRIPE_PRICE_ID_PRO_PLUS`
 

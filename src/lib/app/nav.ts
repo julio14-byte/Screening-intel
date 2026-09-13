@@ -42,7 +42,7 @@ export type AppNavItem = {
   feature?: "payments";
 };
 
-/** Estilos por módulo — sidebar Screening Intelligence */
+/** Estilos por módulo — sidebar Crisvia */
 export const APP_NAV_STYLES: Record<
   string,
   { activeClass: string; idleClass: string }

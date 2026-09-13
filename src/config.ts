@@ -4,7 +4,7 @@
  */
 const config = {
   app: {
-    name: "Screenlane",
+    name: "Crisvia",
     description:
       "Pre-screening y re-matching de pacientes para protocolos de investigación clínica en clinical research sites.",
     domain: "screening-intel.vercel.app",
@@ -67,7 +67,7 @@ const config = {
 
   brand: {
     primary: "#7c3aed",
-    logoText: "Screenlane",
+    logoText: "Crisvia",
     /** Subtítulo bajo el logo (nav, sidebar, metadata). */
     tagline: "Clinical Research Sites",
     logoSrc: null as string | null,
@@ -322,7 +322,7 @@ const config = {
           a: "El producto tiene controles alineados (acceso, cifrado en tránsito, bitácora, minimización). La certificación y el BAA los cierra tu organización. Ver /privacidad#regulaciones.",
         },
         {
-          q: "¿Qué es el ETL de Screenlane?",
+          q: "¿Qué es el ETL de Crisvia?",
           a: "El pipeline Extract → Transform → Load del screening: entra CSV, portal, EHR, PDF de laboratorio o foto de receta; se normaliza el perfil; se carga en tu centro. Guía en /integraciones.",
         },
         {

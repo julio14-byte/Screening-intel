@@ -1,5 +1,6 @@
 import type { CriterionResult, Gender, MatchVerdict } from "@/lib/types";
 import { calculateAge, GENDER_LABELS } from "@/lib/utils";
+import config from "@/config";
 
 export type RematchCompareFailure = {
   protocol_code: string;
@@ -92,7 +93,7 @@ export async function generateRematchCompare(
         {
           role: "system",
           content:
-            "Eres un coordinador de estudios de Screenlane. " +
+            `Eres un coordinador de estudios de ${config.app.name}. ` +
             "El paciente tuvo screen failure y hay que elegir el próximo protocolo a llamar. " +
             "Usa SOLO el JSON. NO inventes criterios, labs ni diagnósticos. " +
             "NO cambies los veredictos ni los scores del motor. " +

@@ -1,4 +1,5 @@
 import type { OpenAPIV3 } from "openapi-types";
+import config from "@/config";
 
 const APP_ROLES = ["investigator", "sub_investigator", "coordinator", "monitor"];
 
@@ -31,7 +32,7 @@ const EXAMPLES = {
   stripeCheckout: { planId: "pro" },
 } as const;
 
-/** Especificación OpenAPI 3.0 — Screenlane REST API. */
+/** Especificación OpenAPI 3.0 — API REST de Crisvia. */
 export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
   const errorSchema: OpenAPIV3.SchemaObject = {
     type: "object",
@@ -47,14 +48,14 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
   return {
     openapi: "3.0.3",
     info: {
-      title: "Screenlane API",
+      title: `${config.app.name} API`,
       version: "1.0.0",
       description:
-        "API REST de Screenlane (HealthTech / clinical research sites). " +
+        `API REST de ${config.app.name} (HealthTech / clinical research sites). ` +
         "La mayoría de endpoints requieren sesión Supabase vía cookies (`sb-*`). " +
         "Inicia sesión con `POST /api/auth/login` desde el mismo navegador antes de probar endpoints protegidos en Swagger UI.",
       contact: {
-        name: "Screenlane",
+        name: config.app.name,
       },
     },
     servers: [{ url: baseUrl, description: "Servidor actual" }],

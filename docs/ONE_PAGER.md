@@ -1,4 +1,4 @@
-# Screenlane — one-pager
+# Crisvia — one-pager
 
 Pitch de **una hoja** para clinical research sites e inversores.
 
@@ -10,7 +10,7 @@ Copia de trabajo (español). No incluye métricas de tracción inventadas.
 
 ---
 
-# SCREENLANE
+# CRISVIA
 
 **HealthTech SaaS · Clinical research sites**  
 https://screening-intel.vercel.app
@@ -27,18 +27,18 @@ El enrollment es el cuello de botella del ensayo. El coordinador no tiene un sis
 
 ## El producto
 
-Screenlane es el funnel operativo del clinical research site. La IA explica y acelera; el motor de reglas decide la elegibilidad.
+Crisvia es el funnel operativo del clinical research site. La IA explica y acelera; el motor de reglas decide la elegibilidad.
 
 1. **Captura** — Portal público, CSV, nota clínica, PDF de lab o foto de receta. EHR opcional — no es un requisito.
 2. **Match** — Motor de reglas con semáforo 🟢 cumple / 🟡 pendiente / 🔴 no cumple y justificación clínica.
 3. **Opera** — Triage IA para la llamada, WhatsApp/SMS con plantillas, agenda de visitas y consentimiento informado.
 4. **Recupera** — Screen failure → Re-Match nativo al siguiente protocolo activo del centro.
 
-## Por qué Screenlane
+## Por qué Crisvia
 
 | | |
 |---|---|
-| **Hecho para el site** | El CTMS sirve al sponsor. Screenlane cubre el día a día del coordinador y del PI. |
+| **Hecho para el site** | El CTMS sirve al sponsor. Crisvia cubre el día a día del coordinador y del PI. |
 | **Re-Match nativo** | El screen failure no es el final: el paciente vuelve a protocolos activos del mismo centro. |
 | **IA que no decide** | Extrae, resume y explica. Nunca cambia inclusión / exclusión. Semáforo auditable. |
 | **LATAM-first** | Español latinoamericano. Arranca sin EHR. Integración hospitalaria cuando el site la tenga. |
@@ -70,4 +70,4 @@ Métrica: tiempo a pre-screening y % de screen failures reasignados a otro estud
 
 ---
 
-Controles alineados a HIPAA, GDPR, leyes de datos de LatAm y 21 CFR Part 11. Screenlane **no** emite la certificación de tu centro ni sustituye el BAA / DPA legal.
+Controles alineados a HIPAA, GDPR, leyes de datos de LatAm y 21 CFR Part 11. Crisvia **no** emite la certificación de tu centro ni sustituye el BAA / DPA legal.

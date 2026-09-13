@@ -4,6 +4,7 @@ import type {
   MatchVerdict,
 } from "@/lib/types";
 import { calculateAge, GENDER_LABELS, toPatientInitials } from "@/lib/utils";
+import config from "@/config";
 
 export type MatchRationaleInput = {
   protocol: { code_name: string; title: string };
@@ -84,7 +85,7 @@ export async function generateMatchRationale(
         {
           role: "system",
           content:
-            "Eres un asistente clínico de Screenlane para clinical research sites. " +
+            `Eres un asistente clínico de ${config.app.name} para clinical research sites. ` +
             "Explica en español latinoamericano (tú, no vos) el resultado del motor de matching usando SOLO el JSON provisto. " +
             "NO cambies el veredicto, NO inventes datos clínicos ni valores de laboratorio. " +
             "Cita diagnósticos, medicamentos, labs y el título del protocolo TEXTUALMENTE, en el idioma en que vienen. NO los traduzcas. " +
