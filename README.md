@@ -54,6 +54,8 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 
 **En una frase:** del candidato al protocolo correcto, sin perder pacientes tras un screen failure.
 
+**One-pager (pitch):** página imprimible en [`/one-pager`](https://screening-intel.vercel.app/one-pager) (español) y [`/one-pager?lang=en`](https://screening-intel.vercel.app/one-pager?lang=en). Texto para Notion/PDF: [`docs/ONE_PAGER.md`](docs/ONE_PAGER.md).
+
 ---
 
 ## Características principales

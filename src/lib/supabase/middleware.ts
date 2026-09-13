@@ -50,6 +50,11 @@ function isPublicMarketingPath(pathname: string) {
   );
 }
 
+/** Pitch / one-pager: público, pero no redirige a usuarios ya logueados. */
+function isPublicPitchPath(pathname: string) {
+  return pathname === routes.app.onePager;
+}
+
 function applyBufferedCookies(
   target: NextResponse,
   cookiesToSet: CookieToSet[]
@@ -77,6 +82,7 @@ async function runUpdateSession(request: NextRequest) {
   const isMfaChallenge = pathname === routes.loginMfa;
   const isPublic =
     isPublicMarketingPath(pathname) ||
+    isPublicPitchPath(pathname) ||
     isLogin ||
     isMfaChallenge ||
     isPublicApiPath(pathname);

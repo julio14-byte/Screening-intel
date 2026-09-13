@@ -30,6 +30,11 @@ export const productDocs = {
           body:
             "Evalúa candidatos contra protocolos y sigue el estado de screening en el Dashboard.",
         },
+        {
+          heading: "One-pager",
+          body:
+            "Pitch de una hoja para sites e inversores: /one-pager (español) y /one-pager?lang=en. Imprime a PDF desde el navegador.",
+        },
       ],
     },
     {

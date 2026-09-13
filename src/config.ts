@@ -145,6 +145,7 @@ const config = {
       apiDocs: "/docs/api",
       privacy: "/privacidad",
       integrations: "/integraciones",
+      onePager: "/one-pager",
     },
     apis: {
       openApi: "/api/openapi",
@@ -380,6 +381,7 @@ const config = {
         { label: "Documentación", href: "/docs" },
         { label: "Privacidad", href: "/privacidad" },
         { label: "Integraciones", href: "/integraciones" },
+        { label: "One-pager", href: "/one-pager" },
       ],
     },
   },
