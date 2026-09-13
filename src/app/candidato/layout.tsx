@@ -1,16 +1,20 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import config from "@/config";
+import { Logo } from "@/components/Logo";
 
 export default function CandidatoLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/50 to-violet-50">
       <header className="border-b border-violet-100 bg-white/90 backdrop-blur-sm">
         <div className="mx-auto flex max-w-lg items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <Link href="/candidato" className="text-sm font-semibold text-indigo-950">
-            {config.brand.logoText}
-            <span className="block text-[11px] font-normal text-violet-600">
-              Pre-registro de candidatos
+          <Link href="/candidato" className="flex items-center gap-2.5 text-sm font-semibold text-indigo-950">
+            <Logo className="h-8 w-8 shrink-0" />
+            <span>
+              {config.brand.logoText}
+              <span className="block text-[11px] font-normal text-violet-600">
+                Pre-registro de candidatos
+              </span>
             </span>
           </Link>
           <Link

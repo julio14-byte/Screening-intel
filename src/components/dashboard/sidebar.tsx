@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, ClipboardList, LogOut, X } from "lucide-react";
+import { ClipboardList, LogOut, X } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import config from "@/config";
 import { APP_NAV_STYLES, appIcon } from "@/lib/app/nav";
 import { routes } from "@/lib/app/routes";
@@ -54,9 +55,7 @@ export function DashboardSidebar({
             className="flex min-w-0 items-center gap-3"
             onClick={onMobileClose}
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-violet-500 shadow-lg shadow-violet-900/50">
-              <Activity className="h-5 w-5" aria-hidden />
-            </span>
+            <Logo className="h-10 w-10 shrink-0 shadow-lg shadow-violet-900/50" />
             <span className="min-w-0 leading-tight">
               <span className="block truncate text-sm font-semibold">
                 {config.app.name}

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="Crisvia">
+  <defs>
+    <linearGradient id="crisvia-g" x1="8" y1="2" x2="56" y2="62">
+      <stop stop-color="#22d3ee"/>
+      <stop offset="0.48" stop-color="#3b82f6"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#crisvia-g)"/>
+  <path
+    d="M11 33.5h8.2l2.6-3.2 4.8-10.6 4.6 19.2 3.4-8.4H37"
+    stroke="#fff"
+    stroke-width="3.4"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M37 33.5c5.2 0 8.4-8.2 12.2-13"
+    stroke="#fff"
+    stroke-width="3.4"
+    stroke-linecap="round"
+  />
+  <path
+    d="M37 33.5c5.2 0 8.4 8.2 12.2 13"
+    stroke="#fff"
+    stroke-width="3.4"
+    stroke-linecap="round"
+  />
+</svg>
