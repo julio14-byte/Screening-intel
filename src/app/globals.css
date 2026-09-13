@@ -25,3 +25,22 @@ body {
 ::selection {
   background: color-mix(in srgb, var(--accent-violet) 25%, white);
 }
+
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .one-pager-root {
+    background: white !important;
+  }
+
+  .one-pager-sheet {
+    box-shadow: none !important;
+  }
+}

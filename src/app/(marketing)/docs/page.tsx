@@ -49,6 +49,12 @@ export default function DocsPage() {
           >
             Integraciones
           </Link>
+          <Link
+            href={routes.app.onePager}
+            className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-white/20 px-4 py-2 text-sm text-violet-200 hover:bg-white/10"
+          >
+            One-pager
+          </Link>
         </div>
 
         <div className="mt-10 space-y-8 sm:mt-12 sm:space-y-10">
