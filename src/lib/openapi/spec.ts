@@ -349,6 +349,52 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           },
         },
       },
+      "/api/candidatos/{id}/mensaje": {
+        get: {
+          tags: ["Patients"],
+          summary: "Historial de WhatsApp/SMS al candidato",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          ],
+          responses: { "200": { description: "Canales disponibles y últimos envíos" } },
+        },
+        post: {
+          tags: ["Patients"],
+          summary: "Enviar plantilla WhatsApp o SMS",
+          description:
+            "Plantillas fijas: te_llamamos, trae_receta, link_portal. No incluye el briefing de IA ni diagnósticos. whatsapp_link abre wa.me; sms/whatsapp usan Twilio.",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["template", "channel"],
+                  properties: {
+                    template: {
+                      type: "string",
+                      enum: ["te_llamamos", "trae_receta", "link_portal"],
+                    },
+                    channel: {
+                      type: "string",
+                      enum: ["sms", "whatsapp", "whatsapp_link"],
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Enviado o link de WhatsApp" },
+            "400": { description: "Teléfono o Twilio faltante" },
+          },
+        },
+      },
       "/api/matching/rematch-compare": {
         post: {
           tags: ["AI"],

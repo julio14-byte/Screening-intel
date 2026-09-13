@@ -186,8 +186,9 @@ export function CandidatoIntakeForm({
           onChange={(e) => setForm({ ...form, contact_email: e.target.value })}
         />
         <TextInput
-          label="Teléfono"
+          label="Teléfono (WhatsApp / SMS)"
           type="tel"
+          hint="Incluye código de país, ej. +52 55 1234 5678"
           value={form.contact_phone}
           onChange={(e) => setForm({ ...form, contact_phone: e.target.value })}
         />

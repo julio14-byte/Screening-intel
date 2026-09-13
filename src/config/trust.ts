@@ -57,6 +57,7 @@ export const privacyPage: TrustPage = {
         "Sesión con inactividad de 30 minutos y tope absoluto de 8 horas.",
         "El portal público no expone secretos del centro (webhook EHR, facturación).",
         "La IA recibe iniciales y el resultado del motor de reglas; no cambia la elegibilidad ni debe recibir el nombre completo.",
+        "WhatsApp/SMS al candidato usa plantillas fijas (llamada, receta, link del portal), sin briefing de IA ni diagnósticos.",
         "Webhooks EHR firmados con HMAC; bitácora append-only para cambios clínicos.",
       ],
     },
@@ -148,6 +149,7 @@ export const integrationsPage: TrustPage = {
       bullets: [
         "CSV de pacientes: importación masiva en el registro.",
         "Portal /candidato: pre-registro público del centro (slug + protocolos activos).",
+        "WhatsApp / SMS: plantillas desde el inbox (`POST /api/candidatos/:id/mensaje`). Twilio opcional; si no, se abre wa.me.",
         "PDF de laboratorio y foto de receta: ver la sección anterior. Carga en /patients/[id].",
         "PDF de protocolo: extracción de criterios (el texto del sponsor no se traduce).",
         "ICD-11 (OMS): búsqueda y normalización de términos coloquiales.",

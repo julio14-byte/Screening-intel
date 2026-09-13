@@ -31,6 +31,7 @@ Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-sc
 | **Agenda de visitas** | Calendario de pre-screening, ICF, labs, screening y randomización (`/agenda`). |
 | **Pendientes** | Cola de visitas vencidas, ICF faltante y criterios 🟡 (`/pendientes`). |
 | **Consentimiento informado** | Versión, fecha, responsable y PDF cifrado en el expediente. |
+| **WhatsApp / SMS** | Plantillas al candidato desde `/candidatos`: te llamamos, trae receta, link del portal. |
 | **Screenlane** | Rebrand completo del producto (antes Screening Intelligence). |
 
 ---
@@ -104,7 +105,7 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | `/tracker` | Pipeline Kanban con drag & drop |
 | `/rematch` | Re-matching automático post screen failure + comparador IA de alternativas |
 | `/candidato` | Portal público de pre-registro (pacientes) |
-| `/candidatos` | Inbox de leads del portal + briefing IA para la llamada |
+| `/candidatos` | Inbox de leads del portal + briefing IA para la llamada + WhatsApp/SMS |
 | `/settings/portal` | Configuración del portal (investigator) |
 | `/settings/ehr` | Integración EHR — sync batch y webhooks (investigator) |
 | `/settings/security` | MFA TOTP (obligatorio en prod para PI / sub-PI) |
@@ -174,9 +175,10 @@ supabase/migrations/0017_secure_patient_data.sql
 supabase/migrations/0018_tenant_rls_portal_sites.sql
 supabase/migrations/0019_protocol_assignments_encrypted_docs.sql
 supabase/migrations/0020_visits_consent.sql
+supabase/migrations/0021_candidato_outreach.sql
 ```
 
-Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. **0019** (ACL por protocolo + bucket de documentos) va después de 0018. **0020** (agenda + ICF) va después de 0019. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
+Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. **0019** (ACL por protocolo + bucket de documentos) va después de 0018. **0020** (agenda + ICF) va después de 0019. **0021** (WhatsApp/SMS a candidatos) va después de 0020. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
 
 Opcional — datos de demo o activar Pro sin Stripe:
 

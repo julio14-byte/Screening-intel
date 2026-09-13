@@ -191,7 +191,8 @@ export function PortalSettingsPanel() {
         </div>
       ) : (
         <p className="text-sm text-indigo-500">
-          Activa el portal y guarda un slug para generar links.
+          Activa el portal y guarda un slug para generar links. El inbox de
+          candidatos puede mandar ese link por WhatsApp o SMS.
         </p>
       )}
     </div>
