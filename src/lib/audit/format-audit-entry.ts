@@ -21,6 +21,7 @@ const TABLE_LABELS: Record<string, string> = {
   clinical_documents: "Documento clínico",
   study_visits: "Visita",
   informed_consents: "Consentimiento informado",
+  candidato_outreach: "Mensaje a candidato",
 };
 
 export interface FormattedAuditEntry {

@@ -168,6 +168,7 @@ const config = {
       visits: "/api/visits",
       pendientes: "/api/pendientes",
       patientConsents: "/api/patients/{id}/consents",
+      candidatoMensaje: "/api/candidatos/{id}/mensaje",
     },
   },
 

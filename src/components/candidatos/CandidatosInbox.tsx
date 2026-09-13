@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { ErrorState } from "@/components/ui/StateMessage";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
 import { CandidatoTriagePanel } from "@/components/candidatos/CandidatoTriagePanel";
+import { CandidatoOutreachPanel } from "@/components/candidatos/CandidatoOutreachPanel";
 import { routes } from "@/lib/app/routes";
 
 type SubmissionRow = {
@@ -60,7 +61,7 @@ export function CandidatosInbox() {
   }, []);
 
   useEffect(() => {
-    load();
+    void Promise.resolve().then(load);
   }, [load]);
 
   const convertir = async (id: string) => {
@@ -153,6 +154,10 @@ export function CandidatosInbox() {
                 ) : null}
 
                 <CandidatoTriagePanel submissionId={row.id} />
+                <CandidatoOutreachPanel
+                  submissionId={row.id}
+                  hasPhone={Boolean(row.contact_phone?.trim())}
+                />
 
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Button

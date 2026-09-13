@@ -73,9 +73,9 @@ export const productDocs = {
             "POST /api/ehr/sync (sesión) y POST /api/webhooks/ehr (HMAC). Upsert por ehr_patient_id. Configura en /settings/ehr. Detalle en /integraciones.",
         },
         {
-          heading: "API",
+          heading: "WhatsApp y SMS",
           body:
-            "OpenAPI y Swagger en /docs/api. Stripe, ICD-11 y webhooks EHR están documentados ahí.",
+            "En /candidatos, tras el triage, envías plantillas fijas (te llamamos, trae receta, link del portal). No se manda el briefing de IA ni diagnósticos. POST /api/candidatos/:id/mensaje.",
         },
       ],
     },
