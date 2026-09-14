@@ -1,43 +1,21 @@
 -- =============================================================================
--- DEV / pruebas: activar plan Pro sin pasar por Stripe
+-- DEV / pruebas: activar plan Pro+ sin pasar por Stripe
 -- =============================================================================
 -- Ejecutar en Supabase SQL Editor.
--- Cambia el filtro WHERE según tu org (slug, email del owner, o id).
+-- Actualiza TODAS las orgs del proyecto (un solo clinical research site).
+-- Equivale a supabase/migrations/0022_demo_pro_plus.sql
 
--- Opción A: por slug del centro (recomendado)
--- update public.organizations o
--- set
---   plan_id = 'pro',
---   subscription_status = 'active',
---   trial_ends_at = now() + interval '365 days',
---   patient_limit = 500,
---   protocol_limit = 50,
---   user_limit = 3
--- where slug = 'demo';
-
--- Opción B: tu primera / única organización
-update public.organizations o
+update public.organizations
 set
-  plan_id = 'pro',
+  plan_id = 'pro_plus',
   subscription_status = 'active',
   trial_ends_at = now() + interval '365 days',
-  patient_limit = 500,
-  protocol_limit = 50,
-  user_limit = 3
-where o.id = (
-  select id from public.organizations
-  order by created_at
-  limit 1
-);
+  patient_limit = 2000,
+  protocol_limit = 100,
+  user_limit = 10;
 
--- Sincronizar perfil de usuarios del site
-update public.profiles p
-set plan = 'pro'
-from public.organization_members om
-where om.user_id = p.id
-  and om.organization_id in (
-    select id from public.organizations where plan_id = 'pro'
-  );
+update public.profiles
+set plan = 'pro_plus';
 
 -- Verificar
 select id, name, slug, plan_id, subscription_status,

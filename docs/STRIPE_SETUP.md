@@ -45,7 +45,7 @@ Ejecutar en Supabase:
 supabase/scripts/upgrade_org_to_pro.sql
 ```
 
-Eso pone `plan_id = pro`, `subscription_status = active` y límites Pro (500 pacientes, 50 protocolos, 3 usuarios).
+Eso pone `plan_id = pro_plus`, `subscription_status = active` y límites Pro+ (2000 pacientes, 100 protocolos, 10 usuarios) en las orgs del proyecto. Equivale a `0022_demo_pro_plus.sql`. En desarrollo, el login también aplica Pro+ a la org de la sesión.
 
 ## Límites por plan (código)
 

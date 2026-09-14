@@ -2,7 +2,10 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getDemoCredentials, isDemoEmail } from "@/lib/auth/constants";
 import { ensureDemoPatientData } from "@/lib/auth/demo-seed";
-import { provisionDemoUserIfNeeded } from "@/lib/auth/demo-user";
+import {
+  ensureDemoProPlusPlan,
+  provisionDemoUserIfNeeded,
+} from "@/lib/auth/demo-user";
 import {
   applySessionActivityCookies,
   isDemoLoginEnabled,
@@ -117,6 +120,14 @@ export async function POST(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (user && isDemoLoginEnabled()) {
+    try {
+      await ensureDemoProPlusPlan(user.id);
+    } catch (planErr) {
+      console.error("[login] demo plan:", (planErr as Error)?.message);
+    }
+  }
 
   if (user) {
     const { data: roleRow } = await supabase

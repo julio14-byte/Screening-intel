@@ -176,14 +176,15 @@ supabase/migrations/0018_tenant_rls_portal_sites.sql
 supabase/migrations/0019_protocol_assignments_encrypted_docs.sql
 supabase/migrations/0020_visits_consent.sql
 supabase/migrations/0021_candidato_outreach.sql
+supabase/migrations/0022_demo_pro_plus.sql
 ```
 
-Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. **0019** (ACL por protocolo + bucket de documentos) va después de 0018. **0020** (agenda + ICF) va después de 0019. **0021** (WhatsApp/SMS a candidatos) va después de 0020. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
+Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. **0019** (ACL por protocolo + bucket de documentos) va después de 0018. **0020** (agenda + ICF) va después de 0019. **0021** (WhatsApp/SMS a candidatos) va después de 0020. **0022** pone Pro+ en el site de demo. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
 
 Opcional — datos de demo o activar Pro sin Stripe:
 
 ```bash
-# supabase/seed.sql o supabase/scripts/upgrade_org_to_pro.sql
+# supabase/seed.sql o supabase/scripts/upgrade_org_to_pro.sql (Pro+ en demo)
 ```
 
 Con Supabase CLI:
