@@ -4,7 +4,6 @@ import {
   CreditCard,
   FileSpreadsheet,
   FlaskConical,
-  Hospital,
   KanbanSquare,
   RefreshCw,
   Scale,
@@ -31,7 +30,6 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Scale,
   Workflow,
   Cable,
-  Hospital,
   Square,
 };
 

@@ -29,7 +29,7 @@ El enrollment es el cuello de botella del ensayo. El coordinador no tiene un sis
 
 Crisvia es el funnel operativo del clinical research site. La IA explica y acelera; el motor de reglas decide la elegibilidad.
 
-1. **Captura** — Portal público, CSV, nota clínica, PDF de lab o foto de receta. EHR opcional — no es un requisito.
+1. **Captura** — Portal público, CSV, nota clínica, PDF de laboratorio o foto de receta.
 2. **Match** — Motor de reglas con semáforo 🟢 cumple / 🟡 pendiente / 🔴 no cumple y justificación clínica.
 3. **Opera** — Triage IA para la llamada, WhatsApp/SMS con plantillas, agenda de visitas y consentimiento informado.
 4. **Recupera** — Screen failure → Re-Match nativo al siguiente protocolo activo del centro.
@@ -41,7 +41,7 @@ Crisvia es el funnel operativo del clinical research site. La IA explica y acele
 | **Hecho para el site** | El CTMS sirve al sponsor. Crisvia cubre el día a día del coordinador y del PI. |
 | **Re-Match nativo** | El screen failure no es el final: el paciente vuelve a protocolos activos del mismo centro. |
 | **IA que no decide** | Extrae, resume y explica. Nunca cambia inclusión / exclusión. Semáforo auditable. |
-| **LATAM-first** | Español latinoamericano. Arranca sin EHR. Integración hospitalaria cuando el site la tenga. |
+| **LATAM-first** | Español latinoamericano. Los labs entran por PDF o foto de receta, no por un conector hospitalario. |
 
 ## Quién compra
 

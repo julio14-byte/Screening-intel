@@ -103,7 +103,6 @@ const config = {
       "/settings",
       "/settings/roles",
       "/settings/portal",
-      "/settings/ehr",
       "/settings/security",
       "/candidatos",
       "/semaforos",
@@ -116,7 +115,6 @@ const config = {
       "/api/auth/session",
       "/api/waitlist",
       "/api/webhooks/stripe",
-      "/api/webhooks/ehr",
       "/api/openapi",
       "/api/candidato/config",
       "/api/candidato/enviar",
@@ -138,7 +136,6 @@ const config = {
       billing: "/account/billing",
       roles: "/settings/roles",
       portalSettings: "/settings/portal",
-      ehrSettings: "/settings/ehr",
       security: "/settings/security",
       candidatos: "/candidatos",
       docs: "/docs",
@@ -156,8 +153,6 @@ const config = {
       stripeCheckout: "/api/stripe/checkout",
       stripePortal: "/api/stripe/portal",
       stripeWebhook: "/api/webhooks/stripe",
-      ehrSync: "/api/ehr/sync",
-      ehrWebhook: "/api/webhooks/ehr",
       icd11Search: "/api/icd11/search",
       icd11Normalize: "/api/icd11/normalize",
       matchingRationale: "/api/matching/rationale",
@@ -256,7 +251,7 @@ const config = {
         {
           icon: "Cable",
           title: "ETL e integraciones",
-          body: "EHR opcional (batch + webhook), CSV, PDF de lab, foto de receta, ICD-11 y Stripe. El matching sigue siendo un motor de reglas.",
+          body: "CSV, portal, PDF de laboratorio y foto de receta. ICD-11 y Stripe. El matching sigue siendo un motor de reglas.",
         },
         {
           icon: "Shield",
@@ -269,7 +264,7 @@ const config = {
       eyebrow: "Confianza",
       title: "Privacidad, regulaciones, ETL e integraciones.",
       subtitle:
-        "Pensado para sponsors de EE. UU. y sites en LatAm: el funnel opera sin EHR obligatorio, y cuando lo conectas el dato queda aislado por centro.",
+        "Pensado para sponsors de EE. UU. y sites en LatAm: el funnel opera con CSV, portal y ETL de PDF/foto; el dato queda aislado por centro.",
       items: [
         {
           icon: "Shield",
@@ -286,13 +281,13 @@ const config = {
         {
           icon: "Workflow",
           title: "ETL clínico",
-          body: "Extract (CSV, portal, EHR, PDF de lab, foto de receta) → Transform (perfil + ICD-11 + reglas) → Load (pacientes, screening y re-match).",
+          body: "Extract (CSV, portal, PDF de lab, foto de receta) → Transform (perfil + ICD-11 + reglas) → Load (pacientes, screening y re-match).",
           href: "/integraciones#etl",
         },
         {
           icon: "Cable",
           title: "Integraciones",
-          body: "EHR batch y webhook HMAC, Stripe, ICD-11, OpenAI y API OpenAPI. Configuración en la app, sin marketplace genérico.",
+          body: "PDF de laboratorio, foto de receta, CSV, portal, Stripe, ICD-11, OpenAI y API OpenAPI. Sin conector a historia clínica hospitalaria.",
           href: "/integraciones",
         },
       ],
@@ -302,8 +297,8 @@ const config = {
       title: "Lo que preguntan los clinical research sites.",
       items: [
         {
-          q: "¿Necesito integrar con mi EHR?",
-          a: "No para arrancar: registro manual, CSV y portal de candidatos. Fase 1 (sync batch) y Fase 2 (webhook en tiempo real) están disponibles en Configuración → Integración EHR.",
+          q: "¿Cómo cargo labs y recetas al expediente?",
+          a: "En /patients/[id]: sube un PDF de laboratorio o fotografía la receta. La IA pre-rellena el perfil; tú revisas y guardas. También hay CSV, alta manual y portal de candidatos. No hay conector a EHR hospitalario.",
         },
         {
           q: "¿Cuánto dura el trial?",
@@ -323,7 +318,7 @@ const config = {
         },
         {
           q: "¿Qué es el ETL de Crisvia?",
-          a: "El pipeline Extract → Transform → Load del screening: entra CSV, portal, EHR, PDF de laboratorio o foto de receta; se normaliza el perfil; se carga en tu centro. Guía en /integraciones.",
+          a: "El pipeline Extract → Transform → Load del screening: entra CSV, portal, PDF de laboratorio o foto de receta; se normaliza el perfil; se carga en tu centro. Guía en /integraciones.",
         },
         {
           q: "¿Puedo cargar un PDF de laboratorio o una foto de receta?",

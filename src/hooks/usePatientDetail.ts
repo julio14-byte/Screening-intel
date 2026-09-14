@@ -22,7 +22,7 @@ export function usePatientDetail(patientId: string) {
     try {
       const supabase = getSupabaseClient();
       const [patientRes, profileRes] = await Promise.all([
-        supabase.from("patients").select("id, clinic_id, first_name, last_name, birth_date, gender, ehr_patient_id, ehr_source, ehr_last_synced_at, created_at").eq("id", patientId).single(),
+        supabase.from("patients").select("id, clinic_id, first_name, last_name, birth_date, gender, created_at").eq("id", patientId).single(),
         supabase
           .from("clinical_profiles")
           .select("id, patient_id, conditions, medications, laboratories, updated_at")
