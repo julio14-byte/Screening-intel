@@ -2,7 +2,10 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getDemoCredentials, isDemoEmail } from "@/lib/auth/constants";
 import { ensureDemoPatientData } from "@/lib/auth/demo-seed";
-import { provisionDemoUserIfNeeded } from "@/lib/auth/demo-user";
+import {
+  ensureDemoProPlusPlan,
+  provisionDemoUserIfNeeded,
+} from "@/lib/auth/demo-user";
 import {
   applySessionActivityCookies,
   isDemoLoginEnabled,
@@ -108,6 +111,11 @@ export async function POST(request: NextRequest) {
       await ensureDemoPatientData();
     } catch (seedErr) {
       console.error("[login] demo seed:", (seedErr as Error)?.message);
+    }
+    try {
+      await ensureDemoProPlusPlan();
+    } catch (planErr) {
+      console.error("[login] demo plan:", (planErr as Error)?.message);
     }
   }
 

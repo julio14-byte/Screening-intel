@@ -183,7 +183,7 @@ Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y 
 Opcional — datos de demo o activar Pro sin Stripe:
 
 ```bash
-# supabase/seed.sql o supabase/scripts/upgrade_org_to_pro.sql
+# supabase/seed.sql o supabase/scripts/upgrade_org_to_pro.sql (Pro+ en demo)
 ```
 
 Con Supabase CLI:

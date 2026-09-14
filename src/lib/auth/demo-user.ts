@@ -1,6 +1,7 @@
 import { getDemoCredentials } from "@/lib/auth/constants";
 import { isDemoLoginEnabled } from "@/lib/auth/session-policy";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { SAAS_PLAN_LIMITS } from "@/plugins/stripe/plans";
 
 function isDemoLogin(email: string, password: string): boolean {
   const demo = getDemoCredentials();
@@ -87,5 +88,83 @@ export async function provisionDemoUserIfNeeded(
   } catch (err) {
     const message = err instanceof Error ? err.message : "Error al provisionar demo.";
     return { ok: false, reason: message };
+  }
+}
+
+/**
+ * Deja la organización de la cuenta demo en Pro+ (límites y status active).
+ * Idempotente. Requiere SUPABASE_SERVICE_ROLE_KEY.
+ */
+export async function ensureDemoProPlusPlan(): Promise<void> {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return;
+
+  const admin = createAdminClient();
+  const email = getDemoCredentials().email.trim().toLowerCase();
+  const limits = SAAS_PLAN_LIMITS.pro_plus;
+
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("id")
+    .ilike("email", email)
+    .maybeSingle();
+
+  let userId = profile?.id as string | undefined;
+
+  if (!userId) {
+    const { data: listData, error: listError } = await admin.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000,
+    });
+    if (listError) {
+      throw new Error(`demo plan: ${listError.message}`);
+    }
+    userId = listData.users.find(
+      (user) => user.email?.toLowerCase() === email
+    )?.id;
+  }
+
+  if (!userId) return;
+
+  const { data: membership, error: membershipError } = await admin
+    .from("organization_members")
+    .select("organization_id")
+    .eq("user_id", userId)
+    .limit(1)
+    .maybeSingle();
+
+  if (membershipError) {
+    throw new Error(`demo plan: ${membershipError.message}`);
+  }
+
+  const organizationId = membership?.organization_id as string | undefined;
+  if (!organizationId) return;
+
+  const trialEndsAt = new Date(
+    Date.now() + 365 * 24 * 60 * 60 * 1000
+  ).toISOString();
+
+  const { error: orgError } = await admin
+    .from("organizations")
+    .update({
+      plan_id: "pro_plus",
+      subscription_status: "active",
+      trial_ends_at: trialEndsAt,
+      patient_limit: limits.patientLimit,
+      protocol_limit: limits.protocolLimit,
+      user_limit: limits.userLimit,
+    })
+    .eq("id", organizationId);
+
+  if (orgError) {
+    throw new Error(`demo plan: ${orgError.message}`);
+  }
+
+  const { error: profileError } = await admin
+    .from("profiles")
+    .update({ plan: "pro_plus" })
+    .eq("id", userId);
+
+  if (profileError) {
+    throw new Error(`demo plan: ${profileError.message}`);
   }
 }

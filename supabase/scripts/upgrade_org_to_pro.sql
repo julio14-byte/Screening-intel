@@ -1,42 +1,43 @@
 -- =============================================================================
--- DEV / pruebas: activar plan Pro sin pasar por Stripe
+-- DEV / pruebas: activar plan Pro+ sin pasar por Stripe
 -- =============================================================================
 -- Ejecutar en Supabase SQL Editor.
--- Cambia el filtro WHERE según tu org (slug, email del owner, o id).
+-- Por defecto actualiza la org de demo@screening.local.
 
--- Opción A: por slug del centro (recomendado)
--- update public.organizations o
--- set
---   plan_id = 'pro',
---   subscription_status = 'active',
---   trial_ends_at = now() + interval '365 days',
---   patient_limit = 500,
---   protocol_limit = 50,
---   user_limit = 3
--- where slug = 'demo';
-
--- Opción B: tu primera / única organización
+-- Opción A (default): cuenta demo
 update public.organizations o
 set
-  plan_id = 'pro',
+  plan_id = 'pro_plus',
   subscription_status = 'active',
   trial_ends_at = now() + interval '365 days',
-  patient_limit = 500,
-  protocol_limit = 50,
-  user_limit = 3
-where o.id = (
-  select id from public.organizations
-  order by created_at
-  limit 1
+  patient_limit = 2000,
+  protocol_limit = 100,
+  user_limit = 10
+where o.id in (
+  select om.organization_id
+  from public.organization_members om
+  join public.profiles p on p.id = om.user_id
+  where lower(p.email) = 'demo@screening.local'
 );
 
--- Sincronizar perfil de usuarios del site
+-- Opción B: por slug del centro
+-- update public.organizations
+-- set
+--   plan_id = 'pro_plus',
+--   subscription_status = 'active',
+--   trial_ends_at = now() + interval '365 days',
+--   patient_limit = 2000,
+--   protocol_limit = 100,
+--   user_limit = 10
+-- where slug = 'demo';
+
+-- Sincronizar perfil de usuarios de orgs Pro+
 update public.profiles p
-set plan = 'pro'
+set plan = 'pro_plus'
 from public.organization_members om
 where om.user_id = p.id
   and om.organization_id in (
-    select id from public.organizations where plan_id = 'pro'
+    select id from public.organizations where plan_id = 'pro_plus'
   );
 
 -- Verificar
