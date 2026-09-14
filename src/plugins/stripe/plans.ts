@@ -35,9 +35,6 @@ export interface OrganizationRow {
   patient_limit: number;
   protocol_limit: number;
   user_limit: number;
-  ehr_enabled?: boolean;
-  ehr_source?: string | null;
-  ehr_webhook_secret?: string | null;
   created_at: string;
 }
 

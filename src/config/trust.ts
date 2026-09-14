@@ -38,7 +38,7 @@ export const privacyPage: TrustPage = {
         "Solo los necesarios para el funnel de screening. No vendemos datos clínicos ni los usamos para entrenar modelos de terceros.",
       ],
       bullets: [
-        "Identidad operativa: nombre, fecha de nacimiento, sexo, identificadores del centro o del EHR.",
+        "Identidad operativa: nombre, fecha de nacimiento, sexo e identificadores del centro.",
         "Perfil clínico de screening: condiciones, medicación, laboratorios, notas que el equipo carga o importa.",
         "Protocolos y resultados del motor de reglas (veredicto, score, detalle por criterio).",
         "Cuenta del staff: email, rol clínico, MFA y bitácora de acciones.",
@@ -55,10 +55,10 @@ export const privacyPage: TrustPage = {
         "Row Level Security en PostgreSQL (Supabase) y RBAC clínico (investigator, sub-investigator, coordinator, monitor).",
         "MFA TOTP obligatorio en producción para investigator y sub-investigator.",
         "Sesión con inactividad de 30 minutos y tope absoluto de 8 horas.",
-        "El portal público no expone secretos del centro (webhook EHR, facturación).",
+        "El portal público no expone secretos del centro (facturación, claves de API).",
         "La IA recibe iniciales y el resultado del motor de reglas; no cambia la elegibilidad ni debe recibir el nombre completo.",
         "WhatsApp/SMS al candidato usa plantillas fijas (llamada, receta, link del portal), sin briefing de IA ni diagnósticos.",
-        "Webhooks EHR firmados con HMAC; bitácora append-only para cambios clínicos.",
+        "Bitácora append-only para cambios clínicos.",
       ],
     },
     {
@@ -97,17 +97,17 @@ export const privacyPage: TrustPage = {
 export const integrationsPage: TrustPage = {
   title: "ETL e integraciones",
   subtitle:
-    "Cómo entran, se normalizan y se usan los datos clínicos: del EHR o el CSV al matching, sin que la IA decida elegibilidad.",
-  updated: "12 de septiembre de 2026",
+    "Cómo entran, se normalizan y se usan los datos clínicos: del PDF, la foto o el CSV al matching, sin que la IA decida elegibilidad.",
+  updated: "14 de septiembre de 2026",
   sections: [
     {
       id: "etl",
       title: "ETL clínico (Extract → Transform → Load)",
       paragraphs: [
-        "Crisvia no exige un EHR para arrancar. Cuando lo conectas, el flujo es un ETL acotado al screening — no un data warehouse hospitalario.",
+        "El flujo es un ETL acotado al screening — no un data warehouse hospitalario ni un conector a historia clínica electrónica.",
       ],
       bullets: [
-        "Extract: CSV, alta manual, portal, PDF de laboratorio, foto de receta, sync batch del EHR o webhook en tiempo real (JSON / FHIR Bundle).",
+        "Extract: CSV, alta manual, portal de candidatos, PDF de laboratorio o foto de receta.",
         "Transform: perfil clínico (condiciones, medicación, labs), normalización ICD-11 y evaluación con el motor de reglas.",
         "Load: pacientes y perfiles del centro, screenings, re-match y bitácora. Cada fila queda atada a tu organization_id / clinic_id.",
       ],
@@ -116,7 +116,7 @@ export const integrationsPage: TrustPage = {
       id: "documentos",
       title: "PDF de laboratorio y foto de receta",
       paragraphs: [
-        "Cuando el resultado aún no llega por EHR, el Extract del expediente es el documento que trae el paciente: un PDF de laboratorio o la receta fotografiada en consultorio.",
+        "El Extract del expediente es el documento que trae el paciente: un PDF de laboratorio o la receta fotografiada en consultorio.",
         "El flujo es el mismo ETL: extraes texto o imagen, transformas a condiciones / medicación / labs, y cargas al perfil al guardar. Un humano revisa el borrador. El matching no cambia: sigue siendo el motor de reglas.",
       ],
       bullets: [
@@ -125,19 +125,6 @@ export const integrationsPage: TrustPage = {
         "PDF escaneado sin texto: fotografía las páginas con «Tomar foto». No inferimos OCR de páginas rasterizadas.",
         "No se copian nombres, DNI, direcciones ni firmas. Solo condiciones, medicación y valores numéricos.",
         "En /patients/[id] o POST /api/patients/profile/extract-document (permiso profiles:write). Revisa y pulsa Guardar perfil.",
-      ],
-    },
-    {
-      id: "ehr",
-      title: "EHR (historia clínica electrónica)",
-      paragraphs: [
-        "Opcional. Compatible con un middleware hacia Epic, Cerner, FHIR u otro origen. Se configura en la app: Configuración → Integración EHR.",
-      ],
-      bullets: [
-        "Fase 1 — Batch: POST /api/ehr/sync (sesión + permiso patients:write). Upsert por ehr_patient_id, 1–2 veces al día.",
-        "Fase 2 — Webhook: POST /api/webhooks/ehr con X-Organization-Id y X-EHR-Signature (HMAC-SHA256).",
-        "Eventos: patient.upsert, profile.update, observation.created. Idempotencia por event_id.",
-        "Tras un lab o diagnóstico nuevo se recalcula matching y re-match del paciente.",
       ],
     },
     {
@@ -161,8 +148,8 @@ export const integrationsPage: TrustPage = {
       id: "api",
       title: "API y autenticación",
       paragraphs: [
-        "La referencia interactiva está en /docs/api (OpenAPI). Los webhooks de Stripe y EHR son servidor a servidor; el resto usa sesión Supabase (cookies).",
-        "No expongas SUPABASE_SERVICE_ROLE_KEY ni el secreto HMAC del EHR en el navegador. El secreto webhook se muestra una sola vez al generarlo.",
+        "La referencia interactiva está en /docs/api (OpenAPI). El webhook de Stripe es servidor a servidor; el resto usa sesión Supabase (cookies).",
+        "No expongas SUPABASE_SERVICE_ROLE_KEY ni claves de facturación en el navegador.",
       ],
     },
   ],

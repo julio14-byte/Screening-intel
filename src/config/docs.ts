@@ -65,17 +65,12 @@ export const productDocs = {
         {
           heading: "ETL clínico",
           body:
-            "Extract (CSV, portal, EHR, PDF de laboratorio, foto de receta) → Transform (perfil, ICD-11, reglas) → Load (pacientes, screenings, re-match). No hace falta EHR para el MVP.",
+            "Extract (CSV, portal, PDF de laboratorio, foto de receta) → Transform (perfil, ICD-11, reglas) → Load (pacientes, screenings, re-match). No hay conector a EHR hospitalario.",
         },
         {
           heading: "PDF de laboratorio y foto de receta",
           body:
             "En /patients/[id] sube un PDF digital o fotografía la receta. La IA pre-rellena el perfil; revisas y guardas. Un PDF escaneado sin texto se fotografía. POST /api/patients/profile/extract-document.",
-        },
-        {
-          heading: "EHR batch y webhook",
-          body:
-            "POST /api/ehr/sync (sesión) y POST /api/webhooks/ehr (HMAC). Upsert por ehr_patient_id. Configura en /settings/ehr. Detalle en /integraciones.",
         },
         {
           heading: "WhatsApp y SMS",

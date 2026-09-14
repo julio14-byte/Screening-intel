@@ -52,7 +52,7 @@ recrearlas después (Realtime lo maneja solo).
 En planes de pago: **Database → Backups → Restore to a New Project**. Así
 pruebas el restore **sin tocar producción**. El clone es de base de datos;
 después hay que reconfigurar Auth URLs, env vars de Vercel y webhooks
-(Stripe / EHR) si vas a promover ese proyecto.
+(Stripe) si vas a promover ese proyecto.
 
 Management API (PITR):
 
@@ -84,8 +84,7 @@ Cifra el archivo antes de subirlo. No lo commitees al repo.
 - [ ] Login de un investigator (MFA TOTP sigue enrolado: vive en `auth`).
 - [ ] RLS: un usuario de otro centro no ve pacientes ajenos.
 - [ ] Un paciente, un protocolo y un screening recientes existen.
-- [ ] Webhooks Stripe y EHR apuntan al proyecto correcto y el secreto EHR
-      coincide.
+- [ ] Webhooks Stripe apuntan al proyecto correcto.
 - [ ] Variables `NEXT_PUBLIC_SUPABASE_URL` / keys de Vercel coinciden con el
       proyecto restaurado (si restauraste *in place* no cambian).
 

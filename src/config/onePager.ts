@@ -59,7 +59,7 @@ export const onePagerCopy: Record<OnePagerLang, OnePagerCopy> = {
       {
         n: "1",
         title: "Captura",
-        body: "Portal público, CSV, nota clínica, PDF de lab o foto de receta. EHR opcional — no es un requisito.",
+        body: "Portal público, CSV, nota clínica, PDF de laboratorio o foto de receta.",
       },
       {
         n: "2",
@@ -93,7 +93,7 @@ export const onePagerCopy: Record<OnePagerLang, OnePagerCopy> = {
       },
       {
         title: "LATAM-first",
-        body: "Español latinoamericano. Arranca sin EHR. Integración hospitalaria cuando el site la tenga.",
+        body: "Español latinoamericano. Los labs entran por PDF o foto de receta, no por un conector hospitalario.",
       },
     ],
     buyerTitle: "Quién compra",
@@ -146,7 +146,7 @@ export const onePagerCopy: Record<OnePagerLang, OnePagerCopy> = {
       {
         n: "1",
         title: "Capture",
-        body: "Public portal, CSV, clinical note, lab PDF or prescription photo. EHR is optional — not a prerequisite.",
+        body: "Public portal, CSV, clinical note, lab PDF or prescription photo.",
       },
       {
         n: "2",
@@ -180,7 +180,7 @@ export const onePagerCopy: Record<OnePagerLang, OnePagerCopy> = {
       },
       {
         title: "LATAM-first",
-        body: "Latin American Spanish. Ships without an EHR. Hospital integration when the site is ready.",
+        body: "Latin American Spanish. Labs come in as PDF or prescription photo — not a hospital EHR connector.",
       },
     ],
     buyerTitle: "Who buys",
