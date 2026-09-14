@@ -26,9 +26,9 @@ export const productDocs = {
             "Crea estudios con los criterios en el idioma del protocolo (inglés si el sponsor es de EUA). La app opera en español; el matching unifica sinónimos ES/EN sin traducir inclusión/exclusión.",
         },
         {
-          heading: "4. Ejecuta matching y tracking",
+          heading: "4. Ejecuta matching y mira el tablero",
           body:
-            "Evalúa candidatos contra protocolos y sigue el estado de screening en el Dashboard.",
+            "Evalúa candidatos contra protocolos. El Dashboard muestra el funnel del site: candidatos, visitas, tiempo a pre-screening y screen failures reasignados. Los semáforos paciente a paciente están en /semaforos.",
         },
         {
           heading: "One-pager",

@@ -96,7 +96,7 @@ Crisvia no compite como un módulo aislado de “AI sobre historia clínica”. 
 
 | Ruta | Descripción |
 |------|-------------|
-| `/dashboard` | Embudo de screening y métricas del site |
+| `/dashboard` | Tablero del funnel: candidatos, visitas, tiempo a pre-screening, screen failures reasignados |
 | `/patients` | Registro de pacientes |
 | `/patients/[id]` | Perfil clínico + documentos cifrados + timeline de auditoría |
 | `/protocols` | Gestión de protocolos (visibles según asignación) |
