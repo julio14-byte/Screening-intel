@@ -91,80 +91,77 @@ export async function provisionDemoUserIfNeeded(
   }
 }
 
+const DEMO_PRO_PLUS_PATCH = () => {
+  const limits = SAAS_PLAN_LIMITS.pro_plus;
+  return {
+    plan_id: "pro_plus",
+    subscription_status: "active",
+    trial_ends_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+    patient_limit: limits.patientLimit,
+    protocol_limit: limits.protocolLimit,
+    user_limit: limits.userLimit,
+  };
+};
+
 /**
- * Deja la organización de la cuenta demo en Pro+ (límites y status active).
- * Idempotente. Requiere SUPABASE_SERVICE_ROLE_KEY.
+ * Deja la org del usuario (o todas, en demo) en Pro+. Idempotente.
+ * Requiere SUPABASE_SERVICE_ROLE_KEY.
  */
-export async function ensureDemoProPlusPlan(): Promise<void> {
+export async function ensureDemoProPlusPlan(userId?: string): Promise<void> {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return;
 
   const admin = createAdminClient();
-  const email = getDemoCredentials().email.trim().toLowerCase();
-  const limits = SAAS_PLAN_LIMITS.pro_plus;
+  const patch = DEMO_PRO_PLUS_PATCH();
 
-  const { data: profile } = await admin
-    .from("profiles")
-    .select("id")
-    .ilike("email", email)
-    .maybeSingle();
+  let organizationId: string | undefined;
 
-  let userId = profile?.id as string | undefined;
+  if (userId) {
+    const { data: membership, error: membershipError } = await admin
+      .from("organization_members")
+      .select("organization_id")
+      .eq("user_id", userId)
+      .limit(1)
+      .maybeSingle();
 
-  if (!userId) {
-    const { data: listData, error: listError } = await admin.auth.admin.listUsers({
-      page: 1,
-      perPage: 1000,
-    });
-    if (listError) {
-      throw new Error(`demo plan: ${listError.message}`);
+    if (membershipError) {
+      throw new Error(`demo plan: ${membershipError.message}`);
     }
-    userId = listData.users.find(
-      (user) => user.email?.toLowerCase() === email
-    )?.id;
+    organizationId = membership?.organization_id as string | undefined;
   }
 
-  if (!userId) return;
+  if (!organizationId) {
+    const { data: firstOrg, error: orgLookupError } = await admin
+      .from("organizations")
+      .select("id")
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
 
-  const { data: membership, error: membershipError } = await admin
-    .from("organization_members")
-    .select("organization_id")
-    .eq("user_id", userId)
-    .limit(1)
-    .maybeSingle();
-
-  if (membershipError) {
-    throw new Error(`demo plan: ${membershipError.message}`);
+    if (orgLookupError) {
+      throw new Error(`demo plan: ${orgLookupError.message}`);
+    }
+    organizationId = firstOrg?.id as string | undefined;
   }
 
-  const organizationId = membership?.organization_id as string | undefined;
   if (!organizationId) return;
-
-  const trialEndsAt = new Date(
-    Date.now() + 365 * 24 * 60 * 60 * 1000
-  ).toISOString();
 
   const { error: orgError } = await admin
     .from("organizations")
-    .update({
-      plan_id: "pro_plus",
-      subscription_status: "active",
-      trial_ends_at: trialEndsAt,
-      patient_limit: limits.patientLimit,
-      protocol_limit: limits.protocolLimit,
-      user_limit: limits.userLimit,
-    })
+    .update(patch)
     .eq("id", organizationId);
 
   if (orgError) {
     throw new Error(`demo plan: ${orgError.message}`);
   }
 
-  const { error: profileError } = await admin
-    .from("profiles")
-    .update({ plan: "pro_plus" })
-    .eq("id", userId);
+  if (userId) {
+    const { error: profileError } = await admin
+      .from("profiles")
+      .update({ plan: "pro_plus" })
+      .eq("id", userId);
 
-  if (profileError) {
-    throw new Error(`demo plan: ${profileError.message}`);
+    if (profileError) {
+      throw new Error(`demo plan: ${profileError.message}`);
+    }
   }
 }

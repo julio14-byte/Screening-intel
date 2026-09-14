@@ -112,11 +112,6 @@ export async function POST(request: NextRequest) {
     } catch (seedErr) {
       console.error("[login] demo seed:", (seedErr as Error)?.message);
     }
-    try {
-      await ensureDemoProPlusPlan();
-    } catch (planErr) {
-      console.error("[login] demo plan:", (planErr as Error)?.message);
-    }
   }
 
   let mfaRequired = false;
@@ -125,6 +120,14 @@ export async function POST(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (user && isDemoLoginEnabled()) {
+    try {
+      await ensureDemoProPlusPlan(user.id);
+    } catch (planErr) {
+      console.error("[login] demo plan:", (planErr as Error)?.message);
+    }
+  }
 
   if (user) {
     const { data: roleRow } = await supabase
