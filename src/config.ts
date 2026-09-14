@@ -13,7 +13,7 @@ const config = {
     nav: [
       {
         href: "/dashboard",
-        label: "Dashboard",
+        label: "Tablero",
         icon: "LayoutDashboard",
       },
       {
