@@ -13,8 +13,6 @@ export interface ProductMetrics {
   waitlistWeek: number;
   signupsTotal: number;
   signupsWeek: number;
-  chatSessionsTotal: number;
-  chatSessionsWeek: number;
 }
 
 /** ¿Puede este usuario ver métricas globales del producto? */
@@ -39,40 +37,25 @@ export async function getProductMetrics(): Promise<
     const supabase = createAdminClient();
     const since = weekAgoIso();
 
-    const [
-      waitlistAll,
-      waitlistWeek,
-      signupsAll,
-      signupsWeek,
-      chatAll,
-      chatWeek,
-    ] = await Promise.all([
-      supabase.from("waitlist").select("*", { count: "exact", head: true }),
-      supabase
-        .from("waitlist")
-        .select("*", { count: "exact", head: true })
-        .gte("created_at", since),
-      supabase.from("profiles").select("*", { count: "exact", head: true }),
-      supabase
-        .from("profiles")
-        .select("*", { count: "exact", head: true })
-        .gte("created_at", since),
-      supabase
-        .from("ai_conversations")
-        .select("*", { count: "exact", head: true }),
-      supabase
-        .from("ai_conversations")
-        .select("*", { count: "exact", head: true })
-        .gte("created_at", since),
-    ]);
+    const [waitlistAll, waitlistWeek, signupsAll, signupsWeek] =
+      await Promise.all([
+        supabase.from("waitlist").select("*", { count: "exact", head: true }),
+        supabase
+          .from("waitlist")
+          .select("*", { count: "exact", head: true })
+          .gte("created_at", since),
+        supabase.from("profiles").select("*", { count: "exact", head: true }),
+        supabase
+          .from("profiles")
+          .select("*", { count: "exact", head: true })
+          .gte("created_at", since),
+      ]);
 
     const firstError =
       waitlistAll.error ||
       waitlistWeek.error ||
       signupsAll.error ||
-      signupsWeek.error ||
-      chatAll.error ||
-      chatWeek.error;
+      signupsWeek.error;
 
     if (firstError) {
       return { error: firstError.message };
@@ -83,8 +66,6 @@ export async function getProductMetrics(): Promise<
       waitlistWeek: waitlistWeek.count ?? 0,
       signupsTotal: signupsAll.count ?? 0,
       signupsWeek: signupsWeek.count ?? 0,
-      chatSessionsTotal: chatAll.count ?? 0,
-      chatSessionsWeek: chatWeek.count ?? 0,
     };
   } catch (err) {
     return {

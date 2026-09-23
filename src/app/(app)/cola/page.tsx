@@ -6,7 +6,7 @@ export default function ColaPage() {
     <>
       <PageHeader
         title="Cola de trabajo"
-        description="Tareas guardadas del centro. El agente propone; esta lista sigue ahí si cierras el chat."
+        description="Inbox, criterios pendientes y re-match en tareas del centro. El coordinador confirma cada paso."
       />
       <TaskQueueBoard />
     </>

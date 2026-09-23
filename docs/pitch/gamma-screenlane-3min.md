@@ -112,15 +112,15 @@ Visitas de pre-screening: cuándo y con quién.
 ---
 
 # Cola
-## Tareas, avisos y el agente
+## Tareas y avisos
 
 **Cola `/cola`**
-Inbox de candidatos, criterios 🟡 y re-match. Queda guardada si se cierra el chat.
+Inbox de candidatos, criterios 🟡 y re-match. Tareas guardadas del centro.
 
 **Avisos `/avisos`**
 Lead nuevo, screen failure, tarea vencida.
 
-El coordinador confirma cada paso. Nadie cambia un semáforo por chat.
+El coordinador confirma cada paso. La IA no cambia un semáforo.
 
 ---
 

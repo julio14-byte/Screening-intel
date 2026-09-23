@@ -1,4 +1,4 @@
-import { Bot, Mail, Users } from "lucide-react";
+import { Mail, Users } from "lucide-react";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import {
   formatWeekTrend,
@@ -29,14 +29,8 @@ export function ProductMetricsKpis({
 
   if (!productMetrics) return null;
 
-  const {
-    waitlistTotal,
-    waitlistWeek,
-    signupsTotal,
-    signupsWeek,
-    chatSessionsTotal,
-    chatSessionsWeek,
-  } = productMetrics;
+  const { waitlistTotal, waitlistWeek, signupsTotal, signupsWeek } =
+    productMetrics;
 
   return (
     <section aria-label="Métricas de tu producto" className="space-y-3">
@@ -52,7 +46,7 @@ export function ProductMetricsKpis({
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         <KpiCard
           title="Waitlist"
           value={waitlistTotal}
@@ -68,14 +62,6 @@ export function ProductMetricsKpis({
           trend={formatWeekTrend(signupsWeek)}
           icon={Users}
           accent="steel"
-        />
-        <KpiCard
-          title="Sesiones de chat IA"
-          value={chatSessionsTotal}
-          subtitle="Conversaciones históricas (si las hay)"
-          trend={formatWeekTrend(chatSessionsWeek)}
-          icon={Bot}
-          accent="success"
         />
       </div>
     </section>

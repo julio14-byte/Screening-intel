@@ -157,6 +157,11 @@ supabase/migrations/0015_ehr_integration.sql
 supabase/migrations/0016_reduce_rls_disk_io.sql
 supabase/migrations/0017_secure_patient_data.sql
 supabase/migrations/0018_tenant_rls_portal_sites.sql
+supabase/migrations/0019_operations_modules.sql
+supabase/migrations/20260923230029_ehr_patient_fhir.sql
+supabase/migrations/20260923230827_fix_ops_organization_id.sql
+supabase/migrations/20260923234047_drop_external_ehr.sql
+supabase/migrations/20260923235512_drop_queue_agent_and_patient_ehr.sql
 ```
 
 Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.

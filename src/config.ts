@@ -259,7 +259,7 @@ const config = {
         },
         {
           q: "¿Cómo funciona Site Pro?",
-          a: "Plan con mayor volumen de pacientes y protocolos, más re-match y asistente IA.",
+          a: "Plan con mayor volumen de pacientes y protocolos, más re-match y cola de trabajo.",
         },
         {
           q: "¿Los datos están aislados por sitio?",
@@ -286,7 +286,7 @@ const config = {
         },
         {
           quote:
-            "El asistente IA acelera la revisión de criterios de exclusión sin abrir cada protocolo completo.",
+            "La cola de trabajo junta inbox, criterios pendientes y re-match. El coordinador confirma cada paso.",
           author: "Study coordinator",
           role: "Clinical research site regional",
         },

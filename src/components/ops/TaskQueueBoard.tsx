@@ -123,7 +123,7 @@ export function TaskQueueBoard() {
         <Card>
           <CardBody>
             <p className="text-sm text-indigo-800">
-              No hay tareas abiertas. Cuando entre un candidato, falte un criterio o haya un screen failure, queda acá aunque cierres el chat.
+              No hay tareas abiertas. Cuando entre un candidato, falte un criterio o haya un screen failure, queda acá.
             </p>
           </CardBody>
         </Card>
