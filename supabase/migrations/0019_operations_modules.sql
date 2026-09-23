@@ -1,5 +1,9 @@
 -- Tareas de cola, avisos, agenda y cierre de fallos EHR.
 -- Idempotente. Requiere get_user_organization_ids() (0018).
+--
+-- CREATE TABLE IF NOT EXISTS no modifica una tabla que ya existe. Si quedó un
+-- stub sin organization_id, el índice o la policy explotan con 42703.
+-- Por eso, después de cada CREATE se hace ADD COLUMN IF NOT EXISTS.
 
 set statement_timeout = '30s';
 set lock_timeout = '8s';
@@ -24,6 +28,9 @@ create table if not exists public.coordinator_tasks (
   updated_at       timestamptz not null default now(),
   constraint coordinator_tasks_source_unique unique (organization_id, kind, source_id)
 );
+
+alter table public.coordinator_tasks
+  add column if not exists organization_id uuid references public.organizations (id) on delete cascade;
 
 create index if not exists coordinator_tasks_org_status_idx
   on public.coordinator_tasks (organization_id, status, due_at);
@@ -68,6 +75,9 @@ create table if not exists public.app_notifications (
   created_at       timestamptz not null default now(),
   constraint app_notifications_dedupe unique (organization_id, dedupe_key)
 );
+
+alter table public.app_notifications
+  add column if not exists organization_id uuid references public.organizations (id) on delete cascade;
 
 create index if not exists app_notifications_org_created_idx
   on public.app_notifications (organization_id, created_at desc);
@@ -133,6 +143,9 @@ create table if not exists public.study_visits (
   updated_at       timestamptz not null default now()
 );
 
+alter table public.study_visits
+  add column if not exists organization_id uuid references public.organizations (id) on delete cascade;
+
 create index if not exists study_visits_org_when_idx
   on public.study_visits (organization_id, scheduled_at);
 
@@ -165,14 +178,65 @@ grant select, insert, update on table public.study_visits to authenticated;
 -- -----------------------------------------------------------------------------
 -- 6) Bandeja de fallos EHR
 -- -----------------------------------------------------------------------------
+-- 0015 debió crear ehr_sync_logs con organization_id. Si el CREATE IF NOT EXISTS
+-- de 0015 se saltó un stub, aquí no existía la columna y la policy fallaba (42703).
+
+create table if not exists public.ehr_sync_logs (
+  id                  uuid primary key default gen_random_uuid(),
+  organization_id     uuid references public.organizations (id) on delete cascade,
+  sync_type           text not null default 'batch'
+    check (sync_type in ('batch', 'webhook')),
+  status              text not null default 'running'
+    check (status in ('running', 'completed', 'partial', 'failed')),
+  patients_created    integer not null default 0,
+  patients_updated    integer not null default 0,
+  patients_failed     integer not null default 0,
+  rematch_refreshed   integer not null default 0,
+  payload_summary     jsonb not null default '{}'::jsonb,
+  error_details       jsonb not null default '[]'::jsonb,
+  triggered_by        uuid references auth.users (id) on delete set null,
+  started_at          timestamptz not null default now(),
+  completed_at        timestamptz
+);
+
+alter table public.ehr_sync_logs
+  add column if not exists organization_id uuid references public.organizations (id) on delete cascade;
+
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'ehr_sync_logs'
+      and column_name = 'clinic_id'
+  ) then
+    update public.ehr_sync_logs
+    set organization_id = clinic_id
+    where organization_id is null
+      and clinic_id is not null;
+  end if;
+end
+$$;
+
 alter table public.ehr_sync_logs
   add column if not exists acknowledged_at timestamptz,
   add column if not exists failed_patients jsonb not null default '[]'::jsonb;
 
+create index if not exists ehr_sync_logs_org_started_idx
+  on public.ehr_sync_logs (organization_id, started_at desc);
+
+alter table public.ehr_sync_logs enable row level security;
+
+drop policy if exists ehr_sync_logs_select on public.ehr_sync_logs;
+create policy ehr_sync_logs_select
+  on public.ehr_sync_logs for select to authenticated
+  using (ehr_sync_logs.organization_id in (select public.get_user_organization_ids()));
+
 drop policy if exists ehr_sync_logs_update on public.ehr_sync_logs;
 create policy ehr_sync_logs_update
   on public.ehr_sync_logs for update to authenticated
-  using (organization_id in (select public.get_user_organization_ids()))
-  with check (organization_id in (select public.get_user_organization_ids()));
+  using (ehr_sync_logs.organization_id in (select public.get_user_organization_ids()))
+  with check (ehr_sync_logs.organization_id in (select public.get_user_organization_ids()));
 
-grant update on table public.ehr_sync_logs to authenticated;
+grant select, update on table public.ehr_sync_logs to authenticated;
