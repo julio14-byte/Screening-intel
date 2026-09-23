@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { persistFhirChart } from "./persistFhirChart";
 import { mergeLaboratories, mergeStringArrays } from "./mergeProfile";
 import type { EhrPatientPayload, EhrUpsertResult } from "./types";
 
@@ -52,6 +53,13 @@ export async function upsertPatientFromEhr(
       options.profileMode
     );
 
+    await persistFhirChart(supabase, {
+      organizationId: options.organizationId,
+      patientId: existing.id,
+      payload,
+      mode: options.profileMode,
+    });
+
     return {
       patientId: existing.id,
       action: "updated",
@@ -100,6 +108,13 @@ export async function upsertPatientFromEhr(
     payload,
     "replace"
   );
+
+  await persistFhirChart(supabase, {
+    organizationId: options.organizationId,
+    patientId: created.id,
+    payload,
+    mode: "replace",
+  });
 
   return {
     patientId: created.id,
