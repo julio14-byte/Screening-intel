@@ -10,7 +10,8 @@
     "mcp:screening": "tsx --tsconfig tsconfig.json mcp/screening-server.ts",
     "mcp:icd11": "tsx --tsconfig tsconfig.json mcp/icd11-server.ts",
     "verify:ops-modules": "tsx --tsconfig tsconfig.json scripts/verify-ops-modules.ts",
-    "verify:ehr-fhir": "tsx --tsconfig tsconfig.json scripts/verify-ehr-fhir-schema.ts"
+    "verify:ehr-fhir": "tsx --tsconfig tsconfig.json scripts/verify-ehr-fhir-schema.ts",
+    "verify:pharmacy": "tsx --tsconfig tsconfig.json scripts/verify-pharmacy-inventory.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",

@@ -194,3 +194,66 @@ export interface EproResponse {
 export interface EproResponseWithPatient extends EproResponse {
   patients: Pick<Patient, "id" | "first_name" | "last_name">;
 }
+
+// ---------------------------------------------------------------------------
+// Farmacia del protocolo — lotes e inventario
+// ---------------------------------------------------------------------------
+
+export type PrescriptionStatus = "draft" | "delivered" | "cancelled";
+
+export type InventoryMovementKind = "receive" | "dispense" | "adjust";
+
+export interface ProtocolStudyMedication {
+  id: string;
+  organization_id: string;
+  protocol_id: string;
+  name: string;
+  strength: string;
+  form: string;
+  unit: string;
+  created_at: string;
+}
+
+export interface MedicationLot {
+  id: string;
+  organization_id: string;
+  protocol_id: string;
+  study_medication_id: string;
+  lot_number: string;
+  expires_on: string | null;
+  quantity_received: number;
+  quantity_on_hand: number;
+  received_at: string;
+  notes: string;
+  created_at: string;
+}
+
+export interface StudyPrescription {
+  id: string;
+  organization_id: string;
+  protocol_id: string;
+  patient_id: string;
+  study_medication_id: string;
+  lot_id: string;
+  quantity: number;
+  directions: string;
+  status: PrescriptionStatus;
+  prescribed_by: string | null;
+  delivered_at: string | null;
+  delivered_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InventoryMovement {
+  id: string;
+  organization_id: string;
+  lot_id: string;
+  prescription_id: string | null;
+  kind: InventoryMovementKind;
+  quantity_delta: number;
+  quantity_after: number;
+  note: string;
+  created_by: string | null;
+  created_at: string;
+}

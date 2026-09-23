@@ -14,6 +14,7 @@ import {
   ListTodo,
   Bell,
   Calendar,
+  Package,
   Users,
   UserPlus,
 } from "lucide-react";
@@ -34,6 +35,7 @@ export const APP_ICONS: Record<string, LucideIcon> = {
   ListTodo,
   Bell,
   Calendar,
+  Package,
   Cpu,
 };
 
@@ -77,6 +79,10 @@ export const APP_NAV_STYLES: Record<
   },
   "/protocols": {
     activeClass: "bg-fuchsia-400/20 text-fuchsia-100 ring-1 ring-fuchsia-300/30",
+    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
+  },
+  "/inventario": {
+    activeClass: "bg-teal-400/20 text-teal-100 ring-1 ring-teal-300/30",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
   "/semaforos": {
