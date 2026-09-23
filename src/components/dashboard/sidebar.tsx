@@ -26,7 +26,6 @@ export function DashboardSidebar({
   const pathname = usePathname();
 
   const navItems = config.app.nav.filter((item) => {
-    if (item.feature === "aiChat" && !config.features.aiChat) return false;
     if (item.feature === "payments" && !config.features.payments) return false;
     return true;
   });

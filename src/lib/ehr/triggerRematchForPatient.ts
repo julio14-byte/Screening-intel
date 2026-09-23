@@ -18,7 +18,7 @@ export interface RematchRefreshResult {
 }
 
 /**
- * Fase 2: tras actualizar perfil desde EHR, recalcula scores de matching
+ * Tras actualizar el perfil clínico, recalcula scores de matching
  * en screenings activos y cuenta oportunidades de re-match post screen failure.
  */
 export async function refreshMatchScoresForPatient(

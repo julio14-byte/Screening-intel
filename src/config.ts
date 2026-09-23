@@ -22,11 +22,6 @@ const config = {
         icon: "Users",
       },
       {
-        href: "/settings/ehr",
-        label: "Ingreso EHR",
-        icon: "Hospital",
-      },
-      {
         href: "/candidatos",
         label: "Candidatos",
         icon: "UserPlus",
@@ -67,12 +62,6 @@ const config = {
         icon: "RefreshCw",
       },
       {
-        href: "/chat",
-        label: "Agente de cola",
-        icon: "MessageSquare",
-        feature: "aiChat" as const,
-      },
-      {
         href: "/account/billing",
         label: "Facturación",
         icon: "CreditCard",
@@ -93,7 +82,6 @@ const config = {
   features: {
     waitlist: true,
     emailLogin: true,
-    aiChat: true,
     pricing: true,
     payments: true,
   },
@@ -116,12 +104,10 @@ const config = {
       "/tracker",
       "/epro",
       "/rematch",
-      "/chat",
       "/account",
       "/settings",
       "/settings/roles",
       "/settings/portal",
-      "/settings/ehr",
       "/settings/security",
       "/candidatos",
       "/cola",
@@ -153,11 +139,9 @@ const config = {
       tracker: "/tracker",
       epro: "/epro",
       rematch: "/rematch",
-      chat: "/chat",
       billing: "/account/billing",
       roles: "/settings/roles",
       portalSettings: "/settings/portal",
-      ehrSettings: "/settings/ehr",
       security: "/settings/security",
       candidatos: "/candidatos",
       cola: "/cola",
@@ -172,11 +156,9 @@ const config = {
       authLogin: "/api/auth/login",
       authLogout: "/api/auth/logout",
       authSession: "/api/auth/session",
-      authChats: "/api/auth/chats",
       stripeCheckout: "/api/stripe/checkout",
       stripePortal: "/api/stripe/portal",
       stripeWebhook: "/api/webhooks/stripe",
-      ehrSync: "/api/ehr/sync",
       icd11Search: "/api/icd11/search",
       icd11Normalize: "/api/icd11/normalize",
     },
@@ -257,9 +239,9 @@ const config = {
           body: "Re-evalúa cohortes cuando cambian protocolos o criterios.",
         },
         {
-          icon: "MessageSquare",
-          title: "Agente de cola",
-          body: "Prioriza inbox, criterios 🟡 y re-match. Propone; el coordinador confirma. No cambia elegibilidad.",
+          icon: "ListTodo",
+          title: "Cola de trabajo",
+          body: "Inbox, criterios 🟡 y re-match en tareas guardadas. El coordinador confirma cada paso.",
         },
       ],
     },
@@ -268,8 +250,8 @@ const config = {
       title: "Lo que preguntan los clinical research sites.",
       items: [
         {
-          q: "¿Necesito integrar con mi EHR?",
-          a: "No para arrancar: registro manual, CSV y portal de candidatos. El ingreso EHR (formulario, CSV o JSON, sin webhooks) está en Ingreso EHR.",
+          q: "¿Necesito un EHR hospitalario?",
+          a: "No. El expediente es interno: registro manual, CSV y portal de candidatos. No hay conexión con un EHR externo.",
         },
         {
           q: "¿Cuánto dura el trial?",
@@ -277,7 +259,7 @@ const config = {
         },
         {
           q: "¿Cómo funciona Site Pro?",
-          a: "Plan con mayor volumen de pacientes y protocolos, más re-match y asistente IA.",
+          a: "Plan con mayor volumen de pacientes y protocolos, más re-match y cola de trabajo.",
         },
         {
           q: "¿Los datos están aislados por sitio?",
@@ -304,7 +286,7 @@ const config = {
         },
         {
           quote:
-            "El asistente IA acelera la revisión de criterios de exclusión sin abrir cada protocolo completo.",
+            "La cola de trabajo junta inbox, criterios pendientes y re-match. El coordinador confirma cada paso.",
           author: "Study coordinator",
           role: "Clinical research site regional",
         },

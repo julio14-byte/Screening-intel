@@ -32,7 +32,7 @@ export function conditionsToText(conditions: string[]): string {
   return conditions.map(normalizeConditionLabel).join("\n");
 }
 
-/** Lista legible para MCP / chat (solo nombres). */
+/** Lista legible para MCP (solo nombres). */
 export function formatIcd11SearchList(results: Icd11SearchResult[]): string {
   if (results.length === 0) return "Sin resultados.";
   return results.map((result) => `• ${formatIcd11Condition(result)}`).join("\n");
