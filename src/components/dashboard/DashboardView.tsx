@@ -16,6 +16,7 @@ import {
   LoadingState,
 } from "@/components/ui/StateMessage";
 import { OperationalFunnel } from "@/components/dashboard/OperationalFunnel";
+import { computeDashboardMetrics } from "@/lib/dashboard/metrics";
 import { screeningToVerdict } from "@/lib/dashboard/traffic-light";
 import { routes } from "@/lib/app/routes";
 import { useScreenings } from "@/hooks/useScreenings";
