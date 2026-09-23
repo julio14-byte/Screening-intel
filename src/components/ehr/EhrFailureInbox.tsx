@@ -53,7 +53,7 @@ export function EhrFailureInbox() {
     <section className="space-y-3 rounded-xl border border-rose-200 bg-white p-5">
       <h3 className="font-medium text-rose-900">Bandeja de fallos</h3>
       <p className="text-xs text-rose-800/80">
-        Sync batch o webhook que no terminó. Reintentar vuelve a enviar solo los pacientes que fallaron.
+        Ingreso que no terminó. Reintentar vuelve a enviar solo los pacientes que fallaron.
       </p>
       {error ? <p className="text-sm text-rose-700">{error}</p> : null}
       {failures.length === 0 ? (

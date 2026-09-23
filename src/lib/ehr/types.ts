@@ -1,6 +1,6 @@
 import type { Gender } from "@/lib/types";
 
-/** Payload normalizado de un paciente desde EHR (batch o webhook). */
+/** Payload normalizado de un paciente para ingreso EHR. */
 export interface EhrPatientPayload {
   ehr_patient_id: string;
   first_name: string;
@@ -16,21 +16,7 @@ export type EhrSyncType = "batch" | "webhook";
 
 export type EhrSyncStatus = "running" | "completed" | "partial" | "failed";
 
-export type EhrWebhookEventType =
-  | "patient.upsert"
-  | "profile.update"
-  | "observation.created";
-
-/** Cuerpo del webhook EHR (Fase 2). */
-export interface EhrWebhookBody {
-  event_id: string;
-  event_type: EhrWebhookEventType;
-  organization_id?: string;
-  ehr_source?: string;
-  patient: EhrPatientPayload | Record<string, unknown>;
-}
-
-/** Batch sync (Fase 1). */
+/** Ingreso por lote desde la app (sin webhooks). */
 export interface EhrBatchSyncBody {
   ehr_source?: string;
   patients: EhrPatientPayload[];

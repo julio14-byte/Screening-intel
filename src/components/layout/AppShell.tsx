@@ -27,6 +27,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         if (item.feature === "payments" && !config.features.payments)
           return false;
         if (item.href === routes.app.billing) return false;
+        if (item.href === routes.app.ehrSettings && isReadOnly) return false;
         if (isReadOnly && item.href === routes.app.chat) return false;
         return true;
       })

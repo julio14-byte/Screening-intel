@@ -29,7 +29,7 @@ const bodySchema = z.object({
 });
 
 /**
- * Fase 1 — Sync batch desde EHR (1–2 veces al día).
+ * Ingreso EHR (formulario, CSV o JSON).
  * Upsert por (clinic_id, ehr_patient_id) y recalcula matching activo.
  */
 export async function POST(request: Request) {

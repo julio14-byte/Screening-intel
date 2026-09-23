@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ChevronRight, Search, Upload, UserPlus } from "lucide-react";
+import { ChevronRight, Hospital, Search, Upload, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -15,6 +15,7 @@ import { ImportPatientsModal } from "@/components/patients/ImportPatientsModal";
 import { NewPatientModal } from "@/components/patients/NewPatientModal";
 import { RoleGuard } from "@/components/rbac/RoleGuard";
 import { usePatients } from "@/hooks/usePatients";
+import { routes } from "@/lib/app/routes";
 import { calculateAge, formatDate, GENDER_LABELS, normalizeTerm } from "@/lib/utils";
 
 export default function PatientsPage() {
@@ -39,6 +40,13 @@ export default function PatientsPage() {
         actions={
           <RoleGuard permission="patients:write">
             <div className="flex flex-wrap gap-2">
+              <Link
+                href={routes.app.ehrSettings}
+                className="inline-flex items-center gap-1.5 rounded-md border border-violet-200 bg-white px-3 py-1.5 text-sm font-medium text-indigo-900 hover:bg-violet-50"
+              >
+                <Hospital className="h-4 w-4" aria-hidden />
+                Ingreso EHR
+              </Link>
               <Button variant="secondary" onClick={() => setImportOpen(true)}>
                 <Upload className="h-4 w-4" aria-hidden />
                 Importar CSV

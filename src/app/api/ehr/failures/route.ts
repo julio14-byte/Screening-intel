@@ -31,7 +31,7 @@ async function orgIdForUser(userId: string) {
 
 export async function GET() {
   try {
-    await requirePermission("roles:manage");
+    await requirePermission("patients:write");
   } catch (error) {
     if (error instanceof AuthorizationError) {
       const status = error.code === "UNAUTHENTICATED" ? 401 : 403;
@@ -76,7 +76,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    await requirePermission("roles:manage");
+    await requirePermission("patients:write");
   } catch (error) {
     if (error instanceof AuthorizationError) {
       const status = error.code === "UNAUTHENTICATED" ? 401 : 403;

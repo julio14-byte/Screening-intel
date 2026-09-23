@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { generateEhrWebhookSecret } from "@/lib/ehr/verifyWebhookSignature";
 import {
   AuthorizationError,
   requireAuth,
@@ -10,12 +9,9 @@ import {
   createClient,
   createSupabaseAdminClient,
 } from "@/lib/supabase/server";
-import config from "@/config";
 
 const patchSchema = z.object({
-  ehr_enabled: z.boolean().optional(),
   ehr_source: z.string().trim().min(1).max(80).optional(),
-  regenerate_secret: z.boolean().optional(),
 });
 
 async function getMembershipOrgId(userId: string): Promise<string | null> {
@@ -31,13 +27,13 @@ async function getMembershipOrgId(userId: string): Promise<string | null> {
 
 export async function GET() {
   try {
-    await requirePermission("roles:manage");
-  } catch (e) {
-    if (e instanceof AuthorizationError) {
-      const status = e.code === "UNAUTHENTICATED" ? 401 : 403;
-      return NextResponse.json({ error: e.message }, { status });
+    await requirePermission("patients:write");
+  } catch (error) {
+    if (error instanceof AuthorizationError) {
+      const status = error.code === "UNAUTHENTICATED" ? 401 : 403;
+      return NextResponse.json({ error: error.message }, { status });
     }
-    throw e;
+    throw error;
   }
 
   const { user } = await requireAuth();
@@ -49,7 +45,7 @@ export async function GET() {
   const admin = createSupabaseAdminClient();
   const { data: org, error } = await admin
     .from("organizations")
-    .select("id, name, ehr_enabled, ehr_source, ehr_webhook_secret")
+    .select("id, name, ehr_source")
     .eq("id", orgId)
     .single();
 
@@ -67,20 +63,12 @@ export async function GET() {
     .order("started_at", { ascending: false })
     .limit(10);
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL ?? config.app.defaultUrl;
-
   return NextResponse.json({
     organization: {
       id: org.id,
       name: org.name,
-      ehr_enabled: org.ehr_enabled,
       ehr_source: org.ehr_source,
-      has_webhook_secret: Boolean(org.ehr_webhook_secret),
-      webhook_secret: null,
     },
-    webhookUrl: `${baseUrl.replace(/\/$/, "")}/api/webhooks/ehr`,
-    batchSyncUrl: `${baseUrl.replace(/\/$/, "")}/api/ehr/sync`,
     recentLogs: logs ?? [],
   });
 }
@@ -88,12 +76,12 @@ export async function GET() {
 export async function PATCH(request: Request) {
   try {
     await requirePermission("roles:manage");
-  } catch (e) {
-    if (e instanceof AuthorizationError) {
-      const status = e.code === "UNAUTHENTICATED" ? 401 : 403;
-      return NextResponse.json({ error: e.message }, { status });
+  } catch (error) {
+    if (error instanceof AuthorizationError) {
+      const status = error.code === "UNAUTHENTICATED" ? 401 : 403;
+      return NextResponse.json({ error: error.message }, { status });
     }
-    throw e;
+    throw error;
   }
 
   let body: unknown;
@@ -106,7 +94,7 @@ export async function PATCH(request: Request) {
   const parsed = patchSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: parsed.error.issues.map((i) => i.message).join("; ") },
+      { error: parsed.error.issues.map((issue) => issue.message).join("; ") },
       { status: 400 }
     );
   }
@@ -117,47 +105,16 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Sin organización." }, { status: 404 });
   }
 
-  const updates: Record<string, unknown> = {};
-  if (parsed.data.ehr_enabled !== undefined) {
-    updates.ehr_enabled = parsed.data.ehr_enabled;
-  }
-  if (parsed.data.ehr_source !== undefined) {
-    updates.ehr_source = parsed.data.ehr_source;
-  }
-  if (parsed.data.regenerate_secret) {
-    updates.ehr_webhook_secret = generateEhrWebhookSecret();
-  }
-
-  const admin = createSupabaseAdminClient();
-
-  if (
-    parsed.data.ehr_enabled === true &&
-    !parsed.data.regenerate_secret
-  ) {
-    const { data: current } = await admin
-      .from("organizations")
-      .select("ehr_webhook_secret")
-      .eq("id", orgId)
-      .single();
-    if (!current?.ehr_webhook_secret) {
-      updates.ehr_webhook_secret = generateEhrWebhookSecret();
-    }
-  }
-
-  const generatedSecret =
-    typeof updates.ehr_webhook_secret === "string"
-      ? (updates.ehr_webhook_secret as string)
-      : null;
-
-  if (!Object.keys(updates).length) {
+  if (!parsed.data.ehr_source) {
     return NextResponse.json({ error: "Nada para actualizar." }, { status: 400 });
   }
 
+  const admin = createSupabaseAdminClient();
   const { data: org, error } = await admin
     .from("organizations")
-    .update(updates)
+    .update({ ehr_source: parsed.data.ehr_source })
     .eq("id", orgId)
-    .select("id, name, ehr_enabled, ehr_source, ehr_webhook_secret")
+    .select("id, name, ehr_source")
     .single();
 
   if (error || !org) {
@@ -167,19 +124,11 @@ export async function PATCH(request: Request) {
     );
   }
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL ?? config.app.defaultUrl;
-
   return NextResponse.json({
     organization: {
       id: org.id,
       name: org.name,
-      ehr_enabled: org.ehr_enabled,
       ehr_source: org.ehr_source,
-      has_webhook_secret: Boolean(org.ehr_webhook_secret),
-      webhook_secret: generatedSecret,
     },
-    webhookUrl: `${baseUrl.replace(/\/$/, "")}/api/webhooks/ehr`,
-    batchSyncUrl: `${baseUrl.replace(/\/$/, "")}/api/ehr/sync`,
   });
 }
