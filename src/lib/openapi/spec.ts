@@ -29,15 +29,6 @@ const EXAMPLES = {
     role: "coordinator",
   },
   stripeCheckout: { planId: "pro" },
-  chat: {
-    messages: [
-      {
-        id: "msg-1",
-        role: "user",
-        parts: [{ type: "text", text: "¿Qué hay en mi cola hoy?" }],
-      },
-    ],
-  },
 } as const;
 
 /** Especificación OpenAPI 3.0 — Screenlane REST API. */
@@ -74,7 +65,6 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
       { name: "Audit", description: "Bitácora CFR Part 11" },
       { name: "RBAC", description: "Roles clínicos" },
       { name: "ICD-11", description: "Terminología WHO ICD-11" },
-      { name: "AI", description: "Agente de cola" },
       { name: "Stripe", description: "Facturación SaaS" },
       { name: "Waitlist", description: "Landing / captación" },
     ],
@@ -212,19 +202,6 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           },
           example: EXAMPLES.stripeCheckout,
         },
-        ChatRequest: {
-          type: "object",
-          required: ["messages"],
-          properties: {
-            conversationId: { type: "string", format: "uuid" },
-            messages: {
-              type: "array",
-              items: { type: "object", additionalProperties: true },
-              description: "Mensajes UI (Vercel AI SDK UIMessage[])",
-            },
-          },
-          example: EXAMPLES.chat,
-        },
       },
     },
     paths: {
@@ -290,28 +267,6 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
                 },
               },
             },
-          },
-        },
-      },
-      "/api/auth/chats": {
-        post: {
-          tags: ["AI"],
-          summary: "Chat con agente de cola (streaming)",
-          description:
-            "Stream del agente de cola (GPT-4o-mini + LangGraph). Propone inbox, criterios 🟡 y re-match; no cambia elegibilidad ni envía mensajes. Content-Type: stream UI message.",
-          security: [{ cookieAuth: [] }],
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: { $ref: "#/components/schemas/ChatRequest" },
-                example: EXAMPLES.chat,
-              },
-            },
-          },
-          responses: {
-            "200": { description: "Stream de mensajes del asistente" },
-            "401": { description: "No autenticado", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
           },
         },
       },

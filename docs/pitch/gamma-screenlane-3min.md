@@ -54,7 +54,7 @@ Somos el **embudo operativo** del clinical research site.
 # Cómo corre
 ## Cuatro movimientos, no un chatbot
 
-1. **Capturar** — portal, registro, ingreso EHR
+1. **Capturar** — portal, registro, CSV
 2. **Cruzar** — motor de reglas + semáforo
 3. **Operar** — tracker, cola, agenda, avisos
 4. **Recuperar** — re-match y ePRO
@@ -65,7 +65,7 @@ La IA propone y explica.
 ---
 
 # Capturar
-## Portal, pacientes e ingreso EHR
+## Portal y pacientes
 
 **Portal `/candidato`**
 El paciente se pre-registra con el link del centro.
@@ -75,10 +75,7 @@ El coordinador convierte o archiva el lead.
 
 **Pacientes `/patients`**
 Alta manual o CSV. Perfil: diagnósticos, meds, labs, ICD-11.
-
-**Ingreso EHR `/settings/ehr`**
-Formulario, CSV o JSON. Upsert por ID de expediente.
-Sin webhooks: solo se ingresa.
+El expediente es interno. No hay EHR hospitalario.
 
 ---
 
@@ -123,10 +120,7 @@ Inbox de candidatos, criterios 🟡 y re-match. Queda guardada si se cierra el c
 **Avisos `/avisos`**
 Lead nuevo, screen failure, tarea vencida.
 
-**Agente `/chat`**
-Prioriza la cola y arma plantillas (WhatsApp en borrador, no se envía).
-Propone. El coordinador confirma.
-Nunca cambia un semáforo.
+El coordinador confirma cada paso. Nadie cambia un semáforo por chat.
 
 ---
 
@@ -152,7 +146,7 @@ El ICF es el del site. Screenlane no inventa el consentimiento del estudio.
 - Datos aislados por centro (RLS)
 - Expediente alineado a FHIR Patient — diseño, no certificación
 
-Arranca sin EHR. El hospital es opcional.
+Arranca con el expediente interno. No hace falta el hospital.
 
 ---
 
@@ -176,13 +170,13 @@ En el clinical research site el cuello de botella no es “tener un EHR”. Es e
 Screenlane es el funnel de ese trabajo. No reemplazamos el CTMS ni el hospital. Llevamos al candidato al protocolo correcto y lo recuperamos si el primero no entra.
 
 **0:35–0:55 — Captura**
-El paciente llega por el portal del centro. El coordinador lo ve en el inbox y lo pasa a pacientes. También puede cargar CSV o ingresar el expediente a mano. No hay webhooks: el EHR se ingresa, no se espera.
+El paciente llega por el portal del centro. El coordinador lo ve en el inbox y lo pasa a pacientes. También puede cargar CSV. El expediente se escribe en las tablas de la app.
 
 **0:55–1:20 — Matching**
 Los protocolos viven con criterios estructurados. El cruce lo hace un motor de reglas: verde, amarillo o rojo, con el porqué. Si pides una justificación, la IA solo explica ese resultado. No mueve la elegibilidad.
 
 **1:20–1:50 — Operar**
-El tracker es el Kanban del estudio. El dashboard muestra el embudo. La agenda cita el pre-screening. La cola guarda inbox, amarillos y re-match. El agente prioriza y propone un WhatsApp en borrador; quien envía o cambia un estado es el coordinador.
+El tracker es el Kanban del estudio. El dashboard muestra el embudo. La agenda cita el pre-screening. La cola guarda inbox, amarillos y re-match. Quien cambia un estado es el coordinador.
 
 **1:50–2:15 — Recuperar**
 Screen failure no es el final: Re-Match busca otro protocolo activo. ePRO recoge síntomas del paciente. El consentimiento informado es el del site.
@@ -201,7 +195,6 @@ Se empieza sin integrar el hospital. Trial de 14 días: un protocolo, una cohort
 |---|---|---|
 | Dashboard | `/dashboard` | Embudo y semáforos del site |
 | Pacientes | `/patients` | Registro y perfil clínico |
-| Ingreso EHR | `/settings/ehr` | Carga por ID de expediente, sin webhook |
 | Candidatos | `/candidatos` | Inbox del portal |
 | Portal | `/candidato` | Pre-registro público del centro |
 | Protocolos | `/protocols` | Criterios y matcher |
@@ -210,7 +203,6 @@ Se empieza sin integrar el hospital. Trial de 14 días: un protocolo, una cohort
 | Avisos | `/avisos` | Alertas operativas |
 | Agenda | `/agenda` | Visitas de pre-screening |
 | Re-Match | `/rematch` | Otro protocolo tras el fallo |
-| Agente | `/chat` | Prioriza; no decide |
 | ePRO | `/epro` | Cuestionario del paciente |
 | Roles | `/settings/roles` | Investigator crea usuarios |
 | Seguridad | `/settings/security` | MFA |

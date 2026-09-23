@@ -18,7 +18,7 @@ export function ProductMetricsKpis({
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           <p className="font-semibold">Métricas de tu producto</p>
           <p className="mt-1">
-            No pudimos leer waitlist, signups ni chat: {error}. Configura{" "}
+            No pudimos leer waitlist ni signups: {error}. Configura{" "}
             <code className="text-xs">SUPABASE_SERVICE_ROLE_KEY</code> en el
             servidor.
           </p>
@@ -48,8 +48,7 @@ export function ProductMetricsKpis({
           Métricas reales de tu producto
         </h2>
         <p className="mt-1 text-sm text-indigo-600/70">
-          Datos vivos de Supabase para tu pitch: waitlist, registros y sesiones
-          de chat IA.
+          Datos vivos de Supabase para tu pitch: waitlist y registros.
         </p>
       </div>
 
@@ -73,7 +72,7 @@ export function ProductMetricsKpis({
         <KpiCard
           title="Sesiones de chat IA"
           value={chatSessionsTotal}
-          subtitle="Conversaciones guardadas (agente de cola)"
+          subtitle="Conversaciones históricas (si las hay)"
           trend={formatWeekTrend(chatSessionsWeek)}
           icon={Bot}
           accent="success"
