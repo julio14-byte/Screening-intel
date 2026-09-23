@@ -1,12 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Copy, Check, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { TextInput } from "@/components/ui/Field";
+import { useCallback, useEffect, useId, useState } from "react";
+import { Download, Upload } from "lucide-react";
 import { EhrFailureInbox } from "@/components/ehr/EhrFailureInbox";
+import { Button } from "@/components/ui/Button";
+import { Field, SelectInput, TextInput } from "@/components/ui/Field";
 import { ErrorState } from "@/components/ui/StateMessage";
+import { EHR_CSV_TEMPLATE, parseEhrIngestText, parseLabPairs } from "@/lib/ehr/parseEhrIngest";
+import type { EhrPatientPayload } from "@/lib/ehr/types";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
+import type { Gender } from "@/lib/types";
 
 type EhrLog = {
   id: string;
@@ -24,57 +27,57 @@ type EhrSettingsData = {
   organization: {
     id: string;
     name: string;
-    ehr_enabled: boolean;
     ehr_source: string | null;
-    has_webhook_secret: boolean;
-    webhook_secret: string | null;
   };
-  webhookUrl: string;
-  batchSyncUrl: string;
   recentLogs: EhrLog[];
 };
 
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false);
+type SyncResult = {
+  created?: number;
+  updated?: number;
+  failed?: number;
+  rematchRefreshed?: number;
+  errors?: string[];
+  error?: string;
+};
 
-  const copy = async () => {
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+const EMPTY_FORM = {
+  ehr_patient_id: "",
+  first_name: "",
+  last_name: "",
+  birth_date: "",
+  gender: "female" as Gender,
+  conditions: "",
+  medications: "",
+  laboratories: "",
+};
 
-  return (
-    <Button variant="secondary" type="button" onClick={copy} className="shrink-0">
-      {copied ? (
-        <Check className="h-4 w-4" aria-hidden />
-      ) : (
-        <Copy className="h-4 w-4" aria-hidden />
-      )}
-      {copied ? "Copiado" : "Copiar"}
-    </Button>
-  );
+function splitTerms(value: string): string[] {
+  return value
+    .split(/[;|]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 export function EhrSettingsPanel() {
   const [data, setData] = useState<EhrSettingsData | null>(null);
-  const [enabled, setEnabled] = useState(false);
   const [source, setSource] = useState("");
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [batchText, setBatchText] = useState("");
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [ingesting, setIngesting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [result, setResult] = useState<string | null>(null);
+  const batchId = useId();
 
   const applySettings = useCallback((json: EhrSettingsData) => {
     setData(json);
-    setEnabled(json.organization.ehr_enabled);
-    setSource(json.organization.ehr_source ?? "");
+    setSource((current) => current || json.organization.ehr_source || "");
   }, []);
 
   const fetchSettings = useCallback(async () => {
     const res = await fetch("/api/settings/ehr");
-    const json = await readJsonResponse<EhrSettingsData & { error?: string }>(
-      res
-    );
+    const json = await readJsonResponse<EhrSettingsData & { error?: string }>(res);
     if (!res.ok) throw new Error(json?.error ?? "Error al cargar.");
     if (!json) throw new Error("Respuesta vacía.");
     return json;
@@ -85,8 +88,8 @@ export function EhrSettingsPanel() {
     setError(null);
     try {
       applySettings(await fetchSettings());
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Error");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error");
     } finally {
       setLoading(false);
     }
@@ -98,8 +101,8 @@ export function EhrSettingsPanel() {
       .then((json) => {
         if (!cancelled) applySettings(json);
       })
-      .catch((e) => {
-        if (!cancelled) setError(e instanceof Error ? e.message : "Error");
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : "Error");
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -109,52 +112,97 @@ export function EhrSettingsPanel() {
     };
   }, [applySettings, fetchSettings]);
 
-  const save = async (extra?: { regenerate_secret?: boolean }) => {
-    setSaving(true);
+  async function ingest(patients: EhrPatientPayload[]) {
+    if (!patients.length) {
+      throw new Error("No hay pacientes para ingresar.");
+    }
+    if (patients.length > 500) {
+      throw new Error("Máximo 500 pacientes por lote.");
+    }
+
+    setIngesting(true);
     setError(null);
-    setMessage(null);
+    setResult(null);
     try {
-      const res = await fetch("/api/settings/ehr", {
-        method: "PATCH",
+      const res = await fetch("/api/ehr/sync", {
+        method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ehr_enabled: enabled,
           ehr_source: source.trim() || undefined,
-          regenerate_secret: extra?.regenerate_secret,
+          patients,
         }),
       });
-      const json = await readJsonResponse<
-        EhrSettingsData & { error?: string }
-      >(res);
-      if (!res.ok) throw new Error(json?.error ?? "Error al guardar.");
-      if (!json) throw new Error("Respuesta vacía.");
-      setData((prev) => {
-        const nextSecret =
-          json.organization.webhook_secret ??
-          prev?.organization.webhook_secret ??
-          null;
-        return {
-          ...(prev ?? json),
-          organization: {
-            ...json.organization,
-            webhook_secret: nextSecret,
-          },
-          webhookUrl: json.webhookUrl,
-          batchSyncUrl: json.batchSyncUrl,
-          recentLogs: prev?.recentLogs ?? json.recentLogs ?? [],
-        };
-      });
-      setMessage(
-        extra?.regenerate_secret
-          ? "Secreto regenerado. Actualiza el middleware del EHR."
-          : "Configuración EHR guardada."
+      const json = await readJsonResponse<SyncResult>(res);
+      if (!res.ok) throw new Error(json?.error ?? "No se pudo ingresar.");
+
+      const extra =
+        json?.errors && json.errors.length > 0
+          ? ` ${json.errors.slice(0, 3).join(" · ")}`
+          : "";
+      setResult(
+        `Creados ${json?.created ?? 0}. Actualizados ${json?.updated ?? 0}. Fallidos ${json?.failed ?? 0}. Re-match ${json?.rematchRefreshed ?? 0}.${extra}`
       );
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Error");
+      applySettings(await fetchSettings());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error");
     } finally {
-      setSaving(false);
+      setIngesting(false);
     }
-  };
+  }
+
+  async function submitOne(event: React.FormEvent) {
+    event.preventDefault();
+    await ingest([
+      {
+        ehr_patient_id: form.ehr_patient_id.trim(),
+        first_name: form.first_name.trim(),
+        last_name: form.last_name.trim(),
+        birth_date: form.birth_date,
+        gender: form.gender,
+        conditions: splitTerms(form.conditions),
+        medications: splitTerms(form.medications),
+        laboratories: parseLabPairs(form.laboratories),
+      },
+    ]);
+    setForm(EMPTY_FORM);
+  }
+
+  async function submitBatch() {
+    try {
+      const parsed = parseEhrIngestText(batchText);
+      if (parsed.ehr_source && !source.trim()) {
+        setSource(parsed.ehr_source);
+      }
+      await ingest(parsed.patients);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error");
+    }
+  }
+
+  async function handleFile(file: File) {
+    try {
+      const text = await file.text();
+      setBatchText(text);
+      const parsed = parseEhrIngestText(text);
+      if (parsed.ehr_source && !source.trim()) {
+        setSource(parsed.ehr_source);
+      }
+      await ingest(parsed.patients);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al leer el archivo.");
+    }
+  }
+
+  function downloadTemplate() {
+    const blob = new Blob([EHR_CSV_TEMPLATE], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "plantilla-ingreso-ehr.csv";
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
 
   if (loading) {
     return <p className="text-sm text-muted-foreground">Cargando…</p>;
@@ -164,119 +212,182 @@ export function EhrSettingsPanel() {
     return (
       <div className="space-y-3">
         <ErrorState message={error} />
-        <Button type="button" variant="secondary" onClick={() => load()}>
+        <Button type="button" variant="secondary" onClick={() => void load()}>
           Reintentar
         </Button>
       </div>
     );
   }
 
-  if (!data) return null;
-
   return (
-    <div className="space-y-8 max-w-2xl">
-      <section className="rounded-xl border border-border bg-card p-5 space-y-4">
+    <div className="max-w-2xl space-y-8">
+      <section className="space-y-4 rounded-xl border border-border bg-card p-5">
         <div>
-          <h2 className="text-lg font-semibold">Integración EHR</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Fase 1: sync batch vía API autenticada. Fase 2: webhook en tiempo
-            real con firma HMAC cuando cambian labs o diagnósticos.
+          <h2 className="text-lg font-semibold">Ingreso EHR</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Cargá pacientes con el ID del expediente. Se actualizan por{" "}
+            <code className="text-xs">ehr_patient_id</code> y se recalcula el
+            matching. No hay webhooks ni recepción automática.
           </p>
         </div>
 
-        <label className="flex items-center gap-3 text-sm">
-          <input
-            type="checkbox"
-            checked={enabled}
-            onChange={(e) => setEnabled(e.target.checked)}
-            className="h-4 w-4 rounded border-border"
-          />
-          Habilitar recepción de webhooks EHR
-        </label>
-
         <TextInput
-          label="Sistema EHR"
+          label="Origen (opcional)"
           value={source}
-          onChange={(e) => setSource(e.target.value)}
-          placeholder="epic, cerner, fhir, custom…"
+          onChange={(event) => setSource(event.target.value)}
+          placeholder="epic, cerner, historia clínica, export CSV…"
         />
 
+        {result ? (
+          <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+            {result}
+          </p>
+        ) : null}
+        {error ? <p className="text-sm text-rose-700">{error}</p> : null}
+      </section>
+
+      <section className="space-y-4 rounded-xl border border-border bg-card p-5">
+        <h3 className="font-medium">Un paciente</h3>
+        <form onSubmit={(event) => void submitOne(event)} className="space-y-4">
+          <TextInput
+            label="ID en el expediente"
+            required
+            value={form.ehr_patient_id}
+            onChange={(event) =>
+              setForm({ ...form, ehr_patient_id: event.target.value })
+            }
+            placeholder="EHR-1001"
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <TextInput
+              label="Nombre"
+              required
+              value={form.first_name}
+              onChange={(event) =>
+                setForm({ ...form, first_name: event.target.value })
+              }
+            />
+            <TextInput
+              label="Apellido"
+              required
+              value={form.last_name}
+              onChange={(event) =>
+                setForm({ ...form, last_name: event.target.value })
+              }
+            />
+            <TextInput
+              label="Fecha de nacimiento"
+              type="date"
+              required
+              value={form.birth_date}
+              onChange={(event) =>
+                setForm({ ...form, birth_date: event.target.value })
+              }
+            />
+            <SelectInput
+              label="Sexo"
+              value={form.gender}
+              onChange={(event) =>
+                setForm({ ...form, gender: event.target.value as Gender })
+              }
+            >
+              <option value="female">Femenino</option>
+              <option value="male">Masculino</option>
+              <option value="other">Otro</option>
+            </SelectInput>
+          </div>
+          <TextInput
+            label="Diagnósticos"
+            hint="Separá con ;"
+            value={form.conditions}
+            onChange={(event) =>
+              setForm({ ...form, conditions: event.target.value })
+            }
+            placeholder="diabetes tipo 2;hipertensión"
+          />
+          <TextInput
+            label="Medicamentos"
+            hint="Separá con ;"
+            value={form.medications}
+            onChange={(event) =>
+              setForm({ ...form, medications: event.target.value })
+            }
+            placeholder="metformina;enalapril"
+          />
+          <TextInput
+            label="Laboratorios"
+            hint="clave:valor, separados por coma"
+            value={form.laboratories}
+            onChange={(event) =>
+              setForm({ ...form, laboratories: event.target.value })
+            }
+            placeholder="glucosa:145, hba1c:7.8"
+          />
+          <Button type="submit" disabled={ingesting}>
+            {ingesting ? "Ingresando…" : "Ingresar paciente"}
+          </Button>
+        </form>
+      </section>
+
+      <section className="space-y-4 rounded-xl border border-border bg-card p-5">
+        <h3 className="font-medium">Lote CSV o JSON</h3>
+        <p className="text-xs text-muted-foreground">
+          CSV con <code>ehr_patient_id</code> o JSON (un paciente, un array o{" "}
+          <code>{`{ "patients": [...] }`}</code>). Hasta 500 por carga.
+        </p>
+        <Field label="Pegar lote" htmlFor={batchId}>
+          <textarea
+            id={batchId}
+            value={batchText}
+            onChange={(event) => setBatchText(event.target.value)}
+            rows={8}
+            className="w-full rounded-md border border-violet-200 bg-white px-2.5 py-1.5 font-mono text-xs text-indigo-950 placeholder:text-violet-300 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+            placeholder={EHR_CSV_TEMPLATE}
+          />
+        </Field>
         <div className="flex flex-wrap gap-2">
-          <Button type="button" onClick={() => save()} disabled={saving}>
-            {saving ? "Guardando…" : "Guardar"}
+          <Button
+            type="button"
+            onClick={() => void submitBatch()}
+            disabled={ingesting || !batchText.trim()}
+          >
+            Ingresar lote
           </Button>
           <Button
             type="button"
             variant="secondary"
-            onClick={() => save({ regenerate_secret: true })}
-            disabled={saving}
+            onClick={() => {
+              const input = document.getElementById("ehr-ingest-file");
+              if (input instanceof HTMLInputElement) input.click();
+            }}
+            disabled={ingesting}
           >
-            <RefreshCw className="h-4 w-4 mr-1" aria-hidden />
-            Regenerar secreto
+            <Upload className="h-4 w-4" aria-hidden />
+            Subir archivo
           </Button>
-        </div>
-
-        {message ? (
-          <p className="text-sm text-emerald-600 dark:text-emerald-400">
-            {message}
-          </p>
-        ) : null}
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
-      </section>
-
-      <section className="rounded-xl border border-border bg-card p-5 space-y-3">
-        <h3 className="font-medium">Webhook (Fase 2)</h3>
-        <p className="text-xs text-muted-foreground">
-          POST con headers{" "}
-          <code className="text-xs">X-Organization-Id</code> y{" "}
-          <code className="text-xs">X-EHR-Signature: sha256=&lt;hex&gt;</code>
-        </p>
-        <div className="flex gap-2 items-center">
-          <code className="flex-1 text-xs break-all rounded bg-muted px-2 py-2">
-            {data.webhookUrl}
-          </code>
-          <CopyButton text={data.webhookUrl} />
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Organization ID:{" "}
-          <code className="text-xs">{data.organization.id}</code>
-        </p>
-        {data.organization.webhook_secret ? (
-          <div className="space-y-1">
-            <p className="text-xs font-medium">Secreto webhook</p>
-            <div className="flex gap-2 items-center">
-              <code className="flex-1 text-xs break-all rounded bg-muted px-2 py-2">
-                {data.organization.webhook_secret}
-              </code>
-              <CopyButton text={data.organization.webhook_secret} />
-            </div>
-          </div>
-        ) : (
-          <p className="text-xs text-amber-600">
-            Guarda con webhooks habilitados para generar el secreto.
-          </p>
-        )}
-      </section>
-
-      <section className="rounded-xl border border-border bg-card p-5 space-y-3">
-        <h3 className="font-medium">Sync batch (Fase 1)</h3>
-        <p className="text-xs text-muted-foreground">
-          POST autenticado (sesión + permiso patients:write). Upsert por{" "}
-          <code className="text-xs">ehr_patient_id</code>.
-        </p>
-        <div className="flex gap-2 items-center">
-          <code className="flex-1 text-xs break-all rounded bg-muted px-2 py-2">
-            {data.batchSyncUrl}
-          </code>
-          <CopyButton text={data.batchSyncUrl} />
+          <Button type="button" variant="secondary" onClick={downloadTemplate}>
+            <Download className="h-4 w-4" aria-hidden />
+            Plantilla CSV
+          </Button>
+          <input
+            id="ehr-ingest-file"
+            type="file"
+            accept=".csv,.json,text/csv,application/json"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) void handleFile(file);
+              event.target.value = "";
+            }}
+          />
         </div>
       </section>
 
       <EhrFailureInbox />
 
-      {data.recentLogs.length > 0 ? (
-        <section className="rounded-xl border border-border bg-card p-5 space-y-3">
-          <h3 className="font-medium">Últimas sincronizaciones</h3>
+      {data && data.recentLogs.length > 0 ? (
+        <section className="space-y-3 rounded-xl border border-border bg-card p-5">
+          <h3 className="font-medium">Últimos ingresos</h3>
           <ul className="space-y-2 text-sm">
             {data.recentLogs.map((log) => (
               <li
@@ -292,7 +403,7 @@ export function EhrSettingsPanel() {
                 {log.rematch_refreshed > 0 ? (
                   <span className="text-emerald-600">re-match</span>
                 ) : null}
-                <span className="text-xs text-muted-foreground w-full">
+                <span className="w-full text-xs text-muted-foreground">
                   {new Date(log.started_at).toLocaleString("es")}
                 </span>
               </li>

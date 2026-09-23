@@ -10,8 +10,8 @@ export default async function EhrSettingsPage() {
     return (
       <>
         <PageHeader
-          title="Integración EHR"
-          description="Configura sync batch (Fase 1) y webhooks en tiempo real (Fase 2) con tu sistema hospitalario."
+          title="Ingreso EHR"
+          description="Cargá pacientes del expediente a mano, por CSV o JSON. Sin webhooks."
         />
         <EhrSettingsPanel />
       </>

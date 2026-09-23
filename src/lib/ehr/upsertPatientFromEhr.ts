@@ -5,7 +5,7 @@ import type { EhrPatientPayload, EhrUpsertResult } from "./types";
 export interface UpsertPatientFromEhrOptions {
   organizationId: string;
   ehrSource?: string;
-  /** batch = reemplaza perfil clínico; webhook = merge incremental */
+  /** ingest = reemplaza perfil clínico; merge = incremental */
   profileMode: "replace" | "merge";
   patientLimit?: number;
 }
