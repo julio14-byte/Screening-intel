@@ -18,22 +18,26 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { cn } from "@/lib/utils";
 
 const SUGGESTED_PROMPTS = [
-  "Convierte 'presión alta' a terminología ICD-11",
-  "¿Qué pacientes tenemos con diabetes?",
-  "Normaliza 'azúcar alta' según ICD-11",
-  "Muéstrame los screen failures para re-match",
+  "¿Qué hay en mi cola hoy?",
+  "Prioriza los criterios 🟡 que me faltan",
+  "¿A quién conviene contactar primero?",
+  "Arma un mensaje de te llamamos para el inbox",
 ];
 
 const TOOL_LABELS: Record<string, string> = {
   search_patients: "Buscando pacientes (MCP)",
   match_protocol: "Evaluando protocolo (MCP)",
   list_screen_failures: "Consultando screen failures (MCP)",
+  get_coordinator_queue: "Revisando cola del coordinador (MCP)",
+  draft_outreach_template: "Preparando plantilla de contacto (MCP)",
   icd11_normalize_colloquial: "Normalizando a terminología ICD-11",
   icd11_search: "Buscando en ICD-11 (MCP)",
   icd11_get_entity: "Consultando detalle ICD-11 (MCP)",
   searchPatientsByCriteria: "Buscando pacientes en la base",
   matchPatientsToProtocol: "Evaluando elegibilidad del protocolo",
   getScreenFailuresForRematch: "Consultando screen failures",
+  getCoordinatorQueue: "Revisando cola del coordinador",
+  draftOutreachTemplate: "Preparando plantilla de contacto",
 };
 
 function getTextFromMessage(message: UIMessage): string {
@@ -159,7 +163,10 @@ export function ClinicalChat() {
 
   return (
     <>
-      <PageHeader title="Asistente Clínico" />
+      <PageHeader
+        title="Agente de cola"
+        description="Propone el siguiente paso. Tú confirmas en la app. No cambia elegibilidad."
+      />
 
       <Card className="flex min-h-[calc(100vh-11rem)] flex-col overflow-hidden">
         <div
@@ -173,7 +180,11 @@ export function ClinicalChat() {
               </div>
               <div>
                 <p className="text-sm font-medium text-indigo-900">
-                  ¿En qué te puedo ayudar hoy?
+                  ¿Qué priorizamos en tu cola hoy?
+                </p>
+                <p className="mt-1 max-w-md text-xs text-violet-600">
+                  Inbox de candidatos, criterios 🟡 y screen failures para re-match.
+                  Yo propongo; tú confirmas.
                 </p>
               </div>
               <div className="flex flex-wrap justify-center gap-2">
@@ -198,7 +209,7 @@ export function ClinicalChat() {
           {isBusy && messages.length > 0 ? (
             <div className="flex items-center gap-2 text-xs text-violet-600">
               <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
-              El asistente está pensando…
+              El agente está revisando la cola…
             </div>
           ) : null}
         </div>
@@ -225,7 +236,7 @@ export function ClinicalChat() {
                   void handleSubmit(event);
                 }
               }}
-              placeholder="Ej: convertí 'azúcar alta' a terminología ICD-11"
+              placeholder="Ej: ¿qué hay en mi cola esta mañana?"
               disabled={isBusy}
               className="min-h-[3rem] flex-1 resize-none rounded-xl border border-violet-200 bg-white px-3 py-2 text-sm text-indigo-950 placeholder:text-violet-300 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 disabled:opacity-60"
             />

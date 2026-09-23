@@ -6,6 +6,11 @@ import {
   matchPatientsToProtocol,
   searchPatientsByCriteria,
 } from "../src/lib/screening-services";
+import {
+  draftOutreachTemplate,
+  getCoordinatorQueue,
+  OUTREACH_KINDS,
+} from "../src/lib/queue/coordinatorQueue";
 
 /**
  * MCP server de Screening Intelligence.
@@ -45,7 +50,7 @@ const server = new McpServer(
   },
   {
     instructions:
-      "Herramientas clínicas para pre-screening, matching de protocolos y re-match en un clinical research site. Los resultados usan iniciales, no nombres completos.",
+      "Herramientas clínicas para la cola del coordinador, pre-screening, matching y re-match en un clinical research site. Los resultados usan iniciales, no nombres completos. No cambian elegibilidad ni envían mensajes.",
   }
 );
 
@@ -120,6 +125,47 @@ server.registerTool(
           null,
           2
         ),
+      },
+    ],
+  })
+);
+
+server.registerTool(
+  "get_coordinator_queue",
+  {
+    description:
+      "Cola del coordinador: inbox pendiente, criterios 🟡 y screen failures. Solo iniciales. No cambia elegibilidad.",
+    inputSchema: {},
+  },
+  async () => ({
+    content: [
+      {
+        type: "text",
+        text: JSON.stringify(
+          await getCoordinatorQueue({ organizationId }),
+          null,
+          2
+        ),
+      },
+    ],
+  })
+);
+
+server.registerTool(
+  "draft_outreach_template",
+  {
+    description:
+      "Borrador de mensaje (te_llamamos, trae_receta, link_portal). No envía WhatsApp ni SMS.",
+    inputSchema: {
+      kind: z.enum(OUTREACH_KINDS),
+      initials: z.string().optional(),
+    },
+  },
+  async ({ kind, initials }) => ({
+    content: [
+      {
+        type: "text",
+        text: JSON.stringify(draftOutreachTemplate(kind, initials), null, 2),
       },
     ],
   })

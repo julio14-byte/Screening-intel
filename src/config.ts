@@ -48,7 +48,7 @@ const config = {
       },
       {
         href: "/chat",
-        label: "Asistente IA",
+        label: "Agente de cola",
         icon: "MessageSquare",
         feature: "aiChat" as const,
       },
@@ -234,8 +234,8 @@ const config = {
         },
         {
           icon: "MessageSquare",
-          title: "Asistente IA",
-          body: "Consulta criterios y resúmenes clínicos en chat contextual.",
+          title: "Agente de cola",
+          body: "Prioriza inbox, criterios 🟡 y re-match. Propone; el coordinador confirma. No cambia elegibilidad.",
         },
       ],
     },
