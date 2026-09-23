@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Archive, FlaskConical, Play, Target } from "lucide-react";
+import { Archive, FlaskConical, Package, Play, Target } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -101,6 +101,15 @@ export default function ProtocolsPage() {
                       )}
                     </Button>
                   </RoleGuard>
+                  <Link
+                    href={`/protocols/${protocol.id}`}
+                    className="w-full sm:w-auto"
+                  >
+                    <Button variant="secondary" className="w-full justify-center sm:w-auto">
+                      <Package className="h-4 w-4" aria-hidden />
+                      Lotes
+                    </Button>
+                  </Link>
                   <Link
                     href={`/protocols/${protocol.id}/match`}
                     className="w-full sm:w-auto"
