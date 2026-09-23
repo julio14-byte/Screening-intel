@@ -5,6 +5,7 @@ import { useRole } from "@/contexts/role-context";
 import { useSupabaseReady } from "@/hooks/useSupabaseReady";
 import { canSetScreeningStatus } from "@/lib/rbac/screening-transitions";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import { screeningUpdateConflict } from "@/lib/ops/model";
 import {
   SCREENING_LIST_COLUMNS,
   SCREENING_LIST_WITH_DETAILS,
@@ -71,13 +72,23 @@ export function useScreenings(options?: { includeMatchDetails?: boolean }) {
         prev.map((s) => (s.id === screeningId ? { ...s, status } : s))
       );
       const supabase = getSupabaseClient();
-      const { error } = await supabase
+      let query = supabase
         .from("screenings")
         .update({ status })
         .eq("id", screeningId);
+      if (previous?.updated_at) {
+        query = query.eq("updated_at", previous.updated_at);
+      }
+      const { data, error } = await query.select("id");
       if (error) {
         await fetchScreenings();
         throw error;
+      }
+      if (screeningUpdateConflict(data?.length ?? 0)) {
+        await fetchScreenings();
+        throw new Error(
+          "Otra persona ya movió este screening. Recargué el tablero; vuelve a intentar."
+        );
       }
 
       if (previous && previous.status !== status) {

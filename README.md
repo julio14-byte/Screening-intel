@@ -89,6 +89,9 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | `/rematch` | Re-matching automático post screen failure |
 | `/candidato` | Portal público de pre-registro (pacientes) |
 | `/candidatos` | Inbox de leads del portal (coordinadores) |
+| `/cola` | Tareas guardadas: inbox, criterios 🟡 y re-match |
+| `/avisos` | Avisos de candidato nuevo, screen failure y tarea vencida |
+| `/agenda` | Visitas de pre-screening |
 | `/settings/portal` | Configuración del portal (investigator) |
 | `/settings/ehr` | Integración EHR — sync batch y webhooks (investigator) |
 | `/settings/security` | MFA TOTP (obligatorio en prod para PI / sub-PI) |

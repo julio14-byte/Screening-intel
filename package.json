@@ -9,7 +9,8 @@
     "lint": "eslint",
     "mcp:screening": "tsx --tsconfig tsconfig.json mcp/screening-server.ts",
     "mcp:icd11": "tsx --tsconfig tsconfig.json mcp/icd11-server.ts",
-    "verify:queue-agent": "tsx --tsconfig tsconfig.json scripts/verify-queue-agent.ts"
+    "verify:queue-agent": "tsx --tsconfig tsconfig.json scripts/verify-queue-agent.ts",
+    "verify:ops-modules": "tsx --tsconfig tsconfig.json scripts/verify-ops-modules.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.41",

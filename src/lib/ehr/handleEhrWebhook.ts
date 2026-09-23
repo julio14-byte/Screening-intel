@@ -105,6 +105,7 @@ export async function handleEhrWebhook(
     patientsFailed,
     rematchRefreshed,
     errors,
+    failedPatients: status === "failed" ? [patientPayload] : [],
     payloadSummary: {
       event_id,
       event_type,

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Copy, Check, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/Field";
+import { EhrFailureInbox } from "@/components/ehr/EhrFailureInbox";
 import { ErrorState } from "@/components/ui/StateMessage";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
 
@@ -270,6 +271,8 @@ export function EhrSettingsPanel() {
           <CopyButton text={data.batchSyncUrl} />
         </div>
       </section>
+
+      <EhrFailureInbox />
 
       {data.recentLogs.length > 0 ? (
         <section className="rounded-xl border border-border bg-card p-5 space-y-3">
