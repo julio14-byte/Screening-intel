@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Menu } from "lucide-react";
 import config from "@/config";
 import { AccountMenu } from "@/components/layout/AccountMenu";
+import { NotificationBell } from "@/components/ops/Notices";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { useRole } from "@/contexts/role-context";
 import { routes } from "@/lib/app/routes";
@@ -110,13 +111,16 @@ export function AppShell({ children }: { children: ReactNode }) {
         <span className="truncate text-sm font-semibold text-indigo-950">
           {config.app.name}
         </span>
-        <AccountMenu
-          email={email}
-          role={role}
-          loggingOut={loggingOut}
-          onLogout={handleLogout}
-          compact
-        />
+        <div className="flex items-center gap-1">
+          <NotificationBell />
+          <AccountMenu
+            email={email}
+            role={role}
+            loggingOut={loggingOut}
+            onLogout={handleLogout}
+            compact
+          />
+        </div>
       </header>
 
       <main className="min-w-0 px-4 py-4 sm:px-6 sm:py-6 lg:ml-64 lg:py-6">
@@ -126,7 +130,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             pathname.startsWith("/account") ? "max-w-7xl" : "max-w-6xl"
           )}
         >
-          <div className="mb-4 hidden justify-end lg:mb-5 lg:flex">
+          <div className="mb-4 hidden items-center justify-end gap-2 lg:mb-5 lg:flex">
+            <NotificationBell />
             <AccountMenu
               email={email}
               role={role}

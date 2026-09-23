@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createEhrSyncLog, finalizeEhrSyncLog } from "./sync-log";
-import type { EhrBatchSyncBody, EhrSyncStats } from "./types";
+import type { EhrBatchSyncBody, EhrPatientPayload, EhrSyncStats } from "./types";
 import { upsertPatientFromEhr } from "./upsertPatientFromEhr";
 import { refreshMatchScoresForPatient } from "./triggerRematchForPatient";
 
@@ -33,6 +33,7 @@ export async function runEhrBatchSync(
     rematchRefreshed: 0,
     errors: [],
   };
+  const failedPatients: EhrPatientPayload[] = [];
 
   for (const [index, patient] of patients.entries()) {
     try {
@@ -63,6 +64,7 @@ export async function runEhrBatchSync(
           err instanceof Error ? err.message : "error desconocido"
         }`
       );
+      failedPatients.push(patient);
     }
   }
 
@@ -80,6 +82,7 @@ export async function runEhrBatchSync(
     patientsFailed: stats.failed,
     rematchRefreshed: stats.rematchRefreshed,
     errors: stats.errors,
+    failedPatients,
     payloadSummary: {
       patientCount: patients.length,
       ehr_source: ehrSource ?? null,

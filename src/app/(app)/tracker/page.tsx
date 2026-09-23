@@ -34,7 +34,7 @@ export default function TrackerPage() {
     <>
       <PageHeader
         title="Screening Tracker"
-        description="Pipeline de screening: arrastrá las tarjetas (o usá las flechas) para mover pacientes entre etapas."
+        description="Pipeline de screening. Si otra persona movió la tarjeta, el cambio se rechaza y el tablero se recarga."
       />
 
       {moveError ? (

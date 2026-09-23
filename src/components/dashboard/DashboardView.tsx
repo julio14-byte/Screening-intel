@@ -15,7 +15,7 @@ import {
   ErrorState,
   LoadingState,
 } from "@/components/ui/StateMessage";
-import { computeDashboardMetrics } from "@/lib/dashboard/metrics";
+import { OperationalFunnel } from "@/components/dashboard/OperationalFunnel";
 import { screeningToVerdict } from "@/lib/dashboard/traffic-light";
 import { routes } from "@/lib/app/routes";
 import { useScreenings } from "@/hooks/useScreenings";
@@ -80,6 +80,8 @@ export function DashboardView({
           ) : null
         }
       />
+
+      <OperationalFunnel screenings={screenings} />
 
       {loading ? (
         <LoadingState label="Cargando pacientes en screening…" />

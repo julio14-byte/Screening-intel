@@ -40,20 +40,26 @@ export async function finalizeEhrSyncLog(
     rematchRefreshed: number;
     errors?: string[];
     payloadSummary?: Record<string, unknown>;
+    failedPatients?: unknown[];
   }
 ): Promise<void> {
+  const patch: Record<string, unknown> = {
+    status: input.status,
+    patients_created: input.patientsCreated,
+    patients_updated: input.patientsUpdated,
+    patients_failed: input.patientsFailed,
+    rematch_refreshed: input.rematchRefreshed,
+    error_details: (input.errors ?? []).slice(0, 50),
+    payload_summary: input.payloadSummary ?? {},
+    completed_at: new Date().toISOString(),
+  };
+  if (input.failedPatients) {
+    patch.failed_patients = input.failedPatients.slice(0, 50);
+  }
+
   const { error } = await supabase
     .from("ehr_sync_logs")
-    .update({
-      status: input.status,
-      patients_created: input.patientsCreated,
-      patients_updated: input.patientsUpdated,
-      patients_failed: input.patientsFailed,
-      rematch_refreshed: input.rematchRefreshed,
-      error_details: (input.errors ?? []).slice(0, 50),
-      payload_summary: input.payloadSummary ?? {},
-      completed_at: new Date().toISOString(),
-    })
+    .update(patch)
     .eq("id", logId);
 
   if (error) {

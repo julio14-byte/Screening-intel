@@ -12,6 +12,9 @@ import {
   RefreshCw,
   Settings,
   ListChecks,
+  ListTodo,
+  Bell,
+  Calendar,
   Users,
   UserPlus,
 } from "lucide-react";
@@ -30,6 +33,9 @@ export const APP_ICONS: Record<string, LucideIcon> = {
   ClipboardList,
   LogOut,
   TrafficLight: ListChecks,
+  ListTodo,
+  Bell,
+  Calendar,
   Cpu,
 };
 
@@ -57,6 +63,18 @@ export const APP_NAV_STYLES: Record<
   },
   "/candidatos": {
     activeClass: "bg-teal-400/20 text-teal-100 ring-1 ring-teal-300/30",
+    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
+  },
+  "/cola": {
+    activeClass: "bg-amber-400/20 text-amber-100 ring-1 ring-amber-300/30",
+    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
+  },
+  "/avisos": {
+    activeClass: "bg-rose-400/20 text-rose-100 ring-1 ring-rose-300/30",
+    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
+  },
+  "/agenda": {
+    activeClass: "bg-sky-400/20 text-sky-100 ring-1 ring-sky-300/30",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
   "/protocols": {
