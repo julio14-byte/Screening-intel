@@ -20,7 +20,17 @@ export interface Patient {
   ehr_patient_id?: string | null;
   ehr_source?: string | null;
   ehr_last_synced_at?: string | null;
+  active?: boolean;
+  phone?: string | null;
+  email?: string | null;
+  address_line?: string | null;
+  address_city?: string | null;
+  address_state?: string | null;
+  address_postal_code?: string | null;
+  address_country?: string;
+  resource_version?: number;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface ClinicalProfile {
@@ -29,7 +39,50 @@ export interface ClinicalProfile {
   conditions: string[];
   medications: string[];
   laboratories: Record<string, number>;
+  reconciled_at?: string | null;
+  source_encounter_id?: string | null;
   updated_at: string;
+}
+
+/** FHIR Condition — diagnóstico del Patient. */
+export interface FhirCondition {
+  id: string;
+  organization_id: string;
+  patient_id: string;
+  encounter_id?: string | null;
+  clinical_status: string;
+  verification_status: string;
+  code_text: string;
+  code_system?: string | null;
+  code_value?: string | null;
+  onset_date?: string | null;
+  recorded_at: string;
+  source: "manual" | "ingest" | "epro";
+}
+
+/** FHIR Observation — laboratorio o signo vital. */
+export interface FhirObservation {
+  id: string;
+  organization_id: string;
+  patient_id: string;
+  encounter_id?: string | null;
+  status: string;
+  category: string;
+  code_text: string;
+  value_quantity?: number | null;
+  value_unit?: string | null;
+  effective_at: string;
+}
+
+/** FHIR Encounter — consulta ligada al Patient. */
+export interface FhirEncounter {
+  id: string;
+  organization_id: string;
+  patient_id: string;
+  status: string;
+  class_code: string;
+  period_start: string;
+  period_end?: string | null;
 }
 
 export interface LabCriterion {
