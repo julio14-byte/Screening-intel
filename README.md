@@ -1,6 +1,6 @@
 # Screenlane
 
-Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-screening**, el **matching** paciente–protocolo y el **re-matching** cuando un paciente cae en screen failure — con portal de candidatos, **integración EHR** (batch + webhook), trazabilidad clínica, RBAC y asistente IA.
+Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-screening**, el **matching** paciente–protocolo y el **re-matching** cuando un paciente cae en screen failure — con portal de candidatos, **integración EHR** (batch + webhook), trazabilidad clínica, RBAC y agente de cola.
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-000?style=flat&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -35,7 +35,7 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | **Re-Match nativo** | Tras un screen failure, propone automáticamente otros protocolos activos donde el paciente podría encajar |
 | **Dos audiencias** | Coordinadores (app clínica) y pacientes (pre-registro en `/candidato` con link del centro) |
 | **Matching explicable** | Motor de reglas con semáforo 🟢🟡🔴 + detalle criterio por criterio + **justificación clínica IA** que narra el resultado sin cambiar la elegibilidad |
-| **IA con herramientas reales** | LangGraph + MCP: buscar pacientes, matchear protocolos, screen failures e ICD-11 — no solo chat genérico |
+| **IA con herramientas reales** | Agente de cola (LangGraph + MCP): inbox, criterios 🟡, re-match e ICD-11 — propone; el coordinador confirma |
 | **RBAC + audit trail** | Roles clínicos (investigator, sub-investigator, coordinator, monitor) y bitácora orientada a 21 CFR Part 11 |
 | **LATAM-first, sin EHR obligatorio** | UI en español; el MVP funciona con registro manual y portal — **integración EHR opcional** (batch + webhook) cuando el site conecta su hospital |
 | **SaaS self-serve** | Trial 14 días, planes por volumen y Stripe — pensado para sitios medianos, no solo enterprise |
@@ -56,7 +56,7 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | **Re-Match** | Propone protocolos alternativos para pacientes con screen failure |
 | **Portal candidatos** | Pre-registro público (`/candidato`) + inbox (`/candidatos`) + settings del portal |
 | **Integración EHR** | Sync batch + webhook FHIR/HMAC; upsert por `ehr_patient_id`; recálculo de matching y re-match |
-| **Asistente IA** | Chat clínico (LangGraph + GPT-4o-mini) con herramientas MCP |
+| **Agente de cola** | Chat del coordinador (LangGraph + GPT-4o-mini): prioriza inbox, 🟡 y re-match; no cambia elegibilidad |
 | **Audit Trail** | Bitácora inmutable alineada a 21 CFR Part 11 |
 | **RBAC clínico** | Investigator / Sub-investigator / Coordinator / Monitor |
 | **SaaS** | Organizations, trial 14 días, Stripe Checkout + Portal |
@@ -92,7 +92,7 @@ Screenlane no compite como un módulo aislado de “AI sobre EHR”. Es el **fun
 | `/settings/portal` | Configuración del portal (investigator) |
 | `/settings/ehr` | Integración EHR — sync batch y webhooks (investigator) |
 | `/settings/security` | MFA TOTP (obligatorio en prod para PI / sub-PI) |
-| `/chat` | Asistente clínico IA |
+| `/chat` | Agente de cola (inbox, 🟡, re-match) |
 | `/epro` | Formularios ePRO |
 | `/settings/roles` | Creación de usuarios y roles (investigator) |
 | `/account/billing` | Plan, trial y facturación Stripe |
@@ -212,7 +212,7 @@ Cada screening guarda `match_score` (0–100) y `match_details` (trazabilidad cr
 
 | Funcionalidad | Ruta / API | Modelo |
 |---------------|------------|--------|
-| Chat clínico | `/chat` · `POST /api/auth/chats` | GPT-4o-mini + LangGraph |
+| Agente de cola | `/chat` · `POST /api/auth/chats` | GPT-4o-mini + LangGraph |
 | Extracción de protocolos PDF | `POST /api/protocols/extract` | GPT-4o-mini |
 | Perfil clínico desde notas | `POST /api/patients/profile/extract` | GPT-4o-mini |
 | Justificación del matching | `POST /api/matching/rationale` | GPT-4o-mini |

@@ -106,6 +106,8 @@ export const MCP_TOOL_NAMES = {
   searchPatients: "search_patients",
   matchProtocol: "match_protocol",
   listScreenFailures: "list_screen_failures",
+  getCoordinatorQueue: "get_coordinator_queue",
+  draftOutreach: "draft_outreach_template",
   icd11Normalize: "icd11_normalize_colloquial",
   icd11Search: "icd11_search",
   icd11GetEntity: "icd11_get_entity",

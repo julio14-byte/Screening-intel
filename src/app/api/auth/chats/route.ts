@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   const user = await getUser();
   if (!user) {
     return NextResponse.json(
-      { error: "Debes iniciar sesión para usar el asistente." },
+      { error: "Debes iniciar sesión para usar el agente de cola." },
       { status: 401 }
     );
   }

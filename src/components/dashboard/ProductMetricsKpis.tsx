@@ -73,7 +73,7 @@ export function ProductMetricsKpis({
         <KpiCard
           title="Sesiones de chat IA"
           value={chatSessionsTotal}
-          subtitle="Conversaciones guardadas (asistente clínico)"
+          subtitle="Conversaciones guardadas (agente de cola)"
           trend={formatWeekTrend(chatSessionsWeek)}
           icon={Bot}
           accent="success"

@@ -5,6 +5,11 @@ import {
   matchPatientsToProtocol,
   searchPatientsByCriteria,
 } from "@/lib/screening-services";
+import {
+  draftOutreachTemplate,
+  getCoordinatorQueue,
+  OUTREACH_KINDS,
+} from "@/lib/queue/coordinatorQueue";
 
 const screeningStatusSchema = z
   .enum(["pre_screening", "screening", "randomized", "screen_failure"])
@@ -39,6 +44,23 @@ export function createScreeningTools(organizationId: string) {
         "Busca screen failures del centro para ofrecer otros protocolos activos.",
       inputSchema: z.object({}),
       execute: () => getScreenFailuresForRematch({ organizationId }),
+    }),
+
+    getCoordinatorQueue: tool({
+      description:
+        "Cola del coordinador: inbox pendiente, criterios 🟡 y screen failures. Solo iniciales. No cambia elegibilidad.",
+      inputSchema: z.object({}),
+      execute: () => getCoordinatorQueue({ organizationId }),
+    }),
+
+    draftOutreachTemplate: tool({
+      description:
+        "Borrador de mensaje (te_llamamos, trae_receta, link_portal). No envía el mensaje.",
+      inputSchema: z.object({
+        kind: z.enum(OUTREACH_KINDS),
+        initials: z.string().optional(),
+      }),
+      execute: ({ kind, initials }) => draftOutreachTemplate(kind, initials),
     }),
   };
 }

@@ -34,7 +34,7 @@ const EXAMPLES = {
       {
         id: "msg-1",
         role: "user",
-        parts: [{ type: "text", text: "¿Qué pacientes tienen diabetes?" }],
+        parts: [{ type: "text", text: "¿Qué hay en mi cola hoy?" }],
       },
     ],
   },
@@ -74,7 +74,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
       { name: "Audit", description: "Bitácora CFR Part 11" },
       { name: "RBAC", description: "Roles clínicos" },
       { name: "ICD-11", description: "Terminología WHO ICD-11" },
-      { name: "AI", description: "Asistente clínico" },
+      { name: "AI", description: "Agente de cola" },
       { name: "Stripe", description: "Facturación SaaS" },
       { name: "Waitlist", description: "Landing / captación" },
     ],
@@ -296,9 +296,9 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
       "/api/auth/chats": {
         post: {
           tags: ["AI"],
-          summary: "Chat con asistente clínico (streaming)",
+          summary: "Chat con agente de cola (streaming)",
           description:
-            "Stream de respuesta del agente LangGraph (GPT-4o-mini). Content-Type de respuesta: stream UI message.",
+            "Stream del agente de cola (GPT-4o-mini + LangGraph). Propone inbox, criterios 🟡 y re-match; no cambia elegibilidad ni envía mensajes. Content-Type: stream UI message.",
           security: [{ cookieAuth: [] }],
           requestBody: {
             required: true,
