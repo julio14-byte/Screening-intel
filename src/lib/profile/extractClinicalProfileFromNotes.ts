@@ -1,21 +1,28 @@
 import { withComputedBmi } from "@/lib/profile/clinical-measurements";
+import {
+  emptyAnamnesis,
+  hydrateAnamnesis,
+  type ClinicalAnamnesis,
+} from "@/lib/profile/anamnesis";
 
 export type ExtractedClinicalProfileDraft = {
   conditions: string[];
   medications: string[];
   laboratories: Record<string, number>;
+  anamnesis: ClinicalAnamnesis;
 };
 
 const EXTRACTION_SCHEMA = `{
-  "conditions": string[] — diagnósticos o patologías activas en español,
-  "medications": string[] — medicación concomitante actual,
-  "laboratories": { "nombre_lab": number } — mediciones recientes con estas claves si aparecen:
-    pas, pad (mmHg), frecuencia_cardiaca (lpm), temperatura (°C), frecuencia_respiratoria (rpm),
-    peso (kg), estatura (cm), imc,
-    glucosa (mg/dL), creatinina (mg/dL), tgo, tgp, ggt, fa (U/L),
-    hemoglobina (g/dL), hematocrito (%), leucocitos, plaquetas,
-    embarazo_sangre y embarazo_orina (0 = negativo, 1 = positivo).
-    Si figura presión 120/80, usá pas=120 y pad=80.
+  "conditions": string[] — nombres de diagnósticos / enfermedades crónicas,
+  "medications": string[] — nombres de fármacos, vitaminas o suplementos,
+  "laboratories": { "nombre_lab": number } — mediciones (pas, pad, glucosa, creatinina, tgo, tgp, etc.),
+  "anamnesis": {
+    "diagnoses": [{ "name", "diagnosed_at": "YYYY-MM-DD", "symptoms", "severity": "leve"|"moderada"|"grave"| "", "evolution" }],
+    "surgeries": string,
+    "hospitalizations": string,
+    "medications": [{ "name", "kind": "farmaco"|"vitamina"|"suplemento"|"herbolario", "dose", "schedule", "status": "current"|"recent" }],
+    "allergies": [{ "substance", "category": "medicamento"|"alimento"|"quimico"|"otra", "reaction" }]
+  }
 }`;
 
 function normalizeStringList(value: unknown): string[] {
@@ -65,9 +72,9 @@ export async function extractClinicalProfileFromNotes(
         {
           role: "system",
           content:
-            "Sos un asistente clínico para clinical research sites. Extraé de notas en español " +
-            "condiciones, medicación, signos vitales, antropometría y laboratorios. " +
-            "Usá las claves canónicas del esquema (pas/pad, glucosa, creatinina, tgo, tgp, etc.). " +
+            "Sos un asistente clínico para clinical research sites. Extraé anamnesis de notas en español: " +
+            "diagnósticos (fecha, síntomas, gravedad, evolución), cirugías, hospitalizaciones, " +
+            "medicación con dosis y horario, alergias, signos vitales y laboratorios. " +
             "No inventes datos que no estén en el texto. " +
             "Respondé SOLO JSON válido con esta forma:\n" +
             EXTRACTION_SCHEMA,
@@ -93,10 +100,17 @@ export async function extractClinicalProfileFromNotes(
   if (!content) throw new Error("OpenAI no devolvió contenido.");
 
   const parsed = JSON.parse(content) as Partial<ExtractedClinicalProfileDraft>;
+  const conditions = normalizeStringList(parsed.conditions);
+  const medications = normalizeStringList(parsed.medications);
 
   return {
-    conditions: normalizeStringList(parsed.conditions),
-    medications: normalizeStringList(parsed.medications),
+    conditions,
+    medications,
     laboratories: withComputedBmi(normalizeLabs(parsed.laboratories)),
+    anamnesis: hydrateAnamnesis({
+      anamnesis: parsed.anamnesis ?? emptyAnamnesis(),
+      conditions,
+      medications,
+    }),
   };
 }

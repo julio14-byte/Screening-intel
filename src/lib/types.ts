@@ -1,5 +1,7 @@
 // Tipos de dominio alineados con el esquema de Supabase (supabase/migrations).
 
+import type { ClinicalAnamnesis } from "@/lib/profile/anamnesis";
+
 export type Gender = "male" | "female" | "other";
 
 export type ProtocolStatus = "active" | "closed";
@@ -36,6 +38,7 @@ export interface ClinicalProfile {
   conditions: string[];
   medications: string[];
   laboratories: Record<string, number>;
+  anamnesis?: ClinicalAnamnesis;
   reconciled_at?: string | null;
   source_encounter_id?: string | null;
   updated_at: string;
