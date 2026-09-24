@@ -1,20 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { HeartPulse, Pill, Save, Stethoscope, TestTubes } from "lucide-react";
+import { BookOpen, Save, Stethoscope, TestTubes } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ErrorState } from "@/components/ui/StateMessage";
-import { ConditionsEditor } from "@/components/profile/ConditionsEditor";
+import { AnamnesisEditor } from "@/components/profile/AnamnesisEditor";
 import { ClinicalMeasurementsEditor } from "@/components/profile/ClinicalMeasurementsEditor";
 import { ClinicalNotesImport } from "@/components/profile/ClinicalNotesImport";
 import { RoleGuard } from "@/components/rbac/RoleGuard";
 import { useRole } from "@/contexts/role-context";
 import { LabsEditor } from "@/components/profile/LabsEditor";
-import { TagListEditor } from "@/components/profile/TagListEditor";
 import type { ProfileUpdate } from "@/hooks/usePatientDetail";
 import type { ExtractedClinicalProfileDraft } from "@/lib/profile/extractClinicalProfileFromNotes";
+import {
+  hydrateAnamnesis,
+  matchingConditions,
+  matchingMedications,
+  mergeAnamnesisDraft,
+} from "@/lib/profile/anamnesis";
 import {
   catalogLaboratories,
   extraLaboratories,
@@ -37,11 +42,12 @@ export function ClinicalProfileEditor({
   profile: ClinicalProfile | null;
   onSave: (update: ProfileUpdate) => Promise<void>;
 }) {
-  const [conditions, setConditions] = useState<string[]>(
-    profile?.conditions ?? []
-  );
-  const [medications, setMedications] = useState<string[]>(
-    profile?.medications ?? []
+  const [anamnesis, setAnamnesis] = useState(() =>
+    hydrateAnamnesis({
+      anamnesis: profile?.anamnesis,
+      conditions: profile?.conditions,
+      medications: profile?.medications,
+    })
   );
   const [laboratories, setLaboratories] = useState<Record<string, number>>(
     () => withComputedBmi(profile?.laboratories ?? {})
@@ -54,8 +60,7 @@ export function ClinicalProfileEditor({
   const canEdit = hasPermission("profiles:write") && !isReadOnly;
 
   function applyNotesDraft(draft: ExtractedClinicalProfileDraft) {
-    setConditions((prev) => [...new Set([...prev, ...draft.conditions])]);
-    setMedications((prev) => [...new Set([...prev, ...draft.medications])]);
+    setAnamnesis((prev) => mergeAnamnesisDraft(prev, draft));
     setLaboratories((prev) => withComputedBmi({ ...prev, ...draft.laboratories }));
     setDirty(true);
   }
@@ -64,7 +69,12 @@ export function ClinicalProfileEditor({
     setSaving(true);
     setSaveError(null);
     try {
-      await onSave({ conditions, medications, laboratories });
+      await onSave({
+        conditions: matchingConditions(anamnesis),
+        medications: matchingMedications(anamnesis),
+        laboratories,
+        anamnesis,
+      });
       setDirty(false);
       setSavedAt(new Date());
     } catch (e) {
@@ -125,39 +135,19 @@ export function ClinicalProfileEditor({
       ) : null}
 
       <div className={`grid gap-4 lg:grid-cols-2 ${!canEdit ? "pointer-events-none opacity-80" : ""}`}>
-        <Card>
+        <Card className="lg:col-span-2">
           <CardHeader
-            title="Condiciones médicas"
-            description="Patologías y diagnósticos activos — texto libre con soporte ICD-11"
-            actions={<HeartPulse className="h-4 w-4 text-slate-400" aria-hidden />}
+            title="Historial médico completo (anamnesis)"
+            description="Diagnósticos con fecha, síntomas, gravedad y evolución; cirugías; hospitalizaciones; medicación con dosis; alergias"
+            actions={<BookOpen className="h-4 w-4 text-slate-400" aria-hidden />}
           />
           <CardBody>
-            <ConditionsEditor
-              conditions={conditions}
-              onChange={(items) => {
-                setConditions(items);
+            <AnamnesisEditor
+              value={anamnesis}
+              onChange={(next) => {
+                setAnamnesis(next);
                 setDirty(true);
               }}
-            />
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardHeader
-            title="Medicación concomitante"
-            description="Tratamientos actuales del paciente"
-            actions={<Pill className="h-4 w-4 text-slate-400" aria-hidden />}
-          />
-          <CardBody>
-            <TagListEditor
-              label="medicamentos"
-              items={medications}
-              onChange={(items) => {
-                setMedications(items);
-                setDirty(true);
-              }}
-              placeholder="ej: metformina"
-              emptyText="Sin medicación registrada."
             />
           </CardBody>
         </Card>

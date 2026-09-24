@@ -86,6 +86,54 @@ const DEMO_PROFILES = [
       plaquetas: 245000,
       embarazo_sangre: 0,
     },
+    anamnesis: {
+      diagnoses: [
+        {
+          id: "dx-maria-dm2",
+          name: "diabetes tipo 2",
+          diagnosed_at: "2014-03-11",
+          symptoms: "Poliuria y fatiga matinal",
+          severity: "moderada",
+          evolution: "Control parcial con metformina; HbA1c en descenso",
+        },
+        {
+          id: "dx-maria-hta",
+          name: "hipertensión",
+          diagnosed_at: "2016-08-02",
+          symptoms: "Cefalea ocasional",
+          severity: "leve",
+          evolution: "Estable con enalapril",
+        },
+      ],
+      surgeries: "Colecistectomía laparoscópica (2018)",
+      hospitalizations: "Internación breve por crisis hipertensiva (2021)",
+      medications: [
+        {
+          id: "med-maria-met",
+          name: "metformina",
+          kind: "farmaco",
+          dose: "850 mg",
+          schedule: "desayuno y cena",
+          status: "current",
+        },
+        {
+          id: "med-maria-ena",
+          name: "enalapril",
+          kind: "farmaco",
+          dose: "10 mg",
+          schedule: "8:00",
+          status: "current",
+        },
+      ],
+      allergies: [
+        {
+          id: "alg-maria-pen",
+          substance: "penicilina",
+          category: "medicamento",
+          reaction: "rash",
+        },
+      ],
+    },
   },
   {
     patient_id: "11111111-1111-1111-1111-111111111102",

@@ -69,8 +69,8 @@ export function ClinicalNotesImport({
         Notas clínicas → perfil estructurado (IA)
       </p>
       <p className="mt-1 text-xs text-cyan-800">
-        Pegá texto libre para rellenar condiciones, medicación, signos vitales,
-        antropometría y laboratorios. Revisá y editá antes de guardar.
+        Pegá texto libre para rellenar anamnesis, signos vitales y laboratorios.
+        Revisá y editá antes de guardar.
       </p>
 
       <textarea
