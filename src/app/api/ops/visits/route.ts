@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { opsContext } from "@/lib/ops/http";
+import { opsContext, opsSchemaErrorResponse } from "@/lib/ops/http";
 import {
   VISIT_KINDS,
   VISIT_NOTES_MAX,
@@ -63,7 +63,7 @@ export async function GET(request: Request) {
   const { data, error } = await query;
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return opsSchemaErrorResponse(error);
   }
 
   return NextResponse.json({ visits: data ?? [] });
@@ -131,7 +131,7 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return opsSchemaErrorResponse(error);
   }
 
   return NextResponse.json({ visit: data });
@@ -171,7 +171,7 @@ export async function PATCH(request: Request) {
     .maybeSingle();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return opsSchemaErrorResponse(error);
   }
   if (!data) {
     return NextResponse.json({ error: "Visita no encontrada." }, { status: 404 });

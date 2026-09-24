@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { opsContext } from "@/lib/ops/http";
+import { opsContext, opsSchemaErrorResponse } from "@/lib/ops/http";
 import { TASK_STATUSES } from "@/lib/ops/model";
 import { syncCoordinatorWork } from "@/lib/ops/syncCoordinatorWork";
 
@@ -24,7 +24,7 @@ export async function GET() {
     .limit(80);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return opsSchemaErrorResponse(error);
   }
 
   return NextResponse.json({ tasks: data ?? [] });
@@ -39,7 +39,7 @@ export async function POST() {
     return NextResponse.json(summary);
   } catch (error) {
     const message = error instanceof Error ? error.message : "No se pudo sincronizar la cola.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return opsSchemaErrorResponse({ message });
   }
 }
 
@@ -82,7 +82,7 @@ export async function PATCH(request: Request) {
     .maybeSingle();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return opsSchemaErrorResponse(error);
   }
   if (!data) {
     return NextResponse.json({ error: "Tarea no encontrada." }, { status: 404 });

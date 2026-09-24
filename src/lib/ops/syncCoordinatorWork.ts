@@ -37,6 +37,17 @@ async function insertNotification(
     dedupe_key: input.dedupeKey,
   });
   if (error && error.code !== "23505") {
+    const message = error.message ?? "";
+    const missing =
+      error.code === "PGRST205" ||
+      error.code === "42P01" ||
+      error.code === "42703" ||
+      /schema cache/i.test(message) ||
+      /does not exist/i.test(message);
+    if (missing) {
+      console.warn("[ops] app_notifications no disponible:", message);
+      return;
+    }
     throw new Error(error.message);
   }
 }
