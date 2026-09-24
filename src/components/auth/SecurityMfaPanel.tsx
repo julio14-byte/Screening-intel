@@ -81,7 +81,7 @@ export function SecurityMfaPanel({ forceEnroll = false }: { forceEnroll?: boolea
 
       const { data, error: enrollError } = await supabase.auth.mfa.enroll({
         factorType: "totp",
-        friendlyName: "Screenlane",
+        friendlyName: "Crisvia",
       });
       if (enrollError || !data || data.type !== "totp") {
         setError(

@@ -4,7 +4,7 @@
 export const productDocs = {
   title: "Documentación",
   subtitle:
-    "Guía rápida para coordinadores de clinical research sites que usan Screenlane.",
+    "Guía rápida para coordinadores de clinical research sites que usan Crisvia.",
   sections: [
     {
       id: "inicio",

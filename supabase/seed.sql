@@ -1,5 +1,5 @@
 -- =============================================================================
--- Datos de ejemplo para demo — Screening Intelligence
+-- Datos de ejemplo para demo — Crisvia
 -- =============================================================================
 -- Opcional. Ejecutar después de 0001_initial_schema.sql.
 -- Idempotente: se puede ejecutar varias veces sin error de claves duplicadas.
