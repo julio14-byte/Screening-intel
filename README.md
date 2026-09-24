@@ -1,4 +1,4 @@
-# Screenlane
+# Crisvia
 
 Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-screening**, el **matching** paciente–protocolo y el **re-matching** cuando un paciente cae en screen failure — con portal de candidatos, expediente interno, trazabilidad clínica y RBAC.
 
@@ -21,13 +21,13 @@ Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-sc
 | **Portal de candidatos** | Pre-registro público en `/candidato`, inbox en `/candidatos` y settings en `/settings/portal`. |
 | **Re-Match nativo** | Propone protocolos alternativos tras un screen failure. |
 | **Sub-investigator** | Rol clínico con permisos de PI excepto roles y facturación. |
-| **Screenlane** | Rebrand completo del producto (antes Screening Intelligence). |
+| **Crisvia** | Nombre del producto (antes Screenlane / Screening Intelligence). |
 
 ---
 
 ## Qué nos diferencia
 
-Screenlane no compite como un módulo aislado de IA clínica. Es el **funnel operativo completo del clinical research site** en un solo producto SaaS accesible.
+Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operativo completo del clinical research site** en un solo producto SaaS accesible.
 
 | Diferencial | Qué significa en la práctica |
 |-------------|------------------------------|
@@ -230,7 +230,7 @@ Cada screening guarda `match_score` (0–100) y `match_details` (trazabilidad cr
 Servidores MCP locales (opcional). El de screening **exige** el UUID del centro:
 
 ```bash
-SCREENLANE_ORGANIZATION_ID=<uuid-del-centro> yarn mcp:screening
+CRISVIA_ORGANIZATION_ID=<uuid-del-centro> yarn mcp:screening
 yarn mcp:icd11
 ```
 
@@ -355,7 +355,7 @@ docs/                        # STRIPE_SETUP.md, BACKUP.md, etc.
 | `yarn build` | Build de producción |
 | `yarn start` | Servidor de producción |
 | `yarn lint` | ESLint |
-| `yarn mcp:screening` | MCP servidor screening (`SCREENLANE_ORGANIZATION_ID` obligatorio) |
+| `yarn mcp:screening` | MCP servidor screening (`CRISVIA_ORGANIZATION_ID` obligatorio) |
 | `yarn mcp:icd11` | MCP servidor ICD-11 |
 
 ---
@@ -390,4 +390,4 @@ Antes de producción con datos reales de pacientes: revisá políticas RLS, rot�
 
 ## Autor
 
-Desarrollado por [**julio14-byte**](https://github.com/julio14-byte) — Screenlane para clinical research sites.
+Desarrollado por [**julio14-byte**](https://github.com/julio14-byte) — Crisvia para clinical research sites.

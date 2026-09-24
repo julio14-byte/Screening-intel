@@ -4,7 +4,7 @@
  */
 const config = {
   app: {
-    name: "Screenlane",
+    name: "Crisvia",
     description:
       "Pre-screening y re-matching de pacientes para protocolos de investigación clínica en clinical research sites.",
     domain: "screening-intel.vercel.app",
@@ -77,7 +77,7 @@ const config = {
 
   brand: {
     primary: "#7c3aed",
-    logoText: "Screenlane",
+    logoText: "Crisvia",
     /** Subtítulo bajo el logo (nav, sidebar, metadata). */
     tagline: "Clinical Research Sites",
     logoSrc: null as string | null,

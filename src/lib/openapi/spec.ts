@@ -31,7 +31,7 @@ const EXAMPLES = {
   stripeCheckout: { planId: "pro" },
 } as const;
 
-/** Especificación OpenAPI 3.0 — Screenlane REST API. */
+/** Especificación OpenAPI 3.0 — Crisvia REST API. */
 export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
   const errorSchema: OpenAPIV3.SchemaObject = {
     type: "object",
@@ -47,14 +47,14 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
   return {
     openapi: "3.0.3",
     info: {
-      title: "Screenlane API",
+      title: "Crisvia API",
       version: "1.0.0",
       description:
-        "API REST de Screenlane (HealthTech / clinical research sites). " +
+        "API REST de Crisvia (HealthTech / clinical research sites). " +
         "La mayoría de endpoints requieren sesión Supabase vía cookies (`sb-*`). " +
         "Iniciá sesión con `POST /api/auth/login` desde el mismo navegador antes de probar endpoints protegidos en Swagger UI.",
       contact: {
-        name: "Screenlane",
+        name: "Crisvia",
       },
     },
     servers: [{ url: baseUrl, description: "Servidor actual" }],

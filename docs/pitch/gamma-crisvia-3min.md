@@ -1,4 +1,4 @@
-# Screenlane — pitch 3 minutos (para pegar en Gamma)
+# Crisvia — pitch 3 minutos (para pegar en Gamma)
 
 ## Cómo usarlo en Gamma
 
@@ -22,7 +22,7 @@ Guion hablado: ~180 segundos. No cites HIPAA certificado, ICF propio ni números
 
 ---
 
-# Screenlane
+# Crisvia
 ## El funnel de screening del clinical research site
 
 Pre-screening y re-matching de pacientes a protocolos.
@@ -133,7 +133,7 @@ Si falló un estudio, busca protocolos activos donde no esté excluido.
 **ePRO `/epro`**
 Cuestionarios del paciente durante el screening.
 
-El ICF es el del site. Screenlane no inventa el consentimiento del estudio.
+El ICF es el del site. Crisvia no inventa el consentimiento del estudio.
 
 ---
 
@@ -156,7 +156,7 @@ Arranca con el expediente interno. No hace falta el hospital.
 Trial de 14 días en el site.
 Carga pacientes, un protocolo y corre el primer cruce el mismo día.
 
-Screenlane
+Crisvia
 Del candidato al protocolo correcto — y de vuelta si el primero no entra.
 
 ---
@@ -167,7 +167,7 @@ Del candidato al protocolo correcto — y de vuelta si el primero no entra.
 En el clinical research site el cuello de botella no es “tener un EHR”. Es el pre-screening: el coordinador arma el cruce a mano y, si el paciente cae en screen failure, casi nunca vuelve a otro protocolo.
 
 **0:20–0:35 — Frase**
-Screenlane es el funnel de ese trabajo. No reemplazamos el CTMS ni el hospital. Llevamos al candidato al protocolo correcto y lo recuperamos si el primero no entra.
+Crisvia es el funnel de ese trabajo. No reemplazamos el CTMS ni el hospital. Llevamos al candidato al protocolo correcto y lo recuperamos si el primero no entra.
 
 **0:35–0:55 — Captura**
 El paciente llega por el portal del centro. El coordinador lo ve en el inbox y lo pasa a pacientes. También puede cargar CSV. El expediente se escribe en las tablas de la app.

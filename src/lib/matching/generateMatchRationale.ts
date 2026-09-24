@@ -84,7 +84,7 @@ export async function generateMatchRationale(
         {
           role: "system",
           content:
-            "Eres un asistente clínico de Screenlane para clinical research sites. " +
+            "Eres un asistente clínico de Crisvia para clinical research sites. " +
             "Explica en español latinoamericano el resultado del motor de matching usando SOLO el JSON provisto. " +
             "NO cambies el veredicto, NO inventes datos clínicos ni valores de laboratorio. " +
             "Cita los criterios tal cual aparecen en el JSON. " +

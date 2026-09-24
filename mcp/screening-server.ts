@@ -8,39 +8,41 @@ import {
 } from "../src/lib/screening-services";
 
 /**
- * MCP server de Screening Intelligence.
+ * MCP server de Crisvia.
  *
  * Uso local (Cursor / Claude Desktop):
- *   SCREENLANE_ORGANIZATION_ID=<uuid> yarn mcp:screening
+ *   CRISVIA_ORGANIZATION_ID=<uuid> yarn mcp:screening
  *
  * Config Cursor (~/.cursor/mcp.json):
  * {
  *   "mcpServers": {
- *     "screening-intel": {
+ *     "crisvia": {
  *       "command": "yarn",
  *       "args": ["mcp:screening"],
- *       "cwd": "/ruta/a/Screening-intel",
+ *       "cwd": "/ruta/a/Crisvia",
  *       "env": {
  *         "NEXT_PUBLIC_SUPABASE_URL": "...",
  *         "SUPABASE_SERVICE_ROLE_KEY": "...",
- *         "SCREENLANE_ORGANIZATION_ID": "uuid-del-centro"
+ *         "CRISVIA_ORGANIZATION_ID": "uuid-del-centro"
  *       }
  *     }
  *   }
  * }
  */
 
-const organizationId = process.env.SCREENLANE_ORGANIZATION_ID?.trim();
+const organizationId =
+  process.env.CRISVIA_ORGANIZATION_ID?.trim() ||
+  process.env.SCREENLANE_ORGANIZATION_ID?.trim();
 if (!organizationId) {
   console.error(
-    "Falta SCREENLANE_ORGANIZATION_ID. El MCP de screening no puede listar pacientes de todos los centros."
+    "Falta CRISVIA_ORGANIZATION_ID. El MCP de screening no puede listar pacientes de todos los centros."
   );
   process.exit(1);
 }
 
 const server = new McpServer(
   {
-    name: "screening-intelligence",
+    name: "crisvia",
     version: "0.1.0",
   },
   {
