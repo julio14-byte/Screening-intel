@@ -7,8 +7,10 @@ import { firstEmbedded } from "@/lib/supabase/embed";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import {
   PATIENT_WITH_PROFILE_COLUMNS,
+  PATIENT_WITH_PROFILE_COLUMNS_LEGACY,
   PROTOCOL_LIST_COLUMNS,
 } from "@/lib/supabase/query-columns";
+import { isMissingDemographicsColumn } from "@/lib/profile/demographics";
 import type {
   ClinicalProfile,
   MatchResult,
@@ -71,11 +73,20 @@ export function useRematch() {
         return;
       }
 
-      const [patientsRes, protocolsRes, enrolledRes] = await Promise.all([
-        supabase
-          .from("patients")
-          .select(PATIENT_WITH_PROFILE_COLUMNS)
-          .in("id", patientIds),
+      const fullPatients = await supabase
+        .from("patients")
+        .select(PATIENT_WITH_PROFILE_COLUMNS)
+        .in("id", patientIds);
+      const patientsRes =
+        fullPatients.error &&
+        isMissingDemographicsColumn(fullPatients.error.message)
+          ? await supabase
+              .from("patients")
+              .select(PATIENT_WITH_PROFILE_COLUMNS_LEGACY)
+              .in("id", patientIds)
+          : fullPatients;
+
+      const [protocolsRes, enrolledRes] = await Promise.all([
         supabase
           .from("protocols")
           .select(PROTOCOL_LIST_COLUMNS)

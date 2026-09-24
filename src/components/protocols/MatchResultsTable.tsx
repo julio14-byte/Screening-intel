@@ -15,6 +15,7 @@ import { ScoreBar } from "@/components/ui/ScoreBar";
 import { VerdictBadge } from "@/components/ui/VerdictBadge";
 import { MatchRationalePanel } from "@/components/matching/MatchRationalePanel";
 import type { CriterionResult, MatchResult, Protocol, Screening } from "@/lib/types";
+import { ethnicityLabel, studySubjectCaption } from "@/lib/profile/demographics";
 import {
   calculateAge,
   cn,
@@ -195,9 +196,17 @@ export function MatchResultsTable({
                   >
                     {patient.last_name}, {patient.first_name}
                   </Link>
+                  {studySubjectCaption(patient) ? (
+                    <p className="mt-0.5 font-mono text-[11px] text-indigo-600">
+                      {studySubjectCaption(patient)}
+                    </p>
+                  ) : null}
                   <p className="mt-1 text-xs text-indigo-500">
                     {calculateAge(patient.birth_date)} años ·{" "}
                     {GENDER_LABELS[patient.gender]}
+                    {patient.ethnicity
+                      ? ` · ${ethnicityLabel(patient.ethnicity)}`
+                      : ""}
                   </p>
                   {!result.profile ? (
                     <span className="mt-1 inline-block rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
@@ -274,6 +283,11 @@ export function MatchResultsTable({
                       >
                         {patient.last_name}, {patient.first_name}
                       </Link>
+                      {studySubjectCaption(patient) ? (
+                        <span className="mt-0.5 block font-mono text-[11px] text-indigo-500">
+                          {studySubjectCaption(patient)}
+                        </span>
+                      ) : null}
                       {!result.profile ? (
                         <span className="ml-2 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
                           Sin perfil clínico
@@ -283,6 +297,9 @@ export function MatchResultsTable({
                     <td className="px-3 py-2.5 text-indigo-600">
                       {calculateAge(patient.birth_date)} años ·{" "}
                       {GENDER_LABELS[patient.gender]}
+                      {patient.ethnicity
+                        ? ` · ${ethnicityLabel(patient.ethnicity)}`
+                        : ""}
                     </td>
                     <td className="px-3 py-2.5">
                       <VerdictBadge verdict={result.verdict} />

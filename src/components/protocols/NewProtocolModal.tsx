@@ -145,7 +145,7 @@ export function NewProtocolModal({
               placeholder="75"
             />
             <SelectInput
-              label="Sexo requerido"
+              label="Sexo biológico requerido"
               value={gender}
               onChange={(e) =>
                 setGender(e.target.value as "any" | "male" | "female")

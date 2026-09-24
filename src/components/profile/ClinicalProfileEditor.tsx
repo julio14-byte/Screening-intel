@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Save, Stethoscope, TestTubes } from "lucide-react";
+import { BookOpen, IdCard, Save, Stethoscope, TestTubes } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -9,6 +9,7 @@ import { ErrorState } from "@/components/ui/StateMessage";
 import { AnamnesisEditor } from "@/components/profile/AnamnesisEditor";
 import { ClinicalMeasurementsEditor } from "@/components/profile/ClinicalMeasurementsEditor";
 import { ClinicalNotesImport } from "@/components/profile/ClinicalNotesImport";
+import { DemographicsEditor } from "@/components/profile/DemographicsEditor";
 import { RoleGuard } from "@/components/rbac/RoleGuard";
 import { useRole } from "@/contexts/role-context";
 import { LabsEditor } from "@/components/profile/LabsEditor";
@@ -26,6 +27,11 @@ import {
   mergeLaboratories,
   withComputedBmi,
 } from "@/lib/profile/clinical-measurements";
+import {
+  demographicsFromPatient,
+  ethnicityLabel,
+  studySubjectCaption,
+} from "@/lib/profile/demographics";
 import type { ClinicalProfile, Patient } from "@/lib/types";
 import { calculateAge, formatDate, GENDER_LABELS } from "@/lib/utils";
 
@@ -42,6 +48,9 @@ export function ClinicalProfileEditor({
   profile: ClinicalProfile | null;
   onSave: (update: ProfileUpdate) => Promise<void>;
 }) {
+  const [demographics, setDemographics] = useState(() =>
+    demographicsFromPatient(patient)
+  );
   const [anamnesis, setAnamnesis] = useState(() =>
     hydrateAnamnesis({
       anamnesis: profile?.anamnesis,
@@ -74,6 +83,7 @@ export function ClinicalProfileEditor({
         medications: matchingMedications(anamnesis),
         laboratories,
         anamnesis,
+        demographics,
       });
       setDirty(false);
       setSavedAt(new Date());
@@ -89,8 +99,20 @@ export function ClinicalProfileEditor({
   return (
     <>
       <PageHeader
-        title={`${patient.last_name}, ${patient.first_name}`}
-        description={`${calculateAge(patient.birth_date)} años · ${GENDER_LABELS[patient.gender]} · Nac. ${formatDate(patient.birth_date)}`}
+        title={`${demographics.last_name || patient.last_name}, ${demographics.first_name || patient.first_name}`}
+        description={[
+          studySubjectCaption(demographics),
+          demographics.birth_date
+            ? `${calculateAge(demographics.birth_date)} años`
+            : null,
+          GENDER_LABELS[demographics.gender],
+          demographics.ethnicity ? ethnicityLabel(demographics.ethnicity) : null,
+          demographics.birth_date
+            ? `Nac. ${formatDate(demographics.birth_date)}`
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" · ")}
         actions={
           <div className="flex items-center gap-3">
             {savedAt && !dirty ? (
@@ -137,6 +159,23 @@ export function ClinicalProfileEditor({
       <div className={`grid gap-4 lg:grid-cols-2 ${!canEdit ? "pointer-events-none opacity-80" : ""}`}>
         <Card className="lg:col-span-2">
           <CardHeader
+            title="Datos demográficos y básicos"
+            description="Identificación confidencial, código de sujeto, edad, sexo biológico y etnia"
+            actions={<IdCard className="h-4 w-4 text-slate-400" aria-hidden />}
+          />
+          <CardBody>
+            <DemographicsEditor
+              value={demographics}
+              onChange={(next) => {
+                setDemographics(next);
+                setDirty(true);
+              }}
+            />
+          </CardBody>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardHeader
             title="Historial médico completo (anamnesis)"
             description="Diagnósticos con fecha, síntomas, gravedad y evolución; cirugías; hospitalizaciones; medicación con dosis; alergias"
             actions={<BookOpen className="h-4 w-4 text-slate-400" aria-hidden />}
@@ -161,7 +200,7 @@ export function ClinicalProfileEditor({
           <CardBody>
             <ClinicalMeasurementsEditor
               labs={laboratories}
-              gender={patient.gender}
+              gender={demographics.gender}
               onChange={(labs) => {
                 setLaboratories(labs);
                 setDirty(true);

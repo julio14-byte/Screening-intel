@@ -49,11 +49,13 @@ export async function POST(
     .from("patients")
     .insert({
       clinic_id: submission.organization_id,
-      first_name: submission.first_name,
-      last_name: submission.last_name,
-      birth_date: submission.birth_date,
-      gender: submission.gender,
-    })
+        first_name: submission.first_name,
+        last_name: submission.last_name,
+        birth_date: submission.birth_date,
+        gender: submission.gender,
+        phone: submission.contact_phone || null,
+        email: submission.contact_email || null,
+      })
     .select("id")
     .single();
 

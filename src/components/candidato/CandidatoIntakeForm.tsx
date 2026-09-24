@@ -141,7 +141,7 @@ export function CandidatoIntakeForm({
           onChange={(e) => setForm({ ...form, birth_date: e.target.value })}
         />
         <SelectInput
-          label="Sexo"
+          label="Sexo biológico"
           value={form.gender}
           onChange={(e) =>
             setForm({ ...form, gender: e.target.value as Gender })

@@ -19,6 +19,10 @@ export interface Patient {
   last_name: string;
   birth_date: string; // ISO date (YYYY-MM-DD)
   gender: Gender;
+  /** Código numérico del sujeto en el estudio. Disocia PHI nominativo. */
+  subject_code?: string | null;
+  /** Etnia registrada por el coordinador (farmacología / criterios). */
+  ethnicity?: string | null;
   active?: boolean;
   phone?: string | null;
   email?: string | null;

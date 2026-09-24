@@ -5,6 +5,7 @@ import {
   AuthorizationError,
   requirePermission,
 } from "@/lib/rbac/require-permission";
+import { isMissingDemographicsColumn } from "@/lib/profile/demographics";
 import type { ParsedPatientRow } from "@/lib/import/parsePatientCsv";
 
 export async function POST(request: Request) {
@@ -54,17 +55,42 @@ export async function POST(request: Request) {
   const errors: string[] = [];
 
   for (const [index, row] of rows.entries()) {
-    const { data: patient, error: patientError } = await supabase
+    const fullRow = {
+      clinic_id: clinicId,
+      first_name: row.first_name,
+      last_name: row.last_name,
+      birth_date: row.birth_date,
+      gender: row.gender,
+      phone: row.phone || null,
+      email: row.email || null,
+      ethnicity: row.ethnicity || null,
+      subject_code: row.subject_code || null,
+      address_line: row.address_line || null,
+      address_city: row.address_city || null,
+    };
+    let inserted = await supabase
       .from("patients")
-      .insert({
-        clinic_id: clinicId,
-        first_name: row.first_name,
-        last_name: row.last_name,
-        birth_date: row.birth_date,
-        gender: row.gender,
-      })
+      .insert(fullRow)
       .select("id")
       .single();
+    if (
+      inserted.error &&
+      isMissingDemographicsColumn(inserted.error.message)
+    ) {
+      inserted = await supabase
+        .from("patients")
+        .insert({
+          clinic_id: clinicId,
+          first_name: row.first_name,
+          last_name: row.last_name,
+          birth_date: row.birth_date,
+          gender: row.gender,
+        })
+        .select("id")
+        .single();
+    }
+    const patient = inserted.data;
+    const patientError = inserted.error;
 
     if (patientError || !patient) {
       errors.push(`Fila ${index + 2}: ${patientError?.message ?? "error al crear paciente"}`);

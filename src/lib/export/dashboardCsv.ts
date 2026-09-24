@@ -10,6 +10,7 @@ const VERDICT_LABELS = {
 
 export function screeningsToCsv(rows: ScreeningWithRelations[]): string {
   const header = [
+    "sujeto",
     "paciente",
     "protocolo_codigo",
     "protocolo_titulo",
@@ -23,6 +24,7 @@ export function screeningsToCsv(rows: ScreeningWithRelations[]): string {
     const verdict = screeningToVerdict(row);
     const patient = `${row.patients.last_name}, ${row.patients.first_name}`;
     return [
+      csvEscape(row.patients.subject_code ?? ""),
       csvEscape(patient),
       csvEscape(row.protocols.code_name),
       csvEscape(row.protocols.title),

@@ -78,8 +78,12 @@ export function ImportPatientsModal({
       <div className="space-y-4">
         <p className="text-sm text-slate-600">
           Subí un CSV con columnas{" "}
-          <code className="rounded bg-slate-100 px-1">first_name, last_name, birth_date, gender</code>
-          . Opcional: <code className="rounded bg-slate-100 px-1">conditions</code>,{" "}
+          <code className="rounded bg-slate-100 px-1">          first_name, last_name, birth_date, gender</code>
+          . Opcional: <code className="rounded bg-slate-100 px-1">phone</code>,{" "}
+          <code className="rounded bg-slate-100 px-1">email</code>,{" "}
+          <code className="rounded bg-slate-100 px-1">ethnicity</code>,{" "}
+          <code className="rounded bg-slate-100 px-1">subject_code</code>,{" "}
+          <code className="rounded bg-slate-100 px-1">conditions</code>,{" "}
           <code className="rounded bg-slate-100 px-1">medications</code> y labs numéricos (
           <code className="rounded bg-slate-100 px-1">glucosa</code>,{" "}
           <code className="rounded bg-slate-100 px-1">hba1c</code>…).

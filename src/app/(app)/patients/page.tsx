@@ -16,6 +16,7 @@ import { NewPatientModal } from "@/components/patients/NewPatientModal";
 import { RoleGuard } from "@/components/rbac/RoleGuard";
 import { usePatients } from "@/hooks/usePatients";
 import { calculateAge, formatDate, GENDER_LABELS, normalizeTerm } from "@/lib/utils";
+import { ethnicityLabel, studySubjectCaption } from "@/lib/profile/demographics";
 
 export default function PatientsPage() {
   const { patients, loading, error, addPatient, refetch } = usePatients();
@@ -27,7 +28,9 @@ export default function PatientsPage() {
     const q = normalizeTerm(query);
     if (!q) return patients;
     return patients.filter((p) =>
-      normalizeTerm(`${p.first_name} ${p.last_name}`).includes(q)
+      normalizeTerm(
+        `${p.first_name} ${p.last_name} ${p.subject_code ?? ""} ${p.ethnicity ?? ""}`
+      ).includes(q)
     );
   }, [patients, query]);
 
@@ -63,7 +66,7 @@ export default function PatientsPage() {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Buscar por nombre o apellido…"
+              placeholder="Buscar por nombre, código o etnia…"
               aria-label="Buscar pacientes"
               className="w-full rounded-md border border-slate-300 py-1.5 pl-8 pr-3 text-sm placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
             />
@@ -91,8 +94,10 @@ export default function PatientsPage() {
             <thead>
               <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
                 <th className="px-4 py-2.5 font-medium">Paciente</th>
+                <th className="px-4 py-2.5 font-medium">Sujeto</th>
                 <th className="px-4 py-2.5 font-medium">Edad</th>
-                <th className="px-4 py-2.5 font-medium">Sexo</th>
+                <th className="px-4 py-2.5 font-medium">Sexo biológico</th>
+                <th className="px-4 py-2.5 font-medium">Etnia</th>
                 <th className="px-4 py-2.5 font-medium">Fecha de nacimiento</th>
                 <th className="px-4 py-2.5 font-medium">Alta</th>
                 <th className="px-4 py-2.5" />
@@ -111,12 +116,23 @@ export default function PatientsPage() {
                     >
                       {p.last_name}, {p.first_name}
                     </Link>
+                    {p.phone || p.email ? (
+                      <p className="text-[11px] text-slate-400">
+                        {[p.phone, p.email].filter(Boolean).join(" · ")}
+                      </p>
+                    ) : null}
+                  </td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-slate-700">
+                    {studySubjectCaption(p) ?? "—"}
                   </td>
                   <td className="px-4 py-2.5 tabular-nums text-slate-600">
                     {calculateAge(p.birth_date)} años
                   </td>
                   <td className="px-4 py-2.5 text-slate-600">
                     {GENDER_LABELS[p.gender]}
+                  </td>
+                  <td className="px-4 py-2.5 text-slate-600">
+                    {ethnicityLabel(p.ethnicity)}
                   </td>
                   <td className="px-4 py-2.5 text-slate-600">
                     {formatDate(p.birth_date)}

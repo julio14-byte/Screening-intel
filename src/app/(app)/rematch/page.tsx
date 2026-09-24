@@ -14,6 +14,7 @@ import {
   LoadingState,
 } from "@/components/ui/StateMessage";
 import { useRematch, type RematchOpportunity } from "@/hooks/useRematch";
+import { studySubjectCaption } from "@/lib/profile/demographics";
 import { calculateAge, GENDER_LABELS } from "@/lib/utils";
 
 function OpportunityCard({
@@ -39,7 +40,13 @@ function OpportunityCard({
     <Card>
       <CardHeader
         title={`${patient.last_name}, ${patient.first_name}`}
-        description={`${calculateAge(patient.birth_date)} años · ${GENDER_LABELS[patient.gender]}`}
+        description={[
+          studySubjectCaption(patient),
+          `${calculateAge(patient.birth_date)} años`,
+          GENDER_LABELS[patient.gender],
+        ]
+          .filter(Boolean)
+          .join(" · ")}
         actions={
           <Link
             href={`/patients/${patient.id}`}

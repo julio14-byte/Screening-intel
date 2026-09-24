@@ -9,6 +9,15 @@ const DEMO_PATIENTS = [
     last_name: "González",
     birth_date: "1962-04-12",
     gender: "female" as const,
+    subject_code: "10001",
+    ethnicity: "mestizo",
+    phone: "+54 11 5555-0101",
+    email: "maria.g@example.com",
+    address_line: "Av. Santa Fe 1234",
+    address_city: "CABA",
+    address_state: "Buenos Aires",
+    address_postal_code: "1059",
+    address_country: "AR",
   },
   {
     id: "11111111-1111-1111-1111-111111111102",
@@ -16,6 +25,12 @@ const DEMO_PATIENTS = [
     last_name: "Fernández",
     birth_date: "1975-09-30",
     gender: "male" as const,
+    subject_code: "10002",
+    ethnicity: "blanco",
+    phone: "+54 11 5555-0102",
+    email: "carlos.f@example.com",
+    address_city: "CABA",
+    address_country: "AR",
   },
   {
     id: "11111111-1111-1111-1111-111111111103",
@@ -23,6 +38,11 @@ const DEMO_PATIENTS = [
     last_name: "Martínez",
     birth_date: "1988-01-22",
     gender: "female" as const,
+    subject_code: "10003",
+    ethnicity: "mestizo",
+    phone: "+54 11 5555-0103",
+    email: "lucia.m@example.com",
+    address_country: "AR",
   },
   {
     id: "11111111-1111-1111-1111-111111111104",
@@ -30,6 +50,11 @@ const DEMO_PATIENTS = [
     last_name: "Pereyra",
     birth_date: "1954-11-03",
     gender: "male" as const,
+    subject_code: "10004",
+    ethnicity: "indigena",
+    phone: "+54 11 5555-0104",
+    email: "jorge.p@example.com",
+    address_country: "AR",
   },
   {
     id: "11111111-1111-1111-1111-111111111105",
@@ -37,6 +62,11 @@ const DEMO_PATIENTS = [
     last_name: "Suárez",
     birth_date: "1970-06-17",
     gender: "female" as const,
+    subject_code: "10005",
+    ethnicity: "afrodescendiente",
+    phone: "+54 11 5555-0105",
+    email: "ana.s@example.com",
+    address_country: "AR",
   },
   {
     id: "11111111-1111-1111-1111-111111111106",
@@ -44,6 +74,11 @@ const DEMO_PATIENTS = [
     last_name: "López",
     birth_date: "1948-02-08",
     gender: "male" as const,
+    subject_code: "10006",
+    ethnicity: "mestizo",
+    phone: "+54 11 5555-0106",
+    email: "ricardo.l@example.com",
+    address_country: "AR",
   },
   {
     id: "11111111-1111-1111-1111-111111111107",
@@ -51,6 +86,11 @@ const DEMO_PATIENTS = [
     last_name: "Ríos",
     birth_date: "1995-08-25",
     gender: "female" as const,
+    subject_code: "10007",
+    ethnicity: "blanco",
+    phone: "+54 11 5555-0107",
+    email: "valentina.r@example.com",
+    address_country: "AR",
   },
   {
     id: "11111111-1111-1111-1111-111111111108",
@@ -58,6 +98,11 @@ const DEMO_PATIENTS = [
     last_name: "Domínguez",
     birth_date: "1966-12-01",
     gender: "male" as const,
+    subject_code: "10008",
+    ethnicity: "mestizo",
+    phone: "+54 11 5555-0108",
+    email: "hector.d@example.com",
+    address_country: "AR",
   },
 ];
 
@@ -412,10 +457,27 @@ export async function ensureDemoPatientData(userId?: string): Promise<void> {
   const admin = createAdminClient();
   const clinicId = await resolveDemoClinicId(admin, userId);
 
-  const { error: patientsError } = await admin.from("patients").upsert(
+  let { error: patientsError } = await admin.from("patients").upsert(
     DEMO_PATIENTS.map((patient) => ({ ...patient, clinic_id: clinicId })),
     { onConflict: "id" }
   );
+  if (
+    patientsError &&
+    /subject_code|ethnicity|phone|address_line/i.test(patientsError.message)
+  ) {
+    const retry = await admin.from("patients").upsert(
+      DEMO_PATIENTS.map((patient) => ({
+        id: patient.id,
+        first_name: patient.first_name,
+        last_name: patient.last_name,
+        birth_date: patient.birth_date,
+        gender: patient.gender,
+        clinic_id: clinicId,
+      })),
+      { onConflict: "id" }
+    );
+    patientsError = retry.error;
+  }
 
   if (patientsError) {
     throw new Error(`demo patients: ${patientsError.message}`);
