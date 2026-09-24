@@ -3,8 +3,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSupabaseReady } from "@/hooks/useSupabaseReady";
 import { getSupabaseClient } from "@/lib/supabase/client";
-import { PATIENT_LIST_COLUMNS } from "@/lib/supabase/query-columns";
+import { PATIENT_CORE_COLUMNS, PATIENT_LIST_COLUMNS } from "@/lib/supabase/query-columns";
 import type { ClinicalAnamnesis } from "@/lib/profile/anamnesis";
+import {
+  demographicsToRow,
+  isMissingDemographicsColumn,
+  type PatientDemographics,
+} from "@/lib/profile/demographics";
 import type { ClinicalProfile, Patient } from "@/lib/types";
 
 export interface ProfileUpdate {
@@ -12,6 +17,7 @@ export interface ProfileUpdate {
   medications: string[];
   laboratories: Record<string, number>;
   anamnesis: ClinicalAnamnesis;
+  demographics: PatientDemographics;
 }
 
 const PROFILE_COLUMNS =
@@ -31,11 +37,19 @@ export function usePatientDetail(patientId: string) {
     setError(null);
     try {
       const supabase = getSupabaseClient();
-      const patientRes = await supabase
+      const full = await supabase
         .from("patients")
         .select(PATIENT_LIST_COLUMNS)
         .eq("id", patientId)
         .maybeSingle();
+      const patientRes =
+        full.error && isMissingDemographicsColumn(full.error.message)
+          ? await supabase
+              .from("patients")
+              .select(PATIENT_CORE_COLUMNS)
+              .eq("id", patientId)
+              .maybeSingle()
+          : full;
       if (patientRes.error) throw patientRes.error;
       if (!patientRes.data) {
         setPatient(null);
@@ -79,8 +93,31 @@ export function usePatientDetail(patientId: string) {
   const saveProfile = useCallback(
     async (update: ProfileUpdate) => {
       const supabase = getSupabaseClient();
+      const patientRow = demographicsToRow(update.demographics);
+      const { error: patientError } = await supabase
+        .from("patients")
+        .update(patientRow)
+        .eq("id", patientId);
+      if (patientError) {
+        if (isMissingDemographicsColumn(patientError.message)) {
+          throw new Error(
+            "Faltan columnas demográficas. En Supabase SQL Editor ejecutá supabase/migrations/20260924140000_patient_demographics.sql y recargá el schema."
+          );
+        }
+        if (/subject_code|patients_clinic_subject_code/i.test(patientError.message ?? "") && /duplicate|unique/i.test(patientError.message ?? "")) {
+          throw new Error("Ese código de sujeto ya está en uso en este centro.");
+        }
+        throw patientError;
+      }
+
       const { error } = await supabase.from("clinical_profiles").upsert(
-        { patient_id: patientId, ...update },
+        {
+          patient_id: patientId,
+          conditions: update.conditions,
+          medications: update.medications,
+          laboratories: update.laboratories,
+          anamnesis: update.anamnesis,
+        },
         { onConflict: "patient_id" }
       );
       if (error) {

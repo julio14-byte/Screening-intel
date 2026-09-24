@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useSupabaseReady } from "@/hooks/useSupabaseReady";
 import { firstEmbedded } from "@/lib/supabase/embed";
 import { getSupabaseClient } from "@/lib/supabase/client";
-import { PATIENT_WITH_PROFILE_COLUMNS } from "@/lib/supabase/query-columns";
+import { PATIENT_WITH_PROFILE_COLUMNS, PATIENT_WITH_PROFILE_COLUMNS_LEGACY } from "@/lib/supabase/query-columns";
+import { isMissingDemographicsColumn } from "@/lib/profile/demographics";
 import type {
   ClinicalProfile,
   Patient,
@@ -28,12 +29,19 @@ export function usePatientsWithProfiles() {
     setError(null);
     try {
       const supabase = getSupabaseClient();
-      const { data, error } = await supabase
+      const full = await supabase
         .from("patients")
         .select(PATIENT_WITH_PROFILE_COLUMNS)
         .order("last_name");
-      if (error) throw error;
-      const rows = (data ?? []) as unknown as PatientWithProfile[];
+      const result =
+        full.error && isMissingDemographicsColumn(full.error.message)
+          ? await supabase
+              .from("patients")
+              .select(PATIENT_WITH_PROFILE_COLUMNS_LEGACY)
+              .order("last_name")
+          : full;
+      if (result.error) throw result.error;
+      const rows = (result.data ?? []) as unknown as PatientWithProfile[];
       setPairs(
         rows.map((row) => {
           const { clinical_profiles, ...patient } = row;

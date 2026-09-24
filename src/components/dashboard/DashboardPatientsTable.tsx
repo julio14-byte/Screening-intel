@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { VerdictBadge } from "@/components/ui/VerdictBadge";
 import { screeningToVerdict } from "@/lib/dashboard/traffic-light";
+import { studySubjectCaption } from "@/lib/profile/demographics";
 import type { ScreeningWithRelations } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 
@@ -26,6 +27,7 @@ export function DashboardPatientsTable({ rows }: DashboardPatientsTableProps) {
         {rows.map((screening) => {
           const verdict = screeningToVerdict(screening);
           const patientName = `${screening.patients.last_name}, ${screening.patients.first_name}`;
+          const subject = studySubjectCaption(screening.patients);
 
           return (
             <li
@@ -40,6 +42,11 @@ export function DashboardPatientsTable({ rows }: DashboardPatientsTableProps) {
                   >
                     {patientName}
                   </Link>
+                  {subject ? (
+                    <p className="mt-0.5 font-mono text-[11px] text-indigo-600">
+                      {subject}
+                    </p>
+                  ) : null}
                   <p className="mt-1 text-xs text-indigo-500">
                     {screening.protocols.code_name}
                   </p>
@@ -69,6 +76,7 @@ export function DashboardPatientsTable({ rows }: DashboardPatientsTableProps) {
             {rows.map((screening) => {
               const verdict = screeningToVerdict(screening);
               const patientName = `${screening.patients.last_name}, ${screening.patients.first_name}`;
+              const subject = studySubjectCaption(screening.patients);
 
               return (
                 <tr key={screening.id} className="hover:bg-violet-50/40">
@@ -79,6 +87,11 @@ export function DashboardPatientsTable({ rows }: DashboardPatientsTableProps) {
                     >
                       {patientName}
                     </Link>
+                    {subject ? (
+                      <span className="mt-0.5 block font-mono text-[11px] text-indigo-500">
+                        {subject}
+                      </span>
+                    ) : null}
                   </td>
                   <td className="px-4 py-3 text-indigo-700">
                     <span className="font-medium">

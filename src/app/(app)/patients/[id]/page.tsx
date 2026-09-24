@@ -35,7 +35,7 @@ export default function PatientDetailPage({
       </Link>
 
       <ClinicalProfileEditor
-        key={profile?.id ?? "new"}
+        key={`${profile?.id ?? "new"}-${patient.updated_at ?? patient.subject_code ?? patient.id}`}
         patient={patient}
         profile={profile}
         onSave={saveProfile}

@@ -54,9 +54,9 @@ export function evaluatePatientAgainstProtocol(
     const pass = patient.gender === inclusion.gender;
     details.push({
       type: "inclusion",
-      criterion: `Sexo requerido: ${GENDER_LABELS[inclusion.gender]}`,
+      criterion: `Sexo biológico requerido: ${GENDER_LABELS[inclusion.gender]}`,
       status: pass ? "pass" : "fail",
-      detail: `Sexo del paciente: ${GENDER_LABELS[patient.gender]}`,
+      detail: `Sexo biológico del paciente: ${GENDER_LABELS[patient.gender]}`,
     });
   }
 

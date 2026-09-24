@@ -8,8 +8,11 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 import { screeningUpdateConflict } from "@/lib/ops/model";
 import {
   SCREENING_LIST_COLUMNS,
+  SCREENING_LIST_COLUMNS_LEGACY,
   SCREENING_LIST_WITH_DETAILS,
+  SCREENING_LIST_WITH_DETAILS_LEGACY,
 } from "@/lib/supabase/query-columns";
+import { isMissingDemographicsColumn } from "@/lib/profile/demographics";
 import type {
   CriterionResult,
   ScreeningStatus,
@@ -29,16 +32,26 @@ export function useScreenings(options?: { includeMatchDetails?: boolean }) {
     setError(null);
     try {
       const supabase = getSupabaseClient();
-      const { data, error } = await supabase
+      const fullSelect = includeMatchDetails
+        ? SCREENING_LIST_WITH_DETAILS
+        : SCREENING_LIST_COLUMNS;
+      const full = await supabase
         .from("screenings")
-        .select(
-          includeMatchDetails
-            ? SCREENING_LIST_WITH_DETAILS
-            : SCREENING_LIST_COLUMNS
-        )
+        .select(fullSelect)
         .order("updated_at", { ascending: false });
-      if (error) throw error;
-      setScreenings((data ?? []) as unknown as ScreeningWithRelations[]);
+      const result =
+        full.error && isMissingDemographicsColumn(full.error.message)
+          ? await supabase
+              .from("screenings")
+              .select(
+                includeMatchDetails
+                  ? SCREENING_LIST_WITH_DETAILS_LEGACY
+                  : SCREENING_LIST_COLUMNS_LEGACY
+              )
+              .order("updated_at", { ascending: false })
+          : full;
+      if (result.error) throw result.error;
+      setScreenings((result.data ?? []) as unknown as ScreeningWithRelations[]);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error al cargar screenings");
     } finally {
