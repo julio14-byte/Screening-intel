@@ -52,8 +52,8 @@ Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operat
 | **Patient Registry** | Alta, búsqueda e importación CSV de pacientes |
 | **Clinical Profile** | Condiciones, medicación, laboratorios + búsqueda ICD-11 + extracción IA desde notas |
 | **Protocol Matcher** | Criterios de inclusión/exclusión; extracción NLP desde PDF |
-| **Motor de elegibilidad** | Semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple + `match_score` + justificación IA |
-| **Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure |
+| **Motor de elegibilidad** | Semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple + `match_score` + justificación IA. No es un sorteo: filtra por criterios. |
+| **Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure. “Randomizado” es un estado clínico, no un IWRS de brazos. |
 | **Re-Match** | Propone protocolos alternativos para pacientes con screen failure |
 | **Portal candidatos** | Pre-registro público (`/candidato`) + inbox (`/candidatos`) + settings del portal |
 | **Expediente interno** | Pacientes y perfil clínico en tablas de la app (incluye modelo FHIR Patient) |

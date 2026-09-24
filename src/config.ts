@@ -262,6 +262,10 @@ const config = {
       title: "Lo que preguntan los clinical research sites.",
       items: [
         {
+          q: "¿El screening es un sorteo digital para elegir pacientes?",
+          a: "No. El screening es un filtro de elegibilidad: el motor de reglas compara el expediente con inclusión y exclusión (🟢 cumple, 🟡 falta un dato, 🔴 no cumple). No hay azar y la IA no decide quién entra. El paso que sí es aleatorio es la randomización (IWRS): asignar el brazo del estudio cuando el paciente ya pasó el screening. Crisvia registra ese estado en el tracker; no sortea tratamientos.",
+        },
+        {
           q: "¿Necesito un EHR hospitalario?",
           a: "No. El expediente es interno: registro manual, CSV y portal de candidatos. No hay conexión con un EHR externo.",
         },

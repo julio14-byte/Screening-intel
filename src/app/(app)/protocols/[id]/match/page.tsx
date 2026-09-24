@@ -13,6 +13,7 @@ import {
 import { VerdictDot } from "@/components/ui/VerdictBadge";
 import { CriteriaSummary } from "@/components/protocols/CriteriaSummary";
 import { MatchResultsTable } from "@/components/protocols/MatchResultsTable";
+import { ScreeningProcessNote } from "@/components/screening/ScreeningProcessNote";
 import { useProtocolMatch } from "@/hooks/useProtocolMatch";
 
 export default function ProtocolMatchPage({
@@ -47,8 +48,10 @@ export default function ProtocolMatchPage({
 
       <PageHeader
         title={`Matching · ${protocol.code_name}`}
-        description={protocol.title}
+        description={`${protocol.title}. Filtro de criterios, no un sorteo de pacientes.`}
       />
+
+      <ScreeningProcessNote compact />
 
       <Card className="mb-4">
         <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">
