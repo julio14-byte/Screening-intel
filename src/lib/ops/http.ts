@@ -6,6 +6,26 @@ import {
 } from "@/lib/rbac/require-permission";
 import { createClient } from "@/lib/supabase/server";
 
+const MIGRATION_HINT =
+  "Falta aplicar el esquema de operaciones en Supabase (SQL Editor → supabase/migrations/20260924053000_repair_ops_visits_schema.sql). Después recargá el schema cache en Settings → API.";
+
+export function opsSchemaErrorResponse(error: {
+  code?: string;
+  message?: string;
+}) {
+  const message = error.message ?? "";
+  const missing =
+    error.code === "PGRST205" ||
+    error.code === "42P01" ||
+    error.code === "42703" ||
+    /schema cache/i.test(message) ||
+    /does not exist/i.test(message);
+  return NextResponse.json(
+    { error: missing ? `${message}. ${MIGRATION_HINT}` : message },
+    { status: 500 }
+  );
+}
+
 export async function opsContext(write: boolean) {
   try {
     const ctx = write

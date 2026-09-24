@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { opsContext } from "@/lib/ops/http";
+import { opsContext, opsSchemaErrorResponse } from "@/lib/ops/http";
 
 const patchSchema = z.object({
   id: z.string().uuid().optional(),
@@ -19,7 +19,7 @@ export async function GET() {
     .limit(40);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return opsSchemaErrorResponse(error);
   }
 
   const ids = (notes ?? []).map((note) => note.id);
@@ -31,7 +31,7 @@ export async function GET() {
       .eq("user_id", gate.ctx.user.id)
       .in("notification_id", ids);
     if (readError) {
-      return NextResponse.json({ error: readError.message }, { status: 500 });
+      return opsSchemaErrorResponse(readError);
     }
     for (const row of reads ?? []) readIds.add(row.notification_id);
   }
@@ -70,7 +70,7 @@ export async function PATCH(request: Request) {
       .select("id")
       .eq("organization_id", gate.organizationId)
       .limit(40);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return opsSchemaErrorResponse(error);
     ids = (data ?? []).map((row) => row.id);
   } else if (parsed.data.id) {
     ids = [parsed.data.id];
@@ -88,7 +88,7 @@ export async function PATCH(request: Request) {
     .upsert(rows, { onConflict: "notification_id,user_id", ignoreDuplicates: true });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return opsSchemaErrorResponse(error);
   }
 
   return NextResponse.json({ ok: true });
