@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/StateMessage";
 import { Card } from "@/components/ui/Card";
 import { KanbanBoard } from "@/components/tracker/KanbanBoard";
+import { ScreeningProcessNote } from "@/components/screening/ScreeningProcessNote";
 import { useScreenings } from "@/hooks/useScreenings";
 import type { ScreeningStatus } from "@/lib/types";
 
@@ -34,8 +35,10 @@ export default function TrackerPage() {
     <>
       <PageHeader
         title="Screening Tracker"
-        description="Pipeline de screening. Si otra persona movió la tarjeta, el cambio se rechaza y el tablero se recarga."
+        description="Pipeline de elegibilidad, no un sorteo. Si otra persona movió la tarjeta, el cambio se rechaza y el tablero se recarga."
       />
+
+      <ScreeningProcessNote />
 
       {moveError ? (
         <div className="mb-4">

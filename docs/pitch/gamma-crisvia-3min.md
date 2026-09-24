@@ -86,7 +86,7 @@ El expediente es interno. No hay EHR hospitalario.
 Criterios de inclusión y exclusión. Se pueden extraer de un PDF.
 
 **Matcher `/protocols/[id]/match`**
-Motor de **reglas**, no de IA.
+Motor de **reglas**, no de IA. No es un sorteo de pacientes.
 Semáforo 🟢 cumple · 🟡 falta dato · 🔴 no cumple.
 Score + detalle criterio por criterio.
 
@@ -101,6 +101,7 @@ Narra el veredicto en español.
 
 **Tracker `/tracker`**
 Kanban: pre-screening → screening → randomizado → screen failure.
+Randomizado = el investigador confirma inclusión; no hay sorteo de brazo (IWRS) todavía.
 
 **Dashboard `/dashboard`**
 Embudo del site + semáforos.
