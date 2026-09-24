@@ -12,6 +12,30 @@ export const VISIT_STATUSES = [
 ] as const;
 export type VisitStatus = (typeof VISIT_STATUSES)[number];
 
+export const VISIT_KINDS = [
+  "consulta",
+  "pre_screening",
+  "screening",
+  "follow_up",
+] as const;
+export type VisitKind = (typeof VISIT_KINDS)[number];
+
+export const VISIT_STATUS_LABEL: Record<VisitStatus, string> = {
+  scheduled: "Programada",
+  completed: "Hecha",
+  cancelled: "Cancelada",
+  no_show: "No asistió",
+};
+
+export const VISIT_KIND_LABEL: Record<VisitKind, string> = {
+  consulta: "Consulta médica",
+  pre_screening: "Pre-screening",
+  screening: "Screening",
+  follow_up: "Seguimiento",
+};
+
+export const VISIT_NOTES_MAX = 8000;
+
 export const NOTIFICATION_KINDS = [
   "inbox_new",
   "screen_failure",
