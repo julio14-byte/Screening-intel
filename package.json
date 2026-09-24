@@ -12,7 +12,8 @@
     "verify:ops-modules": "tsx --tsconfig tsconfig.json scripts/verify-ops-modules.ts",
     "verify:ehr-fhir": "tsx --tsconfig tsconfig.json scripts/verify-ehr-fhir-schema.ts",
     "verify:pharmacy": "tsx --tsconfig tsconfig.json scripts/verify-pharmacy-inventory.ts",
-    "verify:clinical-profile-embed": "tsx --tsconfig tsconfig.json scripts/verify-clinical-profile-embed.ts"
+    "verify:clinical-profile-embed": "tsx --tsconfig tsconfig.json scripts/verify-clinical-profile-embed.ts",
+    "verify:clinical-measurements": "tsx --tsconfig tsconfig.json scripts/verify-clinical-measurements.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",

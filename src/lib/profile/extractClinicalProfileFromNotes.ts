@@ -1,3 +1,5 @@
+import { withComputedBmi } from "@/lib/profile/clinical-measurements";
+
 export type ExtractedClinicalProfileDraft = {
   conditions: string[];
   medications: string[];
@@ -7,7 +9,13 @@ export type ExtractedClinicalProfileDraft = {
 const EXTRACTION_SCHEMA = `{
   "conditions": string[] — diagnósticos o patologías activas en español,
   "medications": string[] — medicación concomitante actual,
-  "laboratories": { "nombre_lab": number } — valores numéricos recientes (ej. glucosa, creatinina, hba1c)
+  "laboratories": { "nombre_lab": number } — mediciones recientes con estas claves si aparecen:
+    pas, pad (mmHg), frecuencia_cardiaca (lpm), temperatura (°C), frecuencia_respiratoria (rpm),
+    peso (kg), estatura (cm), imc,
+    glucosa (mg/dL), creatinina (mg/dL), tgo, tgp, ggt, fa (U/L),
+    hemoglobina (g/dL), hematocrito (%), leucocitos, plaquetas,
+    embarazo_sangre y embarazo_orina (0 = negativo, 1 = positivo).
+    Si figura presión 120/80, usá pas=120 y pad=80.
 }`;
 
 function normalizeStringList(value: unknown): string[] {
@@ -58,8 +66,8 @@ export async function extractClinicalProfileFromNotes(
           role: "system",
           content:
             "Sos un asistente clínico para clinical research sites. Extraé de notas en español " +
-            "condiciones, medicación y laboratorios numéricos. " +
-            "Usá términos clínicos claros (ej. 'hipertensión arterial', 'metformina'). " +
+            "condiciones, medicación, signos vitales, antropometría y laboratorios. " +
+            "Usá las claves canónicas del esquema (pas/pad, glucosa, creatinina, tgo, tgp, etc.). " +
             "No inventes datos que no estén en el texto. " +
             "Respondé SOLO JSON válido con esta forma:\n" +
             EXTRACTION_SCHEMA,
@@ -89,6 +97,6 @@ export async function extractClinicalProfileFromNotes(
   return {
     conditions: normalizeStringList(parsed.conditions),
     medications: normalizeStringList(parsed.medications),
-    laboratories: normalizeLabs(parsed.laboratories),
+    laboratories: withComputedBmi(normalizeLabs(parsed.laboratories)),
   };
 }

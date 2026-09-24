@@ -1,4 +1,5 @@
 import type { Gender } from "@/lib/types";
+import { withComputedBmi } from "@/lib/profile/clinical-measurements";
 
 export type ParsedPatientRow = {
   first_name: string;
@@ -72,13 +73,13 @@ export function parsePatientCsv(text: string): ParsedPatientRow[] {
       gender: parseGender(record.gender),
       conditions: parseList(record.conditions),
       medications: parseList(record.medications),
-      laboratories,
+      laboratories: withComputedBmi(laboratories),
     });
   }
 
   return rows;
 }
 
-export const PATIENT_CSV_TEMPLATE = `first_name,last_name,birth_date,gender,conditions,medications,glucosa,hba1c
-María,González,1962-04-12,female,diabetes tipo 2;hipertensión,metformina;enalapril,145,7.8
-Carlos,Fernández,1975-09-30,male,diabetes tipo 2,metformina,190,9.1`;
+export const PATIENT_CSV_TEMPLATE = `first_name,last_name,birth_date,gender,conditions,medications,pas,pad,frecuencia_cardiaca,temperatura,frecuencia_respiratoria,peso,estatura,glucosa,creatinina,tgo,tgp,hemoglobina,embarazo_sangre,embarazo_orina,hba1c
+María,González,1962-04-12,female,diabetes tipo 2;hipertensión,metformina;enalapril,138,82,76,36.6,16,72,158,145,0.9,28,32,13.2,0,,7.8
+Carlos,Fernández,1975-09-30,male,diabetes tipo 2,metformina,142,88,80,36.8,18,91,175,190,1.1,35,40,14.1,,,9.1`;
