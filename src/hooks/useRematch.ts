@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getSupabaseClient } from "@/lib/supabase/client";
+import { useSupabaseReady } from "@/hooks/useSupabaseReady";
 import { evaluatePatientAgainstProtocol } from "@/lib/matching";
+import { firstEmbedded } from "@/lib/supabase/embed";
+import { getSupabaseClient } from "@/lib/supabase/client";
 import {
   PATIENT_WITH_PROFILE_COLUMNS,
   PROTOCOL_LIST_COLUMNS,
@@ -38,6 +40,7 @@ export function useRematch() {
   const [enrolledPairs, setEnrolledPairs] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const supabaseReady = useSupabaseReady();
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -106,8 +109,9 @@ export function useRematch() {
   }, []);
 
   useEffect(() => {
-    void Promise.resolve().then(fetchAll);
-  }, [fetchAll]);
+    if (!supabaseReady) return;
+    void fetchAll();
+  }, [supabaseReady, fetchAll]);
 
   const opportunities: RematchOpportunity[] = useMemo(() => {
     const byPatient = new Map<string, ScreeningWithRelations[]>();
@@ -123,7 +127,7 @@ export function useRematch() {
       const row = patients.find((p) => p.id === patientId);
       if (!row) continue;
       const { clinical_profiles, ...patient } = row;
-      const profile = clinical_profiles?.[0] ?? null;
+      const profile = firstEmbedded(clinical_profiles);
 
       const candidates = protocols
         .filter((p) => !enrolledPairs.has(`${patientId}:${p.id}`))

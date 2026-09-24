@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSupabaseReady } from "@/hooks/useSupabaseReady";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { rankPatientsForProtocol } from "@/lib/matching";
 import type { MatchResult, Protocol, Screening } from "@/lib/types";
@@ -19,6 +20,7 @@ export function useProtocolMatch(protocolId: string) {
   const [existing, setExisting] = useState<Map<string, Screening>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const supabaseReady = useSupabaseReady();
   const { pairs, loading: pairsLoading, error: pairsError } =
     usePatientsWithProfiles();
 
@@ -34,7 +36,7 @@ export function useProtocolMatch(protocolId: string) {
             "id, clinic_id, title, code_name, inclusion_criteria, exclusion_criteria, status, created_at"
           )
           .eq("id", protocolId)
-          .single(),
+          .maybeSingle(),
         supabase
           .from("screenings")
           .select("id, patient_id, protocol_id, status, match_score")
@@ -42,6 +44,11 @@ export function useProtocolMatch(protocolId: string) {
       ]);
       if (protocolRes.error) throw protocolRes.error;
       if (screeningsRes.error) throw screeningsRes.error;
+      if (!protocolRes.data) {
+        setProtocol(null);
+        setError("Protocolo no encontrado");
+        return;
+      }
       setProtocol(protocolRes.data as Protocol);
       setExisting(
         new Map(
@@ -59,10 +66,9 @@ export function useProtocolMatch(protocolId: string) {
   }, [protocolId]);
 
   useEffect(() => {
-    // Deferido a una microtarea para no llamar setState de forma síncrona
-    // dentro del efecto (regla react-hooks/set-state-in-effect).
-    void Promise.resolve().then(fetchData);
-  }, [fetchData]);
+    if (!supabaseReady) return;
+    void fetchData();
+  }, [supabaseReady, fetchData]);
 
   const results: MatchResult[] = useMemo(() => {
     if (!protocol) return [];

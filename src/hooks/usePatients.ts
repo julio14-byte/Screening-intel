@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { PATIENT_LIST_COLUMNS } from "@/lib/supabase/query-columns";
+import { getSessionOrganizationId } from "@/lib/supabase/current-organization";
 import { useSupabaseReady } from "@/hooks/useSupabaseReady";
 import type { Gender, Patient } from "@/lib/types";
 
@@ -45,7 +46,10 @@ export function usePatients() {
   const addPatient = useCallback(
     async (input: NewPatientInput) => {
       const supabase = getSupabaseClient();
-      const { error } = await supabase.from("patients").insert(input);
+      const clinic_id = await getSessionOrganizationId(supabase);
+      const { error } = await supabase
+        .from("patients")
+        .insert({ ...input, clinic_id });
       if (error) throw error;
       await fetchPatients();
     },

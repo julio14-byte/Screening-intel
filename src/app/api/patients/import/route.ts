@@ -31,6 +31,25 @@ export async function POST(request: Request) {
   }
 
   const supabase = await createClient();
+  const { data: membership, error: orgError } = await supabase
+    .from("organization_members")
+    .select("organization_id")
+    .eq("user_id", user.id)
+    .limit(1)
+    .maybeSingle();
+
+  if (orgError) {
+    return NextResponse.json({ error: orgError.message }, { status: 500 });
+  }
+
+  const clinicId = membership?.organization_id as string | undefined;
+  if (!clinicId) {
+    return NextResponse.json(
+      { error: "Sin organización. No se pueden importar pacientes." },
+      { status: 403 }
+    );
+  }
+
   let imported = 0;
   const errors: string[] = [];
 
@@ -38,6 +57,7 @@ export async function POST(request: Request) {
     const { data: patient, error: patientError } = await supabase
       .from("patients")
       .insert({
+        clinic_id: clinicId,
         first_name: row.first_name,
         last_name: row.last_name,
         birth_date: row.birth_date,

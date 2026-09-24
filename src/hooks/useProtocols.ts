@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { PROTOCOL_LIST_COLUMNS } from "@/lib/supabase/query-columns";
+import { getSessionOrganizationId } from "@/lib/supabase/current-organization";
 import { useSupabaseReady } from "@/hooks/useSupabaseReady";
 import type {
   ExclusionCriteria,
@@ -51,7 +52,10 @@ export function useProtocols() {
   const addProtocol = useCallback(
     async (input: NewProtocolInput) => {
       const supabase = getSupabaseClient();
-      const { error } = await supabase.from("protocols").insert(input);
+      const clinic_id = await getSessionOrganizationId(supabase);
+      const { error } = await supabase
+        .from("protocols")
+        .insert({ ...input, clinic_id });
       if (error) throw error;
       await fetchProtocols();
     },

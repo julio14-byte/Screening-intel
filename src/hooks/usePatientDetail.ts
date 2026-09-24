@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSupabaseReady } from "@/hooks/useSupabaseReady";
 import { getSupabaseClient } from "@/lib/supabase/client";
+import { PATIENT_LIST_COLUMNS } from "@/lib/supabase/query-columns";
 import type { ClinicalProfile, Patient } from "@/lib/types";
 
 export interface ProfileUpdate {
@@ -15,6 +17,7 @@ export function usePatientDetail(patientId: string) {
   const [profile, setProfile] = useState<ClinicalProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const supabaseReady = useSupabaseReady();
 
   const fetchDetail = useCallback(async () => {
     setLoading(true);
@@ -22,7 +25,11 @@ export function usePatientDetail(patientId: string) {
     try {
       const supabase = getSupabaseClient();
       const [patientRes, profileRes] = await Promise.all([
-        supabase.from("patients").select("id, clinic_id, first_name, last_name, birth_date, gender, created_at").eq("id", patientId).single(),
+        supabase
+          .from("patients")
+          .select(PATIENT_LIST_COLUMNS)
+          .eq("id", patientId)
+          .maybeSingle(),
         supabase
           .from("clinical_profiles")
           .select("id, patient_id, conditions, medications, laboratories, updated_at")
@@ -31,6 +38,12 @@ export function usePatientDetail(patientId: string) {
       ]);
       if (patientRes.error) throw patientRes.error;
       if (profileRes.error) throw profileRes.error;
+      if (!patientRes.data) {
+        setPatient(null);
+        setProfile(null);
+        setError("Paciente no encontrado");
+        return;
+      }
       setPatient(patientRes.data as Patient);
       setProfile((profileRes.data as ClinicalProfile) ?? null);
     } catch (e) {
@@ -41,10 +54,9 @@ export function usePatientDetail(patientId: string) {
   }, [patientId]);
 
   useEffect(() => {
-    // Deferido a una microtarea para no llamar setState de forma síncrona
-    // dentro del efecto (regla react-hooks/set-state-in-effect).
-    void Promise.resolve().then(fetchDetail);
-  }, [fetchDetail]);
+    if (!supabaseReady) return;
+    void fetchDetail();
+  }, [supabaseReady, fetchDetail]);
 
   /** Crea o actualiza (upsert) el perfil clínico del paciente. */
   const saveProfile = useCallback(
