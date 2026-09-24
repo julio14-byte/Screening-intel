@@ -103,20 +103,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 401 });
   }
 
-  if (isDemoEmail(email) && isDemoLoginEnabled()) {
-    try {
-      await ensureDemoPatientData();
-    } catch (seedErr) {
-      console.error("[login] demo seed:", (seedErr as Error)?.message);
-    }
-  }
-
   let mfaRequired = false;
   let mfaEnrollmentRequired = false;
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (isDemoEmail(email) && isDemoLoginEnabled()) {
+    try {
+      await ensureDemoPatientData(user?.id);
+    } catch (seedErr) {
+      console.error("[login] demo seed:", (seedErr as Error)?.message);
+    }
+  }
 
   if (user) {
     const { data: roleRow } = await supabase

@@ -1,4 +1,6 @@
+import { getDemoCredentials } from "@/lib/auth/constants";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const DEMO_PATIENTS = [
   {
@@ -199,18 +201,100 @@ const DEMO_SCREENINGS = [
   },
 ];
 
+async function createOrgForUser(
+  admin: SupabaseClient,
+  userId: string,
+  email: string
+): Promise<string> {
+  const { data: org, error: orgError } = await admin
+    .from("organizations")
+    .insert({
+      name: "Crisvia demo",
+      plan_id: "starter",
+      subscription_status: "trialing",
+      trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+      patient_limit: 50,
+      protocol_limit: 3,
+      user_limit: 1,
+    })
+    .select("id")
+    .single();
+
+  if (orgError || !org?.id) {
+    throw new Error(`demo org: ${orgError?.message ?? "no se pudo crear"}`);
+  }
+
+  const { error: memberError } = await admin.from("organization_members").insert({
+    organization_id: org.id,
+    user_id: userId,
+    role: "owner",
+  });
+
+  if (memberError && !memberError.message.toLowerCase().includes("duplicate")) {
+    throw new Error(`demo membership: ${memberError.message} (${email})`);
+  }
+
+  return org.id as string;
+}
+
+async function resolveDemoClinicId(
+  admin: SupabaseClient,
+  userId?: string
+): Promise<string> {
+  if (userId) {
+    const { data } = await admin
+      .from("organization_members")
+      .select("organization_id")
+      .eq("user_id", userId)
+      .limit(1)
+      .maybeSingle();
+    if (data?.organization_id) return data.organization_id as string;
+  }
+
+  const demo = getDemoCredentials();
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("id")
+    .eq("email", demo.email.trim().toLowerCase())
+    .maybeSingle();
+
+  if (profile?.id) {
+    const { data: membership } = await admin
+      .from("organization_members")
+      .select("organization_id")
+      .eq("user_id", profile.id)
+      .limit(1)
+      .maybeSingle();
+    if (membership?.organization_id) {
+      return membership.organization_id as string;
+    }
+    return createOrgForUser(admin, profile.id as string, demo.email);
+  }
+
+  if (userId) {
+    return createOrgForUser(admin, userId, demo.email);
+  }
+
+  throw new Error(
+    "demo seed: el usuario demo no tiene organización. Volvé a entrar con el login demo."
+  );
+}
+
 /**
  * Inserta pacientes, protocolos y screenings de demo (idempotente).
+ * Los asigna a la organización del usuario demo para que RLS los deje ver.
  * Requiere SUPABASE_SERVICE_ROLE_KEY.
  */
-export async function ensureDemoPatientData(): Promise<void> {
+export async function ensureDemoPatientData(userId?: string): Promise<void> {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return;
 
   const admin = createAdminClient();
+  const clinicId = await resolveDemoClinicId(admin, userId);
 
-  const { error: patientsError } = await admin
-    .from("patients")
-    .upsert(DEMO_PATIENTS, { onConflict: "id", ignoreDuplicates: true });
+  const { error: patientsError } = await admin.from("patients").upsert(
+    DEMO_PATIENTS.map((patient) => ({ ...patient, clinic_id: clinicId })),
+    { onConflict: "id" }
+  );
 
   if (patientsError) {
     throw new Error(`demo patients: ${patientsError.message}`);
@@ -224,9 +308,10 @@ export async function ensureDemoPatientData(): Promise<void> {
     throw new Error(`demo profiles: ${profilesError.message}`);
   }
 
-  const { error: protocolsError } = await admin
-    .from("protocols")
-    .upsert(DEMO_PROTOCOLS, { onConflict: "id", ignoreDuplicates: true });
+  const { error: protocolsError } = await admin.from("protocols").upsert(
+    DEMO_PROTOCOLS.map((protocol) => ({ ...protocol, clinic_id: clinicId })),
+    { onConflict: "id" }
+  );
 
   if (protocolsError) {
     throw new Error(`demo protocols: ${protocolsError.message}`);

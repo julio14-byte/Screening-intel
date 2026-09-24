@@ -150,7 +150,8 @@ export interface MatchResult {
 
 // Filas con relaciones embebidas devueltas por Supabase
 export interface PatientWithProfile extends Patient {
-  clinical_profiles: ClinicalProfile[] | null;
+  /** PostgREST: array o objeto si hay unique(patient_id). */
+  clinical_profiles: ClinicalProfile | ClinicalProfile[] | null;
 }
 
 export interface ScreeningWithRelations extends Screening {

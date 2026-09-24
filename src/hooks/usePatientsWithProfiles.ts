@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSupabaseReady } from "@/hooks/useSupabaseReady";
+import { firstEmbedded } from "@/lib/supabase/embed";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { PATIENT_WITH_PROFILE_COLUMNS } from "@/lib/supabase/query-columns";
 import type {
@@ -19,6 +21,7 @@ export function usePatientsWithProfiles() {
   const [pairs, setPairs] = useState<PatientProfilePair[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const supabaseReady = useSupabaseReady();
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -36,7 +39,7 @@ export function usePatientsWithProfiles() {
           const { clinical_profiles, ...patient } = row;
           return {
             patient: patient as Patient,
-            profile: clinical_profiles?.[0] ?? null,
+            profile: firstEmbedded(clinical_profiles),
           };
         })
       );
@@ -48,10 +51,9 @@ export function usePatientsWithProfiles() {
   }, []);
 
   useEffect(() => {
-    // Deferido a una microtarea para no llamar setState de forma síncrona
-    // dentro del efecto (regla react-hooks/set-state-in-effect).
-    void Promise.resolve().then(fetchAll);
-  }, [fetchAll]);
+    if (!supabaseReady) return;
+    void fetchAll();
+  }, [supabaseReady, fetchAll]);
 
   return { pairs, loading, error, refetch: fetchAll };
 }
