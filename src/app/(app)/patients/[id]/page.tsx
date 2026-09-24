@@ -7,6 +7,7 @@ import { AuditTimeline } from "@/components/audit/audit-timeline";
 import { InclusionApprovalPanel } from "@/components/rbac/InclusionApprovalPanel";
 import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
 import { ElectronicPrescriptionPanel } from "@/components/pharmacy/ElectronicPrescriptionPanel";
+import { VisitLog } from "@/components/ops/VisitLog";
 import { ClinicalProfileEditor } from "@/components/profile/ClinicalProfileEditor";
 import { usePatientDetail } from "@/hooks/usePatientDetail";
 import { useProtocols } from "@/hooks/useProtocols";
@@ -41,13 +42,22 @@ export default function PatientDetailPage({
       />
 
       <div className="mt-6">
-        <AuditTimeline tableName="patients" recordId={patient.id} />
+        <h2 className="mb-3 text-lg font-semibold text-indigo-950">Visitas con el médico</h2>
+        <VisitLog
+          patientId={patient.id}
+          title="Registrar visita"
+          description="Fecha, médico y nota clínica de esta consulta."
+        />
       </div>
 
       <ElectronicPrescriptionPanel
         patientId={patient.id}
         protocols={protocols}
       />
+
+      <div className="mt-6">
+        <AuditTimeline tableName="patients" recordId={patient.id} />
+      </div>
 
       <InclusionApprovalPanel patientId={patient.id} />
     </>

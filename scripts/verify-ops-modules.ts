@@ -4,6 +4,8 @@ import {
   openTaskKey,
   overdueDedupeKey,
   screeningUpdateConflict,
+  VISIT_KIND_LABEL,
+  VISIT_NOTES_MAX,
 } from "../src/lib/ops/model";
 
 let failed = 0;
@@ -42,6 +44,8 @@ assert(
 assert(funnel.recover.key === "recover", "screen failure queda aparte");
 assert(funnel.recover.href === "/rematch", "recuperar va a re-match");
 assert(!funnel.stages.some((stage) => stage.key === "recover"), "recover no es etapa");
+assert(VISIT_KIND_LABEL.consulta === "Consulta médica", "tipo consulta");
+assert(VISIT_NOTES_MAX >= 4000, "notas clínicas largas");
 
 if (failed) process.exit(1);
 console.log("verify-ops-modules: embudo, vencimientos y conflicto OK");

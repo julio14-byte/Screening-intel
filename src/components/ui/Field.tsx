@@ -5,6 +5,7 @@ import type {
   InputHTMLAttributes,
   ReactNode,
   SelectHTMLAttributes,
+  TextareaHTMLAttributes,
 } from "react";
 import { useId } from "react";
 
@@ -80,6 +81,29 @@ export function SelectInput({
   return (
     <Field label={label} hint={hint} htmlFor={selectId}>
       {select}
+    </Field>
+  );
+}
+
+interface TextAreaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label?: string;
+  hint?: string;
+}
+
+export function TextArea({ label, hint, className, id, ...props }: TextAreaProps) {
+  const autoId = useId();
+  const areaId = id ?? autoId;
+  const area = (
+    <textarea
+      id={areaId}
+      className={cn(inputClasses, "min-h-[96px] resize-y", className)}
+      {...props}
+    />
+  );
+  if (!label) return area;
+  return (
+    <Field label={label} hint={hint} htmlFor={areaId}>
+      {area}
     </Field>
   );
 }

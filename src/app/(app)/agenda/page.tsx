@@ -5,8 +5,8 @@ export default function AgendaPage() {
   return (
     <>
       <PageHeader
-        title="Agenda"
-        description="Visitas de pre-screening. Fecha, sede y si la persona asistió."
+        title="Agenda de visitas"
+        description="Control de visitas del paciente con el médico. Cada consulta queda registrada con nota clínica."
       />
       <VisitAgenda />
     </>

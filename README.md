@@ -22,6 +22,7 @@ Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-sc
 | **Re-Match nativo** | Propone protocolos alternativos tras un screen failure. |
 | **Sub-investigator** | Rol clínico con permisos de PI excepto roles y facturación. |
 | **Crisvia** | Nombre del producto (antes Screenlane / Screening Intelligence). |
+| **Visitas con notas** | Cada consulta con el médico queda registrada (tipo, sede, estado y nota clínica). |
 
 ---
 
@@ -83,7 +84,7 @@ Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operat
 |------|-------------|
 | `/dashboard` | Embudo de screening y métricas del site |
 | `/patients` | Registro de pacientes |
-| `/patients/[id]` | Perfil clínico + timeline de auditoría |
+| `/patients/[id]` | Perfil clínico, visitas con notas, receta e inventario |
 | `/protocols` | Gestión de protocolos |
 | `/protocols/[id]` | Medicamentos del estudio y números de lote |
 | `/protocols/[id]/match` | Cruce masivo paciente ↔ protocolo + justificación IA |
@@ -94,7 +95,7 @@ Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operat
 | `/candidatos` | Inbox de leads del portal (coordinadores) |
 | `/cola` | Tareas guardadas: inbox, criterios 🟡 y re-match |
 | `/avisos` | Avisos de candidato nuevo, screen failure y tarea vencida |
-| `/agenda` | Visitas de pre-screening |
+| `/agenda` | Visitas con el médico: registro, estado y notas clínicas |
 | `/settings/portal` | Configuración del portal (investigator) |
 | `/settings/security` | MFA TOTP (obligatorio en prod para PI / sub-PI) |
 | `/epro` | Formularios ePRO |
