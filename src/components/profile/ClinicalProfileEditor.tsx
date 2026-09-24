@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { HeartPulse, Pill, Save, TestTubes } from "lucide-react";
+import { HeartPulse, Pill, Save, Stethoscope, TestTubes } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ErrorState } from "@/components/ui/StateMessage";
 import { ConditionsEditor } from "@/components/profile/ConditionsEditor";
+import { ClinicalMeasurementsEditor } from "@/components/profile/ClinicalMeasurementsEditor";
 import { ClinicalNotesImport } from "@/components/profile/ClinicalNotesImport";
 import { RoleGuard } from "@/components/rbac/RoleGuard";
 import { useRole } from "@/contexts/role-context";
@@ -14,6 +15,12 @@ import { LabsEditor } from "@/components/profile/LabsEditor";
 import { TagListEditor } from "@/components/profile/TagListEditor";
 import type { ProfileUpdate } from "@/hooks/usePatientDetail";
 import type { ExtractedClinicalProfileDraft } from "@/lib/profile/extractClinicalProfileFromNotes";
+import {
+  catalogLaboratories,
+  extraLaboratories,
+  mergeLaboratories,
+  withComputedBmi,
+} from "@/lib/profile/clinical-measurements";
 import type { ClinicalProfile, Patient } from "@/lib/types";
 import { calculateAge, formatDate, GENDER_LABELS } from "@/lib/utils";
 
@@ -37,7 +44,7 @@ export function ClinicalProfileEditor({
     profile?.medications ?? []
   );
   const [laboratories, setLaboratories] = useState<Record<string, number>>(
-    profile?.laboratories ?? {}
+    () => withComputedBmi(profile?.laboratories ?? {})
   );
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -49,7 +56,7 @@ export function ClinicalProfileEditor({
   function applyNotesDraft(draft: ExtractedClinicalProfileDraft) {
     setConditions((prev) => [...new Set([...prev, ...draft.conditions])]);
     setMedications((prev) => [...new Set([...prev, ...draft.medications])]);
-    setLaboratories((prev) => ({ ...prev, ...draft.laboratories }));
+    setLaboratories((prev) => withComputedBmi({ ...prev, ...draft.laboratories }));
     setDirty(true);
   }
 
@@ -157,15 +164,35 @@ export function ClinicalProfileEditor({
 
         <Card className="lg:col-span-2">
           <CardHeader
-            title="Laboratorios recientes"
-            description="Últimos valores disponibles, usados por el motor de matching"
+            title="Datos biométricos y clínicos"
+            description="Mediciones directas: signos vitales, antropometría, laboratorio dirigido y prueba de embarazo"
+            actions={<Stethoscope className="h-4 w-4 text-slate-400" aria-hidden />}
+          />
+          <CardBody>
+            <ClinicalMeasurementsEditor
+              labs={laboratories}
+              gender={patient.gender}
+              onChange={(labs) => {
+                setLaboratories(labs);
+                setDirty(true);
+              }}
+            />
+          </CardBody>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardHeader
+            title="Otros analitos"
+            description="Valores extra para matching (ej. HbA1c). Los campos de arriba no se duplican acá."
             actions={<TestTubes className="h-4 w-4 text-slate-400" aria-hidden />}
           />
           <CardBody>
             <LabsEditor
-              labs={laboratories}
-              onChange={(labs) => {
-                setLaboratories(labs);
+              labs={extraLaboratories(laboratories)}
+              onChange={(extra) => {
+                setLaboratories(
+                  mergeLaboratories(catalogLaboratories(laboratories), extra)
+                );
                 setDirty(true);
               }}
             />
