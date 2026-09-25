@@ -70,6 +70,11 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
       { name: "ICD-11", description: "Terminología WHO ICD-11" },
       { name: "Stripe", description: "Facturación SaaS" },
       { name: "Waitlist", description: "Landing / captación" },
+      {
+        name: "IWRS",
+        description:
+          "Módulo independiente de randomización. Screening y EDC lo consumen; no forma parte del matcher.",
+      },
     ],
     components: {
       securitySchemes: {
@@ -575,6 +580,179 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           responses: {
             "200": { description: "Evento procesado" },
             "400": { description: "Firma inválida", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+      },
+      "/api/iwrs": {
+        get: {
+          tags: ["IWRS"],
+          summary: "Catálogo del módulo IWRS",
+          description:
+            "Configs, brazos y asignaciones. Screening, EDC y ePRO deben usar este endpoint en lugar de leer tablas IWRS.",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            {
+              name: "protocol_id",
+              in: "query",
+              schema: { type: "string", format: "uuid" },
+            },
+          ],
+          responses: {
+            "200": {
+              description: "Catálogo IWRS",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      module: { type: "string", example: "iwrs" },
+                      version: { type: "string", example: "1" },
+                      configs: { type: "array", items: { type: "object" } },
+                      arms: { type: "array", items: { type: "object" } },
+                      assignments: { type: "array", items: { type: "object" } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      "/api/iwrs/config": {
+        post: {
+          tags: ["IWRS"],
+          summary: "Activar o actualizar IWRS de un protocolo",
+          security: [{ cookieAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["protocol_id", "enabled", "blinding", "block_size"],
+                  properties: {
+                    protocol_id: { type: "string", format: "uuid" },
+                    enabled: { type: "boolean" },
+                    blinding: { type: "string", enum: ["open", "single", "double"] },
+                    block_size: { type: "integer", minimum: 2, maximum: 24 },
+                    stratify_gender: { type: "boolean" },
+                    source: { type: "string", enum: ["site", "sponsor"] },
+                    sponsor_vendor: { type: "string" },
+                    sponsor_study_id: { type: "string" },
+                    sponsor_site_id: { type: "string" },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Config guardada" },
+          },
+        },
+      },
+      "/api/iwrs/arms": {
+        post: {
+          tags: ["IWRS"],
+          summary: "Agregar brazo de randomización",
+          security: [{ cookieAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["protocol_id", "code", "name"],
+                  properties: {
+                    protocol_id: { type: "string", format: "uuid" },
+                    code: { type: "string" },
+                    name: { type: "string" },
+                    allocation_weight: { type: "integer", minimum: 1, maximum: 9 },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Brazo creado" },
+          },
+        },
+      },
+      "/api/iwrs/randomize": {
+        post: {
+          tags: ["IWRS"],
+          summary: "Asignar kit (IWRS del centro)",
+          description: "Solo si el protocolo tiene source=site. Requiere screening en estado screening.",
+          security: [{ cookieAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["screening_id"],
+                  properties: {
+                    screening_id: { type: "string", format: "uuid" },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Asignación" },
+            "400": { description: "Protocolo sponsor o IWRS inactivo", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+      },
+      "/api/iwrs/sponsor-register": {
+        post: {
+          tags: ["IWRS"],
+          summary: "Registrar kit del IRT del sponsor",
+          description: "Crisvia no llama a Lilly ni a IQVIA. El coordinador carga el kit que ya devolvió ese IRT.",
+          security: [{ cookieAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["screening_id", "kit_code"],
+                  properties: {
+                    screening_id: { type: "string", format: "uuid" },
+                    kit_code: { type: "string" },
+                    external_id: { type: "string" },
+                    arm_id: { type: "string", format: "uuid", nullable: true },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Kit registrado" },
+          },
+        },
+      },
+      "/api/iwrs/unblind": {
+        post: {
+          tags: ["IWRS"],
+          summary: "Desenmascarar asignación",
+          security: [{ cookieAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["randomization_id", "reason"],
+                  properties: {
+                    randomization_id: { type: "string", format: "uuid" },
+                    reason: { type: "string", minLength: 8 },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Brazo visible" },
           },
         },
       },

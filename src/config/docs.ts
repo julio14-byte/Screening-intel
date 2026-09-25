@@ -35,6 +35,11 @@ export const productDocs = {
           body:
             "Tras IWRS, farmacia entrega la caja en /dispensacion y registra la primera dosis. El paciente usa un link /diario para hora y síntomas. No hace falta una app aparte.",
         },
+        {
+          heading: "6. Módulos: Screening, EDC, ePRO e IWRS",
+          body:
+            "La app es Screening + EDC + ePRO. El IWRS es un módulo independiente: kit y brazo se piden a /api/iwrs (documentado en /docs/api).",
+        },
       ],
     },
   ],

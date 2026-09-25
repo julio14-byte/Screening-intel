@@ -6,7 +6,7 @@ import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { SelectInput, TextInput } from "@/components/ui/Field";
 import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
 import { useRole } from "@/contexts/role-context";
-import { readJsonResponse } from "@/lib/http/readJsonResponse";
+import { fetchIwrsCatalog, postIwrsArm, postIwrsConfig } from "@/lib/iwrs/client";
 import {
   allocationRatioLabel,
   IWRS_BLINDING_LABEL,
@@ -40,14 +40,8 @@ export function ProtocolIwrsPanel({ protocolId }: { protocolId: string }) {
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
-    const res = await fetch(`/api/iwrs?protocol_id=${protocolId}`);
-    const json = await readJsonResponse<{
-      configs?: IwrsConfig[];
-      arms?: ProtocolArm[];
-      error?: string;
-    }>(res);
-    if (!res.ok) throw new Error(json?.error ?? "No se pudo cargar IWRS.");
-    const next = json?.configs?.[0] ?? null;
+    const json = await fetchIwrsCatalog(protocolId);
+    const next = json.configs[0] ?? null;
     setConfig(next);
     setArms(json?.arms ?? []);
     setEnabled(next?.enabled ?? false);
@@ -82,23 +76,17 @@ export function ProtocolIwrsPanel({ protocolId }: { protocolId: string }) {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch("/api/iwrs/config", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          protocol_id: protocolId,
-          enabled,
-          blinding,
-          block_size: Number(blockSize),
-          stratify_gender: stratify,
-          source,
-          sponsor_vendor: source === "sponsor" ? vendor : "",
-          sponsor_study_id: studyId,
-          sponsor_site_id: siteId,
-        }),
+      await postIwrsConfig({
+        protocol_id: protocolId,
+        enabled,
+        blinding,
+        block_size: Number(blockSize),
+        stratify_gender: stratify,
+        source,
+        sponsor_vendor: source === "sponsor" ? vendor : "",
+        sponsor_study_id: studyId,
+        sponsor_site_id: siteId,
       });
-      const json = await readJsonResponse<{ error?: string }>(res);
-      if (!res.ok) throw new Error(json?.error ?? "No se pudo guardar IWRS.");
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo guardar IWRS.");
@@ -113,18 +101,12 @@ export function ProtocolIwrsPanel({ protocolId }: { protocolId: string }) {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch("/api/iwrs/arms", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          protocol_id: protocolId,
-          code: armCode,
-          name: armName,
-          allocation_weight: Number(armWeight),
-        }),
+      await postIwrsArm({
+        protocol_id: protocolId,
+        code: armCode,
+        name: armName,
+        allocation_weight: Number(armWeight),
       });
-      const json = await readJsonResponse<{ error?: string }>(res);
-      if (!res.ok) throw new Error(json?.error ?? "No se pudo agregar el brazo.");
       setArmName("");
       await load();
     } catch (err) {
@@ -140,7 +122,7 @@ export function ProtocolIwrsPanel({ protocolId }: { protocolId: string }) {
     <Card className="mt-4">
       <CardHeader
         title="IWRS — randomización"
-        description="Kit y brazo después del screening. No cambia la elegibilidad."
+        description="Módulo independiente: este panel llama /api/iwrs. No cambia la elegibilidad del matcher."
       />
       <CardBody className="space-y-4">
         {error ? <ErrorState message={error} /> : null}

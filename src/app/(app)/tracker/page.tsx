@@ -12,8 +12,7 @@ import { Card } from "@/components/ui/Card";
 import { KanbanBoard } from "@/components/tracker/KanbanBoard";
 import { ScreeningProcessNote } from "@/components/screening/ScreeningProcessNote";
 import { useScreenings } from "@/hooks/useScreenings";
-import { readJsonResponse } from "@/lib/http/readJsonResponse";
-import type { IwrsConfig } from "@/lib/iwrs/model";
+import { fetchIwrsCatalog, postIwrsRandomize } from "@/lib/iwrs/client";
 import type { ScreeningStatus } from "@/lib/types";
 
 export default function TrackerPage() {
@@ -25,10 +24,10 @@ export default function TrackerPage() {
   const [sponsorIds, setSponsorIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    fetch("/api/iwrs")
-      .then((res) => readJsonResponse<{ configs?: IwrsConfig[] }>(res))
+    void Promise.resolve()
+      .then(() => fetchIwrsCatalog())
       .then((json) => {
-        const enabled = (json?.configs ?? []).filter((config) => config.enabled);
+        const enabled = json.configs.filter((config) => config.enabled);
         setIwrsIds(new Set(enabled.map((config) => config.protocol_id)));
         setSponsorIds(
           new Set(
@@ -76,13 +75,7 @@ export default function TrackerPage() {
       return;
     }
     try {
-      const res = await fetch("/api/iwrs/randomize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ screening_id: screeningId }),
-      });
-      const json = await readJsonResponse<{ error?: string }>(res);
-      if (!res.ok) throw new Error(json?.error ?? "No se pudo randomizar.");
+      await postIwrsRandomize(screeningId);
       await refetch();
     } catch (e) {
       setMoveError(e instanceof Error ? e.message : "No se pudo randomizar.");

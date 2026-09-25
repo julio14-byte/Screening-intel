@@ -6,7 +6,11 @@ import { Activity, ClipboardList, X } from "lucide-react";
 import config from "@/config";
 import { APP_ROLE_LABELS } from "@/lib/rbac/types";
 import type { AppRole } from "@/lib/rbac/types";
-import { APP_NAV_STYLES, appIcon } from "@/lib/app/nav";
+import { APP_NAV_STYLES, appIcon, groupNavItems } from "@/lib/app/nav";
+import {
+  PRODUCT_MODULE_NAV_LABEL,
+  type ProductModuleId,
+} from "@/lib/product/modules";
 import { routes } from "@/lib/app/routes";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +18,7 @@ export type NavItem = {
   href: string;
   label: string;
   icon: string;
+  section?: string;
 };
 
 export function AppSidebar({
@@ -70,29 +75,39 @@ export function AppSidebar({
         ) : null}
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto p-3" aria-label="Principal">
-        {navItems.map(({ href, label, icon }) => {
-          const Icon = appIcon(icon);
-          const styles = APP_NAV_STYLES[href] ?? APP_NAV_STYLES["/dashboard"];
-          const active =
-            pathname === href || pathname.startsWith(`${href}/`);
+      <nav className="flex-1 space-y-3 overflow-y-auto p-3" aria-label="Principal">
+        {groupNavItems(navItems).map((group) => (
+          <div key={group.section ?? "inicio"} className="space-y-1">
+            {group.section ? (
+              <p className="px-3 pt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-400">
+                {PRODUCT_MODULE_NAV_LABEL[group.section as ProductModuleId] ??
+                  group.section}
+              </p>
+            ) : null}
+            {group.items.map(({ href, label, icon }) => {
+              const Icon = appIcon(icon);
+              const styles = APP_NAV_STYLES[href] ?? APP_NAV_STYLES["/dashboard"];
+              const active =
+                pathname === href || pathname.startsWith(`${href}/`);
 
-          return (
-            <Link
-              key={href}
-              href={href}
-              onClick={onNavigate}
-              aria-current={active ? "page" : undefined}
-              className={cn(
-                "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
-                active ? styles.activeClass : styles.idleClass
-              )}
-            >
-              <Icon className="h-4 w-4 shrink-0" aria-hidden />
-              {label}
-            </Link>
-          );
-        })}
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={onNavigate}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
+                    active ? styles.activeClass : styles.idleClass
+                  )}
+                >
+                  <Icon className="h-4 w-4 shrink-0" aria-hidden />
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       <div className="border-t border-white/10 p-4">

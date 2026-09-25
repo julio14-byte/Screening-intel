@@ -111,5 +111,29 @@ assert(
   "etiqueta Lilly"
 );
 
+const iwrsRoute = readFileSync(resolve("src/app/api/iwrs/route.ts"), "utf8");
+const iwrsClient = readFileSync(resolve("src/lib/iwrs/client.ts"), "utf8");
+const iwrsPaths = readFileSync(resolve("src/lib/iwrs/paths.ts"), "utf8");
+const dispense = readFileSync(resolve("src/app/api/pharmacy/dispense/route.ts"), "utf8");
+const openapi = readFileSync(resolve("src/lib/openapi/spec.ts"), "utf8");
+const modules = readFileSync(resolve("src/lib/product/modules.ts"), "utf8");
+
+assert(iwrsPaths.includes('catalog: "/api/iwrs"'), "contrato HTTP del módulo");
+assert(iwrsClient.includes("fetchIwrsCatalog"), "cliente HTTP para Screening/EDC");
+assert(iwrsRoute.includes("listIwrsCatalog"), "GET /api/iwrs usa el catálogo");
+assert(
+  !dispense.includes('.from("iwrs_randomizations")'),
+  "EDC/farmacia no lee tablas IWRS"
+);
+assert(dispense.includes("listIwrsCatalog"), "dispensación pide kits al módulo IWRS");
+assert(openapi.includes('name: "IWRS"'), "OpenAPI tag IWRS");
+assert(openapi.includes('"/api/iwrs/randomize"'), "OpenAPI randomize");
+assert(modules.includes("screening"), "módulo Screening");
+assert(modules.includes('label: "EDC"'), "módulo EDC");
+assert(modules.includes('label: "ePRO"'), "módulo ePRO");
+assert(modules.includes('href: "/iwrs"'), "IWRS independiente");
+
 if (failed) process.exit(1);
-console.log("verify-iwrs: bloques permutados, RLS ciega, RPCs y puente sponsor OK");
+console.log(
+  "verify-iwrs: bloques permutados, RLS ciega, RPCs, puente sponsor y API independiente OK"
+);

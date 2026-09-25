@@ -4,6 +4,7 @@ import {
   ClipboardList,
   CreditCard,
   Cpu,
+  FileSpreadsheet,
   FlaskConical,
   KanbanSquare,
   LayoutDashboard,
@@ -40,13 +41,17 @@ export const APP_ICONS: Record<string, LucideIcon> = {
   Package,
   Dices,
   Pill,
+  FileSpreadsheet,
   Cpu,
 };
+
+export type NavSection = "screening" | "edc" | "epro" | "iwrs";
 
 export type AppNavItem = {
   href: string;
   label: string;
   icon: string;
+  section?: NavSection;
   activeClass: string;
   idleClass: string;
   feature?: "payments";
@@ -59,6 +64,10 @@ export const APP_NAV_STYLES: Record<
 > = {
   "/dashboard": {
     activeClass: "bg-white/15 text-white ring-1 ring-white/25",
+    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
+  },
+  "/edc": {
+    activeClass: "bg-cyan-400/20 text-cyan-100 ring-1 ring-cyan-300/30",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
   "/patients": {
@@ -122,6 +131,22 @@ export const APP_NAV_STYLES: Record<
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
 };
+
+export function groupNavItems<T extends { section?: string }>(
+  items: T[]
+): { section: string | null; items: T[] }[] {
+  const groups: { section: string | null; items: T[] }[] = [];
+  for (const item of items) {
+    const section = item.section ?? null;
+    const last = groups[groups.length - 1];
+    if (last && last.section === section) {
+      last.items.push(item);
+    } else {
+      groups.push({ section, items: [item] });
+    }
+  }
+  return groups;
+}
 
 export function appIcon(name: string): LucideIcon {
   return APP_ICONS[name] ?? LayoutDashboard;

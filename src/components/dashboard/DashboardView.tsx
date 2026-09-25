@@ -16,6 +16,7 @@ import {
   LoadingState,
 } from "@/components/ui/StateMessage";
 import { OperationalFunnel } from "@/components/dashboard/OperationalFunnel";
+import { ProductModulesStrip } from "@/components/product/ProductModulesStrip";
 import { computeDashboardMetrics } from "@/lib/dashboard/metrics";
 import { screeningToVerdict } from "@/lib/dashboard/traffic-light";
 import { routes } from "@/lib/app/routes";
@@ -64,6 +65,7 @@ export function DashboardView({
     <>
       <PageHeader
         title={title}
+        description="Screening del site. EDC, ePRO e IWRS (API) son módulos aparte."
         actions={
           filteredRows.length > 0 ? (
             <Button
@@ -81,6 +83,8 @@ export function DashboardView({
           ) : null
         }
       />
+
+      <ProductModulesStrip />
 
       <OperationalFunnel screenings={screenings} />
 

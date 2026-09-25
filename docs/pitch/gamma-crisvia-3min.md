@@ -104,6 +104,7 @@ Kanban: pre-screening → screening → randomizado → screen failure.
 Sin IWRS, el PI confirma inclusión a mano. Con IWRS, el kit/brazo se asigna en `/iwrs`.
 
 **IWRS `/iwrs`**
+Módulo **independiente**, conectado por `/api/iwrs`.
 Kit y brazo **después** del screening.
 Del centro (Crisvia sortea) o del sponsor (registrás el kit de su IRT).
 No hay enchufe único a Lilly: cada estudio usa el IRT que ellos designen.
@@ -212,7 +213,8 @@ Se empieza sin integrar el hospital. Trial de 14 días: un protocolo, una cohort
 | Cola | `/cola` | Tareas persistentes |
 | Avisos | `/avisos` | Alertas operativas |
 | Agenda | `/agenda` | Visitas de pre-screening |
-| IWRS | `/iwrs` | Kit y brazo después del screening |
+| EDC | `/edc` | Expediente, visitas y farmacia del centro |
+| IWRS | `/iwrs` | Módulo API: kit y brazo después del screening |
 | Dispensación | `/dispensacion` | Caja IWRS, primera dosis, diario |
 | Diario | `/diario` | El paciente anota toma y síntomas |
 | Re-Match | `/rematch` | Otro protocolo tras el fallo |

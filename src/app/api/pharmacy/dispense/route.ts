@@ -4,6 +4,7 @@ import { firstEmbedded } from "@/lib/supabase/embed";
 import { opsContext, opsSchemaErrorResponse } from "@/lib/ops/http";
 import { parseQuantity } from "@/lib/pharmacy/model";
 import { isMissingDispenseSchema } from "@/lib/pharmacy/dispense";
+import { getIwrsKit, listIwrsCatalog } from "@/lib/iwrs/catalog";
 
 const createSchema = z.object({
   randomization_id: z.string().uuid(),
@@ -20,15 +21,8 @@ export async function GET() {
   const gate = await opsContext(false);
   if (!gate.ok) return gate.response;
 
-  const [randRes, rxRes, medsRes, lotsRes] = await Promise.all([
-    gate.supabase
-      .from("iwrs_randomizations")
-      .select(
-        "id, protocol_id, patient_id, kit_code, randomized_at, patients(id, first_name, last_name, subject_code), protocols(id, code_name, title)"
-      )
-      .eq("organization_id", gate.organizationId)
-      .order("randomized_at", { ascending: false })
-      .limit(80),
+  const [catalog, rxRes, medsRes, lotsRes] = await Promise.all([
+    listIwrsCatalog(gate.supabase, gate.organizationId),
     gate.supabase
       .from("prescriptions")
       .select(
@@ -52,17 +46,20 @@ export async function GET() {
       .order("received_at", { ascending: false }),
   ]);
 
-  if (randRes.error) {
-    if (isMissingDispenseSchema(randRes.error.message) || /iwrs_randomizations/i.test(randRes.error.message)) {
+  if ("error" in catalog && catalog.error) {
+    if (
+      isMissingDispenseSchema(catalog.error.message) ||
+      /iwrs_randomizations|protocol_iwrs_config/i.test(catalog.error.message)
+    ) {
       return NextResponse.json({
         pending: [],
         dispensed: [],
         medications: medsRes.data ?? [],
         lots: lotsRes.data ?? [],
-        hint: randRes.error.message,
+        hint: catalog.error.message,
       });
     }
-    return opsSchemaErrorResponse(randRes.error);
+    return opsSchemaErrorResponse(catalog.error);
   }
 
   let prescriptions = rxRes.data ?? [];
@@ -93,25 +90,19 @@ export async function GET() {
       .map((row) => `${row.patient_id}:${row.protocol_id}`)
   );
 
-  const pending = (randRes.data ?? [])
+  const pending = catalog.assignments
     .filter((row) => !dosedKeys.has(`${row.patient_id}:${row.protocol_id}`))
-    .map((row) => {
-      const patient = firstEmbedded(row.patients);
-      const protocol = firstEmbedded(row.protocols);
-      return {
-        randomization_id: row.id,
-        patient_id: row.patient_id,
-        protocol_id: row.protocol_id,
-        kit_code: row.kit_code,
-        randomized_at: row.randomized_at,
-        patient_name: patient
-          ? `${patient.last_name}, ${patient.first_name}`
-          : "Paciente",
-        subject_code: patient?.subject_code ?? null,
-        protocol_code: protocol?.code_name ?? "",
-        protocol_title: protocol?.title ?? "",
-      };
-    });
+    .map((row) => ({
+      randomization_id: row.id,
+      patient_id: row.patient_id,
+      protocol_id: row.protocol_id,
+      kit_code: row.kit_code,
+      randomized_at: row.randomized_at,
+      patient_name: row.patient_name,
+      subject_code: row.subject_code,
+      protocol_code: row.protocol_code,
+      protocol_title: row.protocol_title,
+    }));
 
   return NextResponse.json({
     pending,
@@ -165,12 +156,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Fecha de primera dosis inválida." }, { status: 400 });
   }
 
-  const { data: randomization, error: randError } = await gate.supabase
-    .from("iwrs_randomizations")
-    .select("id, organization_id, protocol_id, patient_id, kit_code")
-    .eq("id", parsed.data.randomization_id)
-    .eq("organization_id", gate.organizationId)
-    .maybeSingle();
+  const { data: randomization, error: randError } = await getIwrsKit(
+    gate.supabase,
+    gate.organizationId,
+    parsed.data.randomization_id
+  );
 
   if (randError) return opsSchemaErrorResponse(randError);
   if (!randomization?.kit_code) {

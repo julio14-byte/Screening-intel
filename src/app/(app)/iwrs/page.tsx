@@ -7,7 +7,7 @@ export default function IwrsPage() {
     <>
       <PageHeader
         title="IWRS"
-        description="Interactive Web Response: kit y brazo después del screening. Puede ser del centro o del IRT del sponsor (Lilly, IQVIA, etc.). No elige quién entra al estudio."
+        description="Módulo independiente conectado por /api/iwrs. Screening y EDC piden kit y brazo acá; el matcher no randomiza."
       />
       <ScreeningProcessNote compact />
       <IwrsBoard />
