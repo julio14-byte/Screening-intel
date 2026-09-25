@@ -8,7 +8,7 @@ export function ScreeningProcessNote({ compact = false }: { compact?: boolean })
       <p className="mb-4 rounded-md border border-violet-100 bg-violet-50/70 px-3 py-2 text-xs leading-relaxed text-indigo-800">
         <strong>No es un sorteo.</strong> El motor de reglas filtra por
         inclusión/exclusión (🟢🟡🔴). Quien cumple avanza a visitas; no “gana un
-        cupo” al azar. El azar controlado es la randomización (IWRS), después
+        cupo” al azar. El azar controlado es IWRS (/iwrs): kit y brazo después
         del screening.
       </p>
     );
@@ -25,10 +25,12 @@ export function ScreeningProcessNote({ compact = false }: { compact?: boolean })
       </p>
       <p className="mt-2">
         El paso que sí se parece a un sorteo controlado es la{" "}
-        <strong>randomización</strong> (IWRS): asignar el brazo del estudio
-        cuando el paciente ya es elegible. En el tracker, “Randomizado” es ese
-        estado clínico — lo confirma el investigador. Todavía no hay asignación
-        ciega de tratamiento.
+        <strong>randomización IWRS</strong> en{" "}
+        <a href="/iwrs" className="font-medium text-violet-700 underline">
+          /iwrs
+        </a>
+        : asigna kit y brazo cuando el paciente ya está en Screening. No decide
+        quién entra al estudio.
       </p>
     </aside>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import {
   EmptyState,
@@ -12,16 +12,45 @@ import { Card } from "@/components/ui/Card";
 import { KanbanBoard } from "@/components/tracker/KanbanBoard";
 import { ScreeningProcessNote } from "@/components/screening/ScreeningProcessNote";
 import { useScreenings } from "@/hooks/useScreenings";
+import { readJsonResponse } from "@/lib/http/readJsonResponse";
+import type { IwrsConfig } from "@/lib/iwrs/model";
 import type { ScreeningStatus } from "@/lib/types";
 
 export default function TrackerPage() {
-  const { screenings, loading, error, updateStatus } = useScreenings({
+  const { screenings, loading, error, updateStatus, refetch } = useScreenings({
     includeMatchDetails: false,
   });
   const [moveError, setMoveError] = useState<string | null>(null);
+  const [iwrsIds, setIwrsIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    fetch("/api/iwrs")
+      .then((res) => readJsonResponse<{ configs?: IwrsConfig[] }>(res))
+      .then((json) => {
+        setIwrsIds(
+          new Set(
+            (json?.configs ?? [])
+              .filter((config) => config.enabled)
+              .map((config) => config.protocol_id)
+          )
+        );
+      })
+      .catch(() => setIwrsIds(new Set()));
+  }, []);
 
   const handleMove = async (id: string, status: ScreeningStatus) => {
     setMoveError(null);
+    const screening = screenings.find((row) => row.id === id);
+    if (
+      status === "randomized" &&
+      screening &&
+      iwrsIds.has(screening.protocol_id)
+    ) {
+      setMoveError(
+        "Este protocolo usa IWRS. Randomizá desde el módulo IWRS; no arrastres la tarjeta."
+      );
+      return;
+    }
     try {
       await updateStatus(id, status);
     } catch (e) {
@@ -31,11 +60,27 @@ export default function TrackerPage() {
     }
   };
 
+  const handleRandomize = async (screeningId: string) => {
+    setMoveError(null);
+    try {
+      const res = await fetch("/api/iwrs/randomize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ screening_id: screeningId }),
+      });
+      const json = await readJsonResponse<{ error?: string }>(res);
+      if (!res.ok) throw new Error(json?.error ?? "No se pudo randomizar.");
+      await refetch();
+    } catch (e) {
+      setMoveError(e instanceof Error ? e.message : "No se pudo randomizar.");
+    }
+  };
+
   return (
     <>
       <PageHeader
         title="Screening Tracker"
-        description="Pipeline de elegibilidad, no un sorteo. Si otra persona movió la tarjeta, el cambio se rechaza y el tablero se recarga."
+        description="Pipeline de elegibilidad, no un sorteo. Si el protocolo tiene IWRS, Randomizado se asigna en /iwrs."
       />
 
       <ScreeningProcessNote />
@@ -68,7 +113,9 @@ export default function TrackerPage() {
       ) : (
         <KanbanBoard
           screenings={screenings}
+          iwrsProtocolIds={iwrsIds}
           onMove={(id, status) => void handleMove(id, status)}
+          onRandomize={(id) => void handleRandomize(id)}
         />
       )}
     </>

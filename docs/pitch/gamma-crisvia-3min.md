@@ -101,7 +101,11 @@ Narra el veredicto en español.
 
 **Tracker `/tracker`**
 Kanban: pre-screening → screening → randomizado → screen failure.
-Randomizado = el investigador confirma inclusión; no hay sorteo de brazo (IWRS) todavía.
+Sin IWRS, el PI confirma inclusión a mano. Con IWRS, el kit/brazo se asigna en `/iwrs`.
+
+**IWRS `/iwrs`**
+Sorteo controlado de kit y brazo **después** del screening.
+No elige quién entra. El matching sigue siendo reglas 🟢🟡🔴.
 
 **Dashboard `/dashboard`**
 Embudo del site + semáforos.

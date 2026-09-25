@@ -2,8 +2,9 @@ import type { ScreeningStatus } from "@/lib/types";
 import type { AppRole } from "./types";
 
 /**
- * Transiciones de estatus permitidas por rol.
- * `randomized` (Apto) requiere investigador (refuerzo en trigger SQL).
+ * Transiciones de estatus permitidas por rol (arrastre en el tracker).
+ * `randomized` a mano requiere PI/sub. Con IWRS activo el coordinador
+ * randomiza por RPC (`iwrs_randomize`), no arrastrando la tarjeta.
  */
 const ALLOWED_TRANSITIONS: Record<
   AppRole,

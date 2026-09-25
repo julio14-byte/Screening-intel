@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, GripVertical } from "lucide-react";
+import { ChevronLeft, ChevronRight, Dices, GripVertical } from "lucide-react";
 import { useRole } from "@/contexts/role-context";
 import { canSetScreeningStatus } from "@/lib/rbac/screening-transitions";
 import type { ScreeningStatus, ScreeningWithRelations } from "@/lib/types";
@@ -22,11 +22,15 @@ const COLUMN_STYLES: Record<ScreeningStatus, { header: string; count: string }> 
 function KanbanCard({
   screening,
   onMove,
+  onRandomize,
+  usesIwrs,
   readOnly,
   canMoveTo,
 }: {
   screening: ScreeningWithRelations;
   onMove: (id: string, status: ScreeningStatus) => void;
+  onRandomize?: (id: string) => void;
+  usesIwrs: boolean;
   readOnly: boolean;
   canMoveTo: (status: ScreeningStatus) => boolean;
 }) {
@@ -35,11 +39,18 @@ function KanbanCard({
     index > 0 && canMoveTo(SCREENING_STATUS_ORDER[index - 1])
       ? SCREENING_STATUS_ORDER[index - 1]
       : null;
-  const next =
+  const rawNext =
     index < SCREENING_STATUS_ORDER.length - 1 &&
     canMoveTo(SCREENING_STATUS_ORDER[index + 1])
       ? SCREENING_STATUS_ORDER[index + 1]
       : null;
+  const next =
+    rawNext === "randomized" && usesIwrs ? null : rawNext;
+  const showIwrs =
+    usesIwrs &&
+    screening.status === "screening" &&
+    Boolean(onRandomize) &&
+    !readOnly;
 
   return (
     <div
@@ -100,6 +111,17 @@ function KanbanCard({
               <ChevronRight className="h-3.5 w-3.5" aria-hidden />
             </button>
           ) : null}
+          {showIwrs ? (
+            <button
+              type="button"
+              onClick={() => onRandomize?.(screening.id)}
+              aria-label="Randomizar IWRS"
+              title="Randomizar IWRS"
+              className="rounded p-0.5 text-violet-500 hover:bg-violet-50"
+            >
+              <Dices className="h-3.5 w-3.5" aria-hidden />
+            </button>
+          ) : null}
         </div>
       </div>
     </div>
@@ -109,9 +131,13 @@ function KanbanCard({
 export function KanbanBoard({
   screenings,
   onMove,
+  onRandomize,
+  iwrsProtocolIds,
 }: {
   screenings: ScreeningWithRelations[];
   onMove: (id: string, status: ScreeningStatus) => void;
+  onRandomize?: (id: string) => void;
+  iwrsProtocolIds?: Set<string>;
 }) {
   const [dragOver, setDragOver] = useState<ScreeningStatus | null>(null);
   const { role, isReadOnly } = useRole();
@@ -172,6 +198,8 @@ export function KanbanBoard({
                     key={s.id}
                     screening={s}
                     onMove={onMove}
+                    onRandomize={onRandomize}
+                    usesIwrs={Boolean(iwrsProtocolIds?.has(s.protocol_id))}
                     readOnly={isReadOnly}
                     canMoveTo={canMoveTo}
                   />

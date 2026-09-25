@@ -1,5 +1,6 @@
 import { getDemoCredentials } from "@/lib/auth/constants";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isMissingIwrsSchema } from "@/lib/iwrs/model";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 const DEMO_PATIENTS = [
@@ -506,5 +507,59 @@ export async function ensureDemoPatientData(userId?: string): Promise<void> {
 
   if (screeningsError) {
     throw new Error(`demo screenings: ${screeningsError.message}`);
+  }
+
+  await seedDemoIwrs(admin, clinicId);
+}
+
+const DEMO_GLP1_PROTOCOL_ID = "22222222-2222-2222-2222-222222222201";
+
+/** IWRS abierto 1:1 Activo/Placebo en GLP1-DM2-301. María queda lista para randomizar. */
+async function seedDemoIwrs(
+  admin: SupabaseClient,
+  clinicId: string
+): Promise<void> {
+  const { error: configError } = await admin.from("protocol_iwrs_config").upsert(
+    {
+      protocol_id: DEMO_GLP1_PROTOCOL_ID,
+      organization_id: clinicId,
+      enabled: true,
+      blinding: "open",
+      block_size: 4,
+      stratify_gender: true,
+    },
+    { onConflict: "protocol_id" }
+  );
+
+  if (configError) {
+    if (isMissingIwrsSchema(configError.message)) return;
+    throw new Error(`demo iwrs config: ${configError.message}`);
+  }
+
+  const { error: armsError } = await admin.from("protocol_arms").upsert(
+    [
+      {
+        organization_id: clinicId,
+        protocol_id: DEMO_GLP1_PROTOCOL_ID,
+        code: "A",
+        name: "Activo",
+        allocation_weight: 1,
+        sort_order: 0,
+      },
+      {
+        organization_id: clinicId,
+        protocol_id: DEMO_GLP1_PROTOCOL_ID,
+        code: "B",
+        name: "Placebo",
+        allocation_weight: 1,
+        sort_order: 1,
+      },
+    ],
+    { onConflict: "protocol_id,code" }
+  );
+
+  if (armsError) {
+    if (isMissingIwrsSchema(armsError.message)) return;
+    throw new Error(`demo iwrs arms: ${armsError.message}`);
   }
 }
