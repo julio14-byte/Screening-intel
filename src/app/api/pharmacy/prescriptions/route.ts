@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { opsContext } from "@/lib/ops/http";
+import { isMissingDispenseSchema } from "@/lib/pharmacy/dispense";
 import { parseQuantity } from "@/lib/pharmacy/model";
 
 const createSchema = z.object({
@@ -24,11 +25,14 @@ export async function GET(request: Request) {
 
   const patientId = new URL(request.url).searchParams.get("patient_id");
 
+  const selectWithKit =
+    "id, organization_id, protocol_id, patient_id, study_medication_id, lot_id, quantity, directions, status, prescribed_by, delivered_at, delivered_by, created_at, updated_at, kit_code, first_dose_at, first_dose_mode, protocol_study_medications(name, strength, unit), medication_lots(lot_number), protocols(code_name)";
+  const selectLegacy =
+    "id, organization_id, protocol_id, patient_id, study_medication_id, lot_id, quantity, directions, status, prescribed_by, delivered_at, delivered_by, created_at, updated_at, protocol_study_medications(name, strength, unit), medication_lots(lot_number), protocols(code_name)";
+
   let query = gate.supabase
     .from("prescriptions")
-    .select(
-      "id, organization_id, protocol_id, patient_id, study_medication_id, lot_id, quantity, directions, status, prescribed_by, delivered_at, delivered_by, created_at, updated_at, protocol_study_medications(name, strength, unit), medication_lots(lot_number), protocols(code_name)"
-    )
+    .select(selectWithKit)
     .eq("organization_id", gate.organizationId)
     .order("created_at", { ascending: false })
     .limit(60);
@@ -36,6 +40,27 @@ export async function GET(request: Request) {
   if (patientId) query = query.eq("patient_id", patientId);
 
   const { data, error } = await query;
+  if (error && isMissingDispenseSchema(error.message)) {
+    let legacy = gate.supabase
+      .from("prescriptions")
+      .select(selectLegacy)
+      .eq("organization_id", gate.organizationId)
+      .order("created_at", { ascending: false })
+      .limit(60);
+    if (patientId) legacy = legacy.eq("patient_id", patientId);
+    const retry = await legacy;
+    if (retry.error) {
+      return NextResponse.json({ error: retry.error.message }, { status: 500 });
+    }
+    return NextResponse.json({
+      prescriptions: (retry.data ?? []).map((row) => ({
+        ...row,
+        kit_code: "",
+        first_dose_at: null,
+        first_dose_mode: null,
+      })),
+    });
+  }
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

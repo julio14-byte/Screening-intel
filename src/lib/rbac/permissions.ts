@@ -78,6 +78,7 @@ export const WRITE_API_PREFIXES = [
   "/api/pharmacy",
   "/api/ops",
   "/api/iwrs",
+  "/api/diario",
 ] as const;
 
 /** Rutas de app restringidas por rol. */

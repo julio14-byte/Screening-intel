@@ -77,7 +77,8 @@ export function InventoryBoard() {
   }, []);
 
   useEffect(() => {
-    load()
+    void Promise.resolve()
+      .then(() => load())
       .catch((err) =>
         setError(err instanceof Error ? err.message : "Error de inventario.")
       )
@@ -93,6 +94,14 @@ export function InventoryBoard() {
         <CardHeader
           title="Stock por lote"
           description="Lo que llegó de la farmacéutica y lo que queda en el site."
+          actions={
+            <Link
+              href="/dispensacion"
+              className="text-xs font-medium text-teal-700 hover:underline"
+            >
+              Entregar caja IWRS →
+            </Link>
+          }
         />
         <CardBody>
           {lots.length === 0 ? (

@@ -108,6 +108,10 @@ Kit y brazo **después** del screening.
 Del centro (Crisvia sortea) o del sponsor (registrás el kit de su IRT).
 No hay enchufe único a Lilly: cada estudio usa el IRT que ellos designen.
 
+**Dispensación `/dispensacion`**
+Farmacia entrega la caja IWRS y registra la primera dosis (clínica o para llevar).
+El paciente anota toma y síntomas en `/diario` con un link. No es una app aparte ni Clinical Ink.
+
 **Dashboard `/dashboard`**
 Embudo del site + semáforos.
 El screen failure es una **fuga**, no la última etapa.
@@ -208,6 +212,9 @@ Se empieza sin integrar el hospital. Trial de 14 días: un protocolo, una cohort
 | Cola | `/cola` | Tareas persistentes |
 | Avisos | `/avisos` | Alertas operativas |
 | Agenda | `/agenda` | Visitas de pre-screening |
+| IWRS | `/iwrs` | Kit y brazo después del screening |
+| Dispensación | `/dispensacion` | Caja IWRS, primera dosis, diario |
+| Diario | `/diario` | El paciente anota toma y síntomas |
 | Re-Match | `/rematch` | Otro protocolo tras el fallo |
 | ePRO | `/epro` | Cuestionario del paciente |
 | Roles | `/settings/roles` | Investigator crea usuarios |
