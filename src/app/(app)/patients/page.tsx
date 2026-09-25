@@ -44,7 +44,7 @@ export default function PatientsPage() {
             <div className="flex flex-wrap gap-2">
               <Button variant="secondary" onClick={() => setImportOpen(true)}>
                 <Upload className="h-4 w-4" aria-hidden />
-                Importar CSV (EDC / site)
+                Importar listado (Excel / CSV)
               </Button>
               <Button onClick={() => setModalOpen(true)}>
                 <UserPlus className="h-4 w-4" aria-hidden />
@@ -85,7 +85,7 @@ export default function PatientsPage() {
             description={
               query
                 ? "Probá con otro término de búsqueda."
-                : "Cargá a quienes YA están en tu site (alta o CSV) para cruzarlos contra protocolos."
+                : "Cargá a quienes YA están en tu site (alta, pegar Excel o CSV) para cruzarlos contra protocolos."
             }
           />
         ) : (

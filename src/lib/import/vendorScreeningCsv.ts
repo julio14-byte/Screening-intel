@@ -1,15 +1,32 @@
 import type { Gender } from "@/lib/types";
 import { withComputedBmi } from "@/lib/profile/clinical-measurements";
-import { parseEthnicity, parsePatientCsv, type ParsedPatientRow } from "@/lib/import/parsePatientCsv";
-import { firstFilled, parseCsvTable } from "@/lib/import/csvTable";
+import {
+  parseEthnicity,
+  parsePatientTable,
+  type ParsedPatientRow,
+} from "@/lib/import/parsePatientCsv";
+import {
+  firstFilled,
+  parseCsvTable,
+  parseImportDate,
+  parseLabNumber,
+} from "@/lib/import/csvTable";
 
 /** Pedile al CRO/EDC DM + MH + CM + LB de screening. No es un API Clinical Ink ni IQVIA. */
 export const VENDOR_SCREENING_HINT =
-  "Pedí al CRO o al data manager un CSV de screening (DM + MH + CM + LB), no el diario ePRO ni el IRT. No hay enchufe certificado a Clinical Ink ni a IQVIA.";
+  "Pedí al CRO o al data manager el listado de screening (DM + MH + CM + LB). Pegalo desde Excel (más rápido que Guardar como CSV) o subí el archivo. No el diario ePRO ni el IRT. No hay enchufe certificado a Clinical Ink ni a IQVIA.";
 
 const NAME_FIRST = ["first_name", "firstname", "given_name", "nombre", "nombres"];
 const NAME_LAST = ["last_name", "lastname", "surname", "apellido", "apellidos"];
-const BIRTH = ["birth_date", "birthdate", "dob", "brthdtc", "fecha_nacimiento", "fechanacimiento"];
+const BIRTH = [
+  "birth_date",
+  "birthdate",
+  "dob",
+  "brthdtc",
+  "fecha_nacimiento",
+  "fechanacimiento",
+  "fecha_de_nacimiento",
+];
 const SEX = ["gender", "sex", "sexo"];
 const SUBJECT = [
   "subject_code",
@@ -142,38 +159,7 @@ export function digitsSubjectCode(raw: string): string | undefined {
 }
 
 export function parseVendorDate(raw: string): string {
-  const value = raw.trim();
-  if (!value) return "";
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
-  if (/^\d{8}$/.test(value)) {
-    return `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}`;
-  }
-  const latam = value.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
-  if (latam) {
-    const day = latam[1].padStart(2, "0");
-    const month = latam[2].padStart(2, "0");
-    return `${latam[3]}-${month}-${day}`;
-  }
-  const months: Record<string, string> = {
-    jan: "01",
-    feb: "02",
-    mar: "03",
-    apr: "04",
-    may: "05",
-    jun: "06",
-    jul: "07",
-    aug: "08",
-    sep: "09",
-    oct: "10",
-    nov: "11",
-    dec: "12",
-  };
-  const sdtm = value.match(/^(\d{1,2})[- ]([A-Za-z]{3})[- ](\d{4})$/);
-  if (sdtm) {
-    const month = months[sdtm[2].toLowerCase()];
-    if (month) return `${sdtm[3]}-${month}-${sdtm[1].padStart(2, "0")}`;
-  }
-  return "";
+  return parseImportDate(raw);
 }
 
 export function parseVendorGender(value: string): Gender {
@@ -245,7 +231,7 @@ export function collapseVendorRows(
     for (const record of group) {
       firstName ||= firstFilled(record, NAME_FIRST);
       lastName ||= firstFilled(record, NAME_LAST);
-      birth ||= parseVendorDate(firstFilled(record, BIRTH));
+      birth ||= parseImportDate(firstFilled(record, BIRTH));
       const sex = firstFilled(record, SEX);
       if (sex) gender = parseVendorGender(sex);
       ethnicity ||= parseEthnicity(firstFilled(record, ["ethnicity", "etnia", "race"]));
@@ -261,16 +247,16 @@ export function collapseVendorRows(
       if (labName && labValue) {
         if (/^(qs|pro|epro|diary)/i.test(labName)) continue;
         const mapped = mapLabKey(labName);
-        const num = Number(labValue.replace(",", "."));
-        if (mapped && Number.isFinite(num)) laboratories[mapped] = num;
+        const num = parseLabNumber(labValue);
+        if (mapped && num !== null) laboratories[mapped] = num;
       }
       for (const [col, value] of Object.entries(record)) {
         if (SKIP_AS_LAB.has(col) || CONDITIONS.includes(col) || MEDICATIONS.includes(col)) {
           continue;
         }
         const mapped = mapLabKey(col);
-        const num = Number(value.replace(",", "."));
-        if (mapped && value !== "" && Number.isFinite(num)) {
+        const num = parseLabNumber(value);
+        if (mapped && num !== null) {
           laboratories[mapped] = num;
         }
       }
@@ -304,7 +290,7 @@ export function parseVendorScreeningCsv(text: string): ParsedPatientRow[] {
   const table = parseCsvTable(text);
   if (!isVendorScreeningHeader(table.headers) && !table.headers.includes("usubjid")) {
     throw new Error(
-      "Este CSV no parece una exportación de EDC. Usá la plantilla Crisvia o pedí DM+MH+CM+LB."
+      "Este listado no parece una exportación de EDC. Pegá DM+MH+CM+LB desde Excel o usá la plantilla Crisvia."
     );
   }
   return collapseVendorRows(table.rows);
@@ -315,7 +301,7 @@ export function parseScreeningImportCsv(text: string): ParsedPatientRow[] {
   if (isVendorScreeningHeader(table.headers)) {
     return collapseVendorRows(table.rows);
   }
-  return parsePatientCsv(text);
+  return parsePatientTable(table);
 }
 
 export const VENDOR_SCREENING_CSV_TEMPLATE = `USUBJID,BRTHDTC,SEX,MHTERM,CMTRT,LBTESTCD,LBSTRESN

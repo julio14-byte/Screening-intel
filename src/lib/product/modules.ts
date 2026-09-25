@@ -29,7 +29,7 @@ export const PRODUCT_MODULES: Record<
     label: "1. Patient Registry",
     href: "/patients",
     summary:
-      "Quienes YA están en tu site. Alta, CSV y búsqueda. Entrada al matching, no una base para vender.",
+      "Quienes YA están en tu site. Alta, pegar Excel o CSV, y búsqueda. Entrada al matching, no una base para vender.",
   },
   profile: {
     id: "profile",

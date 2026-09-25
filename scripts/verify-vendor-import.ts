@@ -7,8 +7,10 @@ import {
   parseVendorGender,
   parseVendorScreeningCsv,
 } from "../src/lib/import/vendorScreeningCsv";
-import { parseCsvTable } from "../src/lib/import/csvTable";
+import { detectCsvDelimiter, parseCsvTable } from "../src/lib/import/csvTable";
 import { parsePatientCsv } from "../src/lib/import/parsePatientCsv";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 let failed = 0;
 
@@ -70,10 +72,50 @@ const crisvia = parseScreeningImportCsv(
 assert(crisvia[0].first_name === "Ana", "sigue la plantilla Crisvia");
 assert(parsePatientCsv("first_name,last_name,birth_date,gender\nA,B,1990-01-01,female")[0].first_name === "A", "parser clásico intacto");
 
+const vendorTsv = [
+  "USUBJID\tBRTHDTC\tSEX\tMHTERM\tCMTRT\tLBTESTCD\tLBSTRESN",
+  "10001\t1962-04-12\tF\tdiabetes tipo 2\tmetformina\tGLUC\t145",
+  "10001\t1962-04-12\tF\thipertensión\tenalapril\tHBA1C\t7,8",
+].join("\n");
+assert(detectCsvDelimiter(vendorTsv.split("\n")[0]) === "\t", "detecta tabulador de Excel");
+const pastedVendor = parseScreeningImportCsv(vendorTsv);
+assert(pastedVendor.length === 1, "pegar Excel EDC agrupa sujeto");
+assert(pastedVendor[0].conditions.includes("diabetes tipo 2"), "MHTERM TSV");
+assert(pastedVendor[0].conditions.includes("hipertensión"), "segundo MH TSV");
+assert(pastedVendor[0].laboratories.hba1c === 7.8, "decimal LATAM 7,8");
+assert(pastedVendor[0].laboratories.glucosa === 145, "GLUC en TSV");
+
+const crisviaTsv = [
+  "first_name\tlast_name\tbirth_date\tgender\tsubject_code\tconditions\tglucosa",
+  "Ana\tTest\t12/04/1990\tfemale\t10009\tdiabetes tipo 2;asma\t110",
+].join("\n");
+const pastedCrisvia = parseScreeningImportCsv(crisviaTsv);
+assert(pastedCrisvia[0].first_name === "Ana", "pegar plantilla Crisvia");
+assert(pastedCrisvia[0].birth_date === "1990-04-12", "fecha LATAM en TSV");
+assert(pastedCrisvia[0].conditions.includes("diabetes tipo 2"), "conditions ; dentro de celda TSV");
+assert(pastedCrisvia[0].conditions.includes("asma"), "segunda condition");
+assert(pastedCrisvia[0].laboratories.glucosa === 110, "lab en TSV Crisvia");
+
+const spanishTsv = [
+  "Nombre\tApellido\tFecha de nacimiento\tSexo\tCódigo",
+  "Luis\tPérez\t1975-09-30\tmasculino\t10011",
+].join("\n");
+const pastedSpanish = parseScreeningImportCsv(spanishTsv);
+assert(pastedSpanish[0].first_name === "Luis", "cabeceras en español");
+assert(pastedSpanish[0].last_name === "Pérez", "apellido");
+assert(pastedSpanish[0].gender === "male", "sexo masculino");
+assert(pastedSpanish[0].subject_code === "10011", "codigo");
+
 assert(
   !parseVendorScreeningCsv.toString().includes("Clinical Ink API"),
   "no inventa API Clinical Ink"
 );
 
+const modal = readFileSync(resolve("src/components/patients/ImportPatientsModal.tsx"), "utf8");
+assert(modal.includes("Pegar desde Excel"), "modal ofrece pegar Excel");
+assert(modal.includes("Importar lo pegado"), "botón de pegado");
+assert(!modal.includes("Conectar Clinical Ink"), "no hay botón vendor falso");
+assert(modal.includes("parseScreeningImportCsv"), "el pegado usa el mismo parser");
+
 if (failed) process.exit(1);
-console.log("verify-vendor-import: CSV EDC → screening (DM/MH/CM/LB) OK");
+console.log("verify-vendor-import: pegar Excel / CSV EDC → screening (DM/MH/CM/LB) OK");

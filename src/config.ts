@@ -243,7 +243,7 @@ const config = {
         {
           icon: "Users",
           title: "1. Patient Registry",
-          body: "Quienes YA están en tu site. Alta, CSV y búsqueda. Entrada al matching, no un listado para reclutar.",
+          body: "Quienes YA están en tu site. Alta, pegar Excel o CSV, y búsqueda. Entrada al matching, no un listado para reclutar.",
         },
         {
           icon: "ClipboardList",
@@ -302,7 +302,11 @@ const config = {
         },
         {
           q: "¿Cómo paso datos de Clinical Ink o de IQVIA al screening?",
-          a: "Sí, si el CSV es de screening (DM+MH+CM+LB). Después: Protocolos → Ejecutar matching. El motor de reglas compara edad, sexo, diagnósticos, medicación y labs (también sinónimos EN/ES: Type 2 diabetes → diabetes tipo 2). El diario Clinical Ink y el IRT de IQVIA no alcanzan para el match. La IA no cambia el veredicto.",
+          a: "En Pacientes → Importar pegá el listado de screening (DM+MH+CM+LB) copiado de Excel, o subí el CSV. Después: Protocolos → Ejecutar matching. El motor de reglas compara edad, sexo, diagnósticos, medicación y labs (también sinónimos EN/ES: Type 2 diabetes → diabetes tipo 2). El diario Clinical Ink y el IRT de IQVIA no alcanzan para el match. La IA no cambia el veredicto.",
+        },
+        {
+          q: "¿Hay una forma más fácil que un CSV?",
+          a: "Sí. Copiá las celdas en Excel o Sheets (con cabecera) y pegalas en Pacientes → Importar. Evitás Guardar como CSV, punto y coma y encoding. El archivo CSV sigue disponible. Un expediente suelto se carga en el perfil con notas + IA. No hay botón Clinical Ink/IQVIA en vivo: no hay API pública de listing. El import no enrola solo.",
         },
         {
           q: "¿Cómo se conectan EDC, ePRO e IWRS?",
@@ -310,7 +314,7 @@ const config = {
         },
         {
           q: "¿Necesito un EHR hospitalario?",
-          a: "No. El expediente es interno: registro manual, CSV y portal de candidatos. No hay conexión con un EHR externo.",
+          a: "No. El expediente es interno: registro manual, pegar Excel, CSV y portal de candidatos. No hay conexión con un EHR externo.",
         },
         {
           q: "¿Cuánto dura el trial?",

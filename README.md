@@ -13,7 +13,7 @@ Plataforma de **inteligencia de screening** para **clinical research sites**. No
 
 | Feature | Descripción |
 |---------|-------------|
-| **Expediente interno** | Pacientes, perfil clínico y tablas FHIR propias. Alta manual o CSV. Sin conexión a un EHR hospitalario. |
+| **Expediente interno** | Pacientes, perfil clínico y tablas FHIR propias. Alta manual, pegar Excel o CSV. Sin conexión a un EHR hospitalario. |
 | **MFA TOTP** | Obligatorio en producción para investigator y sub-investigator (`/settings/security`, `/login/mfa`). |
 | **Sesión** | Timeout de inactividad (30 min) y tope absoluto (8 h); login demo apagado en production. |
 | **Backups** | Procedimiento de restore PITR en [`docs/BACKUP.md`](docs/BACKUP.md). |
@@ -37,7 +37,7 @@ Crisvia no se vende como “base de pacientes” ni como “te conseguimos reclu
 | **Matching explicable** | Motor de reglas con semáforo 🟢🟡🔴 + detalle criterio por criterio + **justificación clínica IA** que narra el resultado sin cambiar la elegibilidad |
 | **IA puntual** | Justificación del matching, extracción de PDF y notas. No decide elegibilidad. |
 | **RBAC + audit trail** | Roles clínicos y bitácora con diseño alineado a 21 CFR Part 11 (no es una certificación) |
-| **LATAM-first** | UI en español; expediente interno (manual, CSV, portal). Sin EHR hospitalario. |
+| **LATAM-first** | UI en español; expediente interno (manual, pegar Excel, CSV, portal). Sin EHR hospitalario. |
 | **SaaS self-serve** | Trial 14 días, planes por volumen y Stripe — pensado para sitios medianos, no solo enterprise |
 
 **En una frase:** cada paciente que llega a tu clínica es una oportunidad de investigación; un screen failure no debería ser un paciente perdido.
@@ -48,7 +48,7 @@ Crisvia no se vende como “base de pacientes” ni como “te conseguimos reclu
 
 | Área | Qué hace |
 |------|----------|
-| **1. Patient Registry** | Alta, búsqueda e importación CSV de quienes YA están en el site (plantilla Crisvia o exportación EDC DM+MH+CM+LB). Entrada al matching, no un listado para vender. No hay conector certificado Clinical Ink / IQVIA. |
+| **1. Patient Registry** | Alta, búsqueda, pegar Excel o CSV de quienes YA están en el site (plantilla Crisvia o listado EDC DM+MH+CM+LB). Entrada al matching, no un listado para vender. No hay conector certificado Clinical Ink / IQVIA. |
 | **2. Clinical Profile** | Historia, antecedentes, medicamentos, laboratorios + ICD-11 + extracción IA desde notas |
 | **3. Protocol Matcher** | Paciente ↔ protocolo. Criterios de inclusión/exclusión; extracción NLP desde PDF |
 | **Motor de elegibilidad** | Semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple + `match_score` + justificación IA. No es un sorteo: filtra por criterios. |
@@ -298,7 +298,7 @@ El resto requiere sesión Supabase (cookies).
 
 ## Expediente interno
 
-No hay conexión con un EHR hospitalario. Los pacientes se ingresan a mano, por CSV o por el portal. El chart vive en las tablas de la app (`patients`, `clinical_profiles`, `conditions`, `observations`, etc.).
+No hay conexión con un EHR hospitalario. Los pacientes se ingresan a mano, pegando el listado de Excel, por CSV o por el portal. El chart vive en las tablas de la app (`patients`, `clinical_profiles`, `conditions`, `observations`, etc.).
 
 ---
 

@@ -13,7 +13,7 @@ export const productDocs = {
         {
           heading: "1. Patient Registry",
           body:
-            "En /patients cargás a quienes YA están en tu site (alta o CSV). Podés pegar una exportación de EDC estilo DM+MH+CM+LB (USUBJID, BRTHDTC, SEX, MHTERM, CMTRT, LBTESTCD). No es un conector Clinical Ink ni IQVIA. El diario ePRO no entra al matcher.",
+            "En /patients cargás a quienes YA están en tu site (alta, pegar Excel o CSV). Lo más rápido: copiá el listado DM+MH+CM+LB (USUBJID, BRTHDTC, SEX, MHTERM, CMTRT, LBTESTCD) y pegalo. No es un conector Clinical Ink ni IQVIA. El diario ePRO no entra al matcher.",
         },
         {
           heading: "2. Clinical Profile",
