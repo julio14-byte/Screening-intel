@@ -7,7 +7,7 @@ export default function IwrsPage() {
     <>
       <PageHeader
         title="IWRS"
-        description="Interactive Web Response: sorteo controlado del kit/brazo después del screening. No elige quién entra al estudio."
+        description="Interactive Web Response: kit y brazo después del screening. Puede ser del centro o del IRT del sponsor (Lilly, IQVIA, etc.). No elige quién entra al estudio."
       />
       <ScreeningProcessNote compact />
       <IwrsBoard />

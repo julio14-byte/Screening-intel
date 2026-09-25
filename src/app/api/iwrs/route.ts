@@ -16,6 +16,8 @@ type AssignmentRow = {
   unblinded_at: string | null;
   unblinded_by: string | null;
   unblind_reason: string;
+  assignment_source?: string | null;
+  external_id?: string | null;
   patients:
     | { first_name: string; last_name: string; subject_code?: string | null; gender?: string }
     | { first_name: string; last_name: string; subject_code?: string | null; gender?: string }[]
@@ -59,6 +61,8 @@ function mapAssignment(row: AssignmentRow): IwrsAssignment & {
     unblinded_at: row.unblinded_at,
     unblinded_by: row.unblinded_by,
     unblind_reason: row.unblind_reason,
+    assignment_source: row.assignment_source ?? "site",
+    external_id: row.external_id ?? "",
     arm_id: assignment?.arm_id ?? null,
     arm_code: arm?.code ?? null,
     arm_name: arm?.name ?? null,
@@ -81,7 +85,7 @@ export async function GET(request: Request) {
   let configsQuery = gate.supabase
     .from("protocol_iwrs_config")
     .select(
-      "protocol_id, organization_id, enabled, blinding, block_size, stratify_gender, updated_at"
+      "protocol_id, organization_id, enabled, blinding, block_size, stratify_gender, source, sponsor_vendor, sponsor_study_id, sponsor_site_id, updated_at"
     )
     .eq("organization_id", gate.organizationId);
   let armsQuery = gate.supabase
@@ -95,7 +99,7 @@ export async function GET(request: Request) {
   let assignmentsQuery = gate.supabase
     .from("iwrs_randomizations")
     .select(
-      "id, organization_id, protocol_id, patient_id, screening_id, stratum, kit_code, randomized_at, randomized_by, unblinded_at, unblinded_by, unblind_reason, patients(first_name, last_name, subject_code, gender), protocols(code_name, title), iwrs_arm_assignments(arm_id, protocol_arms(code, name))"
+      "id, organization_id, protocol_id, patient_id, screening_id, stratum, kit_code, randomized_at, randomized_by, unblinded_at, unblinded_by, unblind_reason, assignment_source, external_id, patients(first_name, last_name, subject_code, gender), protocols(code_name, title), iwrs_arm_assignments(arm_id, protocol_arms(code, name))"
     )
     .eq("organization_id", gate.organizationId)
     .order("randomized_at", { ascending: false });
@@ -106,16 +110,39 @@ export async function GET(request: Request) {
     assignmentsQuery = assignmentsQuery.eq("protocol_id", protocolId);
   }
 
-  const [configsRes, armsRes, initialAssignments] = await Promise.all([
+  const [initialConfigs, armsRes, initialAssignments] = await Promise.all([
     configsQuery,
     armsQuery,
     assignmentsQuery,
   ]);
 
+  let configRows = (initialConfigs.data ?? []) as unknown as IwrsConfig[];
+  let configsError = initialConfigs.error;
+  if (
+    configsError &&
+    /source|sponsor_vendor|sponsor_study_id|sponsor_site_id/i.test(
+      configsError.message
+    )
+  ) {
+    let legacyConfigs = gate.supabase
+      .from("protocol_iwrs_config")
+      .select(
+        "protocol_id, organization_id, enabled, blinding, block_size, stratify_gender, updated_at"
+      )
+      .eq("organization_id", gate.organizationId);
+    if (protocolId) legacyConfigs = legacyConfigs.eq("protocol_id", protocolId);
+    const legacy = await legacyConfigs;
+    configRows = (legacy.data ?? []) as unknown as IwrsConfig[];
+    configsError = legacy.error;
+  }
+
   let assignmentRows = (initialAssignments.data ?? []) as unknown as AssignmentRow[];
   let assignmentsError = initialAssignments.error;
 
-  if (assignmentsError && /subject_code/i.test(assignmentsError.message)) {
+  if (
+    assignmentsError &&
+    /subject_code|assignment_source|external_id/i.test(assignmentsError.message)
+  ) {
     let legacy = gate.supabase
       .from("iwrs_randomizations")
       .select(
@@ -129,12 +156,18 @@ export async function GET(request: Request) {
     assignmentsError = legacyRes.error;
   }
 
-  if (configsRes.error) return iwrsSchemaErrorResponse(configsRes.error);
+  if (configsError) return iwrsSchemaErrorResponse(configsError);
   if (armsRes.error) return iwrsSchemaErrorResponse(armsRes.error);
   if (assignmentsError) return iwrsSchemaErrorResponse(assignmentsError);
 
   return NextResponse.json({
-    configs: (configsRes.data ?? []) as IwrsConfig[],
+    configs: configRows.map((config) => ({
+      ...config,
+      source: config.source ?? "site",
+      sponsor_vendor: config.sponsor_vendor ?? "",
+      sponsor_study_id: config.sponsor_study_id ?? "",
+      sponsor_site_id: config.sponsor_site_id ?? "",
+    })),
     arms: (armsRes.data ?? []) as ProtocolArm[],
     assignments: assignmentRows.map(mapAssignment),
   });

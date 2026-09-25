@@ -5,11 +5,17 @@ import {
   buildPermutedBlock,
   isMissingIwrsSchema,
   isNeedBlockError,
+  isSponsorIwrs,
   normalizeBlockSize,
+  sponsorVendorLabel,
 } from "../src/lib/iwrs/model";
 
 const sql = readFileSync(
   resolve("supabase/migrations/20260924150000_iwrs_randomization.sql"),
+  "utf8"
+);
+const sponsorSql = readFileSync(
+  resolve("supabase/migrations/20260925001000_sponsor_iwrs.sql"),
   "utf8"
 );
 
@@ -91,5 +97,19 @@ assert(
   "no confunde unique con schema faltante"
 );
 
+assert(sponsorSql.includes("source text not null default 'site'"), "columna source");
+assert(sponsorSql.includes("iwrs_register_sponsor_kit"), "RPC registro sponsor");
+assert(
+  sponsorSql.includes("Este protocolo usa el IWRS del sponsor"),
+  "IWRS local no sortea si el protocolo es del sponsor"
+);
+assert(sponsorSql.includes("alter column slot_id drop not null"), "kit sponsor sin slot");
+assert(isSponsorIwrs({ source: "sponsor" }) === true, "detecta sponsor");
+assert(isSponsorIwrs({ source: "site" }) === false, "site no es sponsor");
+assert(
+  sponsorVendorLabel("lilly").includes("Lilly"),
+  "etiqueta Lilly"
+);
+
 if (failed) process.exit(1);
-console.log("verify-iwrs: bloques permutados, RLS ciega y RPCs OK");
+console.log("verify-iwrs: bloques permutados, RLS ciega, RPCs y puente sponsor OK");

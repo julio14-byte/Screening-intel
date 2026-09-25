@@ -40,11 +40,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Screening no encontrado." }, { status: 404 });
   }
 
-  const [configRes, armsRes] = await Promise.all([
+  const [initialConfig, armsRes] = await Promise.all([
     gate.supabase
       .from("protocol_iwrs_config")
       .select(
-        "protocol_id, organization_id, enabled, blinding, block_size, stratify_gender"
+        "protocol_id, organization_id, enabled, blinding, block_size, stratify_gender, source"
       )
       .eq("protocol_id", screening.protocol_id)
       .maybeSingle(),
@@ -57,14 +57,36 @@ export async function POST(request: Request) {
       .order("sort_order"),
   ]);
 
-  if (configRes.error) return iwrsSchemaErrorResponse(configRes.error);
+  let config = initialConfig.data as IwrsConfig | null;
+  let configError = initialConfig.error;
+  if (configError && /source/i.test(configError.message)) {
+    const legacy = await gate.supabase
+      .from("protocol_iwrs_config")
+      .select(
+        "protocol_id, organization_id, enabled, blinding, block_size, stratify_gender"
+      )
+      .eq("protocol_id", screening.protocol_id)
+      .maybeSingle();
+    config = legacy.data as IwrsConfig | null;
+    configError = legacy.error;
+  }
+
+  if (configError) return iwrsSchemaErrorResponse(configError);
   if (armsRes.error) return iwrsSchemaErrorResponse(armsRes.error);
 
-  const config = configRes.data as IwrsConfig | null;
   const arms = (armsRes.data ?? []) as ProtocolArm[];
   if (!config?.enabled) {
     return NextResponse.json(
       { error: "Este protocolo no tiene IWRS activo. Configuralo en el protocolo." },
+      { status: 400 }
+    );
+  }
+  if (config.source === "sponsor") {
+    return NextResponse.json(
+      {
+        error:
+          "Este protocolo usa el IWRS del sponsor. Registrá en /iwrs el kit que asignó su IRT; Crisvia no llama a Lilly ni a IQVIA.",
+      },
       { status: 400 }
     );
   }

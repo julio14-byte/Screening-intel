@@ -353,6 +353,13 @@ const DEMO_SCREENINGS = [
     match_details: [],
   },
   {
+    patient_id: "11111111-1111-1111-1111-111111111103",
+    protocol_id: "22222222-2222-2222-2222-222222222202",
+    status: "screening" as const,
+    match_score: 90,
+    match_details: [],
+  },
+  {
     patient_id: "11111111-1111-1111-1111-111111111106",
     protocol_id: "22222222-2222-2222-2222-222222222203",
     status: "randomized" as const,
@@ -513,23 +520,63 @@ export async function ensureDemoPatientData(userId?: string): Promise<void> {
 }
 
 const DEMO_GLP1_PROTOCOL_ID = "22222222-2222-2222-2222-222222222201";
+const DEMO_HTA_PROTOCOL_ID = "22222222-2222-2222-2222-222222222202";
 
-/** IWRS abierto 1:1 Activo/Placebo en GLP1-DM2-301. María queda lista para randomizar. */
+/** GLP1: IWRS del centro. HTA: IWRS del sponsor (Lilly/IRT) para registrar kit. */
 async function seedDemoIwrs(
   admin: SupabaseClient,
   clinicId: string
 ): Promise<void> {
-  const { error: configError } = await admin.from("protocol_iwrs_config").upsert(
-    {
-      protocol_id: DEMO_GLP1_PROTOCOL_ID,
-      organization_id: clinicId,
-      enabled: true,
-      blinding: "open",
-      block_size: 4,
-      stratify_gender: true,
-    },
-    { onConflict: "protocol_id" }
-  );
+  const glp1 = {
+    protocol_id: DEMO_GLP1_PROTOCOL_ID,
+    organization_id: clinicId,
+    enabled: true,
+    blinding: "open",
+    block_size: 4,
+    stratify_gender: true,
+    source: "site",
+    sponsor_vendor: "",
+    sponsor_study_id: "",
+    sponsor_site_id: "",
+  };
+  const hta = {
+    protocol_id: DEMO_HTA_PROTOCOL_ID,
+    organization_id: clinicId,
+    enabled: true,
+    blinding: "double",
+    block_size: 4,
+    stratify_gender: true,
+    source: "sponsor",
+    sponsor_vendor: "lilly",
+    sponsor_study_id: "HTA-CMB-205",
+    sponsor_site_id: "AR-SITE-01",
+  };
+
+  let { error: configError } = await admin
+    .from("protocol_iwrs_config")
+    .upsert([glp1, hta], { onConflict: "protocol_id" });
+
+  if (
+    configError &&
+    /source|sponsor_vendor|sponsor_study_id|sponsor_site_id/i.test(
+      configError.message
+    )
+  ) {
+    const retry = await admin.from("protocol_iwrs_config").upsert(
+      [
+        {
+          protocol_id: DEMO_GLP1_PROTOCOL_ID,
+          organization_id: clinicId,
+          enabled: true,
+          blinding: "open",
+          block_size: 4,
+          stratify_gender: true,
+        },
+      ],
+      { onConflict: "protocol_id" }
+    );
+    configError = retry.error;
+  }
 
   if (configError) {
     if (isMissingIwrsSchema(configError.message)) return;

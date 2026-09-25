@@ -13,6 +13,8 @@ type Row = {
   arm_code: string | null;
   arm_name: string | null;
   unblinded_at: string | null;
+  assignment_source?: string;
+  external_id?: string;
 };
 
 export function PatientIwrsCard({ patientId }: { patientId: string }) {
@@ -45,6 +47,11 @@ export function PatientIwrsCard({ patientId }: { patientId: string }) {
             <li key={row.id} className="rounded-md border border-violet-100 px-3 py-2">
               <p className="font-mono text-xs text-violet-700">{row.kit_code}</p>
               <p className="text-indigo-950">{row.protocol_code}</p>
+              <p className="text-xs text-slate-500">
+                {row.assignment_source === "sponsor"
+                  ? `IRT del sponsor${row.external_id ? ` · ${row.external_id}` : ""}`
+                  : "IWRS del centro"}
+              </p>
               <p className="text-xs text-slate-500">
                 {row.arm_visible
                   ? `Brazo ${row.arm_code} · ${row.arm_name}`

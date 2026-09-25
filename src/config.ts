@@ -273,6 +273,10 @@ const config = {
           a: "No. El screening es un filtro de elegibilidad: el motor de reglas compara el expediente con inclusión y exclusión (🟢 cumple, 🟡 falta un dato, 🔴 no cumple). No hay azar y la IA no decide quién entra. El paso que sí es aleatorio es IWRS: asigna kit y brazo cuando el paciente ya está en Screening. Se configura por protocolo (brazos, cegamiento, bloques permutados) en /iwrs.",
         },
         {
+          q: "¿Crisvia se conecta al IWRS de Lilly o de otra farmacéutica?",
+          a: "No hay un enchufe único. Lilly y el resto usan un IRT por estudio (a menudo IQVIA, Suvoda, Medidata, etc.) y ese sistema es la fuente de verdad. En /iwrs el protocolo puede ser IWRS del centro (Crisvia sortea) o IWRS del sponsor (el coordinador registra el kit que ya asignó ese IRT). Una API en vivo requiere contrato, credenciales y el mapeo de ese estudio; no lo inventamos.",
+        },
+        {
           q: "¿Necesito un EHR hospitalario?",
           a: "No. El expediente es interno: registro manual, CSV y portal de candidatos. No hay conexión con un EHR externo.",
         },

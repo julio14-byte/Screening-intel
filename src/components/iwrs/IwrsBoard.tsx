@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Dices } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
-import { TextArea } from "@/components/ui/Field";
+import { TextArea, TextInput, SelectInput } from "@/components/ui/Field";
 import {
   EmptyState,
   ErrorState,
@@ -14,7 +14,8 @@ import {
 import { useRole } from "@/contexts/role-context";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
 import { studySubjectCaption } from "@/lib/profile/demographics";
-import type { IwrsConfig } from "@/lib/iwrs/model";
+import type { IwrsConfig, ProtocolArm } from "@/lib/iwrs/model";
+import { isSponsorIwrs, sponsorVendorLabel } from "@/lib/iwrs/model";
 import { formatDate } from "@/lib/utils";
 import { useScreenings } from "@/hooks/useScreenings";
 
@@ -33,6 +34,8 @@ type AssignmentRow = {
   patient_name: string;
   subject_code: string | null;
   protocol_code: string;
+  assignment_source?: string;
+  external_id?: string;
 };
 
 export function IwrsBoard() {
@@ -44,22 +47,28 @@ export function IwrsBoard() {
   });
   const [assignments, setAssignments] = useState<AssignmentRow[]>([]);
   const [configs, setConfigs] = useState<IwrsConfig[]>([]);
+  const [arms, setArms] = useState<ProtocolArm[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [workingId, setWorkingId] = useState<string | null>(null);
   const [unblindId, setUnblindId] = useState<string | null>(null);
   const [reason, setReason] = useState("");
+  const [kitDrafts, setKitDrafts] = useState<
+    Record<string, { kit: string; externalId: string; armId: string }>
+  >({});
 
   const load = useCallback(async () => {
     const res = await fetch("/api/iwrs");
     const json = await readJsonResponse<{
       assignments?: AssignmentRow[];
       configs?: IwrsConfig[];
+      arms?: ProtocolArm[];
       error?: string;
     }>(res);
     if (!res.ok) throw new Error(json?.error ?? "No se pudo cargar IWRS.");
     setAssignments(json?.assignments ?? []);
     setConfigs(json?.configs ?? []);
+    setArms(json?.arms ?? []);
   }, []);
 
   useEffect(() => {
@@ -78,6 +87,12 @@ export function IwrsBoard() {
       cancelled = true;
     };
   }, [load]);
+
+  const configByProtocol = useMemo(() => {
+    const map = new Map<string, IwrsConfig>();
+    for (const config of configs) map.set(config.protocol_id, config);
+    return map;
+  }, [configs]);
 
   const enabledIds = useMemo(
     () => new Set(configs.filter((c) => c.enabled).map((c) => c.protocol_id)),
@@ -102,6 +117,36 @@ export function IwrsBoard() {
       await Promise.all([load(), refetch()]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo randomizar.");
+    } finally {
+      setWorkingId(null);
+    }
+  }
+
+  async function registerSponsor(screeningId: string) {
+    const draft = kitDrafts[screeningId] ?? { kit: "", externalId: "", armId: "" };
+    setWorkingId(screeningId);
+    setError(null);
+    try {
+      const res = await fetch("/api/iwrs/sponsor-register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          screening_id: screeningId,
+          kit_code: draft.kit,
+          external_id: draft.externalId,
+          arm_id: draft.armId || null,
+        }),
+      });
+      const json = await readJsonResponse<{ error?: string }>(res);
+      if (!res.ok) throw new Error(json?.error ?? "No se pudo registrar el kit.");
+      setKitDrafts((prev) => {
+        const next = { ...prev };
+        delete next[screeningId];
+        return next;
+      });
+      await Promise.all([load(), refetch()]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo registrar el kit.");
     } finally {
       setWorkingId(null);
     }
@@ -138,7 +183,7 @@ export function IwrsBoard() {
       <Card>
         <CardHeader
           title="Listos para randomizar"
-          description="Pacientes en Screening de un protocolo con IWRS activo. El motor de reglas ya filtró; esto solo asigna kit/brazo."
+          description="Pacientes en Screening con IWRS activo. Si el protocolo es del sponsor, registrá el kit que ya asignó su IRT."
           actions={<Dices className="h-4 w-4 text-violet-500" aria-hidden />}
         />
         <CardBody>
@@ -158,34 +203,109 @@ export function IwrsBoard() {
               }
             />
           ) : (
-            <ul className="space-y-2">
-              {ready.map((row) => (
-                <li
-                  key={row.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-violet-100 bg-white px-3 py-2"
-                >
-                  <div>
-                    <p className="text-sm font-medium text-indigo-950">
-                      {row.patients.last_name}, {row.patients.first_name}
-                    </p>
-                    <p className="font-mono text-[11px] text-violet-600">
-                      {studySubjectCaption(row.patients) ?? "Sin código"} ·{" "}
-                      {row.protocols.code_name}
-                    </p>
-                  </div>
-                  {canRandomize ? (
-                    <Button
-                      disabled={workingId === row.id}
-                      onClick={() => void randomize(row.id)}
-                    >
-                      <Dices className="h-4 w-4" aria-hidden />
-                      {workingId === row.id ? "Asignando…" : "Randomizar"}
-                    </Button>
-                  ) : (
-                    <span className="text-xs text-slate-400">Solo lectura</span>
-                  )}
-                </li>
-              ))}
+            <ul className="space-y-3">
+              {ready.map((row) => {
+                const config = configByProtocol.get(row.protocol_id);
+                const sponsor = isSponsorIwrs(config);
+                const draft = kitDrafts[row.id] ?? {
+                  kit: "",
+                  externalId: "",
+                  armId: "",
+                };
+                const protocolArms = arms.filter(
+                  (arm) => arm.protocol_id === row.protocol_id
+                );
+                return (
+                  <li
+                    key={row.id}
+                    className="space-y-2 rounded-md border border-violet-100 bg-white px-3 py-2"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-medium text-indigo-950">
+                          {row.patients.last_name}, {row.patients.first_name}
+                        </p>
+                        <p className="font-mono text-[11px] text-violet-600">
+                          {studySubjectCaption(row.patients) ?? "Sin código"} ·{" "}
+                          {row.protocols.code_name}
+                          {sponsor
+                            ? ` · ${sponsorVendorLabel(config?.sponsor_vendor)}`
+                            : ""}
+                        </p>
+                      </div>
+                      {canRandomize && !sponsor ? (
+                        <Button
+                          disabled={workingId === row.id}
+                          onClick={() => void randomize(row.id)}
+                        >
+                          <Dices className="h-4 w-4" aria-hidden />
+                          {workingId === row.id ? "Asignando…" : "Randomizar"}
+                        </Button>
+                      ) : null}
+                      {!canRandomize ? (
+                        <span className="text-xs text-slate-400">Solo lectura</span>
+                      ) : null}
+                    </div>
+                    {sponsor && canRandomize ? (
+                      <div className="grid gap-2 sm:grid-cols-4">
+                        <TextInput
+                          label="Kit del IRT"
+                          value={draft.kit}
+                          onChange={(e) =>
+                            setKitDrafts((prev) => ({
+                              ...prev,
+                              [row.id]: { ...draft, kit: e.target.value },
+                            }))
+                          }
+                          placeholder="Ej. LLY-00421"
+                        />
+                        <TextInput
+                          label="ID de randomización"
+                          value={draft.externalId}
+                          onChange={(e) =>
+                            setKitDrafts((prev) => ({
+                              ...prev,
+                              [row.id]: { ...draft, externalId: e.target.value },
+                            }))
+                          }
+                          placeholder="Opcional"
+                        />
+                        {config?.blinding === "open" && protocolArms.length > 0 ? (
+                          <SelectInput
+                            label="Brazo (si el IRT lo muestra)"
+                            value={draft.armId}
+                            onChange={(e) =>
+                              setKitDrafts((prev) => ({
+                                ...prev,
+                                [row.id]: { ...draft, armId: e.target.value },
+                              }))
+                            }
+                          >
+                            <option value="">Sin brazo</option>
+                            {protocolArms.map((arm) => (
+                              <option key={arm.id} value={arm.id}>
+                                {arm.code} · {arm.name}
+                              </option>
+                            ))}
+                          </SelectInput>
+                        ) : (
+                          <p className="self-end text-[11px] text-slate-500">
+                            Estudio ciego: solo se guarda el kit.
+                          </p>
+                        )}
+                        <div className="flex items-end">
+                          <Button
+                            disabled={workingId === row.id || draft.kit.trim().length < 3}
+                            onClick={() => void registerSponsor(row.id)}
+                          >
+                            {workingId === row.id ? "Registrando…" : "Registrar kit"}
+                          </Button>
+                        </div>
+                      </div>
+                    ) : null}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </CardBody>
@@ -205,6 +325,7 @@ export function IwrsBoard() {
                 <thead>
                   <tr className="border-b border-slate-200 text-xs uppercase text-slate-500">
                     <th className="px-2 py-2">Kit</th>
+                    <th className="px-2 py-2">Origen</th>
                     <th className="px-2 py-2">Paciente</th>
                     <th className="px-2 py-2">Protocolo</th>
                     <th className="px-2 py-2">Brazo</th>
@@ -216,6 +337,11 @@ export function IwrsBoard() {
                   {assignments.map((row) => (
                     <tr key={row.id} className="border-b border-slate-100">
                       <td className="px-2 py-2 font-mono text-xs">{row.kit_code}</td>
+                      <td className="px-2 py-2 text-xs text-slate-500">
+                        {row.assignment_source === "sponsor"
+                          ? `Sponsor${row.external_id ? ` · ${row.external_id}` : ""}`
+                          : "Centro"}
+                      </td>
                       <td className="px-2 py-2">
                         <Link
                           href={`/patients/${row.patient_id}`}
