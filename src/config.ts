@@ -302,7 +302,7 @@ const config = {
         },
         {
           q: "¿Cómo paso datos de Clinical Ink o de IQVIA al screening?",
-          a: "No hay API pública ni conector certificado. Pedí al data manager un CSV de screening: demografía (DM), antecedentes (MH), medicación (CM) y labs (LB). El diario ePRO y el IRT no sirven para matching. En /patients → Importar CSV se agrupa por USUBJID y se cruza con el motor de reglas. El análisis es el matcher 🟢🟡🔴, no SAS/R.",
+          a: "Sí, si el CSV es de screening (DM+MH+CM+LB). Después: Protocolos → Ejecutar matching. El motor de reglas compara edad, sexo, diagnósticos, medicación y labs (también sinónimos EN/ES: Type 2 diabetes → diabetes tipo 2). El diario Clinical Ink y el IRT de IQVIA no alcanzan para el match. La IA no cambia el veredicto.",
         },
         {
           q: "¿Cómo se conectan EDC, ePRO e IWRS?",

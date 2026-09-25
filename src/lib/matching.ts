@@ -7,6 +7,10 @@ import type {
   Protocol,
 } from "./types";
 import { calculateAge, GENDER_LABELS, normalizeTerm } from "./utils";
+import {
+  clinicalTermMatches,
+  labValueForCriterion,
+} from "./matching/aliases";
 
 /**
  * Motor de reglas de elegibilidad.
@@ -27,8 +31,8 @@ export function evaluatePatientAgainstProtocol(
   const inclusion = protocol.inclusion_criteria ?? {};
   const exclusion = protocol.exclusion_criteria ?? {};
 
-  const conditions = (profile?.conditions ?? []).map(normalizeTerm);
-  const medications = (profile?.medications ?? []).map(normalizeTerm);
+  const conditions = profile?.conditions ?? [];
+  const medications = profile?.medications ?? [];
   const labs = profile?.laboratories ?? {};
   const normalizedLabs = new Map<string, number>(
     Object.entries(labs).map(([k, v]) => [normalizeTerm(k), Number(v)])
@@ -62,7 +66,6 @@ export function evaluatePatientAgainstProtocol(
 
   // --- Inclusión: condiciones requeridas ------------------------------------
   for (const required of inclusion.required_conditions ?? []) {
-    const target = normalizeTerm(required);
     if (!profile) {
       details.push({
         type: "inclusion",
@@ -72,9 +75,7 @@ export function evaluatePatientAgainstProtocol(
       });
       continue;
     }
-    const pass = conditions.some(
-      (c) => c.includes(target) || target.includes(c)
-    );
+    const pass = clinicalTermMatches(conditions, required);
     details.push({
       type: "inclusion",
       criterion: `Diagnóstico requerido: ${required}`,
@@ -94,7 +95,7 @@ export function evaluatePatientAgainstProtocol(
       .filter(Boolean)
       .join(" y ");
     const label = `Lab ${lab.name} ${range}${lab.unit ? ` ${lab.unit}` : ""}`;
-    const value = normalizedLabs.get(normalizeTerm(lab.name));
+    const value = labValueForCriterion(normalizedLabs, lab.name);
 
     if (value == null || Number.isNaN(value)) {
       details.push({
@@ -118,7 +119,6 @@ export function evaluatePatientAgainstProtocol(
 
   // --- Exclusión: condiciones prohibidas -------------------------------------
   for (const excluded of exclusion.excluded_conditions ?? []) {
-    const target = normalizeTerm(excluded);
     if (!profile) {
       details.push({
         type: "exclusion",
@@ -128,9 +128,7 @@ export function evaluatePatientAgainstProtocol(
       });
       continue;
     }
-    const triggered = conditions.some(
-      (c) => c.includes(target) || target.includes(c)
-    );
+    const triggered = clinicalTermMatches(conditions, excluded);
     details.push({
       type: "exclusion",
       criterion: `Condición excluyente: ${excluded}`,
@@ -143,7 +141,6 @@ export function evaluatePatientAgainstProtocol(
 
   // --- Exclusión: medicamentos prohibidos -------------------------------------
   for (const excluded of exclusion.excluded_medications ?? []) {
-    const target = normalizeTerm(excluded);
     if (!profile) {
       details.push({
         type: "exclusion",
@@ -153,9 +150,7 @@ export function evaluatePatientAgainstProtocol(
       });
       continue;
     }
-    const triggered = medications.some(
-      (m) => m.includes(target) || target.includes(m)
-    );
+    const triggered = clinicalTermMatches(medications, excluded);
     details.push({
       type: "exclusion",
       criterion: `Medicación excluyente: ${excluded}`,
