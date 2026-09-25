@@ -78,9 +78,9 @@ assert(adherencePercent(28, 4) === 85.7, "adherencia 24/28");
 assert(adherencePercent(10, 11) === null, "devueltas > entregadas");
 assert(reimbursementTotal(1500.5, 800.25) === 2300.75, "reembolso");
 
-assert(config.includes('href: "/seguimiento"'), "nav seguimiento");
-assert(config.includes('seguimiento: "/seguimiento"'), "ruta canónica");
-assert(permissions.includes('"/api/follow-up"'), "WRITE API follow-up");
+assert(config.includes('seguimiento: "/seguimiento"'), "ruta canónica retirada");
+assert(!config.includes('href: "/seguimiento"'), "seguimiento ya no está en el nav");
+assert(!permissions.includes('"/api/follow-up"'), "WRITE ya no cubre follow-up");
 assert(completar.includes("statusAfterActualDate"), "completa aplica ventana");
 assert(completar.includes("systolic"), "vitales obligatorios en API");
 assert(completar.includes("recordCustomAuditEvent"), "bitácora al completar");

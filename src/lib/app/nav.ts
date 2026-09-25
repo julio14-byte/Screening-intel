@@ -19,6 +19,7 @@ import {
   Package,
   Dices,
   Lock,
+  Plug,
   Pill,
   Users,
   UserPlus,
@@ -44,12 +45,13 @@ export const APP_ICONS: Record<string, LucideIcon> = {
   Package,
   Dices,
   Lock,
+  Plug,
   Pill,
   FileSpreadsheet,
   Cpu,
 };
 
-export type NavSection = "screening" | "edc" | "epro" | "iwrs";
+export type NavSection = "screening" | "integraciones";
 
 export type AppNavItem = {
   href: string;
@@ -70,12 +72,8 @@ export const APP_NAV_STYLES: Record<
     activeClass: "bg-white/15 text-white ring-1 ring-white/25",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
-  "/edc": {
-    activeClass: "bg-cyan-400/20 text-cyan-100 ring-1 ring-cyan-300/30",
-    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
-  },
   "/patients": {
-    activeClass: "bg-cyan-400/20 text-cyan-100 ring-1 ring-cyan-300/30",
+    activeClass: "bg-teal-400/20 text-teal-100 ring-1 ring-teal-300/30",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
   "/candidatos": {
@@ -136,6 +134,10 @@ export const APP_NAV_STYLES: Record<
   },
   "/rematch": {
     activeClass: "bg-emerald-400/20 text-emerald-100 ring-1 ring-emerald-300/30",
+    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
+  },
+  "/integraciones": {
+    activeClass: "bg-cyan-400/20 text-cyan-100 ring-1 ring-cyan-300/30",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
   "/account/billing": {

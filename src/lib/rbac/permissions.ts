@@ -75,15 +75,15 @@ export const WRITE_API_PREFIXES = [
   "/api/rbac",
   "/api/candidatos",
   "/api/settings/portal",
-  "/api/pharmacy",
-  "/api/ops",
-  "/api/iwrs",
-  "/api/diario",
-  "/api/epro-app/invite",
-  "/api/follow-up",
+  "/api/integraciones",
 ] as const;
-// /api/cierre no entra: el monitor CRA debe poder abrir/cerrar queries de limpieza.
-// Lock, unblind, CSR y sometimiento se validan en cada ruta (solo PI/sub).
+
+/** El inbound del tercero es público (HMAC/Bearer); no aplica el bloqueo de monitor. */
+export function isWriteApiPath(pathname: string): boolean {
+  if (pathname === "/api/integraciones/inbound") return false;
+  if (pathname.startsWith("/api/integraciones/inbound/")) return false;
+  return WRITE_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
 
 /** Rutas de app restringidas por rol. */
 export const ROLE_RESTRICTED_ROUTES: Record<string, AppRole[]> = {

@@ -15,7 +15,7 @@ import { routes } from "@/lib/app/routes";
 import { isProtectedPath, isPublicApiPath, isPublicPatientPath } from "@/lib/app/routes";
 import {
   isRouteAllowedForRole,
-  WRITE_API_PREFIXES,
+  isWriteApiPath,
 } from "@/lib/rbac/permissions";
 import type { AppRole } from "@/lib/rbac/types";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -273,9 +273,7 @@ async function runUpdateSession(request: NextRequest) {
     }
 
     const isWriteMethod = !["GET", "HEAD", "OPTIONS"].includes(request.method);
-    const isWriteApi = WRITE_API_PREFIXES.some((prefix) =>
-      pathname.startsWith(prefix)
-    );
+    const isWriteApi = isWriteApiPath(pathname);
 
     if (isWriteMethod && isWriteApi && role === "monitor") {
       return NextResponse.json(

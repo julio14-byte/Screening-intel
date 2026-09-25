@@ -109,9 +109,9 @@ assert(csr.includes("COFEPRIS"), "menciona COFEPRIS");
 assert(csr.includes("Fase IV"), "Fase IV");
 assert(csr.includes("Database Lock"), "lock en CSR");
 
-assert(config.includes('href: "/cierre"'), "nav cierre");
-assert(config.includes('cierre: "/cierre"'), "ruta canónica");
-assert(config.includes("Database Lock"), "FAQ lock");
+assert(config.includes('cierre: "/cierre"'), "ruta canónica retirada");
+assert(config.includes("/integraciones"), "cierre apunta a integraciones");
+assert(!config.includes('href: "/cierre"'), "cierre ya no está en el nav de producto");
 assert(!permissions.includes('"/api/cierre"'), "monitor no bloqueado en middleware");
 assert(lockRoute.includes("closeout_lock"), "API lock");
 assert(studyUnblind.includes("closeout_unblind_study"), "API unblind estudio");

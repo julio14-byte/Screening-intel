@@ -77,19 +77,15 @@ assert(
 );
 assert(FIRST_DOSE_MODE_LABEL.home.includes("casa"), "etiqueta casa");
 
-assert(config.includes('href: "/dispensacion"'), "nav de dispensación");
+assert(config.includes('dispensacion: "/dispensacion"'), "ruta canónica retirada");
+assert(!config.includes('href: "/dispensacion"'), "dispensación ya no está en el nav");
 assert(
-  config.includes('"/api/diario/t"'),
-  "API pública del diario acotada a /api/diario/t"
+  !config.includes('"/api/diario/t"'),
+  "diario ya no es API pública de producto"
 );
-assert(
-  !config.includes('"/api/diario",'),
-  "link y entries del diario no son APIs públicas"
-);
-assert(config.includes('dispensacion: "/dispensacion"'), "ruta canónica");
 assert(
   config.includes("Clinical Ink") || config.includes("app aparte"),
-  "FAQ aclara que no es una app aparte"
+  "FAQ aclara que el diario lo opera el tercero"
 );
 
 if (failed) process.exit(1);

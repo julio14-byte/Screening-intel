@@ -44,3 +44,6 @@ next-env.d.ts
 # mcp
 mcp-icd11/.env
 mcp-icd11/node_modules
+
+# Nested clone dropped in this workspace — never commit it
+/Screening-intel/
