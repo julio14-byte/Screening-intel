@@ -30,6 +30,11 @@ export const productDocs = {
           body:
             "Evalúa candidatos contra protocolos y sigue el estado de screening en el Dashboard.",
         },
+        {
+          heading: "5. Dispensa y diario",
+          body:
+            "Tras IWRS, farmacia entrega la caja en /dispensacion y registra la primera dosis. El paciente usa un link /diario para hora y síntomas. No hace falta una app aparte.",
+        },
       ],
     },
   ],

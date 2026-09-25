@@ -60,6 +60,7 @@ Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operat
 | **Expediente interno** | Pacientes y perfil clínico en tablas de la app (incluye modelo FHIR Patient) |
 | **Cola de trabajo** | Tareas de inbox, criterios 🟡 y re-match |
 | **Inventario / receta** | Lotes de la farmacéutica por protocolo; la receta electrónica descuenta stock |
+| **Dispensación / diario** | Farmacia entrega la caja IWRS, registra la primera dosis y el paciente anota toma/síntomas en `/diario` (link, no una app aparte) |
 | **Audit Trail** | Bitácora inmutable alineada a 21 CFR Part 11 |
 | **RBAC clínico** | Investigator / Sub-investigator / Coordinator / Monitor |
 | **SaaS** | Organizations, trial 14 días, Stripe Checkout + Portal |
@@ -85,11 +86,14 @@ Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operat
 |------|-------------|
 | `/dashboard` | Embudo de screening y métricas del site |
 | `/patients` | Registro de pacientes |
-| `/patients/[id]` | Perfil clínico, visitas con notas, receta e inventario |
+| `/patients/[id]` | Perfil clínico, visitas con notas, receta, IWRS y diario |
 | `/protocols` | Gestión de protocolos |
 | `/protocols/[id]` | Medicamentos del estudio y números de lote |
 | `/protocols/[id]/match` | Cruce masivo paciente ↔ protocolo + justificación IA |
 | `/inventario` | Stock de lotes y recetas entregadas |
+| `/iwrs` | Randomización de sitio o registro del kit del IRT del sponsor |
+| `/dispensacion` | Entrega de caja IWRS, primera dosis y link del diario |
+| `/diario/[token]` | Diario público del paciente (hora de toma y síntomas) |
 | `/tracker` | Pipeline Kanban con drag & drop |
 | `/rematch` | Re-matching automático post screen failure |
 | `/candidato` | Portal público de pre-registro (pacientes) |
@@ -174,6 +178,7 @@ supabase/migrations/20260924120000_clinical_anamnesis.sql
 supabase/migrations/20260924140000_patient_demographics.sql
 supabase/migrations/20260924150000_iwrs_randomization.sql
 supabase/migrations/20260925001000_sponsor_iwrs.sql
+supabase/migrations/20260925010000_dispense_first_dose_diary.sql
 ```
 
 Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
@@ -250,7 +255,7 @@ yarn mcp:icd11
 |-----|----------|
 | **investigator** | Protocolos, IWRS (config + desenlace), aprobaciones, gestión de roles y facturación |
 | **sub_investigator** | Igual que PI en clínica; sin roles ni billing |
-| **coordinator** | Pacientes, screening operativo, randomizar IWRS (sin marcar Apto a mano ni desenmascarar) |
+| **coordinator** | Pacientes, screening operativo, randomizar IWRS, dispensar caja y generar diario (sin marcar Apto a mano ni desenmascarar) |
 | **monitor** | Solo lectura (CRA / auditoría farmacéutica) |
 
 Administración en `/settings/roles` (solo investigator).

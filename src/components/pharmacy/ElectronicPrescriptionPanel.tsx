@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { SelectInput, TextInput } from "@/components/ui/Field";
@@ -17,6 +18,7 @@ type RxRow = {
   status: "draft" | "delivered" | "cancelled";
   created_at: string;
   delivered_at: string | null;
+  kit_code?: string | null;
   protocol_study_medications: { name: string; strength: string; unit: string } | { name: string; strength: string; unit: string }[] | null;
   medication_lots: { lot_number: string } | { lot_number: string }[] | null;
   protocols: { code_name: string } | { code_name: string }[] | null;
@@ -54,44 +56,48 @@ export function ElectronicPrescriptionPanel({
   }, [patientId]);
 
   useEffect(() => {
-    loadPrescriptions().catch((err) =>
-      setError(err instanceof Error ? err.message : "Error de recetas.")
-    );
+    void Promise.resolve()
+      .then(() => loadPrescriptions())
+      .catch((err) =>
+        setError(err instanceof Error ? err.message : "Error de recetas.")
+      );
   }, [loadPrescriptions]);
 
   useEffect(() => {
-    if (!protocolId) {
-      setMedications([]);
-      setLots([]);
-      setMedicationId("");
-      setLotId("");
-      return;
-    }
-    Promise.all([
-      fetch(`/api/pharmacy/medications?protocol_id=${protocolId}`).then((res) =>
-        readJsonResponse<{ medications?: ProtocolStudyMedication[]; error?: string }>(res).then(
-          (json) => {
-            if (!res.ok) throw new Error(json?.error ?? "No se pudieron cargar medicamentos.");
-            return json?.medications ?? [];
-          }
-        )
-      ),
-      fetch(`/api/pharmacy/lots?protocol_id=${protocolId}`).then((res) =>
-        readJsonResponse<{ lots?: MedicationLot[]; error?: string }>(res).then((json) => {
-          if (!res.ok) throw new Error(json?.error ?? "No se pudieron cargar lotes.");
-          return json?.lots ?? [];
-        })
-      ),
-    ])
-      .then(([nextMeds, nextLots]) => {
-        setMedications(nextMeds);
-        setLots(nextLots);
+    void Promise.resolve().then(() => {
+      if (!protocolId) {
+        setMedications([]);
+        setLots([]);
         setMedicationId("");
         setLotId("");
-      })
-      .catch((err) =>
-        setError(err instanceof Error ? err.message : "Error de farmacia.")
-      );
+        return;
+      }
+      return Promise.all([
+        fetch(`/api/pharmacy/medications?protocol_id=${protocolId}`).then((res) =>
+          readJsonResponse<{ medications?: ProtocolStudyMedication[]; error?: string }>(res).then(
+            (json) => {
+              if (!res.ok) throw new Error(json?.error ?? "No se pudieron cargar medicamentos.");
+              return json?.medications ?? [];
+            }
+          )
+        ),
+        fetch(`/api/pharmacy/lots?protocol_id=${protocolId}`).then((res) =>
+          readJsonResponse<{ lots?: MedicationLot[]; error?: string }>(res).then((json) => {
+            if (!res.ok) throw new Error(json?.error ?? "No se pudieron cargar lotes.");
+            return json?.lots ?? [];
+          })
+        ),
+      ])
+        .then(([nextMeds, nextLots]) => {
+          setMedications(nextMeds);
+          setLots(nextLots);
+          setMedicationId("");
+          setLotId("");
+        })
+        .catch((err) =>
+          setError(err instanceof Error ? err.message : "Error de farmacia.")
+        );
+    });
   }, [protocolId]);
 
   const lotsForMed = useMemo(
@@ -145,7 +151,12 @@ export function ElectronicPrescriptionPanel({
     <Card className="mt-6">
       <CardHeader
         title="Receta electrónica"
-        description="Al entregar se descuenta el inventario del lote del medicamento."
+        description="Al entregar se descuenta el lote. La caja IWRS (kit) se entrega en Dispensación, no desde acá."
+        actions={
+          <Link href="/dispensacion" className="text-xs font-medium text-teal-700 hover:underline">
+            Ir a dispensación →
+          </Link>
+        }
       />
       <CardBody className="space-y-4">
         {error ? <ErrorState message={error} /> : null}
@@ -242,7 +253,8 @@ export function ElectronicPrescriptionPanel({
                 <li key={rx.id} className="py-2 text-sm text-indigo-900">
                   <span className="font-medium">{med?.name ?? "Medicamento"}</span>
                   {med?.strength ? ` ${med.strength}` : ""} · lote{" "}
-                  {lot?.lot_number ?? "—"} ·{" "}
+                  {lot?.lot_number ?? "—"}
+                  {rx.kit_code ? ` · caja ${rx.kit_code}` : ""} ·{" "}
                   {formatQuantity(Number(rx.quantity), med?.unit)} ·{" "}
                   {protocol?.code_name ?? "Protocolo"} ·{" "}
                   {PRESCRIPTION_STATUS_LABEL[rx.status]}

@@ -52,6 +52,11 @@ const config = {
         icon: "Package",
       },
       {
+        href: "/dispensacion",
+        label: "Dispensación",
+        icon: "Pill",
+      },
+      {
         href: "/tracker",
         label: "Tracker",
         icon: "KanbanSquare",
@@ -124,6 +129,7 @@ const config = {
       "/avisos",
       "/agenda",
       "/inventario",
+      "/dispensacion",
       "/iwrs",
       "/semaforos",
       "/devices",
@@ -137,11 +143,13 @@ const config = {
       "/api/openapi",
       "/api/candidato/config",
       "/api/candidato/enviar",
+      "/api/diario/t",
     ],
     candidato: {
       hub: "/candidato",
       gracias: "/candidato/gracias",
     },
+    diario: "/diario",
     app: {
       dashboard: "/dashboard",
       patients: "/patients",
@@ -160,6 +168,7 @@ const config = {
       avisos: "/avisos",
       agenda: "/agenda",
       inventario: "/inventario",
+      dispensacion: "/dispensacion",
       iwrs: "/iwrs",
       docs: "/docs",
       apiDocs: "/docs/api",
@@ -260,7 +269,7 @@ const config = {
         {
           icon: "Package",
           title: "Inventario de estudio",
-          body: "Lotes de la farmacéutica por protocolo. La receta electrónica descuenta el stock.",
+          body: "Lotes de la farmacéutica por protocolo. Tras IWRS, farmacia entrega la caja en /dispensacion y el paciente registra la toma en /diario.",
         },
       ],
     },
@@ -275,6 +284,10 @@ const config = {
         {
           q: "¿Crisvia se conecta al IWRS de Lilly o de otra farmacéutica?",
           a: "No hay un enchufe único. Lilly y el resto usan un IRT por estudio (a menudo IQVIA, Suvoda, Medidata, etc.) y ese sistema es la fuente de verdad. En /iwrs el protocolo puede ser IWRS del centro (Crisvia sortea) o IWRS del sponsor (el coordinador registra el kit que ya asignó ese IRT). Una API en vivo requiere contrato, credenciales y el mapeo de ese estudio; no lo inventamos.",
+        },
+        {
+          q: "¿Hace falta una app tipo Clinical Ink para el diario de medicación?",
+          a: "No. Después del IWRS, farmacia entrega la caja en /dispensacion, registra la primera dosis (en la clínica o oral para llevar) y genera un link /diario. El paciente anota hora y síntomas ahí; el centro lo ve en el expediente. Una app aparte duplicaría login, PHI y mantenimiento. ePRO sigue siendo para cuestionarios de visita, no para un registro diario. Esto no es un eSource tipo Clinical Ink.",
         },
         {
           q: "¿Necesito un EHR hospitalario?",

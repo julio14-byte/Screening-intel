@@ -19,7 +19,7 @@ export default function EproPage() {
     <>
       <PageHeader
         title="ePRO"
-        description="Formularios de resultados reportados por el paciente (Fase A)."
+        description="Cuestionarios del estudio (calidad de vida, síntomas de visita). El diario de toma de medicación está en Dispensación: el paciente usa un link /diario, no una app aparte."
       />
 
       {loading ? (
@@ -30,7 +30,7 @@ export default function EproPage() {
         <Card>
           <EmptyState
             title="Sin formularios ePRO"
-            description="Todavía no hay formularios configurados para este clinical research site. El investigador principal puede habilitarlos desde la administración del sitio."
+            description="Todavía no hay formularios configurados para este clinical research site. El diario de medicación no va acá: se genera un link /diario desde Dispensación."
           />
         </Card>
       ) : (

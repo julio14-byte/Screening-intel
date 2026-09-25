@@ -6,7 +6,7 @@ export default function InventarioPage() {
     <>
       <PageHeader
         title="Inventario de medicamentos"
-        description="Lotes que envía la farmacéutica y stock que queda al entregar recetas."
+        description="Lotes de la farmacéutica. La caja IWRS y la primera dosis se registran en Dispensación."
       />
       <InventoryBoard />
     </>
