@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  CalendarCheck,
   ClipboardList,
   CreditCard,
   Dices,
@@ -7,6 +8,7 @@ import {
   FlaskConical,
   KanbanSquare,
   ListTodo,
+  Lock,
   MessageSquare,
   Package,
   RefreshCw,
@@ -30,6 +32,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
   CreditCard,
   ClipboardList,
   Dices,
+  CalendarCheck,
+  Lock,
   Square,
 };
 

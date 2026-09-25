@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { use } from "react";
 import { ArrowLeft, Target } from "lucide-react";
+import { ProtocolCloseoutPanel } from "@/components/cierre/ProtocolCloseoutPanel";
 import { ProtocolVisitCalendarPanel } from "@/components/follow-up/ProtocolVisitCalendarPanel";
 import { ProtocolStudyMedsPanel } from "@/components/pharmacy/ProtocolStudyMedsPanel";
 import { ProtocolIwrsPanel } from "@/components/iwrs/ProtocolIwrsPanel";
@@ -46,6 +47,7 @@ export default function ProtocolPharmacyPage({
       />
 
       <ProtocolVisitCalendarPanel protocolId={protocol.id} />
+      <ProtocolCloseoutPanel protocolId={protocol.id} />
       <ProtocolStudyMedsPanel protocolId={protocol.id} />
       <ProtocolIwrsPanel protocolId={protocol.id} />
     </>

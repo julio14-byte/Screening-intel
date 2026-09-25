@@ -18,6 +18,7 @@ import {
   CalendarCheck,
   Package,
   Dices,
+  Lock,
   Pill,
   Users,
   UserPlus,
@@ -42,6 +43,7 @@ export const APP_ICONS: Record<string, LucideIcon> = {
   CalendarCheck,
   Package,
   Dices,
+  Lock,
   Pill,
   FileSpreadsheet,
   Cpu,
@@ -94,6 +96,10 @@ export const APP_NAV_STYLES: Record<
   },
   "/seguimiento": {
     activeClass: "bg-cyan-400/20 text-cyan-100 ring-1 ring-cyan-300/30",
+    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
+  },
+  "/cierre": {
+    activeClass: "bg-slate-100/20 text-slate-100 ring-1 ring-white/30",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
   "/protocols": {

@@ -82,6 +82,8 @@ export const WRITE_API_PREFIXES = [
   "/api/epro-app/invite",
   "/api/follow-up",
 ] as const;
+// /api/cierre no entra: el monitor CRA debe poder abrir/cerrar queries de limpieza.
+// Lock, unblind, CSR y sometimiento se validan en cada ruta (solo PI/sub).
 
 /** Rutas de app restringidas por rol. */
 export const ROLE_RESTRICTED_ROUTES: Record<string, AppRole[]> = {
