@@ -5,11 +5,42 @@ import {
   type Ethnicity,
 } from "@/lib/profile/demographics";
 import { normalizeTerm } from "@/lib/utils";
+import {
+  firstFilled,
+  parseCsvTable,
+  parseImportDate,
+  parseLabNumber,
+  type CsvTable,
+} from "@/lib/import/csvTable";
+
+const NAME_FIRST = ["first_name", "firstname", "given_name", "nombre", "nombres"];
+const NAME_LAST = ["last_name", "lastname", "surname", "apellido", "apellidos"];
+const BIRTH = [
+  "birth_date",
+  "birthdate",
+  "dob",
+  "brthdtc",
+  "fecha_nacimiento",
+  "fechanacimiento",
+  "fecha_de_nacimiento",
+];
+const SEX = ["gender", "sex", "sexo"];
+const SUBJECT = [
+  "subject_code",
+  "usubjid",
+  "subjid",
+  "subjectid",
+  "subject_id",
+  "codigo",
+];
+const CONDITIONS = ["conditions", "diagnostico", "diagnosticos", "antecedentes"];
+const MEDICATIONS = ["medications", "medicamentos", "comed"];
 
 const DEMOGRAPHIC_COLUMNS = [
   "phone",
   "email",
   "ethnicity",
+  "etnia",
   "subject_code",
   "address_line",
   "address_city",
@@ -68,70 +99,70 @@ export function parseEthnicity(value: string | undefined): Ethnicity | "" {
   return "";
 }
 
-/** Parsea CSV de pacientes (cabecera obligatoria). */
-export function parsePatientCsv(text: string): ParsedPatientRow[] {
-  const lines = text
-    .split(/\r?\n/)
-    .map((l) => l.trim())
-    .filter(Boolean);
+function headerHas(headers: string[], keys: string[]): boolean {
+  const set = new Set(headers);
+  return keys.some((key) => set.has(key));
+}
 
-  if (lines.length < 2) {
-    throw new Error("El CSV debe tener cabecera y al menos una fila de datos.");
+/** Parsea plantilla Crisvia (CSV, TSV pegado de Excel o ; de Excel LATAM). */
+export function parsePatientTable(table: CsvTable): ParsedPatientRow[] {
+  const { headers, rows: records } = table;
+  if (!headerHas(headers, NAME_FIRST)) {
+    throw new Error("Falta la columna obligatoria: first_name (o nombre).");
   }
-
-  const header = lines[0].split(",").map((h) => h.trim().toLowerCase());
-  const required = ["first_name", "last_name", "birth_date", "gender"];
-  for (const col of required) {
-    if (!header.includes(col)) {
-      throw new Error(`Falta la columna obligatoria: ${col}`);
-    }
+  if (!headerHas(headers, NAME_LAST)) {
+    throw new Error("Falta la columna obligatoria: last_name (o apellido).");
+  }
+  if (!headerHas(headers, BIRTH)) {
+    throw new Error("Falta la columna obligatoria: birth_date (o fecha de nacimiento).");
+  }
+  if (!headerHas(headers, SEX)) {
+    throw new Error("Falta la columna obligatoria: gender (o sexo).");
   }
 
   const reserved = new Set<string>([
-    ...required,
-    "conditions",
-    "medications",
+    ...NAME_FIRST,
+    ...NAME_LAST,
+    ...BIRTH,
+    ...SEX,
+    ...SUBJECT,
+    ...CONDITIONS,
+    ...MEDICATIONS,
     ...DEMOGRAPHIC_COLUMNS,
   ]);
-  const labColumns = header.filter((h) => !reserved.has(h));
+  const labColumns = headers.filter((h) => !reserved.has(h));
 
-  const rows: ParsedPatientRow[] = [];
-
-  for (let i = 1; i < lines.length; i++) {
-    const cells = lines[i].split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
-    const record: Record<string, string> = {};
-    header.forEach((key, idx) => {
-      record[key] = cells[idx] ?? "";
-    });
-
+  return records.map((record) => {
     const laboratories: Record<string, number> = {};
     for (const lab of labColumns) {
-      const num = Number(record[lab]);
-      if (!Number.isNaN(num) && record[lab] !== "") {
-        laboratories[lab] = num;
-      }
+      const num = parseLabNumber(record[lab] ?? "");
+      if (num !== null) laboratories[lab] = num;
     }
 
-    const subjectCode = (record.subject_code ?? "").replace(/[^\d]/g, "");
+    const rawBirth = firstFilled(record, BIRTH);
+    const birthDate = parseImportDate(rawBirth) || rawBirth;
+    const subjectCode = firstFilled(record, SUBJECT).replace(/[^\d]/g, "");
 
-    rows.push({
-      first_name: record.first_name,
-      last_name: record.last_name,
-      birth_date: record.birth_date,
-      gender: parseGender(record.gender),
+    return {
+      first_name: firstFilled(record, NAME_FIRST),
+      last_name: firstFilled(record, NAME_LAST),
+      birth_date: birthDate,
+      gender: parseGender(firstFilled(record, SEX)),
       phone: record.phone?.trim() || undefined,
       email: record.email?.trim() || undefined,
-      ethnicity: parseEthnicity(record.ethnicity),
+      ethnicity: parseEthnicity(firstFilled(record, ["ethnicity", "etnia"])),
       subject_code: subjectCode || undefined,
       address_line: record.address_line?.trim() || undefined,
       address_city: record.address_city?.trim() || undefined,
-      conditions: parseList(record.conditions),
-      medications: parseList(record.medications),
+      conditions: parseList(firstFilled(record, CONDITIONS)),
+      medications: parseList(firstFilled(record, MEDICATIONS)),
       laboratories: withComputedBmi(laboratories),
-    });
-  }
+    };
+  });
+}
 
-  return rows;
+export function parsePatientCsv(text: string): ParsedPatientRow[] {
+  return parsePatientTable(parseCsvTable(text));
 }
 
 export const PATIENT_CSV_TEMPLATE = `first_name,last_name,birth_date,gender,phone,email,ethnicity,subject_code,conditions,medications,pas,pad,frecuencia_cardiaca,temperatura,frecuencia_respiratoria,peso,estatura,glucosa,creatinina,tgo,tgp,hemoglobina,embarazo_sangre,embarazo_orina,hba1c
