@@ -23,7 +23,8 @@
     "verify:cierre": "tsx --tsconfig tsconfig.json scripts/verify-cierre.ts",
     "verify:integraciones": "tsx --tsconfig tsconfig.json scripts/verify-integraciones.ts",
     "verify:five-modules": "tsx --tsconfig tsconfig.json scripts/verify-five-modules.ts",
-    "verify:vendor-import": "tsx --tsconfig tsconfig.json scripts/verify-vendor-import.ts"
+    "verify:vendor-import": "tsx --tsconfig tsconfig.json scripts/verify-vendor-import.ts",
+    "verify:matching-aliases": "tsx --tsconfig tsconfig.json scripts/verify-matching-aliases.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",

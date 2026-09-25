@@ -149,6 +149,9 @@ export function ImportPatientsModal({
         {result ? (
           <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
             {result}
+            <span className="mt-1 block text-xs">
+              Siguiente paso: Protocolos → Ejecutar matching. El import no enrola solo.
+            </span>
           </p>
         ) : null}
 
