@@ -54,7 +54,7 @@ export function useEproForm(formId: string) {
         supabase
           .from("epro_forms")
           .select(
-            "id, title, description, protocol_id, questions, active, created_at, updated_at"
+            "id, title, description, protocol_id, questions, cadence, active, created_at, updated_at"
           )
           .eq("id", formId)
           .single(),

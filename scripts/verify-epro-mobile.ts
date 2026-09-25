@@ -13,6 +13,7 @@ import {
   verifyPin,
 } from "../src/lib/epro-app/crypto";
 import { sanitizeAnswerValue } from "../src/lib/epro-app/sanitize";
+import { canSendEproInvite } from "../src/lib/rbac/types";
 
 const sql = readFileSync(
   resolve("supabase/migrations/20260925020000_epro_mobile_patient.sql"),
@@ -23,6 +24,10 @@ const permissions = readFileSync(resolve("src/lib/rbac/permissions.ts"), "utf8")
 const hoy = readFileSync(resolve("src/app/api/epro-app/p/hoy/route.ts"), "utf8");
 const activar = readFileSync(resolve("src/app/api/epro-app/p/activar/route.ts"), "utf8");
 const pageHoy = readFileSync(resolve("src/app/epro-app/page.tsx"), "utf8");
+const inviteApi = readFileSync(
+  resolve("src/app/api/epro-app/invite/route.ts"),
+  "utf8"
+);
 const inviteUi = readFileSync(
   resolve("src/components/epro/PatientEproInviteCard.tsx"),
   "utf8"
@@ -106,7 +111,12 @@ assert(pageHoy.includes("Cuestionario completado por hoy"), "pantalla de complet
 assert(pageHoy.includes("SubjectBadge"), "UI con código de sujeto");
 assert(!pageHoy.includes("first_name"), "UI móvil sin first_name");
 assert(!pageHoy.includes("phone"), "UI móvil sin teléfono");
-assert(inviteUi.includes("coordinador"), "invitación desde coordinador");
+assert(inviteUi.includes("Invitar al ePRO móvil (coordinador)"), "botón de invitación del coordinador");
+assert(inviteUi.includes("canSendEproInvite"), "UI usa canSendEproInvite");
+assert(inviteApi.includes("canSendEproInvite"), "API exige rol de invitación");
+assert(canSendEproInvite("coordinator"), "coordinador invita");
+assert(canSendEproInvite("investigator"), "PI también puede invitar");
+assert(!canSendEproInvite("monitor"), "monitor no invita");
 
 async function main() {
   const pinHash = await hashPin("482917");

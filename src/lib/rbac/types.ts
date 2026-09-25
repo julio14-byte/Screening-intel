@@ -65,3 +65,8 @@ export const CLINICAL_LEAD_ROLES: readonly AppRole[] = [
 export function isClinicalLead(role: AppRole): boolean {
   return CLINICAL_LEAD_ROLES.includes(role);
 }
+
+/** Quién genera el link del ePRO móvil. El sujeto no se registra solo. */
+export function canSendEproInvite(role: AppRole): boolean {
+  return role === "coordinator" || isClinicalLead(role);
+}
