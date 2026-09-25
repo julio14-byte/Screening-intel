@@ -80,6 +80,11 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
         description:
           "ePRO móvil del sujeto (invitación, PIN, cuestionario diario) y formularios de visita. No es certificación HIPAA ni 21 CFR Part 11.",
       },
+      {
+        name: "Follow-up",
+        description:
+          "Calendario de visitas de seguimiento (día objetivo + ventana), adherencia, signos vitales, desviación y viáticos.",
+      },
     ],
     components: {
       securitySchemes: {
@@ -868,6 +873,50 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           responses: {
             "200": { description: "Guardado" },
             "409": { description: "Cuestionario completado por hoy" },
+          },
+        },
+      },
+      "/api/follow-up/calendario": {
+        get: {
+          tags: ["Follow-up"],
+          summary: "Calendario del protocolo",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            {
+              name: "protocol_id",
+              in: "query",
+              required: true,
+              schema: { type: "string", format: "uuid" },
+            },
+          ],
+          responses: { "200": { description: "Visitas del calendario" } },
+        },
+        post: {
+          tags: ["Follow-up"],
+          summary: "Agregar visita al calendario",
+          security: [{ cookieAuth: [] }],
+          responses: { "200": { description: "Visita creada" } },
+        },
+      },
+      "/api/follow-up/generar": {
+        post: {
+          tags: ["Follow-up"],
+          summary: "Generar visitas del sujeto",
+          description: "Día 0 = IWRS o primera dosis. Copia la ventana al momento de generar.",
+          security: [{ cookieAuth: [] }],
+          responses: { "200": { description: "Calendario generado" } },
+        },
+      },
+      "/api/follow-up/completar": {
+        post: {
+          tags: ["Follow-up"],
+          summary: "Completar visita de seguimiento",
+          description:
+            "Signos vitales obligatorios. Fuera de ventana → status out_of_window y protocol_deviation.",
+          security: [{ cookieAuth: [] }],
+          responses: {
+            "200": { description: "Guardado" },
+            "409": { description: "Ya no está programada" },
           },
         },
       },

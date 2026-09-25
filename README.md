@@ -86,9 +86,9 @@ Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operat
 |------|-------------|
 | `/dashboard` | Embudo de screening y métricas del site |
 | `/patients` | Registro de pacientes |
-| `/patients/[id]` | Perfil clínico, visitas, receta, IWRS, invitación ePRO y diario |
+| `/patients/[id]` | Perfil clínico, visitas, seguimiento, receta, IWRS, ePRO y diario |
 | `/protocols` | Gestión de protocolos |
-| `/protocols/[id]` | Medicamentos del estudio y números de lote |
+| `/protocols/[id]` | Medicamentos del estudio, IWRS y calendario de seguimiento |
 | `/protocols/[id]/match` | Cruce masivo paciente ↔ protocolo + justificación IA |
 | `/inventario` | Stock de lotes y recetas entregadas |
 | `/edc` | Hub de captura clínica (expediente, visitas, farmacia) |
@@ -102,6 +102,7 @@ Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operat
 | `/cola` | Tareas guardadas: inbox, criterios 🟡 y re-match |
 | `/avisos` | Avisos de candidato nuevo, screen failure y tarea vencida |
 | `/agenda` | Visitas con el médico: registro, estado y notas clínicas |
+| `/seguimiento` | Visitas obligatorias del protocolo (ventana, adherencia, desviación) |
 | `/settings/portal` | Configuración del portal (investigator) |
 | `/settings/security` | MFA TOTP (obligatorio en prod para PI / sub-PI) |
 | `/epro` | Formularios ePRO de visita (staff) |
@@ -182,6 +183,7 @@ supabase/migrations/20260924150000_iwrs_randomization.sql
 supabase/migrations/20260925001000_sponsor_iwrs.sql
 supabase/migrations/20260925010000_dispense_first_dose_diary.sql
 supabase/migrations/20260925020000_epro_mobile_patient.sql
+supabase/migrations/20260925030000_follow_up_visits.sql
 ```
 
 Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.

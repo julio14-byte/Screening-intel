@@ -19,7 +19,7 @@ export const PRODUCT_MODULES: Record<
     label: "EDC",
     href: "/edc",
     summary:
-      "Captura clínica del centro: expediente, visitas, inventario y dispensación. No es un EDC CDISC certificado.",
+      "Captura clínica del centro: expediente, agenda, seguimiento del protocolo, inventario y dispensación. No es un EDC CDISC certificado.",
   },
   epro: {
     id: "epro",
