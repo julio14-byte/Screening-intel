@@ -53,7 +53,8 @@ Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operat
 | **Clinical Profile** | Condiciones, medicación, laboratorios + búsqueda ICD-11 + extracción IA desde notas |
 | **Protocol Matcher** | Criterios de inclusión/exclusión; extracción NLP desde PDF |
 | **Motor de elegibilidad** | Semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple + `match_score` + justificación IA. No es un sorteo: filtra por criterios. |
-| **Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure. “Randomizado” es un estado clínico, no un IWRS de brazos. |
+| **Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure. Con IWRS activo, Randomizado se asigna en `/iwrs`, no arrastrando. |
+| **IWRS** | Randomización de sitio: bloques permutados, kit visible, brazo según cegamiento. No cambia la elegibilidad. |
 | **Re-Match** | Propone protocolos alternativos para pacientes con screen failure |
 | **Portal candidatos** | Pre-registro público (`/candidato`) + inbox (`/candidatos`) + settings del portal |
 | **Expediente interno** | Pacientes y perfil clínico en tablas de la app (incluye modelo FHIR Patient) |
@@ -167,6 +168,11 @@ supabase/migrations/20260923230827_fix_ops_organization_id.sql
 supabase/migrations/20260923234047_drop_external_ehr.sql
 supabase/migrations/20260923235512_drop_queue_agent_and_patient_ehr.sql
 supabase/migrations/20260924001000_protocol_medication_inventory.sql
+supabase/migrations/20260924044000_patient_visit_notes.sql
+supabase/migrations/20260924053000_repair_ops_visits_schema.sql
+supabase/migrations/20260924120000_clinical_anamnesis.sql
+supabase/migrations/20260924140000_patient_demographics.sql
+supabase/migrations/20260924150000_iwrs_randomization.sql
 ```
 
 Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
@@ -241,9 +247,9 @@ yarn mcp:icd11
 
 | Rol | Permisos |
 |-----|----------|
-| **investigator** | Protocolos, aprobaciones, randomización, gestión de roles y facturación |
+| **investigator** | Protocolos, IWRS (config + desenlace), aprobaciones, gestión de roles y facturación |
 | **sub_investigator** | Igual que PI en clínica; sin roles ni billing |
-| **coordinator** | Pacientes, screening operativo (sin marcar Apto) |
+| **coordinator** | Pacientes, screening operativo, randomizar IWRS (sin marcar Apto a mano ni desenmascarar) |
 | **monitor** | Solo lectura (CRA / auditoría farmacéutica) |
 
 Administración en `/settings/roles` (solo investigator).

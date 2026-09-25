@@ -57,6 +57,11 @@ const config = {
         icon: "KanbanSquare",
       },
       {
+        href: "/iwrs",
+        label: "IWRS",
+        icon: "Dices",
+      },
+      {
         href: "/epro",
         label: "ePRO",
         icon: "ClipboardList",
@@ -119,6 +124,7 @@ const config = {
       "/avisos",
       "/agenda",
       "/inventario",
+      "/iwrs",
       "/semaforos",
       "/devices",
     ],
@@ -154,6 +160,7 @@ const config = {
       avisos: "/avisos",
       agenda: "/agenda",
       inventario: "/inventario",
+      iwrs: "/iwrs",
       docs: "/docs",
       apiDocs: "/docs/api",
     },
@@ -263,7 +270,7 @@ const config = {
       items: [
         {
           q: "¿El screening es un sorteo digital para elegir pacientes?",
-          a: "No. El screening es un filtro de elegibilidad: el motor de reglas compara el expediente con inclusión y exclusión (🟢 cumple, 🟡 falta un dato, 🔴 no cumple). No hay azar y la IA no decide quién entra. El paso que sí es aleatorio es la randomización (IWRS): asignar el brazo del estudio cuando el paciente ya pasó el screening. Crisvia registra ese estado en el tracker; no sortea tratamientos.",
+          a: "No. El screening es un filtro de elegibilidad: el motor de reglas compara el expediente con inclusión y exclusión (🟢 cumple, 🟡 falta un dato, 🔴 no cumple). No hay azar y la IA no decide quién entra. El paso que sí es aleatorio es IWRS: asigna kit y brazo cuando el paciente ya está en Screening. Se configura por protocolo (brazos, cegamiento, bloques permutados) en /iwrs.",
         },
         {
           q: "¿Necesito un EHR hospitalario?",

@@ -15,7 +15,8 @@
     "verify:clinical-profile-embed": "tsx --tsconfig tsconfig.json scripts/verify-clinical-profile-embed.ts",
     "verify:clinical-measurements": "tsx --tsconfig tsconfig.json scripts/verify-clinical-measurements.ts",
     "verify:clinical-anamnesis": "tsx --tsconfig tsconfig.json scripts/verify-clinical-anamnesis.ts",
-    "verify:patient-demographics": "tsx --tsconfig tsconfig.json scripts/verify-patient-demographics.ts"
+    "verify:patient-demographics": "tsx --tsconfig tsconfig.json scripts/verify-patient-demographics.ts",
+    "verify:iwrs": "tsx --tsconfig tsconfig.json scripts/verify-iwrs.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { use } from "react";
 import { ArrowLeft, Target } from "lucide-react";
 import { ProtocolStudyMedsPanel } from "@/components/pharmacy/ProtocolStudyMedsPanel";
+import { ProtocolIwrsPanel } from "@/components/iwrs/ProtocolIwrsPanel";
 import { Button } from "@/components/ui/Button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
@@ -31,8 +32,8 @@ export default function ProtocolPharmacyPage({
       </Link>
 
       <PageHeader
-        title={`${protocol.code_name} · lotes`}
-        description={`${protocol.title}. Registrá el medicamento del estudio y el número de lote que llegó.`}
+        title={`${protocol.code_name} · lotes e IWRS`}
+        description={`${protocol.title}. Medicamento del estudio e IWRS (kit/brazo) después del screening.`}
         actions={
           <Link href={`/protocols/${protocol.id}/match`}>
             <Button variant="secondary">
@@ -44,6 +45,7 @@ export default function ProtocolPharmacyPage({
       />
 
       <ProtocolStudyMedsPanel protocolId={protocol.id} />
+      <ProtocolIwrsPanel protocolId={protocol.id} />
     </>
   );
 }

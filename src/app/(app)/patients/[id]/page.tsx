@@ -7,6 +7,7 @@ import { AuditTimeline } from "@/components/audit/audit-timeline";
 import { InclusionApprovalPanel } from "@/components/rbac/InclusionApprovalPanel";
 import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
 import { ElectronicPrescriptionPanel } from "@/components/pharmacy/ElectronicPrescriptionPanel";
+import { PatientIwrsCard } from "@/components/iwrs/PatientIwrsCard";
 import { VisitLog } from "@/components/ops/VisitLog";
 import { ClinicalProfileEditor } from "@/components/profile/ClinicalProfileEditor";
 import { usePatientDetail } from "@/hooks/usePatientDetail";
@@ -54,6 +55,8 @@ export default function PatientDetailPage({
         patientId={patient.id}
         protocols={protocols}
       />
+
+      <PatientIwrsCard patientId={patient.id} />
 
       <div className="mt-6">
         <AuditTimeline tableName="patients" recordId={patient.id} />
