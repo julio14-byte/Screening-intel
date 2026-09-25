@@ -85,6 +85,11 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
         description:
           "Calendario de visitas de seguimiento (día objetivo + ventana), adherencia, signos vitales, desviación y viáticos.",
       },
+      {
+        name: "Cierre",
+        description:
+          "Limpieza (queries del monitor), Database Lock, apertura del ciego, snapshot descriptivo, CSR del centro y registro regulatorio. No es envío a FDA/EMA/COFEPRIS ni SAS/R.",
+      },
     ],
     components: {
       securitySchemes: {
@@ -918,6 +923,84 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
             "200": { description: "Guardado" },
             "409": { description: "Ya no está programada" },
           },
+        },
+      },
+      "/api/cierre": {
+        get: {
+          tags: ["Cierre"],
+          summary: "Estado de cierre",
+          description:
+            "Sin protocol_id lista protocolos. Con protocol_id: fase, escaneo de limpieza y queries.",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            {
+              name: "protocol_id",
+              in: "query",
+              required: false,
+              schema: { type: "string", format: "uuid" },
+            },
+          ],
+          responses: { "200": { description: "Estado o listado" } },
+        },
+      },
+      "/api/cierre/query": {
+        post: {
+          tags: ["Cierre"],
+          summary: "Abrir query de limpieza",
+          description: "Monitor CRA (o el centro) pide un dato faltante o una justificación.",
+          security: [{ cookieAuth: [] }],
+          responses: { "200": { description: "Query abierta" } },
+        },
+      },
+      "/api/cierre/lock": {
+        post: {
+          tags: ["Cierre"],
+          summary: "Database Lock",
+          description:
+            "Irreversible. Exige escaneo limpio y declaración ≥20 caracteres. Solo PI/sub.",
+          security: [{ cookieAuth: [] }],
+          responses: {
+            "200": { description: "Base congelada" },
+            "409": { description: "Datos incompletos o ya bloqueada" },
+          },
+        },
+      },
+      "/api/cierre/unblind": {
+        post: {
+          tags: ["Cierre"],
+          summary: "Apertura del ciego del estudio",
+          description:
+            "Solo después del lock. Distinto de POST /api/iwrs/unblind (emergencia de un sujeto).",
+          security: [{ cookieAuth: [] }],
+          responses: { "200": { description: "Ciego abierto" } },
+        },
+      },
+      "/api/cierre/analizar": {
+        post: {
+          tags: ["Cierre"],
+          summary: "Snapshot descriptivo",
+          description: "n/brazo, EA, adherencia. No es SAS/R ni significancia estadística.",
+          security: [{ cookieAuth: [] }],
+          responses: { "200": { description: "Snapshot guardado" } },
+        },
+      },
+      "/api/cierre/csr": {
+        post: {
+          tags: ["Cierre"],
+          summary: "CSR del centro",
+          description: "Borrador markdown. No es el CSR oficial del sponsor.",
+          security: [{ cookieAuth: [] }],
+          responses: { "200": { description: "Markdown generado" } },
+        },
+      },
+      "/api/cierre/someter": {
+        post: {
+          tags: ["Cierre"],
+          summary: "Registrar sometimiento",
+          description:
+            "Constancia de paquete para FDA/EMA/COFEPRIS/ANMAT. Crisvia no envía a las agencias.",
+          security: [{ cookieAuth: [] }],
+          responses: { "200": { description: "Registrado" } },
         },
       },
     },

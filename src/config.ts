@@ -77,6 +77,12 @@ const config = {
         section: "edc" as const,
       },
       {
+        href: "/cierre",
+        label: "Cierre",
+        icon: "Lock",
+        section: "edc" as const,
+      },
+      {
         href: "/inventario",
         label: "Inventario",
         icon: "Package",
@@ -153,6 +159,7 @@ const config = {
       "/avisos",
       "/agenda",
       "/seguimiento",
+      "/cierre",
       "/inventario",
       "/dispensacion",
       "/edc",
@@ -197,6 +204,7 @@ const config = {
       avisos: "/avisos",
       agenda: "/agenda",
       seguimiento: "/seguimiento",
+      cierre: "/cierre",
       inventario: "/inventario",
       dispensacion: "/dispensacion",
       edc: "/edc",
@@ -290,7 +298,7 @@ const config = {
         {
           icon: "FileSpreadsheet",
           title: "EDC del centro",
-          body: "Expediente, visitas, inventario y dispensación. Captura clínica del site, no un EDC CDISC certificado.",
+          body: "Expediente, visitas, inventario, dispensación y cierre (lock → ciego → CSR). Captura clínica del site, no un EDC CDISC certificado.",
         },
         {
           icon: "ClipboardList",
@@ -311,6 +319,16 @@ const config = {
           icon: "ListTodo",
           title: "Cola de trabajo",
           body: "Inbox, criterios 🟡 y re-match en tareas guardadas. El coordinador confirma cada paso.",
+        },
+        {
+          icon: "CalendarCheck",
+          title: "Seguimiento del protocolo",
+          body: "Calendario con día objetivo y ventana. Completar visita exige signos vitales; fuera de ventana = desviación.",
+        },
+        {
+          icon: "Lock",
+          title: "Cierre de estudio",
+          body: "Database Lock, apertura del ciego, snapshot descriptivo y CSR del centro. No envía a FDA/EMA/COFEPRIS ni reemplaza SAS/R.",
         },
         {
           icon: "Package",
@@ -346,6 +364,10 @@ const config = {
         {
           q: "¿Cómo se controlan las visitas de seguimiento del protocolo?",
           a: "En el protocolo se define el calendario (día objetivo y ventana, ej. día 14 con −2/+2). El coordinador genera las visitas en el expediente (día 0 = IWRS o primera dosis). Completar exige signos vitales; si la fecha real cae fuera de ventana se marca desviación. También se registra adherencia (pastillas entregadas vs. devueltas), eventos adversos y viáticos. Distinto de la agenda de consultas. No es un EDC CDISC certificado.",
+        },
+        {
+          q: "¿Crisvia hace el Database Lock, abre el ciego y presenta a FDA/EMA/COFEPRIS?",
+          a: "El centro limpia datos (el monitor abre queries, p. ej. una visita sin presión arterial). El investigador bloquea la base (Database Lock irreversible: nadie altera una celda). Recién después se abre el ciego del estudio (distinto del desenlace de emergencia IWRS). Crisvia arma un snapshot descriptivo y un CSR del centro; no reemplaza SAS/R ni al bioestadístico del sponsor, y no envía el expediente a FDA, EMA, COFEPRIS ni ANMAT. Si las agencias aprueban, la Fase IV (farmacovigilancia) ocurre fuera de la app.",
         },
         {
           q: "¿Necesito un EHR hospitalario?",

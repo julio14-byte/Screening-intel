@@ -21,6 +21,11 @@ const EDC_LINKS = [
     body: "Visitas del protocolo con ventana, adherencia y desviaciones.",
   },
   {
+    href: "/cierre",
+    title: "Cierre",
+    body: "Limpieza, Database Lock, apertura del ciego, snapshot, CSR del centro y registro regulatorio.",
+  },
+  {
     href: "/inventario",
     title: "Inventario",
     body: "Lotes de la farmacéutica y stock del site.",

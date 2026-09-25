@@ -45,6 +45,11 @@ export const productDocs = {
           body:
             "Definí día objetivo y ventana en el protocolo. El coordinador genera el calendario en el expediente y completa signos vitales, adherencia y viáticos. Fuera de ventana = desviación. Distinto de /agenda.",
         },
+        {
+          heading: "8. Cierre de estudio",
+          body:
+            "En /cierre el monitor limpia datos con queries, el PI bloquea la base (nadie altera una celda), se abre el ciego, se genera un snapshot descriptivo y un CSR del centro, y se registra el paquete para FDA/EMA/COFEPRIS/ANMAT. Crisvia no envía a las agencias ni reemplaza SAS/R.",
+        },
       ],
     },
   ],

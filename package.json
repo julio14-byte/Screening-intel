@@ -19,7 +19,8 @@
     "verify:iwrs": "tsx --tsconfig tsconfig.json scripts/verify-iwrs.ts",
     "verify:dispense-diary": "tsx --tsconfig tsconfig.json scripts/verify-dispense-diary.ts",
     "verify:epro-mobile": "tsx --tsconfig tsconfig.json scripts/verify-epro-mobile.ts",
-    "verify:follow-up": "tsx --tsconfig tsconfig.json scripts/verify-follow-up.ts"
+    "verify:follow-up": "tsx --tsconfig tsconfig.json scripts/verify-follow-up.ts",
+    "verify:cierre": "tsx --tsconfig tsconfig.json scripts/verify-cierre.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
