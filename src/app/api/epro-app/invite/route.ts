@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { opsContext, opsSchemaErrorResponse } from "@/lib/ops/http";
+import { canSendEproInvite } from "@/lib/rbac/types";
 import {
   EPRO_INVITE_MS,
   EPRO_MIGRATION_HINT,
@@ -16,6 +17,15 @@ const schema = z.object({
 export async function POST(request: Request) {
   const gate = await opsContext(true);
   if (!gate.ok) return gate.response;
+  if (!canSendEproInvite(gate.ctx.role)) {
+    return NextResponse.json(
+      {
+        error:
+          "El coordinador genera la invitación ePRO desde el expediente. El paciente no se registra solo.",
+      },
+      { status: 403 }
+    );
+  }
 
   let body: unknown;
   try {

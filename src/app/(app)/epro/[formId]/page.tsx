@@ -117,7 +117,11 @@ export default function EproFormPage() {
     <>
       <PageHeader
         title={form.title}
-        description={form.description ?? "Completá en nombre del paciente (demo Fase A)."}
+        description={
+          form.cadence === "daily"
+            ? "Cuestionario diario del ePRO móvil. El coordinador invita desde el expediente; el sujeto responde en /epro-app."
+            : (form.description ?? "Completá en nombre del paciente (visita).")
+        }
         actions={
           <Link href="/epro">
             <Button variant="secondary">
@@ -128,6 +132,19 @@ export default function EproFormPage() {
         }
       />
 
+      {form.cadence === "daily" ? (
+        <Card>
+          <CardHeader
+            title="Invitación del coordinador"
+            description="Este cuestionario diario lo responde el sujeto en /epro-app. El staff no lo completa acá."
+          />
+          <CardBody>
+            <Link href="/patients">
+              <Button>Ir al expediente e invitar</Button>
+            </Link>
+          </CardBody>
+        </Card>
+      ) : (
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader title="Nueva respuesta" />
@@ -196,6 +213,7 @@ export default function EproFormPage() {
           </CardBody>
         </Card>
       </div>
+      )}
     </>
   );
 }

@@ -40,6 +40,11 @@ export const productDocs = {
           body:
             "La app es Screening + EDC + ePRO. El coordinador invita al ePRO móvil desde el expediente (link 48 h). El sujeto entra en /epro-app con código y PIN; la UI no muestra nombre. El IWRS es un módulo independiente: kit y brazo se piden a /api/iwrs (documentado en /docs/api).",
         },
+        {
+          heading: "7. Seguimiento del protocolo",
+          body:
+            "Definí día objetivo y ventana en el protocolo. El coordinador genera el calendario en el expediente y completa signos vitales, adherencia y viáticos. Fuera de ventana = desviación. Distinto de /agenda.",
+        },
       ],
     },
   ],

@@ -6,7 +6,7 @@ export default function AgendaPage() {
     <>
       <PageHeader
         title="Agenda de visitas"
-        description="Control de visitas del paciente con el médico. Cada consulta queda registrada con nota clínica."
+        description="Agenda de consultas del centro. Las visitas obligatorias del protocolo (ventana, adherencia) están en Seguimiento."
       />
       <VisitAgenda />
     </>

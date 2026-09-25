@@ -80,6 +80,7 @@ export const WRITE_API_PREFIXES = [
   "/api/iwrs",
   "/api/diario",
   "/api/epro-app/invite",
+  "/api/follow-up",
 ] as const;
 
 /** Rutas de app restringidas por rol. */

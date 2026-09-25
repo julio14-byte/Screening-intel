@@ -10,6 +10,7 @@ import { ElectronicPrescriptionPanel } from "@/components/pharmacy/ElectronicPre
 import { PatientDiaryCard } from "@/components/pharmacy/PatientDiaryCard";
 import { PatientEproInviteCard } from "@/components/epro/PatientEproInviteCard";
 import { PatientIwrsCard } from "@/components/iwrs/PatientIwrsCard";
+import { PatientFollowUpCard } from "@/components/follow-up/PatientFollowUpCard";
 import { VisitLog } from "@/components/ops/VisitLog";
 import { ClinicalProfileEditor } from "@/components/profile/ClinicalProfileEditor";
 import { usePatientDetail } from "@/hooks/usePatientDetail";
@@ -59,6 +60,7 @@ export default function PatientDetailPage({
       />
 
       <PatientIwrsCard patientId={patient.id} />
+      <PatientFollowUpCard patientId={patient.id} protocols={protocols} />
       <PatientEproInviteCard patientId={patient.id} />
       <PatientDiaryCard patientId={patient.id} protocols={protocols} />
 

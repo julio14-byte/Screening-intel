@@ -71,6 +71,12 @@ const config = {
         section: "edc" as const,
       },
       {
+        href: "/seguimiento",
+        label: "Seguimiento",
+        icon: "CalendarCheck",
+        section: "edc" as const,
+      },
+      {
         href: "/inventario",
         label: "Inventario",
         icon: "Package",
@@ -146,6 +152,7 @@ const config = {
       "/cola",
       "/avisos",
       "/agenda",
+      "/seguimiento",
       "/inventario",
       "/dispensacion",
       "/edc",
@@ -189,6 +196,7 @@ const config = {
       cola: "/cola",
       avisos: "/avisos",
       agenda: "/agenda",
+      seguimiento: "/seguimiento",
       inventario: "/inventario",
       dispensacion: "/dispensacion",
       edc: "/edc",
@@ -334,6 +342,10 @@ const config = {
         {
           q: "¿El ePRO móvil muestra el nombre del paciente?",
           a: "No. El sujeto no se registra solo: el coordinador genera un link de 48 horas desde el expediente. El paciente valida el año de nacimiento, crea un PIN de 6 dígitos y después entra con código de sujeto + PIN. La interfaz solo muestra ese código. La sesión caduca a los 3 minutos de inactividad. Cada respuesta diaria entra a la bitácora (quién/sujeto, UTC, acción, valor). El diseño se alinea a HIPAA, GDPR y 21 CFR Part 11; no es una certificación.",
+        },
+        {
+          q: "¿Cómo se controlan las visitas de seguimiento del protocolo?",
+          a: "En el protocolo se define el calendario (día objetivo y ventana, ej. día 14 con −2/+2). El coordinador genera las visitas en el expediente (día 0 = IWRS o primera dosis). Completar exige signos vitales; si la fecha real cae fuera de ventana se marca desviación. También se registra adherencia (pastillas entregadas vs. devueltas), eventos adversos y viáticos. Distinto de la agenda de consultas. No es un EDC CDISC certificado.",
         },
         {
           q: "¿Necesito un EHR hospitalario?",

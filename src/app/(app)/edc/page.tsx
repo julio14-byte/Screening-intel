@@ -12,8 +12,13 @@ const EDC_LINKS = [
   },
   {
     href: "/agenda",
-    title: "Visitas",
-    body: "Agenda con médico y notas de consulta.",
+    title: "Agenda",
+    body: "Consultas con médico y notas clínicas.",
+  },
+  {
+    href: "/seguimiento",
+    title: "Seguimiento",
+    body: "Visitas del protocolo con ventana, adherencia y desviaciones.",
   },
   {
     href: "/inventario",

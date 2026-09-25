@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
 import { useRole } from "@/contexts/role-context";
+import { canSendEproInvite } from "@/lib/rbac/types";
 import { formatDate } from "@/lib/utils";
 
 type Entry = {
@@ -21,7 +22,8 @@ function firstRel<T>(value: T | T[] | null | undefined): T | null {
 }
 
 export function PatientEproInviteCard({ patientId }: { patientId: string }) {
-  const { isReadOnly } = useRole();
+  const { role, isReadOnly } = useRole();
+  const canInvite = Boolean(role && canSendEproInvite(role) && !isReadOnly);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [url, setUrl] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
@@ -87,13 +89,13 @@ export function PatientEproInviteCard({ patientId }: { patientId: string }) {
         ) : (
           <p className="text-xs text-slate-500">Todavía no activó el PIN.</p>
         )}
-        {!isReadOnly ? (
+        {canInvite ? (
           <Button variant="secondary" onClick={() => void invite()}>
-            Generar invitación ePRO (48 h)
+            Invitar al ePRO móvil (coordinador)
           </Button>
         ) : (
           <p className="text-xs text-slate-500">
-            El monitor no genera el link. Lo crea el coordinador desde el expediente.
+            El paciente no se registra solo. El coordinador genera el link desde este expediente.
           </p>
         )}
         {url ? (
