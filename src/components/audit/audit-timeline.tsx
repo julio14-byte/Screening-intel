@@ -190,7 +190,7 @@ export function AuditTimeline({
   tableName,
   recordId,
   title = "Bitácora de auditoría",
-  description = "Registro inmutable de cambios (21 CFR Part 11). Solo lectura.",
+  description = "Registro inmutable de cambios. Diseño alineado a 21 CFR Part 11; no es una certificación. Solo lectura.",
   className,
 }: {
   tableName: string;

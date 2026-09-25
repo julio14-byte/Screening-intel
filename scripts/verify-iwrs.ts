@@ -128,7 +128,7 @@ assert(
 assert(dispense.includes("listIwrsCatalog"), "dispensación pide kits al módulo IWRS");
 assert(openapi.includes('name: "IWRS"'), "OpenAPI tag IWRS");
 assert(openapi.includes('"/api/iwrs/randomize"'), "OpenAPI randomize");
-assert(modules.includes("screening"), "módulo Screening");
+assert(modules.includes('"tracker"'), "módulo Tracker");
 assert(modules.includes("integraciones"), "módulo Integraciones");
 assert(!modules.includes('label: "EDC"'), "EDC lo opera un tercero");
 assert(!modules.includes('href: "/iwrs"'), "IWRS lo opera un tercero");

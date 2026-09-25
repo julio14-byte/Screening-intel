@@ -138,8 +138,9 @@ export function ClinicalProfileEditor({
 
       {!profile && canEdit ? (
         <p className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-          Este paciente todavía no tiene perfil clínico. Cargá sus datos y
-          guardá para habilitar el matching contra protocolos.
+          Este paciente todavía no tiene perfil clínico (historia, antecedentes,
+          medicamentos y laboratorios). Cargalo y guardá: el matcher no puede
+          cruzar un expediente vacío.
         </p>
       ) : null}
 

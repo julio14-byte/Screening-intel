@@ -1,6 +1,6 @@
 # Crisvia
 
-Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-screening**, el **matching** paciente–protocolo y el **re-matching** cuando un paciente cae en screen failure — con portal de candidatos, expediente interno, trazabilidad clínica y RBAC.
+Plataforma de **inteligencia de screening** para **clinical research sites**. No es una base de datos de pacientes ni un reclutador: aprovecha a quienes **YA llegan** al centro, cruza expediente ↔ protocolo y evita que un screen failure se convierta en un paciente perdido.
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-000?style=flat&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -22,26 +22,25 @@ Plataforma **HealthTech** para **clinical research sites**. Optimiza el **pre-sc
 | **Re-Match nativo** | Propone protocolos alternativos tras un screen failure. |
 | **Sub-investigator** | Rol clínico con permisos de PI excepto roles y facturación. |
 | **Crisvia** | Nombre del producto (antes Screenlane / Screening Intelligence). |
-| **Visitas con notas** | Cada consulta con el médico queda registrada (tipo, sede, estado y nota clínica). |
 
 ---
 
 ## Qué nos diferencia
 
-Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operativo completo del clinical research site** en un solo producto SaaS accesible.
+Crisvia no se vende como “base de pacientes” ni como “te conseguimos reclutas”. Es **inteligencia de screening** para el clinical research site: el expediente de quienes ya llegaron, el cruce contra protocolos y la recuperación tras un screen failure.
 
 | Diferencial | Qué significa en la práctica |
 |-------------|------------------------------|
-| **Funnel end-to-end** | Pacientes, protocolos, matching, tracker Kanban, re-match, portal público y facturación — sin Excel ni herramientas sueltas |
+| **Pacientes que YA llegaron** | Registro + perfil clínico de tu centro. El portal `/candidato` es extra, no el discurso de reclutamiento. |
+| **Cinco módulos (V1)** | Registry → Profile → Matcher → Tracker → Re-Match. EDC, ePRO e IWRS los opera un tercero. |
 | **Re-Match nativo** | Tras un screen failure, propone automáticamente otros protocolos activos donde el paciente podría encajar |
-| **Dos audiencias** | Coordinadores (app clínica) y pacientes (pre-registro en `/candidato` con link del centro) |
 | **Matching explicable** | Motor de reglas con semáforo 🟢🟡🔴 + detalle criterio por criterio + **justificación clínica IA** que narra el resultado sin cambiar la elegibilidad |
 | **IA puntual** | Justificación del matching, extracción de PDF y notas. No decide elegibilidad. |
-| **RBAC + audit trail** | Roles clínicos (investigator, sub-investigator, coordinator, monitor) y bitácora orientada a 21 CFR Part 11 |
+| **RBAC + audit trail** | Roles clínicos y bitácora con diseño alineado a 21 CFR Part 11 (no es una certificación) |
 | **LATAM-first** | UI en español; expediente interno (manual, CSV, portal). Sin EHR hospitalario. |
 | **SaaS self-serve** | Trial 14 días, planes por volumen y Stripe — pensado para sitios medianos, no solo enterprise |
 
-**En una frase:** del candidato al protocolo correcto, sin perder pacientes tras un screen failure.
+**En una frase:** cada paciente que llega a tu clínica es una oportunidad de investigación; un screen failure no debería ser un paciente perdido.
 
 ---
 
@@ -49,13 +48,13 @@ Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operat
 
 | Área | Qué hace |
 |------|----------|
-| **Patient Registry** | Alta, búsqueda e importación CSV de pacientes |
-| **Clinical Profile** | Condiciones, medicación, laboratorios + búsqueda ICD-11 + extracción IA desde notas |
-| **Protocol Matcher** | Criterios de inclusión/exclusión; extracción NLP desde PDF |
+| **1. Patient Registry** | Alta, búsqueda e importación CSV de quienes YA están en el site. Entrada al matching, no un listado para vender. |
+| **2. Clinical Profile** | Historia, antecedentes, medicamentos, laboratorios + ICD-11 + extracción IA desde notas |
+| **3. Protocol Matcher** | Paciente ↔ protocolo. Criterios de inclusión/exclusión; extracción NLP desde PDF |
 | **Motor de elegibilidad** | Semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple + `match_score` + justificación IA. No es un sorteo: filtra por criterios. |
-| **Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure. Si el protocolo tiene IWRS de un tercero, Randomizado llega por webhook; no se arrastra. |
+| **4. Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure. Si el protocolo tiene IWRS de un tercero, Randomizado llega por webhook; no se arrastra. |
+| **5. Re-Match & Follow-up** | Screen failure → otros protocolos activos. El calendario de visitas lo opera el EDC del estudio. |
 | **Integraciones** | EDC, ePRO e IWRS los opera un tercero. Crisvia avisa por webhook HTTPS + HMAC (`X-Crisvia-Signature`) cuando el candidato es elegible; el IRT confirma randomización en `POST /api/integraciones/inbound`. No es un conector Lilly/Medidata. |
-| **Re-Match** | Propone protocolos alternativos para pacientes con screen failure |
 | **Portal candidatos** | Pre-registro público (`/candidato`) + inbox (`/candidatos`) + settings del portal |
 | **Expediente interno** | Pacientes y perfil clínico en tablas de la app (incluye modelo FHIR Patient) para matching. No hay EHR hospitalario externo. |
 | **Cola de trabajo** | Tareas de inbox, criterios 🟡 y re-match |

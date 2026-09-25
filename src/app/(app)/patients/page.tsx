@@ -37,8 +37,8 @@ export default function PatientsPage() {
   return (
     <>
       <PageHeader
-        title="Patient Registry"
-        description="Base de pacientes de la clínica para pre-screening."
+        title="Registro de pacientes"
+        description="Quienes YA están en tu site. Entrada al matching — no una base de datos para vender ni para reclutar."
         actions={
           <RoleGuard permission="patients:write">
             <div className="flex flex-wrap gap-2">
@@ -85,7 +85,7 @@ export default function PatientsPage() {
             description={
               query
                 ? "Probá con otro término de búsqueda."
-                : "Agregá el primer paciente para comenzar el pre-screening."
+                : "Cargá a quienes YA están en tu site (alta o CSV) para cruzarlos contra protocolos."
             }
           />
         ) : (

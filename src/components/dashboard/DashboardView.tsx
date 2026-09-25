@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/StateMessage";
 import { OperationalFunnel } from "@/components/dashboard/OperationalFunnel";
 import { ProductModulesStrip } from "@/components/product/ProductModulesStrip";
+import { ScreeningVersionNote } from "@/components/product/ScreeningVersionNote";
 import { computeDashboardMetrics } from "@/lib/dashboard/metrics";
 import { screeningToVerdict } from "@/lib/dashboard/traffic-light";
 import { routes } from "@/lib/app/routes";
@@ -65,7 +66,7 @@ export function DashboardView({
     <>
       <PageHeader
         title={title}
-        description="Screening del site. EDC, ePRO e IWRS los opera un tercero (Integraciones)."
+        description="Inteligencia de screening: cinco módulos. EDC, ePRO e IWRS los opera un tercero."
         actions={
           filteredRows.length > 0 ? (
             <Button
@@ -84,6 +85,8 @@ export function DashboardView({
         }
       />
 
+      <ScreeningVersionNote />
+
       <ProductModulesStrip />
 
       <OperationalFunnel screenings={screenings} />
@@ -95,8 +98,8 @@ export function DashboardView({
       ) : screenings.length === 0 ? (
         <Card>
           <EmptyState
-            title="Sin pacientes en screening"
-            description="Registra pacientes y ejecuta matching en un protocolo para poblar el Dashboard. Si ya cargaste pacientes en Supabase, ejecutá también la parte de screenings en seed.sql."
+            title="Todavía no hay screening"
+            description="Cargá pacientes que YA están en tu site, completá el perfil clínico y corré el matcher de un protocolo."
             action={
               <Link
                 href={routes.app.protocols}

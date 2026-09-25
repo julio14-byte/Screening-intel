@@ -23,10 +23,11 @@ Guion hablado: ~180 segundos. No cites HIPAA certificado, ICF propio ni números
 ---
 
 # Crisvia
-## El funnel de screening del clinical research site
+## Inteligencia de screening para el clinical research site
 
-Pre-screening y re-matching de pacientes a protocolos.
-Pitch de 3 minutos · cómo corre cada módulo.
+Aprovechá los pacientes que YA llegan.
+Cinco módulos. EDC, ePRO e IWRS los opera un tercero.
+Pitch de 3 minutos.
 
 ---
 
@@ -41,25 +42,27 @@ Pitch de 3 minutos · cómo corre cada módulo.
 ---
 
 # Una frase
-## Del candidato al protocolo correcto
+## Aprovechá a quien YA llegó
 
-Sin perder al paciente cuando un estudio lo rechaza.
+Cada paciente del site es una oportunidad de investigación.
+Un screen failure no debería ser un paciente perdido.
 
 No somos un CTMS.
-No somos “AI encima del EHR”.
-Somos el **embudo operativo** del clinical research site.
+No vendemos una base de datos.
+Somos **inteligencia de screening** para el clinical research site.
 
 ---
 
 # Cómo corre
-## Cuatro movimientos, no un chatbot
+## Cinco módulos de screening, no un chatbot
 
-1. **Capturar** — portal, registro, CSV
-2. **Cruzar** — motor de reglas + semáforo
-3. **Operar** — tracker, cola, agenda, avisos
-4. **Recuperar** — re-match y ePRO
+1. **Patient Registry** — quienes YA están en el site
+2. **Clinical Profile** — historia, antecedentes, meds, labs
+3. **Protocol Matcher** — reglas 🟢🟡🔴; la IA no cambia el veredicto
+4. **Screening Tracker** — pre-screening → screening → randomizado → screen failure
+5. **Re-Match & Follow-up** — el screen failure busca otro protocolo
 
-La IA propone y explica.
+EDC, ePRO e IWRS los opera un **tercero** (webhook).
 **El coordinador confirma. Las reglas no se tocan.**
 
 ---
@@ -97,28 +100,14 @@ Narra el veredicto en español.
 ---
 
 # Operar
-## Tracker, dashboard y agenda
+## Tracker y dashboard
 
 **Tracker `/tracker`**
 Kanban: pre-screening → screening → randomizado → screen failure.
-Sin IWRS, el PI confirma inclusión a mano. Con IWRS, el kit/brazo se asigna en `/iwrs`.
-
-**IWRS `/iwrs`**
-Módulo **independiente**, conectado por `/api/iwrs`.
-Kit y brazo **después** del screening.
-Del centro (Crisvia sortea) o del sponsor (registrás el kit de su IRT).
-No hay enchufe único a Lilly: cada estudio usa el IRT que ellos designen.
-
-**Dispensación `/dispensacion`**
-Farmacia entrega la caja IWRS y registra la primera dosis (clínica o para llevar).
-El paciente anota toma y síntomas en `/diario` con un link. No es una app aparte ni Clinical Ink.
+Si el protocolo tiene IWRS de un tercero, Randomizado llega por webhook. Sin IRT, el PI puede marcar Apto a mano.
 
 **Dashboard `/dashboard`**
-Embudo del site + semáforos.
-El screen failure es una **fuga**, no la última etapa.
-
-**Agenda `/agenda`**
-Visitas de pre-screening: cuándo y con quién.
+Los cinco módulos + embudo. El screen failure es una **fuga**, no la última etapa.
 
 ---
 
@@ -136,15 +125,14 @@ El coordinador confirma cada paso. La IA no cambia un semáforo.
 ---
 
 # Recuperar
-## Re-Match y ePRO
+## Re-Match & Follow-up
 
 **Re-Match `/rematch`**
 Si falló un estudio, busca protocolos activos donde no esté excluido.
+Un screen failure no es un paciente perdido.
 
-**ePRO `/epro` y `/epro-app`**
-Cuestionarios de visita (staff) y ePRO móvil del sujeto (invitación 48 h del coordinador, PIN, sin nombre). No es certificación HIPAA ni 21 CFR Part 11.
-
-El ICF es el del site. Crisvia no inventa el consentimiento del estudio.
+El calendario de visitas, el ePRO y el IWRS los opera el **tercero** del estudio (`/integraciones`).
+El ICF es el del site. Crisvia no inventa el consentimiento.
 
 ---
 
@@ -187,10 +175,10 @@ El paciente llega por el portal del centro. El coordinador lo ve en el inbox y l
 Los protocolos viven con criterios estructurados. El cruce lo hace un motor de reglas: verde, amarillo o rojo, con el porqué. Si pides una justificación, la IA solo explica ese resultado. No mueve la elegibilidad.
 
 **1:20–1:50 — Operar**
-El tracker es el Kanban del estudio. El dashboard muestra el embudo. La agenda cita el pre-screening. La cola guarda inbox, amarillos y re-match. Quien cambia un estado es el coordinador.
+El tracker es el Kanban del estudio. El dashboard muestra los cinco módulos. La cola guarda inbox, amarillos y re-match. Quien cambia un estado es el coordinador.
 
 **1:50–2:15 — Recuperar**
-Screen failure no es el final: Re-Match busca otro protocolo activo. ePRO recoge síntomas del paciente. El consentimiento informado es el del site.
+Screen failure no es el final: Re-Match busca otro protocolo activo. EDC, ePRO e IWRS los opera un tercero. El consentimiento informado es el del site.
 
 **2:15–2:40 — Confianza**
 Roles clínicos, MFA, bitácora y datos por organización. El matching no se terceriza a un modelo. El expediente puede alinearse a FHIR; no vendemos sello HIPAA.
@@ -204,21 +192,17 @@ Se empieza sin integrar el hospital. Trial de 14 días: un protocolo, una cohort
 
 | Módulo | Ruta | Qué dices en una línea |
 |---|---|---|
+| 1. Registry | `/patients` | Quienes YA están en el site |
+| 2. Profile | `/patients/[id]` | Historia, antecedentes, meds, labs |
+| 3. Matcher | `/protocols` | Paciente ↔ protocolo, 🟢🟡🔴 |
+| 4. Tracker | `/tracker` | Kanban de screening |
+| 5. Re-Match | `/rematch` | Otro protocolo tras el fallo |
+| Integraciones | `/integraciones` | Webhook a EDC/ePRO/IWRS de terceros |
 | Dashboard | `/dashboard` | Embudo y semáforos del site |
-| Pacientes | `/patients` | Registro y perfil clínico |
 | Candidatos | `/candidatos` | Inbox del portal |
 | Portal | `/candidato` | Pre-registro público del centro |
-| Protocolos | `/protocols` | Criterios y matcher |
-| Tracker | `/tracker` | Kanban de screening |
 | Cola | `/cola` | Tareas persistentes |
 | Avisos | `/avisos` | Alertas operativas |
-| Agenda | `/agenda` | Visitas de pre-screening |
-| EDC | `/edc` | Expediente, visitas y farmacia del centro |
-| IWRS | `/iwrs` | Módulo API: kit y brazo después del screening |
-| Dispensación | `/dispensacion` | Caja IWRS, primera dosis, diario |
-| Diario | `/diario` | El paciente anota toma y síntomas |
-| Re-Match | `/rematch` | Otro protocolo tras el fallo |
-| ePRO | `/epro` + `/epro-app` | Visita (staff) y diario móvil del sujeto |
 | Roles | `/settings/roles` | Investigator crea usuarios |
 | Seguridad | `/settings/security` | MFA |
 | Facturación | `/account/billing` | Plan y trial |

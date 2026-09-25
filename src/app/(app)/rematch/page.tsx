@@ -149,7 +149,7 @@ export default function RematchPage() {
     <>
       <PageHeader
         title="Re-Match & Follow-up"
-        description="Screen failures y protocolos alternativos donde el paciente podría encajar."
+        description="Un screen failure no es un paciente perdido. Acá ves en qué otros protocolos activos todavía califica."
       />
 
       {loading ? (
