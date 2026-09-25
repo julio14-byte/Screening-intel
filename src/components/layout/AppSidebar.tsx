@@ -9,7 +9,6 @@ import type { AppRole } from "@/lib/rbac/types";
 import { APP_NAV_STYLES, appIcon, groupNavItems } from "@/lib/app/nav";
 import {
   PRODUCT_MODULE_NAV_LABEL,
-  type ProductModuleId,
 } from "@/lib/product/modules";
 import { routes } from "@/lib/app/routes";
 import { cn } from "@/lib/utils";
@@ -80,7 +79,7 @@ export function AppSidebar({
           <div key={group.section ?? "inicio"} className="space-y-1">
             {group.section ? (
               <p className="px-3 pt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-400">
-                {PRODUCT_MODULE_NAV_LABEL[group.section as ProductModuleId] ??
+                {PRODUCT_MODULE_NAV_LABEL[group.section] ??
                   group.section}
               </p>
             ) : null}

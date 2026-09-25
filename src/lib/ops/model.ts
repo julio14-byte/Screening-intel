@@ -87,7 +87,7 @@ export function buildOperationalFunnel(counts: FunnelCounts): {
     stages: [
       {
         key: "capture",
-        label: "Captación",
+        label: "Inbox del portal",
         count: counts.capture,
         href: "/candidatos",
       },

@@ -21,7 +21,8 @@
     "verify:epro-mobile": "tsx --tsconfig tsconfig.json scripts/verify-epro-mobile.ts",
     "verify:follow-up": "tsx --tsconfig tsconfig.json scripts/verify-follow-up.ts",
     "verify:cierre": "tsx --tsconfig tsconfig.json scripts/verify-cierre.ts",
-    "verify:integraciones": "tsx --tsconfig tsconfig.json scripts/verify-integraciones.ts"
+    "verify:integraciones": "tsx --tsconfig tsconfig.json scripts/verify-integraciones.ts",
+    "verify:five-modules": "tsx --tsconfig tsconfig.json scripts/verify-five-modules.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",

@@ -6,7 +6,7 @@ const config = {
   app: {
     name: "Crisvia",
     description:
-      "Screening para clinical research sites. EDC, ePRO e IWRS los opera un tercero y se conectan por webhook.",
+      "Inteligencia de screening para clinical research sites. Aprovechá los pacientes que YA llegan. EDC, ePRO e IWRS de terceros por webhook.",
     domain: "screening-intel.vercel.app",
     locale: "es",
     defaultUrl: "http://localhost:3000",
@@ -54,7 +54,7 @@ const config = {
       },
       {
         href: "/patients",
-        label: "Pacientes",
+        label: "Registro",
         icon: "Users",
         section: "screening" as const,
       },
@@ -201,10 +201,10 @@ const config = {
       { label: "Entrar", href: "#entrar" },
     ],
     hero: {
-      eyebrow: "Clinical research sites · Pre-screening clínico",
-      title: "Encuentra candidatos al protocolo correcto, más rápido.",
+      eyebrow: "Inteligencia de screening · Clinical research sites",
+      title: "Aprovechá mejor los pacientes que YA llegan a tu clínica.",
       subtitle:
-        "Pre-screening y re-matching de pacientes para protocolos de investigación clínica.",
+        "Cada llegada es una oportunidad de investigación. Crisvia identifica para qué protocolo puede ser candidato y evita que un screen failure se convierta en un paciente perdido.",
     },
     enterApp: {
       eyebrow: "Acceso",
@@ -213,14 +213,14 @@ const config = {
     },
     problem: {
       eyebrow: "El problema",
-      title: "El pre-screening manual no escala.",
+      title: "El cuello de botella no es reclutar. Es aprovechar a quien ya llegó.",
       subtitle:
-        "Coordinadores de estudios pierden horas en hojas de cálculo, emails y notas dispersas antes de incluir un paciente.",
+        "Los competidores prometen más pacientes. El site ya tiene gente en sala, en Excel y en screen failure. Ahí se pierde el tiempo.",
       items: [
         {
           icon: "Timer",
           title: "Screening lento",
-          body: "Revisar criterios uno por uno contra cada paciente consume días del equipo del clinical research site.",
+          body: "Cruzar a mano el expediente contra inclusión y exclusión consume días del coordinador.",
         },
         {
           icon: "FileSpreadsheet",
@@ -229,46 +229,46 @@ const config = {
         },
         {
           icon: "UserX",
-          title: "Candidatos perdidos",
-          body: "Sin re-matching, pacientes que podrían calificar para un nuevo protocolo nunca se re-evalúan.",
+          title: "Screen failure = paciente perdido",
+          body: "Si falló un estudio, casi nunca se re-evalúa contra los otros protocolos activos del mismo centro.",
         },
       ],
     },
     features: {
-      eyebrow: "Plataforma",
-      title: "Todo el funnel de screening en un solo lugar.",
+      eyebrow: "Versión 1",
+      title: "Cinco módulos de screening. Nada de vender una base de pacientes.",
       subtitle:
-        "Diseñado para coordinadores de clinical research sites con protocolos activos y cohortes en crecimiento.",
+        "Para coordinadores de clinical research sites. EDC, ePRO e IWRS quedan en el tercero del estudio.",
       items: [
         {
           icon: "Users",
-          title: "Patient Registry",
-          body: "Perfil clínico estructurado y registro centralizado de candidatos.",
+          title: "1. Patient Registry",
+          body: "Quienes YA están en tu site. Alta, CSV y búsqueda. Entrada al matching, no un listado para reclutar.",
+        },
+        {
+          icon: "ClipboardList",
+          title: "2. Clinical Profile",
+          body: "Historia, antecedentes, medicamentos y laboratorios. El coordinador lo llena; el matcher lo usa.",
         },
         {
           icon: "FlaskConical",
-          title: "Protocol Matcher",
-          body: "Motor de matching contra criterios de inclusión y exclusión.",
+          title: "3. Protocol Matcher",
+          body: "Paciente ↔ protocolo. Motor de reglas 🟢🟡🔴. La IA explica; no cambia quién entra.",
         },
         {
           icon: "KanbanSquare",
-          title: "Screening Tracker",
-          body: "Kanban de estados con trazabilidad de cada decisión.",
+          title: "4. Screening Tracker",
+          body: "Pre-screening → Screening → Randomizado → Screen failure. No es un sorteo. El IRT del sponsor confirma Randomizado por webhook.",
+        },
+        {
+          icon: "RefreshCw",
+          title: "5. Re-Match & Follow-up",
+          body: "Un screen failure no es el final: otros protocolos activos donde todavía califica.",
         },
         {
           icon: "Plug",
           title: "Integraciones",
-          body: "EDC, ePRO e IWRS los opera un tercero. Crisvia avisa por webhook firmado cuando el candidato es elegible; el IRT confirma la randomización. No es un conector Lilly ni Medidata.",
-        },
-        {
-          icon: "RefreshCw",
-          title: "Re-Match",
-          body: "Re-evalúa cohortes cuando cambian protocolos o criterios.",
-        },
-        {
-          icon: "ListTodo",
-          title: "Cola de trabajo",
-          body: "Inbox, criterios 🟡 y re-match en tareas guardadas. El coordinador confirma cada paso.",
+          body: "EDC, ePRO e IWRS los opera un tercero. Webhook HMAC. No es un conector Lilly ni Medidata.",
         },
       ],
     },
@@ -277,8 +277,16 @@ const config = {
       title: "Lo que preguntan los clinical research sites.",
       items: [
         {
+          q: "¿Crisvia es una base de datos de pacientes?",
+          a: "No. El registro es la entrada al matching. Vendemos inteligencia de screening para el clinical research site, no un listado para reclutar ni para revender. La propuesta es aprovechar a quienes YA llegan a tu clínica.",
+        },
+        {
           q: "¿Crisvia es screening, EDC y ePRO?",
           a: "Crisvia es screening (elegibilidad). EDC, ePRO e IWRS los usa el estudio en sistemas de terceros: se conectan en /integraciones con un webhook HTTPS firmado. El matcher no randomiza ni captura visitas. No es Medidata Rave ni un IRT de farmacéutica.",
+        },
+        {
+          q: "¿El matching reduce el tiempo de screening un 42,6%?",
+          a: "Esa cifra no es de Crisvia. Un trabajo sobre TrialGPT la reportó en su evaluación; no es una garantía de esta app. El recorte real se mide en tu site: 100 pacientes históricos y 2 protocolos, cronómetro en mano.",
         },
         {
           q: "¿El screening es un sorteo digital para elegir pacientes?",
@@ -321,7 +329,7 @@ const config = {
       items: [
         {
           quote:
-            "Dejamos de perder candidatos en hojas de cálculo. El matcher nos dice en minutos quién califica.",
+            "El matcher nos dice en minutos quién de los que YA están en el site califica. Un screen failure ya no se pierde.",
           author: "Coordinadora de clinical research site",
           role: "Site piloto · Oncología",
         },
@@ -343,7 +351,7 @@ const config = {
       eyebrow: "Tu turno",
       title: "Empieza el trial en tu clinical research site.",
       subtitle:
-        "Crea tu cuenta, registra pacientes y activa tu primer protocolo en la misma tarde.",
+        "Un protocolo, una cohorte que ya está en tu site, el primer cruce el mismo día.",
       cta: { label: "Entrar a la app", href: "/login?from=/dashboard" },
       ctaSecondary: { label: "Unirme a waitlist", href: "#waitlist" },
     },
@@ -357,7 +365,7 @@ const config = {
       placeholder: "tu@researchsite.com",
     },
     footer: {
-      tagline: "Pre-screening inteligente para clinical research sites.",
+      tagline: "Inteligencia de screening para clinical research sites.",
       links: [
         { label: "Precios", href: "#pricing" },
         { label: "Waitlist", href: "#waitlist" },

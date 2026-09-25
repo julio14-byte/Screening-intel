@@ -26,7 +26,7 @@ export default function ProtocolsPage() {
     <>
       <PageHeader
         title="Protocol Matcher"
-        description="Protocolos con criterios estructurados. Seleccioná uno para cruzarlo contra pacientes."
+        description="Paciente ↔ protocolo. Criterios estructurados; el motor de reglas marca 🟢🟡🔴. La IA no cambia la elegibilidad."
         actions={
           <RoleGuard permission="protocols:write">
             <Button onClick={() => setModalOpen(true)}>

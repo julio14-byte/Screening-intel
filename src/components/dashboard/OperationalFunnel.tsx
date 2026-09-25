@@ -44,8 +44,8 @@ export function OperationalFunnel({
     <div id="embudo" className="mb-5">
     <Card>
       <CardHeader
-        title="Embudo operativo"
-        description="Captación, avance del screening y, al lado, quienes hay que recuperar."
+        title="Embudo de screening"
+        description="Quienes ya están en el site avanzan en el tracker. El Inbox del portal es extra. A la derecha, screen failures a recuperar."
       />
       <CardBody className="space-y-3">
         {funnel.stages.map((stage) => (
