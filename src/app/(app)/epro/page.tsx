@@ -19,7 +19,7 @@ export default function EproPage() {
     <>
       <PageHeader
         title="ePRO"
-        description="Cuestionarios del estudio (calidad de vida, síntomas de visita). El diario de toma de medicación está en Dispensación: el paciente usa un link /diario, no una app aparte."
+        description="Módulo ePRO: cuestionarios del estudio. Screening y EDC son otros módulos; el IWRS se pide por API. El diario de toma está en Dispensación (/diario)."
       />
 
       {loading ? (

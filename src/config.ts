@@ -6,7 +6,7 @@ const config = {
   app: {
     name: "Crisvia",
     description:
-      "Pre-screening y re-matching de pacientes para protocolos de investigación clínica en clinical research sites.",
+      "Screening, EDC y ePRO para clinical research sites. El IWRS es un módulo independiente conectado por API.",
     domain: "screening-intel.vercel.app",
     locale: "es",
     defaultUrl: "http://localhost:3000",
@@ -17,64 +17,82 @@ const config = {
         icon: "LayoutDashboard",
       },
       {
-        href: "/patients",
-        label: "Pacientes",
-        icon: "Users",
-      },
-      {
         href: "/candidatos",
         label: "Candidatos",
         icon: "UserPlus",
-      },
-      {
-        href: "/cola",
-        label: "Cola de trabajo",
-        icon: "ListTodo",
-      },
-      {
-        href: "/avisos",
-        label: "Avisos",
-        icon: "Bell",
-      },
-      {
-        href: "/agenda",
-        label: "Agenda",
-        icon: "Calendar",
+        section: "screening" as const,
       },
       {
         href: "/protocols",
         label: "Protocolos",
         icon: "FlaskConical",
-      },
-      {
-        href: "/inventario",
-        label: "Inventario",
-        icon: "Package",
-      },
-      {
-        href: "/dispensacion",
-        label: "Dispensación",
-        icon: "Pill",
+        section: "screening" as const,
       },
       {
         href: "/tracker",
         label: "Tracker",
         icon: "KanbanSquare",
-      },
-      {
-        href: "/iwrs",
-        label: "IWRS",
-        icon: "Dices",
-      },
-      {
-        href: "/epro",
-        label: "ePRO",
-        icon: "ClipboardList",
+        section: "screening" as const,
       },
       {
         href: "/rematch",
         label: "Re-Match",
         icon: "RefreshCw",
+        section: "screening" as const,
+      },
+      {
+        href: "/cola",
+        label: "Cola de trabajo",
+        icon: "ListTodo",
+        section: "screening" as const,
+      },
+      {
+        href: "/avisos",
+        label: "Avisos",
+        icon: "Bell",
+        section: "screening" as const,
+      },
+      {
+        href: "/edc",
+        label: "EDC",
+        icon: "FileSpreadsheet",
+        section: "edc" as const,
+      },
+      {
+        href: "/patients",
+        label: "Pacientes",
+        icon: "Users",
+        section: "edc" as const,
+      },
+      {
+        href: "/agenda",
+        label: "Agenda",
+        icon: "Calendar",
+        section: "edc" as const,
+      },
+      {
+        href: "/inventario",
+        label: "Inventario",
+        icon: "Package",
+        section: "edc" as const,
+      },
+      {
+        href: "/dispensacion",
+        label: "Dispensación",
+        icon: "Pill",
+        section: "edc" as const,
+      },
+      {
+        href: "/epro",
+        label: "ePRO",
+        icon: "ClipboardList",
+        section: "epro" as const,
+      },
+      {
+        href: "/iwrs",
+        label: "IWRS",
+        icon: "Dices",
+        section: "iwrs" as const,
       },
       {
         href: "/account/billing",
@@ -130,6 +148,7 @@ const config = {
       "/agenda",
       "/inventario",
       "/dispensacion",
+      "/edc",
       "/iwrs",
       "/semaforos",
       "/devices",
@@ -169,6 +188,7 @@ const config = {
       agenda: "/agenda",
       inventario: "/inventario",
       dispensacion: "/dispensacion",
+      edc: "/edc",
       iwrs: "/iwrs",
       docs: "/docs",
       apiDocs: "/docs/api",
@@ -257,6 +277,21 @@ const config = {
           body: "Kanban de estados con trazabilidad de cada decisión.",
         },
         {
+          icon: "FileSpreadsheet",
+          title: "EDC del centro",
+          body: "Expediente, visitas, inventario y dispensación. Captura clínica del site, no un EDC CDISC certificado.",
+        },
+        {
+          icon: "ClipboardList",
+          title: "ePRO",
+          body: "Cuestionarios del paciente. Distinto del diario de toma y del IWRS.",
+        },
+        {
+          icon: "Dices",
+          title: "IWRS por API",
+          body: "Módulo independiente: Screening y EDC piden kit/brazo a /api/iwrs. No vive dentro del matcher.",
+        },
+        {
           icon: "RefreshCw",
           title: "Re-Match",
           body: "Re-evalúa cohortes cuando cambian protocolos o criterios.",
@@ -277,6 +312,10 @@ const config = {
       eyebrow: "Preguntas frecuentes",
       title: "Lo que preguntan los clinical research sites.",
       items: [
+        {
+          q: "¿Crisvia es screening, EDC y ePRO?",
+          a: "Sí: Screening (elegibilidad), EDC (expediente, visitas, farmacia) y ePRO (cuestionarios) viven en la misma app. El IWRS es un módulo aparte: kit y brazo se piden por /api/iwrs; el matcher no randomiza. No es Medidata Rave ni un IRT de farmacéutica.",
+        },
         {
           q: "¿El screening es un sorteo digital para elegir pacientes?",
           a: "No. El screening es un filtro de elegibilidad: el motor de reglas compara el expediente con inclusión y exclusión (🟢 cumple, 🟡 falta un dato, 🔴 no cumple). No hay azar y la IA no decide quién entra. El paso que sí es aleatorio es IWRS: asigna kit y brazo cuando el paciente ya está en Screening. Se configura por protocolo (brazos, cegamiento, bloques permutados) en /iwrs.",

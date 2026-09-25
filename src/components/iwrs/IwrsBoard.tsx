@@ -12,31 +12,18 @@ import {
   LoadingState,
 } from "@/components/ui/StateMessage";
 import { useRole } from "@/contexts/role-context";
-import { readJsonResponse } from "@/lib/http/readJsonResponse";
+import {
+  fetchIwrsCatalog,
+  postIwrsRandomize,
+  postIwrsSponsorKit,
+  postIwrsUnblind,
+  type IwrsCatalogAssignment,
+} from "@/lib/iwrs/client";
 import { studySubjectCaption } from "@/lib/profile/demographics";
 import type { IwrsConfig, ProtocolArm } from "@/lib/iwrs/model";
 import { isSponsorIwrs, sponsorVendorLabel } from "@/lib/iwrs/model";
 import { formatDate } from "@/lib/utils";
 import { useScreenings } from "@/hooks/useScreenings";
-
-type AssignmentRow = {
-  id: string;
-  screening_id: string;
-  patient_id: string;
-  protocol_id: string;
-  kit_code: string;
-  stratum: string;
-  randomized_at: string;
-  unblinded_at: string | null;
-  arm_visible: boolean;
-  arm_code: string | null;
-  arm_name: string | null;
-  patient_name: string;
-  subject_code: string | null;
-  protocol_code: string;
-  assignment_source?: string;
-  external_id?: string;
-};
 
 export function IwrsBoard() {
   const { hasPermission, isReadOnly } = useRole();
@@ -45,7 +32,7 @@ export function IwrsBoard() {
   const { screenings, loading: screeningsLoading, refetch } = useScreenings({
     includeMatchDetails: false,
   });
-  const [assignments, setAssignments] = useState<AssignmentRow[]>([]);
+  const [assignments, setAssignments] = useState<IwrsCatalogAssignment[]>([]);
   const [configs, setConfigs] = useState<IwrsConfig[]>([]);
   const [arms, setArms] = useState<ProtocolArm[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,17 +45,10 @@ export function IwrsBoard() {
   >({});
 
   const load = useCallback(async () => {
-    const res = await fetch("/api/iwrs");
-    const json = await readJsonResponse<{
-      assignments?: AssignmentRow[];
-      configs?: IwrsConfig[];
-      arms?: ProtocolArm[];
-      error?: string;
-    }>(res);
-    if (!res.ok) throw new Error(json?.error ?? "No se pudo cargar IWRS.");
-    setAssignments(json?.assignments ?? []);
-    setConfigs(json?.configs ?? []);
-    setArms(json?.arms ?? []);
+    const json = await fetchIwrsCatalog();
+    setAssignments(json.assignments);
+    setConfigs(json.configs);
+    setArms(json.arms);
   }, []);
 
   useEffect(() => {
@@ -107,13 +87,7 @@ export function IwrsBoard() {
     setWorkingId(screeningId);
     setError(null);
     try {
-      const res = await fetch("/api/iwrs/randomize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ screening_id: screeningId }),
-      });
-      const json = await readJsonResponse<{ error?: string }>(res);
-      if (!res.ok) throw new Error(json?.error ?? "No se pudo randomizar.");
+      await postIwrsRandomize(screeningId);
       await Promise.all([load(), refetch()]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo randomizar.");
@@ -127,18 +101,12 @@ export function IwrsBoard() {
     setWorkingId(screeningId);
     setError(null);
     try {
-      const res = await fetch("/api/iwrs/sponsor-register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          screening_id: screeningId,
-          kit_code: draft.kit,
-          external_id: draft.externalId,
-          arm_id: draft.armId || null,
-        }),
+      await postIwrsSponsorKit({
+        screening_id: screeningId,
+        kit_code: draft.kit,
+        external_id: draft.externalId,
+        arm_id: draft.armId || null,
       });
-      const json = await readJsonResponse<{ error?: string }>(res);
-      if (!res.ok) throw new Error(json?.error ?? "No se pudo registrar el kit.");
       setKitDrafts((prev) => {
         const next = { ...prev };
         delete next[screeningId];
@@ -157,13 +125,7 @@ export function IwrsBoard() {
     setWorkingId(unblindId);
     setError(null);
     try {
-      const res = await fetch("/api/iwrs/unblind", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ randomization_id: unblindId, reason }),
-      });
-      const json = await readJsonResponse<{ error?: string }>(res);
-      if (!res.ok) throw new Error(json?.error ?? "No se pudo desenmascarar.");
+      await postIwrsUnblind(unblindId, reason);
       setUnblindId(null);
       setReason("");
       await load();
@@ -183,7 +145,7 @@ export function IwrsBoard() {
       <Card>
         <CardHeader
           title="Listos para randomizar"
-          description="Pacientes en Screening con IWRS activo. Si el protocolo es del sponsor, registrá el kit que ya asignó su IRT."
+          description="Pacientes en Screening. Este tablero consume /api/iwrs; el matcher no asigna kit."
           actions={<Dices className="h-4 w-4 text-violet-500" aria-hidden />}
         />
         <CardBody>

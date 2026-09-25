@@ -54,7 +54,7 @@ Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operat
 | **Protocol Matcher** | Criterios de inclusión/exclusión; extracción NLP desde PDF |
 | **Motor de elegibilidad** | Semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple + `match_score` + justificación IA. No es un sorteo: filtra por criterios. |
 | **Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure. Con IWRS activo, Randomizado se asigna en `/iwrs`, no arrastrando. |
-| **IWRS** | Randomización de sitio **o** registro del kit del IRT del sponsor (Lilly/IQVIA/Suvoda/etc.). No hay API pública única de Lilly. |
+| **IWRS** | Randomización de sitio **o** registro del kit del IRT del sponsor (Lilly/IQVIA/Suvoda/etc.). Módulo independiente: Screening y EDC lo llaman por `/api/iwrs`. |
 | **Re-Match** | Propone protocolos alternativos para pacientes con screen failure |
 | **Portal candidatos** | Pre-registro público (`/candidato`) + inbox (`/candidatos`) + settings del portal |
 | **Expediente interno** | Pacientes y perfil clínico en tablas de la app (incluye modelo FHIR Patient) |
@@ -64,7 +64,7 @@ Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operat
 | **Audit Trail** | Bitácora inmutable alineada a 21 CFR Part 11 |
 | **RBAC clínico** | Investigator / Sub-investigator / Coordinator / Monitor |
 | **SaaS** | Organizations, trial 14 días, Stripe Checkout + Portal |
-| **ePRO** | Formularios electrónicos del paciente (Fase A) |
+| **ePRO** | Formularios electrónicos del paciente (módulo propio, distinto de Screening y EDC) |
 | **API Docs** | Swagger UI en [`/docs/api`](http://localhost:3000/docs/api) |
 
 ---
@@ -91,7 +91,8 @@ Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operat
 | `/protocols/[id]` | Medicamentos del estudio y números de lote |
 | `/protocols/[id]/match` | Cruce masivo paciente ↔ protocolo + justificación IA |
 | `/inventario` | Stock de lotes y recetas entregadas |
-| `/iwrs` | Randomización de sitio o registro del kit del IRT del sponsor |
+| `/edc` | Hub de captura clínica (expediente, visitas, farmacia) |
+| `/iwrs` | IWRS independiente (UI que consume `/api/iwrs`) |
 | `/dispensacion` | Entrega de caja IWRS, primera dosis y link del diario |
 | `/diario/[token]` | Diario público del paciente (hora de toma y síntomas) |
 | `/tracker` | Pipeline Kanban con drag & drop |

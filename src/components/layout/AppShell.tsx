@@ -28,11 +28,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         if (item.href === routes.app.billing) return false;
         return true;
       })
-      .map(({ href, label, icon }) => ({ href, label, icon }));
+      .map(({ href, label, icon, section }) => ({ href, label, icon, section }));
   }, []);
 
   useEffect(() => {
-    setMenuOpen(false);
+    void Promise.resolve().then(() => setMenuOpen(false));
   }, [pathname]);
 
   useEffect(() => {
