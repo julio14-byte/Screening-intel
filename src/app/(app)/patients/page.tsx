@@ -44,7 +44,7 @@ export default function PatientsPage() {
             <div className="flex flex-wrap gap-2">
               <Button variant="secondary" onClick={() => setImportOpen(true)}>
                 <Upload className="h-4 w-4" aria-hidden />
-                Importar CSV
+                Importar CSV (EDC / site)
               </Button>
               <Button onClick={() => setModalOpen(true)}>
                 <UserPlus className="h-4 w-4" aria-hidden />

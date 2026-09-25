@@ -5,10 +5,12 @@ import { Download, Upload } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { ErrorState } from "@/components/ui/StateMessage";
+import { PATIENT_CSV_TEMPLATE } from "@/lib/import/parsePatientCsv";
 import {
-  PATIENT_CSV_TEMPLATE,
-  parsePatientCsv,
-} from "@/lib/import/parsePatientCsv";
+  VENDOR_SCREENING_CSV_TEMPLATE,
+  VENDOR_SCREENING_HINT,
+  parseScreeningImportCsv,
+} from "@/lib/import/vendorScreeningCsv";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
 
 export function ImportPatientsModal({
@@ -32,7 +34,7 @@ export function ImportPatientsModal({
 
     try {
       const text = await file.text();
-      const patients = parsePatientCsv(text);
+      const patients = parseScreeningImportCsv(text);
 
       const res = await fetch("/api/patients/import", {
         method: "POST",
@@ -52,8 +54,11 @@ export function ImportPatientsModal({
         throw new Error(data?.error ?? "Error al importar.");
       }
 
+      const extra = (data?.errors ?? []).length
+        ? ` ${data?.errors?.slice(0, 3).join(" ")}`
+        : "";
       setResult(
-        `Importados: ${data?.imported ?? 0}. Fallidos: ${data?.failed ?? 0}.`
+        `Importados: ${data?.imported ?? 0}. Fallidos: ${data?.failed ?? 0}.${extra}`
       );
       onImported();
     } catch (err) {
@@ -63,36 +68,61 @@ export function ImportPatientsModal({
     }
   }
 
-  function downloadTemplate() {
-    const blob = new Blob([PATIENT_CSV_TEMPLATE], { type: "text/csv" });
+  function downloadTemplate(content: string, filename: string) {
+    const blob = new Blob([content], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "plantilla-pacientes.csv";
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
   }
 
   return (
-    <Modal open={open} title="Importar pacientes (CSV)" onClose={onClose} wide>
+    <Modal open={open} title="Importar al screening (CSV)" onClose={onClose} wide>
       <div className="space-y-4">
+        <p className="text-sm text-slate-600">{VENDOR_SCREENING_HINT}</p>
         <p className="text-sm text-slate-600">
-          Subí un CSV con columnas{" "}
-          <code className="rounded bg-slate-100 px-1">          first_name, last_name, birth_date, gender</code>
-          . Opcional: <code className="rounded bg-slate-100 px-1">phone</code>,{" "}
-          <code className="rounded bg-slate-100 px-1">email</code>,{" "}
-          <code className="rounded bg-slate-100 px-1">ethnicity</code>,{" "}
-          <code className="rounded bg-slate-100 px-1">subject_code</code>,{" "}
-          <code className="rounded bg-slate-100 px-1">conditions</code>,{" "}
-          <code className="rounded bg-slate-100 px-1">medications</code> y labs numéricos (
-          <code className="rounded bg-slate-100 px-1">glucosa</code>,{" "}
-          <code className="rounded bg-slate-100 px-1">hba1c</code>…).
+          Para el matcher necesitás demografía, antecedentes, medicación y labs de{" "}
+          <strong>screening</strong> (DM + MH + CM + LB). El diario ePRO de Clinical Ink y el
+          IRT de IQVIA no sustituyen ese expediente: el diario es síntoma en estudio; el IRT
+          confirma randomización en Integraciones.
+        </p>
+        <p className="text-sm text-slate-600">
+          Aceptamos la plantilla Crisvia o un CSV largo estilo CDISC (
+          <code className="rounded bg-slate-100 px-1">USUBJID</code>,{" "}
+          <code className="rounded bg-slate-100 px-1">BRTHDTC</code>,{" "}
+          <code className="rounded bg-slate-100 px-1">SEX</code>,{" "}
+          <code className="rounded bg-slate-100 px-1">MHTERM</code>,{" "}
+          <code className="rounded bg-slate-100 px-1">CMTRT</code>,{" "}
+          <code className="rounded bg-slate-100 px-1">LBTESTCD</code>,{" "}
+          <code className="rounded bg-slate-100 px-1">LBSTRESN</code>
+          ). Si el sujeto ya existe, se actualiza por código.
         </p>
 
         <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="secondary" onClick={downloadTemplate}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() =>
+              downloadTemplate(PATIENT_CSV_TEMPLATE, "plantilla-pacientes.csv")
+            }
+          >
             <Download className="h-4 w-4" aria-hidden />
-            Descargar plantilla
+            Plantilla Crisvia
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() =>
+              downloadTemplate(
+                VENDOR_SCREENING_CSV_TEMPLATE,
+                "plantilla-edc-screening.csv"
+              )
+            }
+          >
+            <Download className="h-4 w-4" aria-hidden />
+            Plantilla EDC (DM/MH/CM/LB)
           </Button>
           <Button
             type="button"

@@ -55,46 +55,82 @@ export async function POST(request: Request) {
   const errors: string[] = [];
 
   for (const [index, row] of rows.entries()) {
-    const fullRow = {
-      clinic_id: clinicId,
-      first_name: row.first_name,
-      last_name: row.last_name,
-      birth_date: row.birth_date,
-      gender: row.gender,
-      phone: row.phone || null,
-      email: row.email || null,
-      ethnicity: row.ethnicity || null,
-      subject_code: row.subject_code || null,
-      address_line: row.address_line || null,
-      address_city: row.address_city || null,
-    };
-    let inserted = await supabase
-      .from("patients")
-      .insert(fullRow)
-      .select("id")
-      .single();
-    if (
-      inserted.error &&
-      isMissingDemographicsColumn(inserted.error.message)
-    ) {
-      inserted = await supabase
+    let patientId: string | null = null;
+
+    if (row.subject_code) {
+      const existing = await supabase
         .from("patients")
-        .insert({
-          clinic_id: clinicId,
+        .select("id")
+        .eq("clinic_id", clinicId)
+        .eq("subject_code", row.subject_code)
+        .maybeSingle();
+      if (existing.data?.id) {
+        patientId = existing.data.id as string;
+        const patch = {
           first_name: row.first_name,
           last_name: row.last_name,
           birth_date: row.birth_date,
           gender: row.gender,
-        })
+          phone: row.phone || null,
+          email: row.email || null,
+          ethnicity: row.ethnicity || null,
+          address_line: row.address_line || null,
+          address_city: row.address_city || null,
+        };
+        const updated = await supabase
+          .from("patients")
+          .update(patch)
+          .eq("id", patientId)
+          .eq("clinic_id", clinicId);
+        if (updated.error && !isMissingDemographicsColumn(updated.error.message)) {
+          errors.push(`Fila ${index + 2}: ${updated.error.message}`);
+          continue;
+        }
+      }
+    }
+
+    if (!patientId) {
+      const fullRow = {
+        clinic_id: clinicId,
+        first_name: row.first_name,
+        last_name: row.last_name,
+        birth_date: row.birth_date,
+        gender: row.gender,
+        phone: row.phone || null,
+        email: row.email || null,
+        ethnicity: row.ethnicity || null,
+        subject_code: row.subject_code || null,
+        address_line: row.address_line || null,
+        address_city: row.address_city || null,
+      };
+      let inserted = await supabase
+        .from("patients")
+        .insert(fullRow)
         .select("id")
         .single();
-    }
-    const patient = inserted.data;
-    const patientError = inserted.error;
-
-    if (patientError || !patient) {
-      errors.push(`Fila ${index + 2}: ${patientError?.message ?? "error al crear paciente"}`);
-      continue;
+      if (
+        inserted.error &&
+        isMissingDemographicsColumn(inserted.error.message)
+      ) {
+        inserted = await supabase
+          .from("patients")
+          .insert({
+            clinic_id: clinicId,
+            first_name: row.first_name,
+            last_name: row.last_name,
+            birth_date: row.birth_date,
+            gender: row.gender,
+          })
+          .select("id")
+          .single();
+      }
+      if (inserted.error || !inserted.data) {
+        errors.push(
+          `Fila ${index + 2}: ${inserted.error?.message ?? "error al crear paciente"}`
+        );
+        continue;
+      }
+      patientId = inserted.data.id as string;
     }
 
     if (
@@ -102,12 +138,15 @@ export async function POST(request: Request) {
       row.medications.length ||
       Object.keys(row.laboratories).length
     ) {
-      const { error: profileError } = await supabase.from("clinical_profiles").insert({
-        patient_id: patient.id,
-        conditions: row.conditions,
-        medications: row.medications,
-        laboratories: row.laboratories,
-      });
+      const { error: profileError } = await supabase.from("clinical_profiles").upsert(
+        {
+          patient_id: patientId,
+          conditions: row.conditions,
+          medications: row.medications,
+          laboratories: row.laboratories,
+        },
+        { onConflict: "patient_id" }
+      );
 
       if (profileError) {
         errors.push(`Fila ${index + 2} perfil: ${profileError.message}`);
