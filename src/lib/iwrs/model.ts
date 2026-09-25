@@ -19,6 +19,37 @@ export type ProtocolArm = {
   created_at: string;
 };
 
+export type IwrsSource = "site" | "sponsor";
+
+export const IWRS_SOURCE_LABEL: Record<IwrsSource, string> = {
+  site: "IWRS del centro (Crisvia genera el kit)",
+  sponsor: "IWRS del sponsor (registrás el kit de su IRT)",
+};
+
+export type IwrsSponsorVendor =
+  | ""
+  | "lilly"
+  | "iqvia"
+  | "suvoda"
+  | "medidata"
+  | "endpoint"
+  | "signant"
+  | "almac"
+  | "4gclinical"
+  | "other";
+
+export const IWRS_SPONSOR_VENDOR_LABEL: Record<Exclude<IwrsSponsorVendor, "">, string> = {
+  lilly: "Eli Lilly (IRT que designe el estudio)",
+  iqvia: "IQVIA IRT",
+  suvoda: "Suvoda",
+  medidata: "Medidata RTSM",
+  endpoint: "Endpoint / ICON",
+  signant: "Signant",
+  almac: "Almac",
+  "4gclinical": "4G Clinical",
+  other: "Otro IRT / IWRS",
+};
+
 export type IwrsConfig = {
   protocol_id: string;
   organization_id: string;
@@ -26,6 +57,10 @@ export type IwrsConfig = {
   blinding: IwrsBlinding;
   block_size: number;
   stratify_gender: boolean;
+  source?: IwrsSource;
+  sponsor_vendor?: IwrsSponsorVendor | string;
+  sponsor_study_id?: string;
+  sponsor_site_id?: string;
   updated_at?: string;
 };
 
@@ -42,6 +77,8 @@ export type IwrsAssignment = {
   unblinded_at: string | null;
   unblinded_by: string | null;
   unblind_reason: string;
+  assignment_source?: IwrsSource | string;
+  external_id?: string;
   arm_id?: string | null;
   arm_code?: string | null;
   arm_name?: string | null;
@@ -111,10 +148,22 @@ export function isNeedBlockError(message: string | undefined): boolean {
   return Boolean(message && /NEED_BLOCK/i.test(message));
 }
 
+export function isSponsorIwrs(config: Pick<IwrsConfig, "source"> | null | undefined): boolean {
+  return config?.source === "sponsor";
+}
+
+export function sponsorVendorLabel(vendor: string | undefined): string {
+  if (!vendor) return "IRT del sponsor";
+  if (vendor in IWRS_SPONSOR_VENDOR_LABEL) {
+    return IWRS_SPONSOR_VENDOR_LABEL[vendor as Exclude<IwrsSponsorVendor, "">];
+  }
+  return vendor;
+}
+
 export function isMissingIwrsSchema(message: string | undefined): boolean {
   if (!message) return false;
   const mentionsIwrs =
-    /protocol_iwrs_config|protocol_arms|iwrs_slots|iwrs_randomizations|iwrs_arm_assignments|iwrs_randomize|iwrs_append_block|iwrs_unblind|iwrs_arm_visible/i.test(
+    /protocol_iwrs_config|protocol_arms|iwrs_slots|iwrs_randomizations|iwrs_arm_assignments|iwrs_randomize|iwrs_append_block|iwrs_unblind|iwrs_arm_visible|iwrs_register_sponsor_kit|sponsor_vendor|assignment_source/i.test(
       message
     );
   const missing =

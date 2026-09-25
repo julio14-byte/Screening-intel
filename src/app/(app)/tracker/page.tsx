@@ -22,20 +22,26 @@ export default function TrackerPage() {
   });
   const [moveError, setMoveError] = useState<string | null>(null);
   const [iwrsIds, setIwrsIds] = useState<Set<string>>(new Set());
+  const [sponsorIds, setSponsorIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetch("/api/iwrs")
       .then((res) => readJsonResponse<{ configs?: IwrsConfig[] }>(res))
       .then((json) => {
-        setIwrsIds(
+        const enabled = (json?.configs ?? []).filter((config) => config.enabled);
+        setIwrsIds(new Set(enabled.map((config) => config.protocol_id)));
+        setSponsorIds(
           new Set(
-            (json?.configs ?? [])
-              .filter((config) => config.enabled)
+            enabled
+              .filter((config) => config.source === "sponsor")
               .map((config) => config.protocol_id)
           )
         );
       })
-      .catch(() => setIwrsIds(new Set()));
+      .catch(() => {
+        setIwrsIds(new Set());
+        setSponsorIds(new Set());
+      });
   }, []);
 
   const handleMove = async (id: string, status: ScreeningStatus) => {
@@ -62,6 +68,13 @@ export default function TrackerPage() {
 
   const handleRandomize = async (screeningId: string) => {
     setMoveError(null);
+    const screening = screenings.find((row) => row.id === screeningId);
+    if (screening && sponsorIds.has(screening.protocol_id)) {
+      setMoveError(
+        "Este protocolo usa el IWRS del sponsor. Registrá el kit en /iwrs; Crisvia no llama al IRT de Lilly ni de otra farmacéutica."
+      );
+      return;
+    }
     try {
       const res = await fetch("/api/iwrs/randomize", {
         method: "POST",

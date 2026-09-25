@@ -54,7 +54,7 @@ Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operat
 | **Protocol Matcher** | Criterios de inclusión/exclusión; extracción NLP desde PDF |
 | **Motor de elegibilidad** | Semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple + `match_score` + justificación IA. No es un sorteo: filtra por criterios. |
 | **Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure. Con IWRS activo, Randomizado se asigna en `/iwrs`, no arrastrando. |
-| **IWRS** | Randomización de sitio: bloques permutados, kit visible, brazo según cegamiento. No cambia la elegibilidad. |
+| **IWRS** | Randomización de sitio **o** registro del kit del IRT del sponsor (Lilly/IQVIA/Suvoda/etc.). No hay API pública única de Lilly. |
 | **Re-Match** | Propone protocolos alternativos para pacientes con screen failure |
 | **Portal candidatos** | Pre-registro público (`/candidato`) + inbox (`/candidatos`) + settings del portal |
 | **Expediente interno** | Pacientes y perfil clínico en tablas de la app (incluye modelo FHIR Patient) |
@@ -173,6 +173,7 @@ supabase/migrations/20260924053000_repair_ops_visits_schema.sql
 supabase/migrations/20260924120000_clinical_anamnesis.sql
 supabase/migrations/20260924140000_patient_demographics.sql
 supabase/migrations/20260924150000_iwrs_randomization.sql
+supabase/migrations/20260925001000_sponsor_iwrs.sql
 ```
 
 Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.

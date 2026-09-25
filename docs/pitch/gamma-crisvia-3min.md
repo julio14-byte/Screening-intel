@@ -104,8 +104,9 @@ Kanban: pre-screening → screening → randomizado → screen failure.
 Sin IWRS, el PI confirma inclusión a mano. Con IWRS, el kit/brazo se asigna en `/iwrs`.
 
 **IWRS `/iwrs`**
-Sorteo controlado de kit y brazo **después** del screening.
-No elige quién entra. El matching sigue siendo reglas 🟢🟡🔴.
+Kit y brazo **después** del screening.
+Del centro (Crisvia sortea) o del sponsor (registrás el kit de su IRT).
+No hay enchufe único a Lilly: cada estudio usa el IRT que ellos designen.
 
 **Dashboard `/dashboard`**
 Embudo del site + semáforos.

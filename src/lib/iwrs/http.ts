@@ -9,7 +9,7 @@ import type { Permission } from "@/lib/rbac/types";
 import { isMissingIwrsSchema } from "@/lib/iwrs/model";
 
 const MIGRATION_HINT =
-  "Falta aplicar IWRS en Supabase (SQL Editor → supabase/migrations/20260924150000_iwrs_randomization.sql) y recargar el schema.";
+  "Falta aplicar IWRS en Supabase (SQL Editor → 20260924150000_iwrs_randomization.sql y 20260925001000_sponsor_iwrs.sql) y recargar el schema.";
 
 export function iwrsSchemaErrorResponse(error: {
   code?: string;

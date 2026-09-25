@@ -10,8 +10,12 @@ import { readJsonResponse } from "@/lib/http/readJsonResponse";
 import {
   allocationRatioLabel,
   IWRS_BLINDING_LABEL,
+  IWRS_SOURCE_LABEL,
+  IWRS_SPONSOR_VENDOR_LABEL,
   type IwrsBlinding,
   type IwrsConfig,
+  type IwrsSource,
+  type IwrsSponsorVendor,
   type ProtocolArm,
 } from "@/lib/iwrs/model";
 
@@ -26,6 +30,10 @@ export function ProtocolIwrsPanel({ protocolId }: { protocolId: string }) {
   const [blinding, setBlinding] = useState<IwrsBlinding>("open");
   const [blockSize, setBlockSize] = useState(4);
   const [stratify, setStratify] = useState(true);
+  const [source, setSource] = useState<IwrsSource>("site");
+  const [vendor, setVendor] = useState<IwrsSponsorVendor>("");
+  const [studyId, setStudyId] = useState("");
+  const [siteId, setSiteId] = useState("");
   const [armCode, setArmCode] = useState("A");
   const [armName, setArmName] = useState("");
   const [armWeight, setArmWeight] = useState(1);
@@ -46,6 +54,10 @@ export function ProtocolIwrsPanel({ protocolId }: { protocolId: string }) {
     setBlinding(next?.blinding ?? "open");
     setBlockSize(next?.block_size ?? 4);
     setStratify(next?.stratify_gender ?? true);
+    setSource(next?.source === "sponsor" ? "sponsor" : "site");
+    setVendor((next?.sponsor_vendor as IwrsSponsorVendor | undefined) ?? "");
+    setStudyId(next?.sponsor_study_id ?? "");
+    setSiteId(next?.sponsor_site_id ?? "");
   }, [protocolId]);
 
   useEffect(() => {
@@ -79,6 +91,10 @@ export function ProtocolIwrsPanel({ protocolId }: { protocolId: string }) {
           blinding,
           block_size: Number(blockSize),
           stratify_gender: stratify,
+          source,
+          sponsor_vendor: source === "sponsor" ? vendor : "",
+          sponsor_study_id: studyId,
+          sponsor_site_id: siteId,
         }),
       });
       const json = await readJsonResponse<{ error?: string }>(res);
@@ -124,15 +140,16 @@ export function ProtocolIwrsPanel({ protocolId }: { protocolId: string }) {
     <Card className="mt-4">
       <CardHeader
         title="IWRS — randomización"
-        description="Asigna el brazo al azar después del screening. No cambia la elegibilidad."
+        description="Kit y brazo después del screening. No cambia la elegibilidad."
       />
       <CardBody className="space-y-4">
         {error ? <ErrorState message={error} /> : null}
         <p className="text-xs leading-relaxed text-slate-600">
-          El matching decide quién <em>puede</em> entrar. IWRS sortea el{" "}
-          <strong>kit / brazo</strong> cuando el paciente ya está en Screening.
-          Lista de bloques permutados, oculta. Coordinador puede randomizar;
-          solo PI/sub desenmascaran.
+          El matching decide quién <em>puede</em> entrar. El IWRS del{" "}
+          <strong>centro</strong> sortea kit/brazo. El IWRS del{" "}
+          <strong>sponsor</strong> (Lilly, IQVIA, Suvoda, Medidata…) es otro
+          sistema: Crisvia no se loguea ahí. Registrás el kit que ese IRT ya
+          asignó. Una API en vivo exige contrato y credenciales del estudio.
         </p>
 
         <form onSubmit={saveConfig} className="grid gap-3 sm:grid-cols-2">
@@ -146,6 +163,57 @@ export function ProtocolIwrsPanel({ protocolId }: { protocolId: string }) {
             IWRS activo (no se puede arrastrar a Randomizado en el tracker)
           </label>
           <SelectInput
+            label="Quién asigna el kit"
+            value={source}
+            disabled={!canEdit}
+            onChange={(e) => setSource(e.target.value as IwrsSource)}
+          >
+            {(Object.keys(IWRS_SOURCE_LABEL) as IwrsSource[]).map((key) => (
+              <option key={key} value={key}>
+                {IWRS_SOURCE_LABEL[key]}
+              </option>
+            ))}
+          </SelectInput>
+          {source === "sponsor" ? (
+            <>
+              <SelectInput
+                label="IRT / IWRS del estudio"
+                value={vendor}
+                disabled={!canEdit}
+                onChange={(e) =>
+                  setVendor(e.target.value as IwrsSponsorVendor)
+                }
+                hint="Lilly no tiene un IWRS público único: cada protocolo usa el proveedor que ellos designen."
+              >
+                <option value="">Elegí el proveedor…</option>
+                {(
+                  Object.keys(IWRS_SPONSOR_VENDOR_LABEL) as Exclude<
+                    IwrsSponsorVendor,
+                    ""
+                  >[]
+                ).map((key) => (
+                  <option key={key} value={key}>
+                    {IWRS_SPONSOR_VENDOR_LABEL[key]}
+                  </option>
+                ))}
+              </SelectInput>
+              <TextInput
+                label="Study ID en el IRT"
+                value={studyId}
+                disabled={!canEdit}
+                onChange={(e) => setStudyId(e.target.value)}
+                placeholder="ID que te dio el sponsor"
+              />
+              <TextInput
+                label="Site ID en el IRT"
+                value={siteId}
+                disabled={!canEdit}
+                onChange={(e) => setSiteId(e.target.value)}
+                placeholder="Código de centro"
+              />
+            </>
+          ) : null}
+          <SelectInput
             label="Cegamiento"
             value={blinding}
             disabled={!canEdit}
@@ -157,16 +225,23 @@ export function ProtocolIwrsPanel({ protocolId }: { protocolId: string }) {
               </option>
             ))}
           </SelectInput>
-          <TextInput
-            label="Tamaño de bloque"
-            type="number"
-            min={2}
-            max={24}
-            value={String(blockSize)}
-            disabled={!canEdit}
-            onChange={(e) => setBlockSize(Number(e.target.value))}
-            hint="Se ajusta a la razón de brazos (1:1 → 4, 6, 8…)"
-          />
+          {source === "site" ? (
+            <TextInput
+              label="Tamaño de bloque"
+              type="number"
+              min={2}
+              max={24}
+              value={String(blockSize)}
+              disabled={!canEdit}
+              onChange={(e) => setBlockSize(Number(e.target.value))}
+              hint="Se ajusta a la razón de brazos (1:1 → 4, 6, 8…)"
+            />
+          ) : (
+            <p className="text-xs text-slate-500 sm:col-span-2">
+              Con IWRS del sponsor no hay lista de bloques en Crisvia: el kit
+              sale del IRT de la farmacéutica.
+            </p>
+          )}
           <label className="flex items-center gap-2 text-sm text-indigo-950">
             <input
               type="checkbox"
