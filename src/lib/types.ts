@@ -180,12 +180,15 @@ export interface EproQuestion {
   max?: number;
 }
 
+export type EproCadence = "visit" | "daily";
+
 export interface EproForm {
   id: string;
   title: string;
   description: string | null;
   protocol_id: string | null;
   questions: EproQuestion[];
+  cadence?: EproCadence;
   active: boolean;
   created_at: string;
   updated_at: string;

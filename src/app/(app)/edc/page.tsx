@@ -25,6 +25,11 @@ const EDC_LINKS = [
     title: "Dispensación",
     body: "Caja IWRS, primera dosis y link del diario. El kit lo pide a /api/iwrs.",
   },
+  {
+    href: "/epro",
+    title: "ePRO",
+    body: "Invitación del coordinador al ePRO móvil y formularios de visita.",
+  },
 ];
 
 export default function EdcPage() {

@@ -75,6 +75,11 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
         description:
           "Módulo independiente de randomización. Screening y EDC lo consumen; no forma parte del matcher.",
       },
+      {
+        name: "ePRO",
+        description:
+          "ePRO móvil del sujeto (invitación, PIN, cuestionario diario) y formularios de visita. No es certificación HIPAA ni 21 CFR Part 11.",
+      },
     ],
     components: {
       securitySchemes: {
@@ -753,6 +758,116 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           },
           responses: {
             "200": { description: "Brazo visible" },
+          },
+        },
+      },
+      "/api/epro-app/invite": {
+        post: {
+          tags: ["ePRO"],
+          summary: "Generar invitación ePRO (coordinador)",
+          description:
+            "Token de un uso, 48 h, asociado al sujeto. El paciente no se registra solo. Coordinador o investigador.",
+          security: [{ cookieAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["patient_id"],
+                  properties: { patient_id: { type: "string", format: "uuid" } },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "URL /epro-app/activar/{token}" },
+            "403": { description: "Monitor u otro rol de solo lectura" },
+          },
+        },
+      },
+      "/api/epro-app/p/activar": {
+        post: {
+          tags: ["ePRO"],
+          summary: "Activar PIN del sujeto",
+          description: "Año de nacimiento + PIN de 6 dígitos. No devuelve PII.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["token", "birth_year", "pin"],
+                  properties: {
+                    token: { type: "string" },
+                    birth_year: { type: "string", pattern: "^\\d{4}$" },
+                    pin: { type: "string", pattern: "^\\d{6}$" },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Sesión HttpOnly, subject_code" },
+          },
+        },
+      },
+      "/api/epro-app/p/login": {
+        post: {
+          tags: ["ePRO"],
+          summary: "Login ePRO (código de sujeto + PIN)",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["subject_code", "pin"],
+                  properties: {
+                    subject_code: { type: "string", pattern: "^[0-9]{4,12}$" },
+                    pin: { type: "string", pattern: "^\\d{6}$" },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Sesión de 3 minutos de inactividad" },
+            "403": { description: "Código o PIN incorrectos" },
+          },
+        },
+      },
+      "/api/epro-app/p/hoy": {
+        get: {
+          tags: ["ePRO"],
+          summary: "Cuestionario del día (UTC)",
+          description: "Si ya contestó, completed=true. Cookie epro-session.",
+          responses: {
+            "200": { description: "Preguntas o completado" },
+            "401": { description: "Sesión vencida" },
+          },
+        },
+        post: {
+          tags: ["ePRO"],
+          summary: "Guardar respuestas del día",
+          description: "INSERT inmutable + bitácora (acción, valor, UTC, subject_code).",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["answers"],
+                  properties: {
+                    answers: { type: "object", additionalProperties: true },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Guardado" },
+            "409": { description: "Cuestionario completado por hoy" },
           },
         },
       },

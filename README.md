@@ -64,7 +64,7 @@ Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operat
 | **Audit Trail** | Bitácora inmutable alineada a 21 CFR Part 11 |
 | **RBAC clínico** | Investigator / Sub-investigator / Coordinator / Monitor |
 | **SaaS** | Organizations, trial 14 días, Stripe Checkout + Portal |
-| **ePRO** | Formularios electrónicos del paciente (módulo propio, distinto de Screening y EDC) |
+| **ePRO** | Formularios de visita en `/epro` y ePRO móvil en `/epro-app` (invitación del coordinador, PIN, sin PII). Distinto de Screening, EDC y del diario de toma |
 | **API Docs** | Swagger UI en [`/docs/api`](http://localhost:3000/docs/api) |
 
 ---
@@ -86,7 +86,7 @@ Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operat
 |------|-------------|
 | `/dashboard` | Embudo de screening y métricas del site |
 | `/patients` | Registro de pacientes |
-| `/patients/[id]` | Perfil clínico, visitas con notas, receta, IWRS y diario |
+| `/patients/[id]` | Perfil clínico, visitas, receta, IWRS, invitación ePRO y diario |
 | `/protocols` | Gestión de protocolos |
 | `/protocols/[id]` | Medicamentos del estudio y números de lote |
 | `/protocols/[id]/match` | Cruce masivo paciente ↔ protocolo + justificación IA |
@@ -104,7 +104,8 @@ Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operat
 | `/agenda` | Visitas con el médico: registro, estado y notas clínicas |
 | `/settings/portal` | Configuración del portal (investigator) |
 | `/settings/security` | MFA TOTP (obligatorio en prod para PI / sub-PI) |
-| `/epro` | Formularios ePRO |
+| `/epro` | Formularios ePRO de visita (staff) |
+| `/epro-app` | ePRO móvil del sujeto (código + PIN, sin nombre) |
 | `/settings/roles` | Creación de usuarios y roles (investigator) |
 | `/account/billing` | Plan, trial y facturación Stripe |
 | `/docs` | Documentación del producto |
@@ -180,6 +181,7 @@ supabase/migrations/20260924140000_patient_demographics.sql
 supabase/migrations/20260924150000_iwrs_randomization.sql
 supabase/migrations/20260925001000_sponsor_iwrs.sql
 supabase/migrations/20260925010000_dispense_first_dose_diary.sql
+supabase/migrations/20260925020000_epro_mobile_patient.sql
 ```
 
 Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
@@ -384,7 +386,7 @@ docs/                        # STRIPE_SETUP.md, BACKUP.md, etc.
 - RLS en PostgreSQL + RBAC clínico: las políticas `using (true)` se eliminan en `0018`; el aislamiento es por `get_user_organization_ids()`
 - Validación Zod en APIs críticas
 - Portal público con rate limiting, vista `portal_sites` (sin secretos) y `anon` sin `SELECT` sobre `organizations`
-- ePRO aislado por centro; bitácora sin acceso `anon`
+- ePRO aislado por centro; el móvil no muestra PII (solo código de sujeto); bitácora sin acceso `anon`. El diseño se alinea a HIPAA / GDPR / 21 CFR Part 11; no es una certificación.
 - Herramientas MCP de screening filtradas por organización; OpenAI recibe iniciales, no nombres
 
 Backups y restore (PITR): [`docs/BACKUP.md`](docs/BACKUP.md).
