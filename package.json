@@ -17,7 +17,8 @@
     "verify:clinical-anamnesis": "tsx --tsconfig tsconfig.json scripts/verify-clinical-anamnesis.ts",
     "verify:patient-demographics": "tsx --tsconfig tsconfig.json scripts/verify-patient-demographics.ts",
     "verify:iwrs": "tsx --tsconfig tsconfig.json scripts/verify-iwrs.ts",
-    "verify:dispense-diary": "tsx --tsconfig tsconfig.json scripts/verify-dispense-diary.ts"
+    "verify:dispense-diary": "tsx --tsconfig tsconfig.json scripts/verify-dispense-diary.ts",
+    "verify:epro-mobile": "tsx --tsconfig tsconfig.json scripts/verify-epro-mobile.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",

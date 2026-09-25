@@ -1,4 +1,4 @@
-import { isPublicApiPath, routes } from "@/lib/app/routes";
+import { isPublicApiPath, isPublicPatientPath, routes } from "@/lib/app/routes";
 
 /** Rutas permitidas con sesión AAL1 mientras se completa MFA. */
 export function isMfaExemptPath(pathname: string): boolean {
@@ -15,5 +15,5 @@ export function isMfaExemptPath(pathname: string): boolean {
   ) {
     return true;
   }
-  return isPublicApiPath(pathname);
+  return isPublicApiPath(pathname) || isPublicPatientPath(pathname);
 }

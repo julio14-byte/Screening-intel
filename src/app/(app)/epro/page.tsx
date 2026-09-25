@@ -19,7 +19,7 @@ export default function EproPage() {
     <>
       <PageHeader
         title="ePRO"
-        description="Módulo ePRO: cuestionarios del estudio. Screening y EDC son otros módulos; el IWRS se pide por API. El diario de toma está en Dispensación (/diario)."
+        description="Módulo ePRO: cuestionarios de visita (staff) y ePRO móvil del sujeto (/epro-app). El coordinador invita desde el expediente. Screening y EDC son otros módulos; el IWRS se pide por API. El diario de toma está en Dispensación (/diario)."
       />
 
       {loading ? (
@@ -48,6 +48,7 @@ export default function EproPage() {
                   ) : null}
                   <p className="mt-2 text-xs text-slate-500">
                     {form.questions.length} preguntas
+                    {form.cadence === "daily" ? " · diario (ePRO móvil)" : " · visita (staff)"}
                   </p>
                 </div>
               </div>

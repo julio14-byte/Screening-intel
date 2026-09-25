@@ -163,12 +163,14 @@ const config = {
       "/api/candidato/config",
       "/api/candidato/enviar",
       "/api/diario/t",
+      "/api/epro-app/p",
     ],
     candidato: {
       hub: "/candidato",
       gracias: "/candidato/gracias",
     },
     diario: "/diario",
+    eproApp: "/epro-app",
     app: {
       dashboard: "/dashboard",
       patients: "/patients",
@@ -177,6 +179,7 @@ const config = {
       devices: "/devices",
       tracker: "/tracker",
       epro: "/epro",
+      eproApp: "/epro-app",
       rematch: "/rematch",
       billing: "/account/billing",
       roles: "/settings/roles",
@@ -284,7 +287,7 @@ const config = {
         {
           icon: "ClipboardList",
           title: "ePRO",
-          body: "Cuestionarios del paciente. Distinto del diario de toma y del IWRS.",
+          body: "Cuestionarios del paciente. El coordinador invita desde el EDC; el sujeto entra en /epro-app con código y PIN. Distinto del diario de toma y del IWRS.",
         },
         {
           icon: "Dices",
@@ -326,7 +329,11 @@ const config = {
         },
         {
           q: "¿Hace falta una app tipo Clinical Ink para el diario de medicación?",
-          a: "No. Después del IWRS, farmacia entrega la caja en /dispensacion, registra la primera dosis (en la clínica o oral para llevar) y genera un link /diario. El paciente anota hora y síntomas ahí; el centro lo ve en el expediente. Una app aparte duplicaría login, PHI y mantenimiento. ePRO sigue siendo para cuestionarios de visita, no para un registro diario. Esto no es un eSource tipo Clinical Ink.",
+          a: "No. Después del IWRS, farmacia entrega la caja en /dispensacion, registra la primera dosis (en la clínica o oral para llevar) y genera un link /diario. El paciente anota hora y síntomas ahí; el centro lo ve en el expediente. Una app aparte duplicaría login, PHI y mantenimiento. El ePRO móvil (/epro-app) es otro módulo: síntomas y calidad de vida, no la toma. Esto no es un eSource tipo Clinical Ink.",
+        },
+        {
+          q: "¿El ePRO móvil muestra el nombre del paciente?",
+          a: "No. El sujeto no se registra solo: el coordinador genera un link de 48 horas desde el expediente. El paciente valida el año de nacimiento, crea un PIN de 6 dígitos y después entra con código de sujeto + PIN. La interfaz solo muestra ese código. La sesión caduca a los 3 minutos de inactividad. Cada respuesta diaria entra a la bitácora (quién/sujeto, UTC, acción, valor). El diseño se alinea a HIPAA, GDPR y 21 CFR Part 11; no es una certificación.",
         },
         {
           q: "¿Necesito un EHR hospitalario?",

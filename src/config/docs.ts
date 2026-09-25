@@ -38,7 +38,7 @@ export const productDocs = {
         {
           heading: "6. Módulos: Screening, EDC, ePRO e IWRS",
           body:
-            "La app es Screening + EDC + ePRO. El IWRS es un módulo independiente: kit y brazo se piden a /api/iwrs (documentado en /docs/api).",
+            "La app es Screening + EDC + ePRO. El coordinador invita al ePRO móvil desde el expediente (link 48 h). El sujeto entra en /epro-app con código y PIN; la UI no muestra nombre. El IWRS es un módulo independiente: kit y brazo se piden a /api/iwrs (documentado en /docs/api).",
         },
       ],
     },

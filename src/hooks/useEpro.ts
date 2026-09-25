@@ -18,7 +18,7 @@ export function useEproForms() {
       const supabase = getSupabaseClient();
       const { data, error } = await supabase
         .from("epro_forms")
-        .select("id, title, description, protocol_id, questions, active, created_at, updated_at")
+        .select("id, title, description, protocol_id, questions, cadence, active, created_at, updated_at")
         .eq("active", true)
         .order("created_at", { ascending: false });
       if (error) throw error;

@@ -26,7 +26,7 @@ export const PRODUCT_MODULES: Record<
     label: "ePRO",
     href: "/epro",
     summary:
-      "Cuestionarios del paciente (síntomas, calidad de vida). Distinto del diario de toma.",
+      "Cuestionarios del paciente. Visita en /epro; diario móvil en /epro-app (invitación del coordinador, sin PII).",
   },
   iwrs: {
     id: "iwrs",

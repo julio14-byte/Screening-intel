@@ -141,8 +141,8 @@ El coordinador confirma cada paso. La IA no cambia un semáforo.
 **Re-Match `/rematch`**
 Si falló un estudio, busca protocolos activos donde no esté excluido.
 
-**ePRO `/epro`**
-Cuestionarios del paciente durante el screening.
+**ePRO `/epro` y `/epro-app`**
+Cuestionarios de visita (staff) y ePRO móvil del sujeto (invitación 48 h del coordinador, PIN, sin nombre). No es certificación HIPAA ni 21 CFR Part 11.
 
 El ICF es el del site. Crisvia no inventa el consentimiento del estudio.
 
@@ -218,7 +218,7 @@ Se empieza sin integrar el hospital. Trial de 14 días: un protocolo, una cohort
 | Dispensación | `/dispensacion` | Caja IWRS, primera dosis, diario |
 | Diario | `/diario` | El paciente anota toma y síntomas |
 | Re-Match | `/rematch` | Otro protocolo tras el fallo |
-| ePRO | `/epro` | Cuestionario del paciente |
+| ePRO | `/epro` + `/epro-app` | Visita (staff) y diario móvil del sujeto |
 | Roles | `/settings/roles` | Investigator crea usuarios |
 | Seguridad | `/settings/security` | MFA |
 | Facturación | `/account/billing` | Plan y trial |
