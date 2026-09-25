@@ -65,7 +65,7 @@ export function DashboardView({
     <>
       <PageHeader
         title={title}
-        description="Screening del site. EDC, ePRO e IWRS (API) son módulos aparte."
+        description="Screening del site. EDC, ePRO e IWRS los opera un tercero (Integraciones)."
         actions={
           filteredRows.length > 0 ? (
             <Button

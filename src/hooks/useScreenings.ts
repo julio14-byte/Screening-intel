@@ -123,6 +123,13 @@ export function useScreenings(options?: { includeMatchDetails?: boolean }) {
         }).catch(() => {
           /* La auditoría no debe bloquear el flujo clínico */
         });
+        void fetch("/api/integraciones/dispatch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ screening_id: screeningId, status }),
+        }).catch(() => {
+          /* El webhook del tercero no bloquea el kanban */
+        });
       }
     },
     [fetchScreenings, screenings, role, isReadOnly]

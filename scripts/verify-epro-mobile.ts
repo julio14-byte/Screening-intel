@@ -94,12 +94,12 @@ assert(
   "no confunde unique con schema faltante"
 );
 
-assert(config.includes('"/api/epro-app/p"'), "API pública acotada a /api/epro-app/p");
-assert(!config.includes('"/api/epro-app",'), "invite y respuestas no son APIs públicas");
-assert(config.includes('eproApp: "/epro-app"'), "ruta canónica ePRO móvil");
-assert(config.includes("no es una certificación"), "FAQ: diseño, no certificación");
-assert(permissions.includes('"/api/epro-app/invite"'), "WRITE solo invite staff");
-assert(!permissions.includes('"/api/epro-app",'), "WRITE no cubre /api/epro-app entero");
+assert(config.includes('"/api/integraciones/inbound"'), "inbound de terceros es público");
+assert(!config.includes('"/api/epro-app/p"'), "ePRO móvil ya no es API pública de producto");
+assert(config.includes('eproApp: "/epro-app"'), "ruta canónica ePRO móvil (dormida)");
+assert(config.includes("webhook HTTPS firmado") || config.includes("X-Crisvia-Signature"), "FAQ: tercero por webhook");
+assert(permissions.includes('"/api/integraciones"'), "WRITE va a integraciones");
+assert(!permissions.includes('"/api/epro-app/invite"'), "WRITE ya no cubre invite ePRO");
 assert(hoy.includes("recordEproMobileAudit"), "POST diario escribe bitácora");
 assert(hoy.includes('action: "INSERT"'), "audit action INSERT");
 assert(hoy.includes("subjectCode"), "audit con código de sujeto");

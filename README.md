@@ -53,18 +53,15 @@ Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operat
 | **Clinical Profile** | Condiciones, medicación, laboratorios + búsqueda ICD-11 + extracción IA desde notas |
 | **Protocol Matcher** | Criterios de inclusión/exclusión; extracción NLP desde PDF |
 | **Motor de elegibilidad** | Semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple + `match_score` + justificación IA. No es un sorteo: filtra por criterios. |
-| **Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure. Con IWRS activo, Randomizado se asigna en `/iwrs`, no arrastrando. |
-| **IWRS** | Randomización de sitio **o** registro del kit del IRT del sponsor (Lilly/IQVIA/Suvoda/etc.). Módulo independiente: Screening y EDC lo llaman por `/api/iwrs`. |
+| **Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure. Si el protocolo tiene IWRS de un tercero, Randomizado llega por webhook; no se arrastra. |
+| **Integraciones** | EDC, ePRO e IWRS los opera un tercero. Crisvia avisa por webhook HTTPS + HMAC (`X-Crisvia-Signature`) cuando el candidato es elegible; el IRT confirma randomización en `POST /api/integraciones/inbound`. No es un conector Lilly/Medidata. |
 | **Re-Match** | Propone protocolos alternativos para pacientes con screen failure |
 | **Portal candidatos** | Pre-registro público (`/candidato`) + inbox (`/candidatos`) + settings del portal |
-| **Expediente interno** | Pacientes y perfil clínico en tablas de la app (incluye modelo FHIR Patient) |
+| **Expediente interno** | Pacientes y perfil clínico en tablas de la app (incluye modelo FHIR Patient) para matching. No hay EHR hospitalario externo. |
 | **Cola de trabajo** | Tareas de inbox, criterios 🟡 y re-match |
-| **Inventario / receta** | Lotes de la farmacéutica por protocolo; la receta electrónica descuenta stock |
-| **Dispensación / diario** | Farmacia entrega la caja IWRS, registra la primera dosis y el paciente anota toma/síntomas en `/diario` (link, no una app aparte) |
-| **Audit Trail** | Bitácora inmutable alineada a 21 CFR Part 11 |
+| **Audit Trail** | Bitácora inmutable alineada a 21 CFR Part 11 (diseño; no es una certificación) |
 | **RBAC clínico** | Investigator / Sub-investigator / Coordinator / Monitor |
 | **SaaS** | Organizations, trial 14 días, Stripe Checkout + Portal |
-| **ePRO** | Formularios de visita en `/epro` y ePRO móvil en `/epro-app` (invitación del coordinador, PIN, sin PII). Distinto de Screening, EDC y del diario de toma |
 | **API Docs** | Swagger UI en [`/docs/api`](http://localhost:3000/docs/api) |
 
 ---
@@ -86,27 +83,20 @@ Crisvia no compite como un módulo aislado de IA clínica. Es el **funnel operat
 |------|-------------|
 | `/dashboard` | Embudo de screening y métricas del site |
 | `/patients` | Registro de pacientes |
-| `/patients/[id]` | Perfil clínico, visitas, seguimiento, receta, IWRS, ePRO y diario |
+| `/patients/[id]` | Perfil clínico para matching (demografía, anamnesis, mediciones) |
 | `/protocols` | Gestión de protocolos |
-| `/protocols/[id]` | Medicamentos del estudio, IWRS y calendario de seguimiento |
+| `/protocols/[id]` | Matching + webhooks a EDC/ePRO/IWRS de terceros |
 | `/protocols/[id]/match` | Cruce masivo paciente ↔ protocolo + justificación IA |
-| `/inventario` | Stock de lotes y recetas entregadas |
-| `/edc` | Hub de captura clínica (expediente, visitas, farmacia) |
-| `/iwrs` | IWRS independiente (UI que consume `/api/iwrs`) |
-| `/dispensacion` | Entrega de caja IWRS, primera dosis y link del diario |
-| `/diario/[token]` | Diario público del paciente (hora de toma y síntomas) |
+| `/integraciones` | URL HTTPS + secreto HMAC por protocolo y módulo (edc / epro / iwrs) |
+| `/edc`, `/epro`, `/iwrs`, `/agenda`, `/seguimiento`, `/cierre`, `/inventario`, `/dispensacion` | Retirados: lo opera un tercero; redirigen a Integraciones |
 | `/tracker` | Pipeline Kanban con drag & drop |
 | `/rematch` | Re-matching automático post screen failure |
 | `/candidato` | Portal público de pre-registro (pacientes) |
 | `/candidatos` | Inbox de leads del portal (coordinadores) |
 | `/cola` | Tareas guardadas: inbox, criterios 🟡 y re-match |
 | `/avisos` | Avisos de candidato nuevo, screen failure y tarea vencida |
-| `/agenda` | Visitas con el médico: registro, estado y notas clínicas |
-| `/seguimiento` | Visitas obligatorias del protocolo (ventana, adherencia, desviación) |
 | `/settings/portal` | Configuración del portal (investigator) |
 | `/settings/security` | MFA TOTP (obligatorio en prod para PI / sub-PI) |
-| `/epro` | Formularios ePRO de visita (staff) |
-| `/epro-app` | ePRO móvil del sujeto (código + PIN, sin nombre) |
 | `/settings/roles` | Creación de usuarios y roles (investigator) |
 | `/account/billing` | Plan, trial y facturación Stripe |
 | `/docs` | Documentación del producto |
@@ -184,6 +174,8 @@ supabase/migrations/20260925001000_sponsor_iwrs.sql
 supabase/migrations/20260925010000_dispense_first_dose_diary.sql
 supabase/migrations/20260925020000_epro_mobile_patient.sql
 supabase/migrations/20260925030000_follow_up_visits.sql
+supabase/migrations/20260925040000_protocol_closeout.sql
+supabase/migrations/20260925050000_protocol_integrations.sql
 ```
 
 Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
@@ -258,9 +250,9 @@ yarn mcp:icd11
 
 | Rol | Permisos |
 |-----|----------|
-| **investigator** | Protocolos, IWRS (config + desenlace), aprobaciones, gestión de roles y facturación |
+| **investigator** | Protocolos, matching, aprobaciones, gestión de roles y facturación |
 | **sub_investigator** | Igual que PI en clínica; sin roles ni billing |
-| **coordinator** | Pacientes, screening operativo, randomizar IWRS, dispensar caja y generar diario (sin marcar Apto a mano ni desenmascarar) |
+| **coordinator** | Pacientes, screening operativo e Integraciones (webhooks a terceros) |
 | **monitor** | Solo lectura (CRA / auditoría farmacéutica) |
 
 Administración en `/settings/roles` (solo investigator).
@@ -388,7 +380,7 @@ docs/                        # STRIPE_SETUP.md, BACKUP.md, etc.
 - RLS en PostgreSQL + RBAC clínico: las políticas `using (true)` se eliminan en `0018`; el aislamiento es por `get_user_organization_ids()`
 - Validación Zod en APIs críticas
 - Portal público con rate limiting, vista `portal_sites` (sin secretos) y `anon` sin `SELECT` sobre `organizations`
-- ePRO aislado por centro; el móvil no muestra PII (solo código de sujeto); bitácora sin acceso `anon`. El diseño se alinea a HIPAA / GDPR / 21 CFR Part 11; no es una certificación.
+- Expediente y screening aislados por centro. EDC, ePRO e IWRS los opera un tercero; el webhook outbound no manda nombre ni fecha de nacimiento, solo `subject_code`. El diseño se alinea a HIPAA / GDPR / 21 CFR Part 11; no es una certificación.
 - Herramientas MCP de screening filtradas por organización; OpenAI recibe iniciales, no nombres
 
 Backups y restore (PITR): [`docs/BACKUP.md`](docs/BACKUP.md).

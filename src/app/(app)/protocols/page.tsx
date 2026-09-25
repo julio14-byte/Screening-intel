@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Archive, FlaskConical, Package, Play, Target } from "lucide-react";
+import { Archive, FlaskConical, Plug, Play, Target } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -69,9 +69,12 @@ export default function ProtocolsPage() {
                       {protocol.status === "active" ? "Activo" : "Cerrado"}
                     </span>
                   </div>
-                  <h2 className="mt-1.5 text-sm font-semibold text-slate-900 break-words">
+                  <Link
+                    href={`/protocols/${protocol.id}`}
+                    className="mt-1.5 block text-sm font-semibold text-slate-900 break-words hover:text-violet-800"
+                  >
                     {protocol.title}
-                  </h2>
+                  </Link>
                   <div className="mt-2">
                     <CriteriaSummary protocol={protocol} />
                   </div>
@@ -102,12 +105,12 @@ export default function ProtocolsPage() {
                     </Button>
                   </RoleGuard>
                   <Link
-                    href={`/protocols/${protocol.id}`}
+                    href={`/integraciones?protocol=${protocol.id}`}
                     className="w-full sm:w-auto"
                   >
                     <Button variant="secondary" className="w-full justify-center sm:w-auto">
-                      <Package className="h-4 w-4" aria-hidden />
-                      Lotes
+                      <Plug className="h-4 w-4" aria-hidden />
+                      Integraciones
                     </Button>
                   </Link>
                   <Link

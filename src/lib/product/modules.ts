@@ -1,6 +1,6 @@
-/** Los tres módulos de la app + IWRS como servicio aparte (solo API). */
+/** Screening en la app. EDC, ePRO e IWRS los opera un tercero conectado por webhook. */
 
-export const PRODUCT_MODULE_IDS = ["screening", "edc", "epro", "iwrs"] as const;
+export const PRODUCT_MODULE_IDS = ["screening", "integraciones"] as const;
 export type ProductModuleId = (typeof PRODUCT_MODULE_IDS)[number];
 
 export const PRODUCT_MODULES: Record<
@@ -14,32 +14,16 @@ export const PRODUCT_MODULES: Record<
     summary:
       "Elegibilidad: candidatos, matcher 🟢🟡🔴, tracker y re-match. No sortea kit.",
   },
-  edc: {
-    id: "edc",
-    label: "EDC",
-    href: "/edc",
+  integraciones: {
+    id: "integraciones",
+    label: "Integraciones",
+    href: "/integraciones",
     summary:
-      "Captura clínica del centro: expediente, agenda, seguimiento, farmacia y cierre de estudio. No es un EDC CDISC certificado.",
-  },
-  epro: {
-    id: "epro",
-    label: "ePRO",
-    href: "/epro",
-    summary:
-      "Cuestionarios del paciente. Visita en /epro; diario móvil en /epro-app (invitación del coordinador, sin PII).",
-  },
-  iwrs: {
-    id: "iwrs",
-    label: "IWRS",
-    href: "/iwrs",
-    summary:
-      "Módulo independiente: kit y brazo vía /api/iwrs. Screening y EDC lo llaman; no vive dentro del matcher.",
+      "EDC, ePRO e IWRS de terceros por webhook HMAC. No es un conector Lilly ni Medidata.",
   },
 };
 
 export const PRODUCT_MODULE_NAV_LABEL: Record<ProductModuleId, string> = {
   screening: "Screening",
-  edc: "EDC",
-  epro: "ePRO",
-  iwrs: "IWRS (API)",
+  integraciones: "Integraciones",
 };

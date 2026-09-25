@@ -3,7 +3,7 @@ import { PRODUCT_MODULES, PRODUCT_MODULE_IDS } from "@/lib/product/modules";
 
 export function ProductModulesStrip() {
   return (
-    <ul className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <ul className="mb-5 grid gap-3 sm:grid-cols-2">
       {PRODUCT_MODULE_IDS.map((id) => {
         const mod = PRODUCT_MODULES[id];
         return (

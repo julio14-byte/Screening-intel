@@ -11,6 +11,7 @@ import {
   Lock,
   MessageSquare,
   Package,
+  Plug,
   RefreshCw,
   Square,
   Timer,
@@ -34,6 +35,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Dices,
   CalendarCheck,
   Lock,
+  Plug,
   Square,
 };
 

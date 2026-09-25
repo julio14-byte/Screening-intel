@@ -31,24 +31,9 @@ export const productDocs = {
             "Evalúa candidatos contra protocolos y sigue el estado de screening en el Dashboard.",
         },
         {
-          heading: "5. Dispensa y diario",
+          heading: "5. Conectá EDC, ePRO e IWRS de terceros",
           body:
-            "Tras IWRS, farmacia entrega la caja en /dispensacion y registra la primera dosis. El paciente usa un link /diario para hora y síntomas. No hace falta una app aparte.",
-        },
-        {
-          heading: "6. Módulos: Screening, EDC, ePRO e IWRS",
-          body:
-            "La app es Screening + EDC + ePRO. El coordinador invita al ePRO móvil desde el expediente (link 48 h). El sujeto entra en /epro-app con código y PIN; la UI no muestra nombre. El IWRS es un módulo independiente: kit y brazo se piden a /api/iwrs (documentado en /docs/api).",
-        },
-        {
-          heading: "7. Seguimiento del protocolo",
-          body:
-            "Definí día objetivo y ventana en el protocolo. El coordinador genera el calendario en el expediente y completa signos vitales, adherencia y viáticos. Fuera de ventana = desviación. Distinto de /agenda.",
-        },
-        {
-          heading: "8. Cierre de estudio",
-          body:
-            "En /cierre el monitor limpia datos con queries, el PI bloquea la base (nadie altera una celda), se abre el ciego, se genera un snapshot descriptivo y un CSR del centro, y se registra el paquete para FDA/EMA/COFEPRIS/ANMAT. Crisvia no envía a las agencias ni reemplaza SAS/R.",
+            "En /integraciones cargás la URL HTTPS y el secreto HMAC de cada módulo. Cuando el screening queda elegible, Crisvia avisa al proveedor. El IWRS del sponsor confirma randomización en POST /api/integraciones/inbound. No hay enchufe a Lilly ni a Medidata.",
         },
       ],
     },

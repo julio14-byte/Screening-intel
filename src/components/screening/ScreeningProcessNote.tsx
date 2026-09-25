@@ -1,15 +1,14 @@
 /**
  * Screening ≠ sorteo. El matching es un filtro de criterios;
- * la randomización (IWRS) es el paso aleatorio posterior.
+ * la randomización la hace el IWRS del tercero.
  */
 export function ScreeningProcessNote({ compact = false }: { compact?: boolean }) {
   if (compact) {
     return (
       <p className="mb-4 rounded-md border border-violet-100 bg-violet-50/70 px-3 py-2 text-xs leading-relaxed text-indigo-800">
         <strong>No es un sorteo.</strong> El motor de reglas filtra por
-        inclusión/exclusión (🟢🟡🔴). Quien cumple avanza a visitas; no “gana un
-        cupo” al azar. El azar controlado es IWRS (/iwrs): kit y brazo después
-        del screening.
+        inclusión/exclusión (🟢🟡🔴). Quien cumple avanza; no “gana un cupo” al
+        azar. Kit y brazo los asigna el IWRS del sponsor, conectado en /integraciones.
       </p>
     );
   }
@@ -24,13 +23,13 @@ export function ScreeningProcessNote({ compact = false }: { compact?: boolean })
         puede explicar el veredicto; no lo cambia.
       </p>
       <p className="mt-2">
-        El paso que sí se parece a un sorteo controlado es la{" "}
-        <strong>randomización IWRS</strong> en{" "}
-        <a href="/iwrs" className="font-medium text-violet-700 underline">
-          /iwrs
+        EDC, ePRO e IWRS los opera un <strong>tercero</strong>. Cuando el
+        candidato queda elegible, Crisvia avisa por webhook. El IRT del estudio
+        confirma la randomización hacia Crisvia. Se configura en{" "}
+        <a href="/integraciones" className="font-medium text-violet-700 underline">
+          /integraciones
         </a>
-        : asigna kit y brazo cuando el paciente ya está en Screening. No decide
-        quién entra al estudio.
+        . No hay enchufe a Lilly ni a Medidata.
       </p>
     </aside>
   );

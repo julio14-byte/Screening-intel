@@ -6,15 +6,8 @@ import { ArrowLeft } from "lucide-react";
 import { AuditTimeline } from "@/components/audit/audit-timeline";
 import { InclusionApprovalPanel } from "@/components/rbac/InclusionApprovalPanel";
 import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
-import { ElectronicPrescriptionPanel } from "@/components/pharmacy/ElectronicPrescriptionPanel";
-import { PatientDiaryCard } from "@/components/pharmacy/PatientDiaryCard";
-import { PatientEproInviteCard } from "@/components/epro/PatientEproInviteCard";
-import { PatientIwrsCard } from "@/components/iwrs/PatientIwrsCard";
-import { PatientFollowUpCard } from "@/components/follow-up/PatientFollowUpCard";
-import { VisitLog } from "@/components/ops/VisitLog";
 import { ClinicalProfileEditor } from "@/components/profile/ClinicalProfileEditor";
 import { usePatientDetail } from "@/hooks/usePatientDetail";
-import { useProtocols } from "@/hooks/useProtocols";
 
 export default function PatientDetailPage({
   params,
@@ -22,7 +15,6 @@ export default function PatientDetailPage({
   const { id } = use(params);
   const { patient, profile, loading, error, saveProfile } =
     usePatientDetail(id);
-  const { protocols } = useProtocols();
 
   if (loading) return <LoadingState label="Cargando perfil clínico…" />;
   if (error || !patient)
@@ -44,25 +36,6 @@ export default function PatientDetailPage({
         profile={profile}
         onSave={saveProfile}
       />
-
-      <div className="mt-6">
-        <h2 className="mb-3 text-lg font-semibold text-indigo-950">Visitas con el médico</h2>
-        <VisitLog
-          patientId={patient.id}
-          title="Registrar visita"
-          description="Fecha, médico y nota clínica de esta consulta."
-        />
-      </div>
-
-      <ElectronicPrescriptionPanel
-        patientId={patient.id}
-        protocols={protocols}
-      />
-
-      <PatientIwrsCard patientId={patient.id} />
-      <PatientFollowUpCard patientId={patient.id} protocols={protocols} />
-      <PatientEproInviteCard patientId={patient.id} />
-      <PatientDiaryCard patientId={patient.id} protocols={protocols} />
 
       <div className="mt-6">
         <AuditTimeline tableName="patients" recordId={patient.id} />
