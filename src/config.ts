@@ -301,6 +301,10 @@ const config = {
           a: "Eso lo resuelve el EDC o el ePRO del tercero, no Crisvia. Después del screening, el sujeto vive en esos sistemas. Crisvia no dispensa caja ni hospeda /diario ni /epro-app como producto.",
         },
         {
+          q: "¿Cómo paso datos de Clinical Ink o de IQVIA al screening?",
+          a: "No hay API pública ni conector certificado. Pedí al data manager un CSV de screening: demografía (DM), antecedentes (MH), medicación (CM) y labs (LB). El diario ePRO y el IRT no sirven para matching. En /patients → Importar CSV se agrupa por USUBJID y se cruza con el motor de reglas. El análisis es el matcher 🟢🟡🔴, no SAS/R.",
+        },
+        {
           q: "¿Cómo se conectan EDC, ePRO e IWRS?",
           a: "Outbound: cuando el screening pasa a elegible, screen failure o randomizado, Crisvia hace POST al webhook del proveedor con X-Crisvia-Signature (HMAC-SHA256). Inbound: el IWRS llama POST /api/integraciones/inbound con la misma firma o Bearer y protocol_code + subject_code + kit_code. Entonces el tracker marca Randomizado.",
         },

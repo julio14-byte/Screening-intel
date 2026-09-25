@@ -48,7 +48,7 @@ Crisvia no se vende como “base de pacientes” ni como “te conseguimos reclu
 
 | Área | Qué hace |
 |------|----------|
-| **1. Patient Registry** | Alta, búsqueda e importación CSV de quienes YA están en el site. Entrada al matching, no un listado para vender. |
+| **1. Patient Registry** | Alta, búsqueda e importación CSV de quienes YA están en el site (plantilla Crisvia o exportación EDC DM+MH+CM+LB). Entrada al matching, no un listado para vender. No hay conector certificado Clinical Ink / IQVIA. |
 | **2. Clinical Profile** | Historia, antecedentes, medicamentos, laboratorios + ICD-11 + extracción IA desde notas |
 | **3. Protocol Matcher** | Paciente ↔ protocolo. Criterios de inclusión/exclusión; extracción NLP desde PDF |
 | **Motor de elegibilidad** | Semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple + `match_score` + justificación IA. No es un sorteo: filtra por criterios. |
