@@ -13,10 +13,6 @@ const dashboard = readFileSync(
   resolve("src/components/dashboard/DashboardView.tsx"),
   "utf8"
 );
-const versionNote = readFileSync(
-  resolve("src/components/product/ScreeningVersionNote.tsx"),
-  "utf8"
-);
 const audit = readFileSync(
   resolve("src/components/audit/audit-timeline.tsx"),
   "utf8"
@@ -26,6 +22,7 @@ const funnel = readFileSync(
   resolve("src/components/dashboard/OperationalFunnel.tsx"),
   "utf8"
 );
+const funnelModel = readFileSync(resolve("src/lib/ops/model.ts"), "utf8");
 
 let failed = 0;
 
@@ -53,12 +50,16 @@ assert(config.includes("Esa cifra no es de Crisvia"), "FAQ TrialGPT no es métri
 assert(!config.includes("42,6% de Crisvia"), "no apropia TrialGPT");
 assert(patients.includes("no una base de datos para vender"), "registro no se vende como DB");
 assert(rematch.includes("no es un paciente perdido"), "re-match = follow-up de SF");
-assert(dashboard.includes("ScreeningVersionNote"), "dashboard declara V1");
-assert(versionNote.includes("Todavía no"), "huecos explícitos");
-assert(versionNote.includes("TrialGPT"), "TrialGPT citado como paper, no como KPI");
+assert(!dashboard.includes("Versión 1"), "dashboard sin banner Versión 1");
+assert(!dashboard.includes("ScreeningVersionNote"), "dashboard sin nota de producto");
+assert(!dashboard.includes("Notas clínicas"), "dashboard sin notas médicas");
+assert(!dashboard.includes("notas médicas"), "dashboard sin notas médicas");
+assert(dashboard.includes("Embudo"), "dashboard muestra el embudo");
+assert(dashboard.includes("DashboardKpiCards"), "dashboard muestra KPIs");
 assert(audit.includes("no es una certificación"), "21 CFR sin sello");
 assert(matching.length > 100, "motor de matching presente");
-assert(funnel.includes("Inbox del portal"), "captación ya no es el discurso");
+assert(funnel.includes("Embudo de screening"), "embudo en dashboard");
+assert(funnelModel.includes("Inbox del portal"), "captación ya no es el discurso");
 
 if (failed) process.exit(1);
 console.log("verify-five-modules: V1 screening intelligence, sin vender DB ni TrialGPT OK");

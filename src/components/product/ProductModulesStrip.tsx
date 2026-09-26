@@ -1,25 +1,34 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { PRODUCT_MODULES, PRODUCT_MODULE_IDS } from "@/lib/product/modules";
 
+/** Atajos a los cinco módulos, sin copy de producto. */
 export function ProductModulesStrip() {
   return (
-    <ul className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {PRODUCT_MODULE_IDS.map((id) => {
-        const mod = PRODUCT_MODULES[id];
-        return (
-          <li key={id}>
-            <Link
-              href={mod.href}
-              className="block h-full rounded-xl border border-violet-100 bg-white/90 p-3 shadow-sm shadow-indigo-100/40 hover:border-violet-300"
-            >
-              <p className="text-xs font-semibold uppercase tracking-wide text-violet-600">
-                {mod.label}
-              </p>
-              <p className="mt-1 text-xs leading-relaxed text-slate-600">{mod.summary}</p>
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
+    <Card className="h-full">
+      <CardHeader
+        title="Ir al screening"
+        description="Registro, matcher, tracker y re-match."
+      />
+      <CardBody className="p-2">
+        <ul className="divide-y divide-violet-50">
+          {PRODUCT_MODULE_IDS.map((id) => {
+            const mod = PRODUCT_MODULES[id];
+            return (
+              <li key={id}>
+                <Link
+                  href={mod.href}
+                  className="flex items-center justify-between gap-3 rounded-lg px-2.5 py-2.5 text-sm text-indigo-950 hover:bg-violet-50"
+                >
+                  <span className="font-medium">{mod.label.replace(/^\d+\.\s/, "")}</span>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-violet-400" aria-hidden />
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </CardBody>
+    </Card>
   );
 }
