@@ -1,6 +1,6 @@
 /**
  * Versión 1: inteligencia de screening para clinical research sites.
- * EDC, ePRO e IWRS los opera un tercero (Integraciones).
+ * EDC, ePRO e IWRS los opera un tercero; no hay módulo de conectores en Crisvia.
  */
 export const PRODUCT_MODULE_IDS = [
   "registry",
@@ -8,17 +8,10 @@ export const PRODUCT_MODULE_IDS = [
   "matcher",
   "tracker",
   "rematch",
-  "integraciones",
 ] as const;
 export type ProductModuleId = (typeof PRODUCT_MODULE_IDS)[number];
 
-export const SCREENING_MODULE_IDS = [
-  "registry",
-  "profile",
-  "matcher",
-  "tracker",
-  "rematch",
-] as const;
+export const SCREENING_MODULE_IDS = PRODUCT_MODULE_IDS;
 
 export const PRODUCT_MODULES: Record<
   ProductModuleId,
@@ -59,16 +52,8 @@ export const PRODUCT_MODULES: Record<
     summary:
       "Un screen failure no es un paciente perdido: otros protocolos activos donde todavía califica.",
   },
-  integraciones: {
-    id: "integraciones",
-    label: "Integraciones",
-    href: "/integraciones",
-    summary:
-      "EDC, ePRO e IWRS de terceros por webhook HMAC. No es un conector Lilly ni Medidata.",
-  },
 };
 
 export const PRODUCT_MODULE_NAV_LABEL: Record<string, string> = {
   screening: "Screening",
-  integraciones: "Integraciones",
 };

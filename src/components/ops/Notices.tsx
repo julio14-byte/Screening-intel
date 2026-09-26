@@ -116,7 +116,7 @@ export function NoticeList() {
         <Card>
           <CardBody>
             <p className="text-sm text-indigo-800">
-              Sin avisos. Aparecen cuando entra un candidato, hay un screen failure o una tarea se vence. Actualiza la cola de trabajo para generarlos.
+              Sin avisos. Aparecen cuando entra un candidato o hay un screen failure.
             </p>
           </CardBody>
         </Card>

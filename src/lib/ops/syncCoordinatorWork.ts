@@ -150,7 +150,7 @@ export async function syncCoordinatorWork(
         kind: "inbox_new",
         title: `Candidato nuevo ${initials}`,
         body: "Entró un pre-registro pendiente.",
-        href: "/cola",
+        href: "/candidatos",
         dedupeKey: `inbox:${row.id}`,
       },
     });
@@ -252,7 +252,7 @@ export async function syncCoordinatorWork(
       kind: "task_overdue",
       title: "Tarea vencida",
       body: task.title,
-      href: "/cola",
+      href: "/avisos",
       dedupeKey: overdueDedupeKey(task.id, now),
     });
   }

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import {
   EmptyState,
@@ -12,7 +12,6 @@ import { Card } from "@/components/ui/Card";
 import { KanbanBoard } from "@/components/tracker/KanbanBoard";
 import { ScreeningProcessNote } from "@/components/screening/ScreeningProcessNote";
 import { useScreenings } from "@/hooks/useScreenings";
-import { readJsonResponse } from "@/lib/http/readJsonResponse";
 import type { ScreeningStatus } from "@/lib/types";
 
 export default function TrackerPage() {
@@ -20,34 +19,9 @@ export default function TrackerPage() {
     includeMatchDetails: false,
   });
   const [moveError, setMoveError] = useState<string | null>(null);
-  const [iwrsIds, setIwrsIds] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    void Promise.resolve()
-      .then(async () => {
-        const res = await fetch("/api/integraciones?kind=iwrs");
-        const json = await readJsonResponse<{
-          integrations?: Array<{ protocol_id: string; active: boolean }>;
-        }>(res);
-        const active = (json?.integrations ?? []).filter((row) => row.active);
-        setIwrsIds(new Set(active.map((row) => row.protocol_id)));
-      })
-      .catch(() => setIwrsIds(new Set()));
-  }, []);
 
   const handleMove = async (id: string, status: ScreeningStatus) => {
     setMoveError(null);
-    const screening = screenings.find((row) => row.id === id);
-    if (
-      status === "randomized" &&
-      screening &&
-      iwrsIds.has(screening.protocol_id)
-    ) {
-      setMoveError(
-        "Este protocolo tiene IWRS de un tercero. La randomización llega por webhook; no arrastres la tarjeta a Randomizado."
-      );
-      return;
-    }
     try {
       await updateStatus(id, status);
     } catch (e) {
@@ -61,7 +35,7 @@ export default function TrackerPage() {
     <>
       <PageHeader
         title="Screening Tracker"
-        description="Pipeline de elegibilidad, no un sorteo. El IWRS del sponsor (si está conectado) confirma Randomizado por webhook."
+        description="Pipeline de elegibilidad, no un sorteo. Randomizado lo marca el coordinador cuando el IRT del sponsor ya asignó kit."
       />
 
       <ScreeningProcessNote />
@@ -94,7 +68,6 @@ export default function TrackerPage() {
       ) : (
         <KanbanBoard
           screenings={screenings}
-          iwrsProtocolIds={iwrsIds}
           onMove={(id, status) => void handleMove(id, status)}
         />
       )}

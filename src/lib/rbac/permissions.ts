@@ -75,13 +75,9 @@ export const WRITE_API_PREFIXES = [
   "/api/rbac",
   "/api/candidatos",
   "/api/settings/portal",
-  "/api/integraciones",
 ] as const;
 
-/** El inbound del tercero es público (HMAC/Bearer); no aplica el bloqueo de monitor. */
 export function isWriteApiPath(pathname: string): boolean {
-  if (pathname === "/api/integraciones/inbound") return false;
-  if (pathname.startsWith("/api/integraciones/inbound/")) return false;
   return WRITE_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 

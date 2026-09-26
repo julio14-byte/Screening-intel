@@ -110,7 +110,7 @@ assert(csr.includes("Fase IV"), "Fase IV");
 assert(csr.includes("Database Lock"), "lock en CSR");
 
 assert(config.includes('cierre: "/cierre"'), "ruta canónica retirada");
-assert(config.includes("/integraciones"), "cierre apunta a integraciones");
+assert(config.includes("/integraciones"), "rutas retiradas siguen protegidas");
 assert(!config.includes('href: "/cierre"'), "cierre ya no está en el nav de producto");
 assert(!permissions.includes('"/api/cierre"'), "monitor no bloqueado en middleware");
 assert(lockRoute.includes("closeout_lock"), "API lock");

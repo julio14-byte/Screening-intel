@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { use } from "react";
 import { ArrowLeft, Target } from "lucide-react";
-import { ProtocolIntegrationsPanel } from "@/components/integraciones/ProtocolIntegrationsPanel";
 import { Button } from "@/components/ui/Button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
@@ -32,7 +31,7 @@ export default function ProtocolPage({
 
       <PageHeader
         title={`${protocol.code_name} · screening`}
-        description={`${protocol.title}. EDC, ePRO e IWRS se conectan como sistemas de terceros.`}
+        description={`${protocol.title}. EDC, ePRO e IWRS los opera el tercero del estudio; no hay módulo de conectores en Crisvia.`}
         actions={
           <Link href={`/protocols/${protocol.id}/match`}>
             <Button variant="secondary">
@@ -42,8 +41,6 @@ export default function ProtocolPage({
           </Link>
         }
       />
-
-      <ProtocolIntegrationsPanel protocolId={protocol.id} />
     </>
   );
 }

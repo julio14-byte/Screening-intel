@@ -28,17 +28,12 @@ export const productDocs = {
         {
           heading: "4. Screening Tracker",
           body:
-            "En /tracker el Kanban es Pre-screening → Screening → Randomizado → Screen failure. No es un sorteo. Si hay IWRS de tercero, Randomizado llega por webhook.",
+            "En /tracker el Kanban es Pre-screening → Screening → Randomizado → Screen failure. No es un sorteo. Randomizado lo marca el coordinador cuando el IRT del sponsor ya asignó kit.",
         },
         {
           heading: "5. Re-Match & Follow-up",
           body:
             "En /rematch un screen failure busca otros protocolos activos. El seguimiento de visitas vive en el EDC del estudio, no acá.",
-        },
-        {
-          heading: "Integraciones (después del screening)",
-          body:
-            "En /integraciones cargás la URL HTTPS y el secreto HMAC del EDC, ePRO o IWRS del estudio. No hay enchufe a Lilly ni a Medidata.",
         },
       ],
     },

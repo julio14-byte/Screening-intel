@@ -14,7 +14,8 @@ export function ScreeningVersionNote() {
       </p>
       <p className="mt-2 text-slate-600">
         <strong>Ya está:</strong> registro, perfil clínico, matcher, tracker y
-        re-match. EDC, ePRO e IWRS los opera un tercero (Integraciones).
+        re-match. EDC, ePRO e IWRS los opera un tercero; no hay módulo de
+        conectores en Crisvia.
       </p>
       <p className="mt-1 text-slate-600">
         <strong>Todavía no:</strong> análisis predictivo, EHR hospitalario ni

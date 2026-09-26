@@ -73,7 +73,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
       {
         name: "IWRS",
         description:
-          "Retirado como producto de Crisvia. El IRT lo opera un tercero; usá Integraciones. Estas rutas internas no llaman a Lilly ni a Medidata.",
+          "Retirado como producto de Crisvia. El IRT lo opera un tercero. Estas rutas internas no llaman a Lilly ni a Medidata.",
       },
       {
         name: "ePRO",
@@ -89,11 +89,6 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
         name: "Cierre",
         description:
           "Retirado como producto. Database Lock / CSR los opera el EDC o el biostats del sponsor. Crisvia no envía a FDA/EMA/COFEPRIS.",
-      },
-      {
-        name: "Integraciones",
-        description:
-          "Webhooks HTTPS + HMAC hacia EDC, ePRO e IWRS de terceros. No es un conector certificado Lilly/Medidata/IQVIA.",
       },
     ],
     components: {
@@ -603,133 +598,12 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           },
         },
       },
-      "/api/integraciones": {
-        get: {
-          tags: ["Integraciones"],
-          summary: "Listar conexiones EDC / ePRO / IWRS",
-          description:
-            "No devuelve el secreto HMAC. Filtrá por protocol_id o kind.",
-          security: [{ cookieAuth: [] }],
-          parameters: [
-            {
-              name: "protocol_id",
-              in: "query",
-              schema: { type: "string", format: "uuid" },
-            },
-            {
-              name: "kind",
-              in: "query",
-              schema: { type: "string", enum: ["edc", "epro", "iwrs"] },
-            },
-          ],
-          responses: { "200": { description: "Conexiones sin secreto" } },
-        },
-        post: {
-          tags: ["Integraciones"],
-          summary: "Crear o reemplazar webhook",
-          description:
-            "El signing_secret se muestra una sola vez. Coordinador o PI. HTTPS (o localhost).",
-          security: [{ cookieAuth: [] }],
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  required: ["protocol_id", "kind", "vendor", "endpoint_url"],
-                  properties: {
-                    protocol_id: { type: "string", format: "uuid" },
-                    kind: { type: "string", enum: ["edc", "epro", "iwrs"] },
-                    vendor: { type: "string", example: "Castor" },
-                    endpoint_url: {
-                      type: "string",
-                      format: "uri",
-                      example: "https://vendor.example/webhooks/crisvia",
-                    },
-                  },
-                },
-              },
-            },
-          },
-          responses: {
-            "200": { description: "Conexión + signing_secret una vez" },
-          },
-        },
-        patch: {
-          tags: ["Integraciones"],
-          summary: "Pausar o actualizar URL / proveedor",
-          security: [{ cookieAuth: [] }],
-          responses: { "200": { description: "Conexión actualizada" } },
-        },
-      },
-      "/api/integraciones/inbound": {
-        post: {
-          tags: ["Integraciones"],
-          summary: "Webhook del tercero hacia Crisvia",
-          description:
-            "Público. Firma HMAC `X-Crisvia-Signature: sha256=…` sobre el body crudo, o `Authorization: Bearer` con el mismo secreto. El IWRS usa event=iwrs.randomized + kit_code para pasar Screening → Randomizado. No es una API de Lilly.",
-          parameters: [
-            {
-              name: "X-Crisvia-Signature",
-              in: "header",
-              schema: { type: "string", example: "sha256=abc" },
-            },
-            {
-              name: "Authorization",
-              in: "header",
-              schema: { type: "string", example: "Bearer …" },
-            },
-          ],
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  required: ["event", "protocol_code", "subject_code"],
-                  properties: {
-                    event: { type: "string", example: "iwrs.randomized" },
-                    protocol_code: { type: "string", example: "GLP1-01" },
-                    subject_code: { type: "string", example: "10001" },
-                    kind: { type: "string", enum: ["edc", "epro", "iwrs"] },
-                    kit_code: { type: "string" },
-                    external_id: { type: "string" },
-                  },
-                },
-              },
-            },
-          },
-          responses: {
-            "200": { description: "Evento aceptado" },
-            "401": { description: "Firma inválida" },
-            "409": { description: "El sujeto no está en Screening" },
-          },
-        },
-      },
-      "/api/integraciones/dispatch": {
-        post: {
-          tags: ["Integraciones"],
-          summary: "Reenviar evento de screening a los webhooks",
-          description:
-            "Lo dispara el tracker al cambiar de estado. Solo subject_code, sin nombre ni fecha de nacimiento.",
-          security: [{ cookieAuth: [] }],
-          responses: { "200": { description: "Entregas intentadas" } },
-        },
-      },
-      "/api/integraciones/entregas": {
-        get: {
-          tags: ["Integraciones"],
-          summary: "Bitácora de webhooks",
-          security: [{ cookieAuth: [] }],
-          responses: { "200": { description: "Últimas entregas" } },
-        },
-      },
       "/api/iwrs": {
         get: {
           tags: ["IWRS"],
           summary: "Catálogo del módulo IWRS",
           description:
-            "Retirado como producto. Usá GET /api/integraciones. Esta ruta no es el IRT del sponsor.",
+            "Retirado como producto. El IRT lo opera un tercero. Esta ruta no es el IRT del sponsor.",
           security: [{ cookieAuth: [] }],
           parameters: [
             {
@@ -823,7 +697,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           tags: ["IWRS"],
           summary: "Asignar kit (retirado)",
           description:
-            "Retirado. La randomización la confirma el IWRS del tercero en POST /api/integraciones/inbound.",
+            "Retirado. La randomización la confirma el IWRS del sponsor; el coordinador marca Randomizado en el tracker.",
           security: [{ cookieAuth: [] }],
           requestBody: {
             required: true,
