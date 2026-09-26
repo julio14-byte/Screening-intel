@@ -8,18 +8,15 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { ErrorState } from "@/components/ui/StateMessage";
 import { AnamnesisEditor } from "@/components/profile/AnamnesisEditor";
 import { ClinicalMeasurementsEditor } from "@/components/profile/ClinicalMeasurementsEditor";
-import { ClinicalNotesImport } from "@/components/profile/ClinicalNotesImport";
 import { DemographicsEditor } from "@/components/profile/DemographicsEditor";
 import { RoleGuard } from "@/components/rbac/RoleGuard";
 import { useRole } from "@/contexts/role-context";
 import { LabsEditor } from "@/components/profile/LabsEditor";
 import type { ProfileUpdate } from "@/hooks/usePatientDetail";
-import type { ExtractedClinicalProfileDraft } from "@/lib/profile/extractClinicalProfileFromNotes";
 import {
   hydrateAnamnesis,
   matchingConditions,
   matchingMedications,
-  mergeAnamnesisDraft,
 } from "@/lib/profile/anamnesis";
 import {
   catalogLaboratories,
@@ -67,12 +64,6 @@ export function ClinicalProfileEditor({
   const [savedAt, setSavedAt] = useState<Date | null>(null);
   const { isReadOnly, hasPermission } = useRole();
   const canEdit = hasPermission("profiles:write") && !isReadOnly;
-
-  function applyNotesDraft(draft: ExtractedClinicalProfileDraft) {
-    setAnamnesis((prev) => mergeAnamnesisDraft(prev, draft));
-    setLaboratories((prev) => withComputedBmi({ ...prev, ...draft.laboratories }));
-    setDirty(true);
-  }
 
   const handleSave = async () => {
     setSaving(true);
@@ -149,12 +140,6 @@ export function ClinicalProfileEditor({
           Modo solo lectura (Monitor CRA). Podés revisar el expediente y la
           bitácora de auditoría, sin modificar datos clínicos.
         </p>
-      ) : null}
-
-      {canEdit ? (
-        <div className="mb-4">
-          <ClinicalNotesImport onExtracted={applyNotesDraft} />
-        </div>
       ) : null}
 
       <div className={`grid gap-4 lg:grid-cols-2 ${!canEdit ? "pointer-events-none opacity-80" : ""}`}>

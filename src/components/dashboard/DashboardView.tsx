@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/StateMessage";
 import { OperationalFunnel } from "@/components/dashboard/OperationalFunnel";
 import { ProductModulesStrip } from "@/components/product/ProductModulesStrip";
-import { ScreeningVersionNote } from "@/components/product/ScreeningVersionNote";
 import { computeDashboardMetrics } from "@/lib/dashboard/metrics";
 import { screeningToVerdict } from "@/lib/dashboard/traffic-light";
 import { routes } from "@/lib/app/routes";
@@ -66,7 +65,7 @@ export function DashboardView({
     <>
       <PageHeader
         title={title}
-        description="Inteligencia de screening: cinco módulos. EDC, ePRO e IWRS los opera un tercero."
+        description="Embudo del site: quién está en screening, el semáforo y los screen failures a recuperar."
         actions={
           filteredRows.length > 0 ? (
             <Button
@@ -85,39 +84,47 @@ export function DashboardView({
         }
       />
 
-      <ScreeningVersionNote />
-
-      <ProductModulesStrip />
-
-      <OperationalFunnel screenings={screenings} />
-
       {loading ? (
         <LoadingState label="Cargando pacientes en screening…" />
       ) : error ? (
         <ErrorState message={error} />
       ) : screenings.length === 0 ? (
-        <Card>
-          <EmptyState
-            title="Todavía no hay screening"
-            description="Cargá pacientes que YA están en tu site, completá el perfil clínico y corré el matcher de un protocolo."
-            action={
-              <Link
-                href={routes.app.protocols}
-                className="text-xs font-medium text-indigo-700"
-              >
-                Ir a Protocolos Clínicos →
-              </Link>
-            }
-          />
-        </Card>
+        <div className="grid gap-5 lg:grid-cols-5">
+          <Card className="lg:col-span-3">
+            <EmptyState
+              title="Todavía no hay screening"
+              description="Cargá pacientes que YA están en tu site, completá el perfil clínico y corré el matcher de un protocolo."
+              action={
+                <Link
+                  href={routes.app.protocols}
+                  className="text-xs font-medium text-indigo-700"
+                >
+                  Ir a Protocolos Clínicos →
+                </Link>
+              }
+            />
+          </Card>
+          <div className="lg:col-span-2">
+            <ProductModulesStrip />
+          </div>
+        </div>
       ) : (
         <div className="space-y-5">
           <DashboardKpiCards metrics={metrics} />
 
+          <div className="grid items-stretch gap-5 lg:grid-cols-5">
+            <div className="lg:col-span-3">
+              <OperationalFunnel screenings={screenings} />
+            </div>
+            <div className="lg:col-span-2">
+              <ProductModulesStrip />
+            </div>
+          </div>
+
           <Card>
             <CardHeader
               title="Pacientes en screening"
-              description="Semáforos de inclusión/exclusión por protocolo activo."
+              description="Semáforo de inclusión y exclusión por protocolo activo."
             />
             <CardBody className="space-y-4">
               <DashboardFilters
