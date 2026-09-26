@@ -41,7 +41,10 @@ assert(
     "registry,profile,matcher,tracker,rematch",
   "cinco módulos de screening"
 );
-assert(PRODUCT_MODULE_IDS.includes("integraciones"), "integraciones aparte");
+assert(
+  PRODUCT_MODULE_IDS.join(",") === SCREENING_MODULE_IDS.join(","),
+  "sin módulo Integraciones aparte"
+);
 assert(!modules.includes('href: "/iwrs"'), "IWRS no es módulo V1");
 assert(!modules.includes('label: "EDC"'), "EDC no es módulo V1");
 assert(config.includes("Aprovechá mejor los pacientes que YA llegan"), "hero V1");

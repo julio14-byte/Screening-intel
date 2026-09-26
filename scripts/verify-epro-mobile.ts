@@ -94,11 +94,11 @@ assert(
   "no confunde unique con schema faltante"
 );
 
-assert(config.includes('"/api/integraciones/inbound"'), "inbound de terceros es público");
+assert(!config.includes('"/api/integraciones/inbound"'), "inbound de terceros ya no es API pública");
 assert(!config.includes('"/api/epro-app/p"'), "ePRO móvil ya no es API pública de producto");
 assert(config.includes('eproApp: "/epro-app"'), "ruta canónica ePRO móvil (dormida)");
-assert(config.includes("webhook HTTPS firmado") || config.includes("X-Crisvia-Signature"), "FAQ: tercero por webhook");
-assert(permissions.includes('"/api/integraciones"'), "WRITE va a integraciones");
+assert(config.includes("sistemas de terceros") || config.includes("lo opera un tercero"), "FAQ: EDC/ePRO en el tercero");
+assert(!permissions.includes('"/api/integraciones"'), "WRITE ya no cubre integraciones");
 assert(!permissions.includes('"/api/epro-app/invite"'), "WRITE ya no cubre invite ePRO");
 assert(hoy.includes("recordEproMobileAudit"), "POST diario escribe bitácora");
 assert(hoy.includes('action: "INSERT"'), "audit action INSERT");

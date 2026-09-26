@@ -8,7 +8,7 @@ export function ScreeningProcessNote({ compact = false }: { compact?: boolean })
       <p className="mb-4 rounded-md border border-violet-100 bg-violet-50/70 px-3 py-2 text-xs leading-relaxed text-indigo-800">
         <strong>No es un sorteo.</strong> El motor de reglas filtra por
         inclusión/exclusión (🟢🟡🔴). Quien cumple avanza; no “gana un cupo” al
-        azar. Kit y brazo los asigna el IWRS del sponsor, conectado en /integraciones.
+        azar. Kit y brazo los asigna el IWRS del sponsor.
       </p>
     );
   }
@@ -23,13 +23,10 @@ export function ScreeningProcessNote({ compact = false }: { compact?: boolean })
         cumple. La IA puede explicar el veredicto; no lo cambia.
       </p>
       <p className="mt-2">
-        EDC, ePRO e IWRS los opera un <strong>tercero</strong>. Cuando el
-        candidato queda elegible, Crisvia avisa por webhook. El IRT del estudio
-        confirma la randomización hacia Crisvia. Se configura en{" "}
-        <a href="/integraciones" className="font-medium text-violet-700 underline">
-          /integraciones
-        </a>
-        . No hay enchufe a Lilly ni a Medidata.
+        EDC, ePRO e IWRS los opera un <strong>tercero</strong>. No hay módulo de
+        conectores en Crisvia. El coordinador marca Randomizado en el tracker
+        cuando el IRT del estudio ya asignó kit. No hay enchufe a Lilly ni a
+        Medidata.
       </p>
     </aside>
   );

@@ -6,7 +6,7 @@ export default function AvisosPage() {
     <>
       <PageHeader
         title="Avisos"
-        description="Candidato nuevo, screen failure y tarea vencida. Se generan al actualizar la cola."
+        description="Candidato nuevo y screen failure. El coordinador confirma cada paso en Candidatos, Tracker o Re-Match."
       />
       <NoticeList />
     </>

@@ -111,16 +111,13 @@ Los cinco módulos + embudo. El screen failure es una **fuga**, no la última et
 
 ---
 
-# Cola
-## Tareas y avisos
-
-**Cola `/cola`**
-Inbox de candidatos, criterios 🟡 y re-match. Tareas guardadas del centro.
+# Avisos
+## Candidato nuevo y screen failure
 
 **Avisos `/avisos`**
-Lead nuevo, screen failure, tarea vencida.
+Lead nuevo y screen failure. El coordinador confirma cada paso en Candidatos, Tracker o Re-Match.
 
-El coordinador confirma cada paso. La IA no cambia un semáforo.
+La IA no cambia un semáforo.
 
 ---
 
@@ -131,7 +128,7 @@ El coordinador confirma cada paso. La IA no cambia un semáforo.
 Si falló un estudio, busca protocolos activos donde no esté excluido.
 Un screen failure no es un paciente perdido.
 
-El calendario de visitas, el ePRO y el IWRS los opera el **tercero** del estudio (`/integraciones`).
+El calendario de visitas, el ePRO y el IWRS los opera el **tercero** del estudio.
 El ICF es el del site. Crisvia no inventa el consentimiento.
 
 ---
@@ -197,11 +194,9 @@ Se empieza sin integrar el hospital. Trial de 14 días: un protocolo, una cohort
 | 3. Matcher | `/protocols` | Paciente ↔ protocolo, 🟢🟡🔴 |
 | 4. Tracker | `/tracker` | Kanban de screening |
 | 5. Re-Match | `/rematch` | Otro protocolo tras el fallo |
-| Integraciones | `/integraciones` | Webhook a EDC/ePRO/IWRS de terceros |
 | Dashboard | `/dashboard` | Embudo y semáforos del site |
 | Candidatos | `/candidatos` | Inbox del portal |
 | Portal | `/candidato` | Pre-registro público del centro |
-| Cola | `/cola` | Tareas persistentes |
 | Avisos | `/avisos` | Alertas operativas |
 | Roles | `/settings/roles` | Investigator crea usuarios |
 | Seguridad | `/settings/security` | MFA |

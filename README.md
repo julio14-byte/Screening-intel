@@ -52,12 +52,10 @@ Crisvia no se vende como “base de pacientes” ni como “te conseguimos reclu
 | **2. Clinical Profile** | Historia, antecedentes, medicamentos, laboratorios + ICD-11 + extracción IA desde notas |
 | **3. Protocol Matcher** | Paciente ↔ protocolo. Criterios de inclusión/exclusión; extracción NLP desde PDF |
 | **Motor de elegibilidad** | Semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple + `match_score` + justificación IA. No es un sorteo: filtra por criterios. |
-| **4. Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure. Si el protocolo tiene IWRS de un tercero, Randomizado llega por webhook; no se arrastra. |
+| **4. Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure. Randomizado lo marca el coordinador cuando el IRT del sponsor ya asignó kit. |
 | **5. Re-Match & Follow-up** | Screen failure → otros protocolos activos. El calendario de visitas lo opera el EDC del estudio. |
-| **Integraciones** | EDC, ePRO e IWRS los opera un tercero. Crisvia avisa por webhook HTTPS + HMAC (`X-Crisvia-Signature`) cuando el candidato es elegible; el IRT confirma randomización en `POST /api/integraciones/inbound`. No es un conector Lilly/Medidata. |
 | **Portal candidatos** | Pre-registro público (`/candidato`) + inbox (`/candidatos`) + settings del portal |
 | **Expediente interno** | Pacientes y perfil clínico en tablas de la app (incluye modelo FHIR Patient) para matching. No hay EHR hospitalario externo. |
-| **Cola de trabajo** | Tareas de inbox, criterios 🟡 y re-match |
 | **Audit Trail** | Bitácora inmutable alineada a 21 CFR Part 11 (diseño; no es una certificación) |
 | **RBAC clínico** | Investigator / Sub-investigator / Coordinator / Monitor |
 | **SaaS** | Organizations, trial 14 días, Stripe Checkout + Portal |
@@ -84,16 +82,14 @@ Crisvia no se vende como “base de pacientes” ni como “te conseguimos reclu
 | `/patients` | Registro de pacientes |
 | `/patients/[id]` | Perfil clínico para matching (demografía, anamnesis, mediciones) |
 | `/protocols` | Gestión de protocolos |
-| `/protocols/[id]` | Matching + webhooks a EDC/ePRO/IWRS de terceros |
+| `/protocols/[id]` | Matching contra el protocolo. EDC/ePRO/IWRS los opera un tercero |
 | `/protocols/[id]/match` | Cruce masivo paciente ↔ protocolo + justificación IA |
-| `/integraciones` | URL HTTPS + secreto HMAC por protocolo y módulo (edc / epro / iwrs) |
-| `/edc`, `/epro`, `/iwrs`, `/agenda`, `/seguimiento`, `/cierre`, `/inventario`, `/dispensacion` | Retirados: lo opera un tercero; redirigen a Integraciones |
+| `/edc`, `/epro`, `/iwrs`, `/agenda`, `/seguimiento`, `/cierre`, `/inventario`, `/dispensacion` | Retirados: lo opera un tercero; no hay módulo de conectores |
 | `/tracker` | Pipeline Kanban con drag & drop |
 | `/rematch` | Re-matching automático post screen failure |
 | `/candidato` | Portal público de pre-registro (pacientes) |
 | `/candidatos` | Inbox de leads del portal (coordinadores) |
-| `/cola` | Tareas guardadas: inbox, criterios 🟡 y re-match |
-| `/avisos` | Avisos de candidato nuevo, screen failure y tarea vencida |
+| `/avisos` | Avisos de candidato nuevo y screen failure |
 | `/settings/portal` | Configuración del portal (investigator) |
 | `/settings/security` | MFA TOTP (obligatorio en prod para PI / sub-PI) |
 | `/settings/roles` | Creación de usuarios y roles (investigator) |
@@ -251,7 +247,7 @@ yarn mcp:icd11
 |-----|----------|
 | **investigator** | Protocolos, matching, aprobaciones, gestión de roles y facturación |
 | **sub_investigator** | Igual que PI en clínica; sin roles ni billing |
-| **coordinator** | Pacientes, screening operativo e Integraciones (webhooks a terceros) |
+| **coordinator** | Pacientes y screening operativo |
 | **monitor** | Solo lectura (CRA / auditoría farmacéutica) |
 
 Administración en `/settings/roles` (solo investigator).

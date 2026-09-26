@@ -6,7 +6,7 @@ const config = {
   app: {
     name: "Crisvia",
     description:
-      "Inteligencia de screening para clinical research sites. Aprovechá los pacientes que YA llegan. EDC, ePRO e IWRS de terceros por webhook.",
+      "Inteligencia de screening para clinical research sites. Aprovechá los pacientes que YA llegan. EDC, ePRO e IWRS los opera el tercero del estudio.",
     domain: "screening-intel.vercel.app",
     locale: "es",
     defaultUrl: "http://localhost:3000",
@@ -41,12 +41,6 @@ const config = {
         section: "screening" as const,
       },
       {
-        href: "/cola",
-        label: "Cola de trabajo",
-        icon: "ListTodo",
-        section: "screening" as const,
-      },
-      {
         href: "/avisos",
         label: "Avisos",
         icon: "Bell",
@@ -57,12 +51,6 @@ const config = {
         label: "Registro",
         icon: "Users",
         section: "screening" as const,
-      },
-      {
-        href: "/integraciones",
-        label: "Integraciones",
-        icon: "Plug",
-        section: "integraciones" as const,
       },
       {
         href: "/account/billing",
@@ -112,8 +100,8 @@ const config = {
       "/settings/portal",
       "/settings/security",
       "/candidatos",
-      "/cola",
       "/avisos",
+      "/cola",
       "/integraciones",
       "/edc",
       "/epro",
@@ -135,7 +123,6 @@ const config = {
       "/api/openapi",
       "/api/candidato/config",
       "/api/candidato/enviar",
-      "/api/integraciones/inbound",
     ],
     candidato: {
       hub: "/candidato",
@@ -158,9 +145,7 @@ const config = {
       portalSettings: "/settings/portal",
       security: "/settings/security",
       candidatos: "/candidatos",
-      cola: "/cola",
       avisos: "/avisos",
-      integraciones: "/integraciones",
       pacientes: "/patients",
       edc: "/edc",
       iwrs: "/iwrs",
@@ -258,17 +243,12 @@ const config = {
         {
           icon: "KanbanSquare",
           title: "4. Screening Tracker",
-          body: "Pre-screening → Screening → Randomizado → Screen failure. No es un sorteo. El IRT del sponsor confirma Randomizado por webhook.",
+          body: "Pre-screening → Screening → Randomizado → Screen failure. No es un sorteo. Randomizado lo marca el coordinador cuando el IRT del sponsor ya asignó kit.",
         },
         {
           icon: "RefreshCw",
           title: "5. Re-Match & Follow-up",
           body: "Un screen failure no es el final: otros protocolos activos donde todavía califica.",
-        },
-        {
-          icon: "Plug",
-          title: "Integraciones",
-          body: "EDC, ePRO e IWRS los opera un tercero. Webhook HMAC. No es un conector Lilly ni Medidata.",
         },
       ],
     },
@@ -282,7 +262,7 @@ const config = {
         },
         {
           q: "¿Crisvia es screening, EDC y ePRO?",
-          a: "Crisvia es screening (elegibilidad). EDC, ePRO e IWRS los usa el estudio en sistemas de terceros: se conectan en /integraciones con un webhook HTTPS firmado. El matcher no randomiza ni captura visitas. No es Medidata Rave ni un IRT de farmacéutica.",
+          a: "Crisvia es screening (elegibilidad). EDC, ePRO e IWRS los usa el estudio en sistemas de terceros. El matcher no randomiza ni captura visitas. No es Medidata Rave ni un IRT de farmacéutica. No hay módulo de conectores en Crisvia.",
         },
         {
           q: "¿El matching reduce el tiempo de screening un 42,6%?",
@@ -290,11 +270,11 @@ const config = {
         },
         {
           q: "¿El screening es un sorteo digital para elegir pacientes?",
-          a: "No. El screening es un filtro de elegibilidad: el motor de reglas compara el expediente con inclusión y exclusión (🟢 cumple, 🟡 falta un dato, 🔴 no cumple). No hay azar y la IA no decide quién entra. El paso aleatorio es el IWRS del sponsor: asigna kit y brazo cuando el paciente ya está en Screening y avisa a Crisvia por webhook.",
+          a: "No. El screening es un filtro de elegibilidad: el motor de reglas compara el expediente con inclusión y exclusión (🟢 cumple, 🟡 falta un dato, 🔴 no cumple). No hay azar y la IA no decide quién entra. El paso aleatorio es el IWRS del sponsor: asigna kit y brazo cuando el paciente ya está en Screening.",
         },
         {
           q: "¿Crisvia se conecta al IWRS de Lilly o de otra farmacéutica?",
-          a: "No hay un enchufe único. Lilly y el resto usan un IRT por estudio (a menudo IQVIA, Suvoda, Medidata, etc.). En /integraciones configurás la URL y el secreto HMAC de ese estudio. Una API en vivo requiere contrato, credenciales y el mapeo; no lo inventamos.",
+          a: "No hay un enchufe único ni un módulo de conectores. Lilly y el resto usan un IRT por estudio (a menudo IQVIA, Suvoda, Medidata, etc.). El coordinador marca Randomizado en el tracker cuando el IRT ya asignó kit. Una API en vivo requiere contrato, credenciales y el mapeo; no lo inventamos.",
         },
         {
           q: "¿Hace falta una app tipo Clinical Ink para el diario de medicación?",
@@ -309,10 +289,6 @@ const config = {
           a: "Sí. Copiá las celdas en Excel o Sheets (con cabecera) y pegalas en Pacientes → Importar. Evitás Guardar como CSV, punto y coma y encoding. El archivo CSV sigue disponible. Un expediente suelto se carga en el perfil con notas + IA. No hay botón Clinical Ink/IQVIA en vivo: no hay API pública de listing. El import no enrola solo.",
         },
         {
-          q: "¿Cómo se conectan EDC, ePRO e IWRS?",
-          a: "Outbound: cuando el screening pasa a elegible, screen failure o randomizado, Crisvia hace POST al webhook del proveedor con X-Crisvia-Signature (HMAC-SHA256). Inbound: el IWRS llama POST /api/integraciones/inbound con la misma firma o Bearer y protocol_code + subject_code + kit_code. Entonces el tracker marca Randomizado.",
-        },
-        {
           q: "¿Necesito un EHR hospitalario?",
           a: "No. El expediente es interno: registro manual, pegar Excel, CSV y portal de candidatos. No hay conexión con un EHR externo.",
         },
@@ -322,7 +298,7 @@ const config = {
         },
         {
           q: "¿Cómo funciona Site Pro?",
-          a: "Plan con mayor volumen de pacientes y protocolos, más re-match y cola de trabajo.",
+          a: "Plan con mayor volumen de pacientes y protocolos, más re-match.",
         },
         {
           q: "¿Los datos están aislados por sitio?",
@@ -349,7 +325,7 @@ const config = {
         },
         {
           quote:
-            "La cola de trabajo junta inbox, criterios pendientes y re-match. El coordinador confirma cada paso.",
+            "El re-match propone otros protocolos activos cuando alguien queda screen failure. El coordinador confirma cada paso.",
           author: "Study coordinator",
           role: "Clinical research site regional",
         },
@@ -367,7 +343,7 @@ const config = {
       eyebrow: "Waitlist",
       title: "¿Quieres novedades antes del trial?",
       subtitle:
-        "Te avisamos de integraciones, nuevas funciones y disponibilidad en tu región.",
+        "Te avisamos de nuevas funciones y disponibilidad en tu región.",
       successMessage: "¡Listo! Te avisamos cuando haya novedades.",
       buttonLabel: "Quiero entrar",
       placeholder: "tu@researchsite.com",
