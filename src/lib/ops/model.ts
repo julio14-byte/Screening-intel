@@ -39,25 +39,8 @@ export const VISIT_NOTES_MAX = 8000;
 export const NOTIFICATION_KINDS = [
   "inbox_new",
   "screen_failure",
-  "task_overdue",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
-
-const DUE_DAYS: Record<TaskKind, number> = {
-  inbox: 1,
-  yellow: 2,
-  rematch: 3,
-};
-
-export function dueAtForKind(kind: TaskKind, from = new Date()): string {
-  const due = new Date(from.getTime());
-  due.setUTCDate(due.getUTCDate() + DUE_DAYS[kind]);
-  return due.toISOString();
-}
-
-export function openTaskKey(kind: string, sourceId: string): string {
-  return `${kind}:${sourceId}`;
-}
 
 /** El screening se movió si el update condicionado no devolvió filas. */
 export function screeningUpdateConflict(rowCount: number): boolean {
@@ -117,8 +100,4 @@ export function buildOperationalFunnel(counts: FunnelCounts): {
       href: "/rematch",
     },
   };
-}
-
-export function overdueDedupeKey(taskId: string, now = new Date()): string {
-  return `overdue:${taskId}:${now.toISOString().slice(0, 10)}`;
 }

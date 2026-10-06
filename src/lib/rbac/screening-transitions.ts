@@ -3,8 +3,8 @@ import type { AppRole } from "./types";
 
 /**
  * Transiciones de estatus permitidas por rol (arrastre en el tracker).
- * Randomizado lo marca el coordinador o el PI cuando el IRT del sponsor
- * ya asignó kit. Crisvia no opera IWRS.
+ * Randomizado lo marca el coordinador o el PI cuando el sponsor
+ * ya asignó kit.
  */
 const ALLOWED_TRANSITIONS: Record<
   AppRole,

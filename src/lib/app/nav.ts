@@ -3,24 +3,13 @@ import {
   Activity,
   ClipboardList,
   CreditCard,
-  Cpu,
-  FileSpreadsheet,
   FlaskConical,
   KanbanSquare,
   LayoutDashboard,
   LogOut,
   RefreshCw,
   Settings,
-  ListChecks,
-  ListTodo,
   Bell,
-  Calendar,
-  CalendarCheck,
-  Package,
-  Dices,
-  Lock,
-  Plug,
-  Pill,
   Users,
   UserPlus,
 } from "lucide-react";
@@ -37,18 +26,7 @@ export const APP_ICONS: Record<string, LucideIcon> = {
   Activity,
   ClipboardList,
   LogOut,
-  TrafficLight: ListChecks,
-  ListTodo,
   Bell,
-  Calendar,
-  CalendarCheck,
-  Package,
-  Dices,
-  Lock,
-  Plug,
-  Pill,
-  FileSpreadsheet,
-  Cpu,
 };
 
 export type NavSection = "screening";
@@ -84,48 +62,12 @@ export const APP_NAV_STYLES: Record<
     activeClass: "bg-rose-400/20 text-rose-100 ring-1 ring-rose-300/30",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
-  "/agenda": {
-    activeClass: "bg-sky-400/20 text-sky-100 ring-1 ring-sky-300/30",
-    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
-  },
-  "/seguimiento": {
-    activeClass: "bg-cyan-400/20 text-cyan-100 ring-1 ring-cyan-300/30",
-    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
-  },
-  "/cierre": {
-    activeClass: "bg-slate-100/20 text-slate-100 ring-1 ring-white/30",
-    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
-  },
   "/protocols": {
     activeClass: "bg-fuchsia-400/20 text-fuchsia-100 ring-1 ring-fuchsia-300/30",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
-  "/inventario": {
-    activeClass: "bg-teal-400/20 text-teal-100 ring-1 ring-teal-300/30",
-    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
-  },
-  "/dispensacion": {
-    activeClass: "bg-emerald-400/20 text-emerald-100 ring-1 ring-emerald-300/30",
-    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
-  },
-  "/iwrs": {
-    activeClass: "bg-violet-400/20 text-violet-100 ring-1 ring-violet-300/30",
-    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
-  },
-  "/semaforos": {
-    activeClass: "bg-amber-400/20 text-amber-100 ring-1 ring-amber-300/30",
-    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
-  },
-  "/devices": {
-    activeClass: "bg-sky-400/20 text-sky-100 ring-1 ring-sky-300/30",
-    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
-  },
   "/tracker": {
     activeClass: "bg-amber-400/20 text-amber-100 ring-1 ring-amber-300/30",
-    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
-  },
-  "/epro": {
-    activeClass: "bg-sky-400/20 text-sky-100 ring-1 ring-sky-300/30",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
   "/rematch": {

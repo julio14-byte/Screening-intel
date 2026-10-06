@@ -108,8 +108,7 @@ export function ImportPatientsModal({
         </p>
         <p className="text-sm text-slate-600">
           Para el matcher necesitás demografía, antecedentes, medicación y labs de{" "}
-          <strong>screening</strong> (DM + MH + CM + LB). El diario ePRO de Clinical Ink y el
-          IRT de IQVIA no sustituyen ese expediente. Un paciente suelto: abrilo y usá notas +
+          <strong>screening</strong> (DM + MH + CM + LB). Un paciente suelto: abrilo y usá notas +
           IA en el perfil. El import no enrola solo.
         </p>
         <p className="text-sm text-slate-600">

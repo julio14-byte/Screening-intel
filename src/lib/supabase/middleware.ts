@@ -12,7 +12,7 @@ import {
   shouldSkipMfaForUser,
 } from "@/lib/auth/session-policy";
 import { routes } from "@/lib/app/routes";
-import { isProtectedPath, isPublicApiPath, isPublicPatientPath } from "@/lib/app/routes";
+import { isProtectedPath, isPublicApiPath } from "@/lib/app/routes";
 import {
   isRouteAllowedForRole,
   isWriteApiPath,
@@ -77,8 +77,7 @@ async function runUpdateSession(request: NextRequest) {
     isPublicMarketingPath(pathname) ||
     isLogin ||
     isMfaChallenge ||
-    isPublicApiPath(pathname) ||
-    isPublicPatientPath(pathname);
+    isPublicApiPath(pathname);
 
   if (!isSupabaseConfigured()) {
     if (!isPublic && !isLogin) {

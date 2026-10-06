@@ -1,11 +1,10 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   PRODUCT_MODULE_IDS,
   SCREENING_MODULE_IDS,
 } from "../src/lib/product/modules";
 
-const modules = readFileSync(resolve("src/lib/product/modules.ts"), "utf8");
 const config = readFileSync(resolve("src/config.ts"), "utf8");
 const patients = readFileSync(resolve("src/app/(app)/patients/page.tsx"), "utf8");
 const rematch = readFileSync(resolve("src/app/(app)/rematch/page.tsx"), "utf8");
@@ -42,8 +41,6 @@ assert(
   PRODUCT_MODULE_IDS.join(",") === SCREENING_MODULE_IDS.join(","),
   "sin módulo Integraciones aparte"
 );
-assert(!modules.includes('href: "/iwrs"'), "IWRS no es módulo V1");
-assert(!modules.includes('label: "EDC"'), "EDC no es módulo V1");
 assert(config.includes("Aprovechá mejor los pacientes que YA llegan"), "hero V1");
 assert(config.includes("¿Crisvia es una base de datos de pacientes?"), "FAQ no vende DB");
 assert(config.includes("Esa cifra no es de Crisvia"), "FAQ TrialGPT no es métrica nuestra");
@@ -60,6 +57,35 @@ assert(audit.includes("no es una certificación"), "21 CFR sin sello");
 assert(matching.length > 100, "motor de matching presente");
 assert(funnel.includes("Embudo de screening"), "embudo en dashboard");
 assert(funnelModel.includes("Inbox del portal"), "captación ya no es el discurso");
+const RETIRED = [
+  "src/app/(app)/devices",
+  "src/app/(app)/iwrs",
+  "src/app/(app)/edc",
+  "src/app/(app)/epro",
+  "src/app/(app)/cierre",
+  "src/app/(app)/agenda",
+  "src/app/(app)/seguimiento",
+  "src/app/(app)/inventario",
+  "src/app/(app)/dispensacion",
+  "src/app/(app)/integraciones",
+  "src/app/(app)/cola",
+  "src/app/epro-app",
+  "src/app/diario",
+  "src/app/api/iwrs",
+  "src/app/api/epro-app",
+  "src/app/api/pharmacy",
+  "src/app/api/follow-up",
+  "src/app/api/cierre",
+  "src/lib/iwrs",
+  "src/lib/ehr",
+  "src/lib/pharmacy",
+];
+for (const path of RETIRED) {
+  assert(!existsSync(resolve(path)), `módulo retirado no debe existir: ${path}`);
+}
+for (const route of ["/devices", "/iwrs", "/epro", "/edc", "/cierre"]) {
+  assert(!config.includes(`"${route}"`), `config sin ruta ${route}`);
+}
 const transitions = readFileSync(
   resolve("src/lib/rbac/screening-transitions.ts"),
   "utf8"

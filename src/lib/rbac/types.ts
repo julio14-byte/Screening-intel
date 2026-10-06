@@ -53,7 +53,7 @@ export const APP_ROLE_DESCRIPTIONS: Record<AppRole, string> = {
   coordinator:
     "Registro de pacientes, captura de datos clínicos y screening operativo.",
   monitor:
-    "Lectura de expedientes y bitácora. En el cierre puede abrir y cerrar queries de datos faltantes; no bloquea la base.",
+    "Lectura de expedientes y bitácora. Solo lectura.",
 };
 
 /** Roles con autoridad clínica (PI y sub-PI). */
@@ -64,29 +64,4 @@ export const CLINICAL_LEAD_ROLES: readonly AppRole[] = [
 
 export function isClinicalLead(role: AppRole): boolean {
   return CLINICAL_LEAD_ROLES.includes(role);
-}
-
-/** Quién genera el link del ePRO móvil. El sujeto no se registra solo. */
-export function canSendEproInvite(role: AppRole): boolean {
-  return role === "coordinator" || isClinicalLead(role);
-}
-
-/** El monitor CRA abre queries de limpieza; el centro también puede auto-flaggear. */
-export function canOpenCloseoutQuery(role: AppRole): boolean {
-  return role === "monitor" || role === "coordinator" || isClinicalLead(role);
-}
-
-/** El centro responde la query (dato encontrado o justificación). */
-export function canAnswerCloseoutQuery(role: AppRole): boolean {
-  return role === "coordinator" || isClinicalLead(role);
-}
-
-/** El monitor (o el PI) cierra la query cuando el dato está limpio. */
-export function canCloseCloseoutQuery(role: AppRole): boolean {
-  return role === "monitor" || isClinicalLead(role);
-}
-
-/** Database Lock, apertura del ciego, CSR y registro regulatorio. */
-export function canLeadCloseout(role: AppRole): boolean {
-  return isClinicalLead(role);
 }

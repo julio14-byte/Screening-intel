@@ -23,7 +23,6 @@ type Notice = {
 const KIND_LABEL: Record<string, string> = {
   inbox_new: "Candidato",
   screen_failure: "Screen failure",
-  task_overdue: "Vencida",
 };
 
 export function useNotices() {

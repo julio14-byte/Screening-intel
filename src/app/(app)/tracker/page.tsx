@@ -34,7 +34,7 @@ export default function TrackerPage() {
     <>
       <PageHeader
         title="Screening Tracker"
-        description="Pipeline de elegibilidad, no un sorteo. Randomizado lo marca el coordinador cuando el IRT del sponsor ya asignó kit."
+        description="Pipeline de elegibilidad, no un sorteo. Randomizado lo marca el coordinador cuando el sponsor ya asignó kit."
       />
 
       <ScreeningProcessNote />
