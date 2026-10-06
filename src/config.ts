@@ -41,6 +41,12 @@ const config = {
         section: "screening" as const,
       },
       {
+        href: "/citas",
+        label: "Citas",
+        icon: "CalendarDays",
+        section: "screening" as const,
+      },
+      {
         href: "/candidatos",
         label: "Candidatos",
         icon: "UserPlus",
@@ -100,6 +106,7 @@ const config = {
       "/settings/portal",
       "/settings/security",
       "/candidatos",
+      "/citas",
       "/avisos",
     ],
     publicApis: [
@@ -127,6 +134,7 @@ const config = {
       portalSettings: "/settings/portal",
       security: "/settings/security",
       candidatos: "/candidatos",
+      citas: "/citas",
       avisos: "/avisos",
       pacientes: "/patients",
       docs: "/docs",
