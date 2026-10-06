@@ -33,7 +33,7 @@ export default function ProtocolPage({
 
       <PageHeader
         title={`${protocol.code_name} · screening`}
-        description={`${protocol.title}. EDC, ePRO e IWRS los opera el tercero del estudio; no hay módulo de conectores en Crisvia.`}
+        description={`${protocol.title}. Criterios de inclusión y exclusión del protocolo.`}
         actions={
           <Link href={`/protocols/${protocol.id}/match`}>
             <Button variant="secondary">

@@ -13,7 +13,7 @@ export const productDocs = {
         {
           heading: "1. Patient Registry",
           body:
-            "En /patients cargás a quienes YA están en tu site (alta, pegar Excel o CSV). Lo más rápido: copiá el listado DM+MH+CM+LB (USUBJID, BRTHDTC, SEX, MHTERM, CMTRT, LBTESTCD) y pegalo. No es un conector Clinical Ink ni IQVIA. El diario ePRO no entra al matcher.",
+            "En /patients cargás a quienes YA están en tu site (alta, pegar Excel o CSV). Lo más rápido: copiá el listado DM+MH+CM+LB (USUBJID, BRTHDTC, SEX, MHTERM, CMTRT, LBTESTCD) y pegalo. No es un conector en vivo con Clinical Ink ni IQVIA.",
         },
         {
           heading: "2. Clinical Profile",
@@ -28,12 +28,12 @@ export const productDocs = {
         {
           heading: "4. Screening Tracker",
           body:
-            "En /tracker el Kanban es Pre-screening → Screening → Randomizado → Screen failure. No es un sorteo. Randomizado lo marca el coordinador cuando el IRT del sponsor ya asignó kit.",
+            "En /tracker el Kanban es Pre-screening → Screening → Randomizado → Screen failure. No es un sorteo. Randomizado lo marca el coordinador cuando el sponsor ya asignó kit.",
         },
         {
           heading: "5. Re-Match & Follow-up",
           body:
-            "En /rematch un screen failure busca otros protocolos activos. El seguimiento de visitas vive en el EDC del estudio, no acá.",
+            "En /rematch un screen failure busca otros protocolos activos.",
         },
       ],
     },

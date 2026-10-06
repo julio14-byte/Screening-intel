@@ -6,7 +6,7 @@ const config = {
   app: {
     name: "Crisvia",
     description:
-      "Inteligencia de screening para clinical research sites. Aprovechá los pacientes que YA llegan. EDC, ePRO e IWRS los opera el tercero del estudio.",
+      "Inteligencia de screening para clinical research sites. Aprovechá los pacientes que YA llegan.",
     domain: "screening-intel.vercel.app",
     locale: "es",
     defaultUrl: "http://localhost:3000",
@@ -101,18 +101,6 @@ const config = {
       "/settings/security",
       "/candidatos",
       "/avisos",
-      "/cola",
-      "/integraciones",
-      "/edc",
-      "/epro",
-      "/iwrs",
-      "/agenda",
-      "/seguimiento",
-      "/cierre",
-      "/inventario",
-      "/dispensacion",
-      "/semaforos",
-      "/devices",
     ],
     publicApis: [
       "/api/auth/login",
@@ -128,17 +116,11 @@ const config = {
       hub: "/candidato",
       gracias: "/candidato/gracias",
     },
-    diario: "/diario",
-    eproApp: "/epro-app",
     app: {
       dashboard: "/dashboard",
       patients: "/patients",
       protocols: "/protocols",
-      semaforos: "/semaforos",
-      devices: "/devices",
       tracker: "/tracker",
-      epro: "/epro",
-      eproApp: "/epro-app",
       rematch: "/rematch",
       billing: "/account/billing",
       roles: "/settings/roles",
@@ -147,13 +129,6 @@ const config = {
       candidatos: "/candidatos",
       avisos: "/avisos",
       pacientes: "/patients",
-      edc: "/edc",
-      iwrs: "/iwrs",
-      agenda: "/agenda",
-      seguimiento: "/seguimiento",
-      cierre: "/cierre",
-      inventario: "/inventario",
-      dispensacion: "/dispensacion",
       docs: "/docs",
       apiDocs: "/docs/api",
     },
@@ -223,7 +198,7 @@ const config = {
       eyebrow: "Versión 1",
       title: "Cinco módulos de screening. Nada de vender una base de pacientes.",
       subtitle:
-        "Para coordinadores de clinical research sites. EDC, ePRO e IWRS quedan en el tercero del estudio.",
+        "Para coordinadores de clinical research sites.",
       items: [
         {
           icon: "Users",
@@ -243,7 +218,7 @@ const config = {
         {
           icon: "KanbanSquare",
           title: "4. Screening Tracker",
-          body: "Pre-screening → Screening → Randomizado → Screen failure. No es un sorteo. Randomizado lo marca el coordinador cuando el IRT del sponsor ya asignó kit.",
+          body: "Pre-screening → Screening → Randomizado → Screen failure. No es un sorteo. Randomizado lo marca el coordinador cuando el sponsor ya asignó kit.",
         },
         {
           icon: "RefreshCw",
@@ -261,8 +236,8 @@ const config = {
           a: "No. El registro es la entrada al matching. Vendemos inteligencia de screening para el clinical research site, no un listado para reclutar ni para revender. La propuesta es aprovechar a quienes YA llegan a tu clínica.",
         },
         {
-          q: "¿Crisvia es screening, EDC y ePRO?",
-          a: "Crisvia es screening (elegibilidad). EDC, ePRO e IWRS los usa el estudio en sistemas de terceros. El matcher no randomiza ni captura visitas. No es Medidata Rave ni un IRT de farmacéutica. No hay módulo de conectores en Crisvia.",
+          q: "¿Crisvia reemplaza al EDC del estudio?",
+          a: "No. Crisvia es screening (elegibilidad). El matcher no randomiza ni captura visitas del estudio; eso lo hacen los sistemas del sponsor.",
         },
         {
           q: "¿El matching reduce el tiempo de screening un 42,6%?",
@@ -270,27 +245,15 @@ const config = {
         },
         {
           q: "¿El screening es un sorteo digital para elegir pacientes?",
-          a: "No. El screening es un filtro de elegibilidad: el motor de reglas compara el expediente con inclusión y exclusión (🟢 cumple, 🟡 falta un dato, 🔴 no cumple). No hay azar y la IA no decide quién entra. El paso aleatorio es el IWRS del sponsor: asigna kit y brazo cuando el paciente ya está en Screening.",
-        },
-        {
-          q: "¿Crisvia se conecta al IWRS de Lilly o de otra farmacéutica?",
-          a: "No hay un enchufe único ni un módulo de conectores. Lilly y el resto usan un IRT por estudio (a menudo IQVIA, Suvoda, Medidata, etc.). El coordinador marca Randomizado en el tracker cuando el IRT ya asignó kit. Una API en vivo requiere contrato, credenciales y el mapeo; no lo inventamos.",
-        },
-        {
-          q: "¿Hace falta una app tipo Clinical Ink para el diario de medicación?",
-          a: "Eso lo resuelve el EDC o el ePRO del tercero, no Crisvia. Después del screening, el sujeto vive en esos sistemas. Crisvia no dispensa caja ni hospeda /diario ni /epro-app como producto.",
+          a: "No. El screening es un filtro de elegibilidad: el motor de reglas compara el expediente con inclusión y exclusión (🟢 cumple, 🟡 falta un dato, 🔴 no cumple). No hay azar y la IA no decide quién entra. El paso aleatorio lo hace el sponsor cuando el paciente ya está en Screening.",
         },
         {
           q: "¿Cómo paso datos de Clinical Ink o de IQVIA al screening?",
-          a: "En Pacientes → Importar pegá el listado de screening (DM+MH+CM+LB) copiado de Excel, o subí el CSV. Después: Protocolos → Ejecutar matching. El motor de reglas compara edad, sexo, diagnósticos, medicación y labs (también sinónimos EN/ES: Type 2 diabetes → diabetes tipo 2). El diario Clinical Ink y el IRT de IQVIA no alcanzan para el match. La IA no cambia el veredicto.",
+          a: "En Pacientes → Importar pegá el listado de screening (DM+MH+CM+LB) copiado de Excel, o subí el CSV. Después: Protocolos → Ejecutar matching. El motor de reglas compara edad, sexo, diagnósticos, medicación y labs (también sinónimos EN/ES: Type 2 diabetes → diabetes tipo 2). La IA no cambia el veredicto.",
         },
         {
           q: "¿Hay una forma más fácil que un CSV?",
           a: "Sí. Copiá las celdas en Excel o Sheets (con cabecera) y pegalas en Pacientes → Importar. Evitás Guardar como CSV, punto y coma y encoding. El archivo CSV sigue disponible. Un expediente suelto se carga en el perfil con notas + IA. No hay botón Clinical Ink/IQVIA en vivo: no hay API pública de listing. El import no enrola solo.",
-        },
-        {
-          q: "¿Necesito un EHR hospitalario?",
-          a: "No. El expediente es interno: registro manual, pegar Excel, CSV y portal de candidatos. No hay conexión con un EHR externo.",
         },
         {
           q: "¿Cuánto dura el trial?",

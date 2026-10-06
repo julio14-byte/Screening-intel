@@ -13,7 +13,7 @@ Plataforma de **inteligencia de screening** para **clinical research sites**. No
 
 | Feature | Descripción |
 |---------|-------------|
-| **Expediente interno** | Pacientes, perfil clínico y tablas FHIR propias. Alta manual, pegar Excel o CSV. Sin conexión a un EHR hospitalario. |
+| **Expediente interno** | Pacientes y perfil clínico en tablas de la app. Alta manual, pegar Excel o CSV. |
 | **MFA TOTP** | Obligatorio en producción para investigator y sub-investigator (`/settings/security`, `/login/mfa`). |
 | **Sesión** | Timeout de inactividad (30 min) y tope absoluto (8 h); login demo apagado en production. |
 | **Backups** | Procedimiento de restore PITR en [`docs/BACKUP.md`](docs/BACKUP.md). |
@@ -32,12 +32,12 @@ Crisvia no se vende como “base de pacientes” ni como “te conseguimos reclu
 | Diferencial | Qué significa en la práctica |
 |-------------|------------------------------|
 | **Pacientes que YA llegaron** | Registro + perfil clínico de tu centro. El portal `/candidato` es extra, no el discurso de reclutamiento. |
-| **Cinco módulos (V1)** | Registry → Profile → Matcher → Tracker → Re-Match. EDC, ePRO e IWRS los opera un tercero. |
+| **Cinco módulos (V1)** | Registry → Profile → Matcher → Tracker → Re-Match. |
 | **Re-Match nativo** | Tras un screen failure, propone automáticamente otros protocolos activos donde el paciente podría encajar |
 | **Matching explicable** | Motor de reglas con semáforo 🟢🟡🔴 + detalle criterio por criterio + **justificación clínica IA** que narra el resultado sin cambiar la elegibilidad |
 | **IA puntual** | Justificación del matching, extracción de PDF y notas. No decide elegibilidad. |
 | **RBAC + audit trail** | Roles clínicos y bitácora con diseño alineado a 21 CFR Part 11 (no es una certificación) |
-| **LATAM-first** | UI en español; expediente interno (manual, pegar Excel, CSV, portal). Sin EHR hospitalario. |
+| **LATAM-first** | UI en español; expediente interno (manual, pegar Excel, CSV, portal). |
 | **SaaS self-serve** | Trial 14 días, planes por volumen y Stripe — pensado para sitios medianos, no solo enterprise |
 
 **En una frase:** cada paciente que llega a tu clínica es una oportunidad de investigación; un screen failure no debería ser un paciente perdido.
@@ -53,9 +53,9 @@ Crisvia no se vende como “base de pacientes” ni como “te conseguimos reclu
 | **3. Protocol Matcher** | Paciente ↔ protocolo. Criterios de inclusión/exclusión; extracción NLP desde PDF |
 | **Motor de elegibilidad** | Semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple + `match_score` + justificación IA. No es un sorteo: filtra por criterios. |
 | **4. Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure. Randomizado lo marca el coordinador cuando el IRT del sponsor ya asignó kit. |
-| **5. Re-Match & Follow-up** | Screen failure → otros protocolos activos. El calendario de visitas lo opera el EDC del estudio. |
+| **5. Re-Match & Follow-up** | Screen failure → otros protocolos activos. |
 | **Portal candidatos** | Pre-registro público (`/candidato`) + inbox (`/candidatos`) + settings del portal |
-| **Expediente interno** | Pacientes y perfil clínico en tablas de la app (incluye modelo FHIR Patient) para matching. No hay EHR hospitalario externo. |
+| **Expediente interno** | Pacientes y perfil clínico en tablas de la app, para matching. |
 | **Audit Trail** | Bitácora inmutable alineada a 21 CFR Part 11 (diseño; no es una certificación) |
 | **RBAC clínico** | Investigator / Sub-investigator / Coordinator / Monitor |
 | **SaaS** | Organizations, trial 14 días, Stripe Checkout + Portal |
@@ -82,9 +82,8 @@ Crisvia no se vende como “base de pacientes” ni como “te conseguimos reclu
 | `/patients` | Registro de pacientes |
 | `/patients/[id]` | Perfil clínico para matching (demografía, anamnesis, mediciones) |
 | `/protocols` | Gestión de protocolos |
-| `/protocols/[id]` | Matching contra el protocolo. EDC/ePRO/IWRS los opera un tercero |
+| `/protocols/[id]` | Criterios y matching contra el protocolo |
 | `/protocols/[id]/match` | Cruce masivo paciente ↔ protocolo + justificación IA |
-| `/edc`, `/epro`, `/iwrs`, `/agenda`, `/seguimiento`, `/cierre`, `/inventario`, `/dispensacion` | Retirados: lo opera un tercero; no hay módulo de conectores |
 | `/tracker` | Pipeline Kanban con drag & drop |
 | `/rematch` | Re-matching automático post screen failure |
 | `/candidato` | Portal público de pre-registro (pacientes) |
@@ -172,6 +171,8 @@ supabase/migrations/20260925030000_follow_up_visits.sql
 supabase/migrations/20260925040000_protocol_closeout.sql
 supabase/migrations/20260925050000_protocol_integrations.sql
 ```
+
+> Varias migraciones crean tablas heredadas (ePRO, IWRS, farmacia, visitas, cierre, FHIR) que la app **ya no usa**. Se conservan como historial; no hace falta ejecutarlas en un proyecto nuevo salvo que quieras el orden completo.
 
 Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
 
@@ -294,7 +295,7 @@ El resto requiere sesión Supabase (cookies).
 
 ## Expediente interno
 
-No hay conexión con un EHR hospitalario. Los pacientes se ingresan a mano, pegando el listado de Excel, por CSV o por el portal. El chart vive en las tablas de la app (`patients`, `clinical_profiles`, `conditions`, `observations`, etc.).
+Los pacientes se ingresan a mano, pegando el listado de Excel, por CSV o por el portal. El chart vive en las tablas de la app (`patients`, `clinical_profiles`, `conditions`, `observations`, etc.).
 
 ---
 
@@ -375,7 +376,7 @@ docs/                        # STRIPE_SETUP.md, BACKUP.md, etc.
 - RLS en PostgreSQL + RBAC clínico: las políticas `using (true)` se eliminan en `0018`; el aislamiento es por `get_user_organization_ids()`
 - Validación Zod en APIs críticas
 - Portal público con rate limiting, vista `portal_sites` (sin secretos) y `anon` sin `SELECT` sobre `organizations`
-- Expediente y screening aislados por centro. EDC, ePRO e IWRS los opera un tercero; el webhook outbound no manda nombre ni fecha de nacimiento, solo `subject_code`. El diseño se alinea a HIPAA / GDPR / 21 CFR Part 11; no es una certificación.
+- Expediente y screening aislados por centro. El diseño se alinea a HIPAA / GDPR / 21 CFR Part 11; no es una certificación.
 - Herramientas MCP de screening filtradas por organización; OpenAI recibe iniciales, no nombres
 
 Backups y restore (PITR): [`docs/BACKUP.md`](docs/BACKUP.md).

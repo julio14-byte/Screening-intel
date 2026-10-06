@@ -1,6 +1,5 @@
 /**
  * Versión 1: inteligencia de screening para clinical research sites.
- * EDC, ePRO e IWRS los opera un tercero; no hay módulo de conectores en Crisvia.
  */
 export const PRODUCT_MODULE_IDS = [
   "registry",
