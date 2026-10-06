@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/Card";
 import { KanbanBoard } from "@/components/tracker/KanbanBoard";
 import { ScreeningProcessNote } from "@/components/screening/ScreeningProcessNote";
 import { useScreenings } from "@/hooks/useScreenings";
+import { toErrorMessage } from "@/lib/errors";
 import type { ScreeningStatus } from "@/lib/types";
 
 export default function TrackerPage() {
@@ -25,9 +26,7 @@ export default function TrackerPage() {
     try {
       await updateStatus(id, status);
     } catch (e) {
-      setMoveError(
-        e instanceof Error ? e.message : "No se pudo mover al paciente"
-      );
+      setMoveError(toErrorMessage(e, "No se pudo mover al paciente"));
     }
   };
 

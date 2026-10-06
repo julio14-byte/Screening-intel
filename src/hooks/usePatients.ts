@@ -12,6 +12,7 @@ import {
   isMissingDemographicsColumn,
   type Ethnicity,
 } from "@/lib/profile/demographics";
+import { toErrorMessage } from "@/lib/errors";
 import type { Gender, Patient } from "@/lib/types";
 
 export interface NewPatientInput {
@@ -51,7 +52,7 @@ export function usePatients() {
         setPatients((full.data ?? []) as Patient[]);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al cargar pacientes");
+      setError(toErrorMessage(e, "Error al cargar pacientes"));
     } finally {
       setLoading(false);
     }

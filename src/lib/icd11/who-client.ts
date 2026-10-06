@@ -67,7 +67,10 @@ function getLinearization(): string {
   return process.env.ICD11_LINEARIZATION?.trim() || "mms";
 }
 
-async function icdFetch(url: string, language = "es"): Promise<any> {
+async function icdFetch(
+  url: string,
+  language = "es"
+): Promise<Record<string, unknown>> {
   const token = await getAccessToken();
   const response = await fetch(url, {
     headers: {
@@ -82,7 +85,7 @@ async function icdFetch(url: string, language = "es"): Promise<any> {
     throw new Error(`WHO ICD-11 (${response.status}): ${await response.text()}`);
   }
 
-  return response.json();
+  return (await response.json()) as Record<string, unknown>;
 }
 
 function extractLabel(field: unknown): string | undefined {
@@ -119,26 +122,32 @@ export async function searchIcd11(
     url.searchParams.set("releaseId", release);
   }
 
-  let data: any;
+  let data: Record<string, unknown>;
   try {
     data = await icdFetch(url.toString(), "es");
   } catch {
     data = await icdFetch(url.toString(), "en");
   }
 
-  const entities = data.destinationEntities || [];
+  const entities = Array.isArray(data.destinationEntities)
+    ? data.destinationEntities
+    : [];
 
-  return entities.map((entity: any) => ({
-    id: entity.id || entity["@id"],
-    code: entity.theCode || entity.code,
-    title: stripHighlightTags(
-      extractLabel(entity.title) || entity.title || "(sin título)"
-    ),
-    matchingText: entity.matchingPVs?.[0]?.label
-      ? stripHighlightTags(String(entity.matchingPVs[0].label))
-      : undefined,
-    score: entity.score,
-  }));
+  return entities
+    .filter((item): item is Record<string, unknown> => !!item && typeof item === "object")
+    .map((entity) => {
+      const title = extractLabel(entity.title) || String(entity.title ?? "(sin título)");
+      const matching = Array.isArray(entity.matchingPVs)
+        ? (entity.matchingPVs[0] as { label?: string } | undefined)?.label
+        : undefined;
+      return {
+        id: String(entity.id || entity["@id"] || ""),
+        code: String(entity.theCode || entity.code || ""),
+        title: stripHighlightTags(title),
+        matchingText: matching ? stripHighlightTags(String(matching)) : undefined,
+        score: typeof entity.score === "number" ? entity.score : undefined,
+      };
+    });
 }
 
 export async function getIcd11Entity(
@@ -154,12 +163,15 @@ export async function getIcd11Entity(
     url = `${API_BASE}/release/11/${release}/${linearization}/codeinfo/${encodeURIComponent(idOrUri)}`;
   }
 
-  let data: any;
+  let data: Record<string, unknown>;
   try {
     data = await icdFetch(url, "es");
   } catch {
     data = await icdFetch(url, "en");
   }
+
+  const inclusion = Array.isArray(data.inclusion) ? data.inclusion : [];
+  const exclusion = Array.isArray(data.exclusion) ? data.exclusion : [];
 
   return {
     id: data["@id"] || data.id,
@@ -168,11 +180,19 @@ export async function getIcd11Entity(
     definition: extractLabel(data.definition),
     longDefinition: extractLabel(data.longDefinition),
     fullySpecifiedName: extractLabel(data.fullySpecifiedName),
-    inclusions: (data.inclusion || []).map((item: any) =>
-      extractLabel(item.label)
+    inclusions: inclusion.map((item) =>
+      extractLabel(
+        item && typeof item === "object" && "label" in item
+          ? (item as { label: unknown }).label
+          : item
+      )
     ),
-    exclusions: (data.exclusion || []).map((item: any) =>
-      extractLabel(item.label)
+    exclusions: exclusion.map((item) =>
+      extractLabel(
+        item && typeof item === "object" && "label" in item
+          ? (item as { label: unknown }).label
+          : item
+      )
     ),
     parent: data.parent,
     children: data.child,

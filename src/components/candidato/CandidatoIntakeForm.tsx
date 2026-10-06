@@ -7,6 +7,7 @@ import { SelectInput, TextInput } from "@/components/ui/Field";
 import { ErrorState } from "@/components/ui/StateMessage";
 import { candidatoPaths } from "@/lib/candidato/paths";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
+import { toErrorMessage } from "@/lib/errors";
 import type { Gender } from "@/lib/types";
 
 type PortalConfig = {
@@ -93,7 +94,7 @@ export function CandidatoIntakeForm({
         data.graciasUrl ?? candidatoPaths.gracias(data.referralCode ?? "")
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al enviar.");
+      setError(toErrorMessage(err, "Error al enviar."));
     } finally {
       setSaving(false);
     }

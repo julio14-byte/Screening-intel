@@ -30,6 +30,7 @@ import {
   studySubjectCaption,
 } from "@/lib/profile/demographics";
 import type { ClinicalProfile, Patient } from "@/lib/types";
+import { toErrorMessage } from "@/lib/errors";
 import { calculateAge, formatDate, GENDER_LABELS } from "@/lib/utils";
 
 /**
@@ -80,7 +81,7 @@ export function ClinicalProfileEditor({
       setSavedAt(new Date());
     } catch (e) {
       setSaveError(
-        e instanceof Error ? e.message : "No se pudo guardar el perfil"
+        toErrorMessage(e, "No se pudo guardar el perfil")
       );
     } finally {
       setSaving(false);

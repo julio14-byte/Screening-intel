@@ -14,13 +14,6 @@ import { evaluatePatientIntake } from "@/lib/matching";
 import { getServiceSupabase } from "@/lib/screening-services";
 import type { ClinicalProfile, Gender, Patient, Protocol } from "@/lib/types";
 
-function parseListFromText(text: string): string[] {
-  return text
-    .split(/[,;\n]+/)
-    .map((s) => s.trim())
-    .filter(Boolean);
-}
-
 function intakeMessage(verdict: string): string {
   if (verdict === "eligible") {
     return "Según lo que nos contaste, podrías ser candidato. Un coordinador te contactará.";
@@ -49,7 +42,7 @@ export async function POST(request: Request) {
   let supabase;
   try {
     supabase = getServiceSupabase();
-  } catch (e) {
+  } catch {
     return NextResponse.json(
       {
         error:

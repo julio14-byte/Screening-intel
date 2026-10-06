@@ -6,6 +6,7 @@ import { Modal } from "@/components/ui/Modal";
 import { SelectInput, TextInput } from "@/components/ui/Field";
 import { ErrorState } from "@/components/ui/StateMessage";
 import type { NewPatientInput } from "@/hooks/usePatients";
+import { toErrorMessage } from "@/lib/errors";
 import {
   ETHNICITY_LABEL,
   ETHNICITY_VALUES,
@@ -50,7 +51,7 @@ export function NewPatientModal({
       setForm(EMPTY);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo crear el paciente");
+      setError(toErrorMessage(err, "No se pudo crear el paciente"));
     } finally {
       setSaving(false);
     }

@@ -57,11 +57,11 @@ export function LoginForm({
       }>(response);
 
       if (data?.mfaEnrollmentRequired) {
-        window.location.assign(`${routes.app.security}?enroll=1`);
+        router.push(`${routes.app.security}?enroll=1`);
         return;
       }
       if (data?.mfaRequired) {
-        window.location.assign(routes.loginMfa);
+        router.push(routes.loginMfa);
         return;
       }
 
@@ -70,9 +70,7 @@ export function LoginForm({
         fromParam && fromParam.startsWith("/") && !fromParam.startsWith("//")
           ? fromParam
           : routes.afterLogin;
-      router.replace(from);
-      router.refresh();
-      window.location.assign(from);
+      window.location.assign(new URL(from, window.location.origin).href);
     } catch {
       setError("Error de conexión. Intentá de nuevo.");
     } finally {

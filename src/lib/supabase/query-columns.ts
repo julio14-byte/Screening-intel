@@ -6,8 +6,17 @@ export const PATIENT_CORE_COLUMNS =
 export const PATIENT_LIST_COLUMNS =
   `${PATIENT_CORE_COLUMNS}, subject_code, ethnicity, phone, email, address_line, address_city, address_state, address_postal_code, address_country`;
 
-export const PATIENT_WITH_PROFILE_COLUMNS = `${PATIENT_LIST_COLUMNS}, clinical_profiles(id, patient_id, conditions, medications, laboratories, updated_at)`;
+export const PATIENT_WITH_PROFILE_COLUMNS = `${PATIENT_LIST_COLUMNS}, clinical_profiles(id, patient_id, conditions, medications, laboratories, anamnesis, updated_at)`;
+export const PATIENT_WITH_PROFILE_COLUMNS_NO_ANAMNESIS = `${PATIENT_LIST_COLUMNS}, clinical_profiles(id, patient_id, conditions, medications, laboratories, updated_at)`;
 export const PATIENT_WITH_PROFILE_COLUMNS_LEGACY = `${PATIENT_CORE_COLUMNS}, clinical_profiles(id, patient_id, conditions, medications, laboratories, updated_at)`;
+
+export function isMissingAnamnesisColumn(message: string | undefined): boolean {
+  if (!message) return false;
+  return (
+    /anamnesis/i.test(message) &&
+    /does not exist|schema cache|could not find the '/i.test(message)
+  );
+}
 
 export const PROTOCOL_LIST_COLUMNS =
   "id, clinic_id, title, code_name, inclusion_criteria, exclusion_criteria, status, created_at";

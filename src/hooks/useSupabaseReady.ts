@@ -8,15 +8,30 @@ export function useSupabaseReady() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const supabase = getSupabaseClient();
+    let cancelled = false;
+    try {
+      const supabase = getSupabaseClient();
 
-    void supabase.auth.getSession().finally(() => setReady(true));
+      void supabase.auth.getSession().finally(() => {
+        if (!cancelled) setReady(true);
+      });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => setReady(true));
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange(() => {
+        if (!cancelled) setReady(true);
+      });
 
-    return () => subscription.unsubscribe();
+      return () => {
+        cancelled = true;
+        subscription.unsubscribe();
+      };
+    } catch {
+      setReady(true);
+      return () => {
+        cancelled = true;
+      };
+    }
   }, []);
 
   return ready;

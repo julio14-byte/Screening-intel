@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import config from "@/config";
 import { routes } from "@/lib/app/routes";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
+import { toErrorMessage } from "@/lib/errors";
 import { Button } from "@/components/ui/Button";
 
 export function CheckoutButton({
@@ -37,7 +37,7 @@ export function CheckoutButton({
 
       window.location.href = data.url;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al conectar con Stripe.");
+      setError(toErrorMessage(err, "Error al conectar con Stripe."));
       setLoading(false);
     }
   }

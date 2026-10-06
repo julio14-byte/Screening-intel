@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import type { ReactNode } from "react";
 import config from "@/config";
 import "./globals.css";
 
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
     "Pre-screening y re-matching de pacientes para protocolos de investigación clínica",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="es"

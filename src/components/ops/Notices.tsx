@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
 import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
+import { toErrorMessage } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 
 type Notice = {
@@ -47,7 +48,7 @@ export function useNotices() {
     let cancelled = false;
     reload()
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Error de avisos.");
+        if (!cancelled) setError(toErrorMessage(err, "Error de avisos."));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -104,7 +105,7 @@ export function NoticeList() {
           onClick={() => {
             setError(null);
             void mark({ all: true }).catch((err) =>
-              setError(err instanceof Error ? err.message : "Error")
+              setError(toErrorMessage(err, "Error"))
             );
           }}
         >
@@ -143,7 +144,7 @@ export function NoticeList() {
                       onClick={() => {
                         setError(null);
                         void mark({ id: item.id }).catch((err) =>
-                          setError(err instanceof Error ? err.message : "Error")
+                          setError(toErrorMessage(err, "Error"))
                         );
                       }}
                     >
