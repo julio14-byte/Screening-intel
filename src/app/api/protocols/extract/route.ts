@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { hasPdfSignature, looksLikeText } from "@/lib/security/file-signature";
 import { serverError } from "@/lib/security/http";
 import { rateLimit, tooManyRequests } from "@/lib/security/rate-limit";
 import {
@@ -56,9 +57,16 @@ export async function POST(request: Request) {
   try {
     if (name.endsWith(".pdf")) {
       const buffer = await file.arrayBuffer();
+      if (!hasPdfSignature(buffer)) {
+        return NextResponse.json({ error: "El archivo no es un PDF válido." }, { status: 400 });
+      }
       text = await extractTextFromPdf(buffer);
     } else if (name.endsWith(".txt")) {
-      text = await file.text();
+      const buffer = await file.arrayBuffer();
+      if (!looksLikeText(buffer)) {
+        return NextResponse.json({ error: "El archivo no es texto válido." }, { status: 400 });
+      }
+      text = new TextDecoder("utf-8").decode(buffer);
     } else {
       return NextResponse.json(
         { error: "Formato no soportado. Usá PDF o TXT." },

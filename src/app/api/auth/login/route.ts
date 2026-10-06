@@ -12,6 +12,8 @@ import type { AppRole } from "@/lib/rbac/types";
 import { clientIp, rateLimit, tooManyRequests } from "@/lib/security/rate-limit";
 import { hardenAuthCookieOptions } from "@/lib/security/safe-redirect";
 import { readJsonBody } from "@/lib/security/http";
+import { securityEvent } from "@/lib/security/log";
+import { pseudonym } from "@/lib/security/pseudonym";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 type SessionCookie = {
@@ -52,9 +54,15 @@ export async function POST(request: NextRequest) {
   }
 
   const ipLimit = await rateLimit(`login:ip:${clientIp(request)}`, 30, 600);
-  if (!ipLimit.allowed) return tooManyRequests(ipLimit);
+  if (!ipLimit.allowed) {
+    securityEvent("login_rate_limited", { scope: "ip", ip: clientIp(request) });
+    return tooManyRequests(ipLimit);
+  }
   const emailLimit = await rateLimit(`login:email:${email}`, 8, 600);
-  if (!emailLimit.allowed) return tooManyRequests(emailLimit);
+  if (!emailLimit.allowed) {
+    securityEvent("login_rate_limited", { scope: "account", account: pseudonym(email) });
+    return tooManyRequests(emailLimit);
+  }
 
   if (isDemoEmail(email) && !isDemoLoginEnabled()) {
     return NextResponse.json(
@@ -121,6 +129,7 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+    securityEvent("login_failed", { account: pseudonym(email), ip: clientIp(request) });
     return NextResponse.json({ error: "Credenciales inválidas." }, { status: 401 });
   }
 

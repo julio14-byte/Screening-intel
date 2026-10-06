@@ -88,9 +88,9 @@ export function CreateSiteUserForm({ onCreated }: { onCreated?: () => void }) {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Mínimo 8 caracteres"
+              placeholder="Mínimo 12 caracteres"
               required
-              minLength={8}
+              minLength={12}
               autoComplete="new-password"
               hint="Compartila de forma segura; el usuario puede cambiarla después."
             />
