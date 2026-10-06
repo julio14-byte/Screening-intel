@@ -62,7 +62,7 @@ export function LandingPricing() {
                   {plan.price === 0 ? "Gratis" : `$${plan.price}`}
                   {plan.price > 0 ? (
                     <span className="text-sm font-normal text-violet-300 sm:text-base">
-                      /{plan.interval}
+                      {" "}{plan.currency}/{plan.interval}
                     </span>
                   ) : null}
                 </p>

@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { serverError } from "@/lib/security/http";
+import { rateLimit, tooManyRequests } from "@/lib/security/rate-limit";
 import { z } from "zod";
 import {
   AuthorizationError,
@@ -13,8 +15,10 @@ const bodySchema = z.object({
 });
 
 export async function POST(request: Request) {
+  let userId = "";
   try {
-    await requirePermission("profiles:write");
+    const ctx = await requirePermission("profiles:write");
+    userId = ctx.user.id;
   } catch (e) {
     if (e instanceof AuthorizationError) {
       const status = e.code === "UNAUTHENTICATED" ? 401 : 403;
@@ -22,6 +26,9 @@ export async function POST(request: Request) {
     }
     throw e;
   }
+
+  const limited = await rateLimit(`ai:extract-profile:${userId}`, 40, 600);
+  if (!limited.allowed) return tooManyRequests(limited);
 
   let body: unknown;
   try {
@@ -43,14 +50,10 @@ export async function POST(request: Request) {
       charCount: parsed.data.notes.length,
     });
   } catch (err) {
-    return NextResponse.json(
-      {
-        error:
-          err instanceof Error
-            ? err.message
-            : "Error al extraer perfil clínico.",
-      },
-      { status: 500 }
+    return serverError(
+      "patients/profile/extract",
+      err,
+      "No se pudo extraer el perfil clínico."
     );
   }
 }

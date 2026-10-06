@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { serverError } from "@/lib/security/http";
+import { rateLimit, tooManyRequests } from "@/lib/security/rate-limit";
 import {
   extractProtocolCriteriaFromText,
   extractTextFromPdf,
@@ -10,9 +12,13 @@ import {
 
 export const runtime = "nodejs";
 
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
 export async function POST(request: Request) {
+  let userId = "";
   try {
-    await requirePermission("protocols:write");
+    const ctx = await requirePermission("protocols:write");
+    userId = ctx.user.id;
   } catch (e) {
     if (e instanceof AuthorizationError) {
       const status = e.code === "UNAUTHENTICATED" ? 401 : 403;
@@ -21,11 +27,27 @@ export async function POST(request: Request) {
     throw e;
   }
 
-  const formData = await request.formData();
+  const limited = await rateLimit(`ai:extract-protocol:${userId}`, 20, 600);
+  if (!limited.allowed) return tooManyRequests(limited);
+
+  const declared = Number(request.headers.get("content-length") ?? "0");
+  if (declared > MAX_UPLOAD_BYTES + 100_000) {
+    return NextResponse.json({ error: "El archivo supera 10 MB." }, { status: 413 });
+  }
+
+  let formData: FormData;
+  try {
+    formData = await request.formData();
+  } catch {
+    return NextResponse.json({ error: "Solicitud inválida." }, { status: 400 });
+  }
   const file = formData.get("file");
 
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "Archivo requerido." }, { status: 400 });
+  }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return NextResponse.json({ error: "El archivo supera 10 MB." }, { status: 413 });
   }
 
   const name = file.name.toLowerCase();
@@ -47,9 +69,6 @@ export async function POST(request: Request) {
     const draft = await extractProtocolCriteriaFromText(text);
     return NextResponse.json({ draft, textLength: text.length });
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Error al extraer criterios." },
-      { status: 500 }
-    );
+    return serverError("protocols/extract", err, "No se pudo extraer los criterios.");
   }
 }

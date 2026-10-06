@@ -41,6 +41,12 @@ const config = {
         section: "screening" as const,
       },
       {
+        href: "/citas",
+        label: "Citas",
+        icon: "CalendarDays",
+        section: "screening" as const,
+      },
+      {
         href: "/candidatos",
         label: "Candidatos",
         icon: "UserPlus",
@@ -100,6 +106,7 @@ const config = {
       "/settings/portal",
       "/settings/security",
       "/candidatos",
+      "/citas",
       "/avisos",
     ],
     publicApis: [
@@ -127,6 +134,7 @@ const config = {
       portalSettings: "/settings/portal",
       security: "/settings/security",
       candidatos: "/candidatos",
+      citas: "/citas",
       avisos: "/avisos",
       pacientes: "/patients",
       docs: "/docs",
@@ -257,11 +265,11 @@ const config = {
         },
         {
           q: "¿Cuánto dura el trial?",
-          a: "14 días en plan Starter: hasta 50 pacientes y 3 protocolos activos sin tarjeta para empezar.",
+          a: "14 días en el plan Free: hasta 50 pacientes y 3 protocolos activos, sin tarjeta.",
         },
         {
-          q: "¿Cómo funciona Site Pro?",
-          a: "Plan con mayor volumen de pacientes y protocolos, más re-match.",
+          q: "¿Cuánto cuesta y qué incluye cada plan?",
+          a: "Free $0, Pro $149 USD/mes (500 pacientes, 50 protocolos, 3 usuarios) y Pro+ $329 USD/mes (2,000 pacientes, 100 protocolos, 10 usuarios). Los límites se aplican en la base de datos: al llegar al tope no se pueden agregar más, pero tus datos siguen disponibles.",
         },
         {
           q: "¿Los datos están aislados por sitio?",
@@ -323,8 +331,9 @@ const config = {
 
   pricing: {
     eyebrow: "Suscripciones",
-    title: "Elige tu plan",
-    subtitle: "Free para empezar. Pro y Pro+ para clinical research sites en crecimiento.",
+    title: "Un plan para cada site",
+    subtitle:
+      "Precios en USD por sitio, sin costo de implementación. Cancelas cuando quieras.",
     plans: [
       {
         id: "free",
@@ -332,29 +341,32 @@ const config = {
         price: 0,
         currency: "USD",
         interval: "mes",
-        description: "Ideal para pilotear pre-screening en un sitio.",
+        description: "Para probar el screening en un site, sin tarjeta.",
         features: [
           "14 días de prueba",
           "Hasta 50 pacientes",
           "3 protocolos activos",
           "1 usuario",
-          "Motor de matching",
+          "Matcher de reglas 🟢🟡🔴",
+          "Tracker y citas",
         ],
         cta: "Empezar gratis",
       },
       {
         id: "pro",
         name: "Pro",
-        price: 399,
+        price: 149,
         currency: "USD",
         interval: "mes",
-        description: "Para clínicas con varios protocolos y mayor volumen.",
+        description: "Para un site con varios protocolos abiertos y equipo pequeño.",
         features: [
           "Hasta 500 pacientes",
           "50 protocolos activos",
           "3 usuarios",
-          "Re-match automático",
-          "Asistente IA clínico",
+          "Re-Match entre protocolos",
+          "Portal de candidatos y avisos",
+          "Explicación del match con IA",
+          "Soporte por correo",
         ],
         cta: "Suscribirse a Pro",
         highlighted: true,
@@ -363,16 +375,17 @@ const config = {
       {
         id: "pro_plus",
         name: "Pro+",
-        price: 699,
+        price: 329,
         currency: "USD",
         interval: "mes",
-        description: "Máximo volumen, multi-equipo y operaciones avanzadas.",
+        description: "Para sites de alto volumen o con varios coordinadores.",
         features: [
-          "Hasta 2.000 pacientes",
+          "Hasta 2,000 pacientes",
           "100 protocolos activos",
           "10 usuarios",
-          "Re-match prioritario",
-          "Asistente IA + soporte dedicado",
+          "Todo lo de Pro",
+          "Roles, MFA y bitácora de auditoría",
+          "Soporte prioritario",
         ],
         cta: "Suscribirse a Pro+",
         stripePriceId: "",

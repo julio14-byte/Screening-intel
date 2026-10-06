@@ -13,6 +13,8 @@ Plataforma de **inteligencia de screening** para **clinical research sites**. No
 
 | Feature | Descripción |
 |---------|-------------|
+| **Citas** | Agenda para coordinadores en `/citas` y en cada paciente: agendar con búsqueda, atajos de fecha y hora, aviso de choque de horario, reprogramar, marcar hecha / no asistió y recordatorio listo por WhatsApp, SMS, llamada o correo (lo envía la persona, la app no envía mensajes). |
+| **Precios** | Free $0, Pro $149 y Pro+ $329 USD/mes. Los límites de pacientes, protocolos y usuarios se aplican en la base de datos. |
 | **Expediente interno** | Pacientes y perfil clínico en tablas de la app. Alta manual, pegar Excel o CSV. |
 | **MFA TOTP** | Obligatorio en producción para investigator y sub-investigator (`/settings/security`, `/login/mfa`). |
 | **Sesión** | Timeout de inactividad (30 min) y tope absoluto (8 h); login demo apagado en production. |
@@ -88,6 +90,7 @@ Crisvia no se vende como “base de pacientes” ni como “te conseguimos reclu
 | `/rematch` | Re-matching automático post screen failure |
 | `/candidato` | Portal público de pre-registro (pacientes) |
 | `/candidatos` | Inbox de leads del portal (coordinadores) |
+| `/citas` | Agenda de citas (hoy, próximas, por cerrar, historial) |
 | `/avisos` | Avisos de candidato nuevo y screen failure |
 | `/settings/portal` | Configuración del portal (investigator) |
 | `/settings/security` | MFA TOTP (obligatorio en prod para PI / sub-PI) |
@@ -302,7 +305,9 @@ Los pacientes se ingresan a mano, pegando el listado de Excel, por CSV o por el 
 ## SaaS y Stripe
 
 - Trial 14 días por organization
-- Planes **Free**, **Pro** y **Pro+** (`src/config.ts`)
+- Planes **Free** ($0), **Pro** ($149 USD/mes) y **Pro+** ($329 USD/mes) en `src/config.ts`
+- Límites por plan (pacientes / protocolos activos / usuarios) aplicados por triggers en Postgres (`20261007000000_enforce_plan_limits.sql`): al llegar al tope no se agregan más, los datos existentes no se tocan
+- Crea los precios en Stripe y pon sus IDs en `STRIPE_PRICE_ID_PRO` y `STRIPE_PRICE_ID_PRO_PLUS` (o en `stripePriceId`); sin ellos el checkout responde 503
 - Webhook: `POST /api/webhooks/stripe`
 
 Variables: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_PRO`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_APP_URL`.
@@ -361,6 +366,7 @@ docs/                        # STRIPE_SETUP.md, BACKUP.md, etc.
 | `yarn build` | Build de producción |
 | `yarn start` | Servidor de producción |
 | `yarn lint` | ESLint |
+| `yarn verify:security` / `yarn verify:citas` | Verificaciones de seguridad y de citas |
 | `yarn mcp:screening` | MCP servidor screening (`CRISVIA_ORGANIZATION_ID` obligatorio) |
 | `yarn mcp:icd11` | MCP servidor ICD-11 |
 
@@ -368,20 +374,39 @@ docs/                        # STRIPE_SETUP.md, BACKUP.md, etc.
 
 ## Seguridad
 
-- Autenticación Supabase SSR con middleware
-- **Next.js 16.3.5** (parche de RCE de agosto 2026: Image Optimization / AVIF y Windows; cache de imágenes vacías)
-- **MFA TOTP** obligatorio en producción para investigator y sub-investigator (activar TOTP en Authentication → MFA)
-- Sesión: 30 min de inactividad y 8 h absolutas (`AUTH_IDLE_MINUTES`, `AUTH_SESSION_HOURS`); las cookies de `@supabase/ssr` no se usan como único límite
-- Login demo (`demo@screening.local`) **deshabilitado** cuando `NODE_ENV=production`, salvo `ALLOW_DEMO_LOGIN=true`
-- RLS en PostgreSQL + RBAC clínico: las políticas `using (true)` se eliminan en `0018`; el aislamiento es por `get_user_organization_ids()`
-- Validación Zod en APIs críticas
-- Portal público con rate limiting, vista `portal_sites` (sin secretos) y `anon` sin `SELECT` sobre `organizations`
-- Expediente y screening aislados por centro. El diseño se alinea a HIPAA / GDPR / 21 CFR Part 11; no es una certificación.
-- Herramientas MCP de screening filtradas por organización; OpenAI recibe iniciales, no nombres
+**Acceso y sesión**
+
+- Supabase Auth SSR; el middleware valida al usuario con `getUser()` en cada petición, responde 401 a cualquier API no pública sin sesión y, si falla, cierra en lugar de abrir
+- **MFA TOTP** obligatorio en producción para investigator y sub-investigator
+- Sesión: 30 min de inactividad y 8 h absolutas (`AUTH_IDLE_MINUTES`, `AUTH_SESSION_HOURS`); cookies `Secure` y `SameSite=Lax` en producción
+- Login con límite de intentos por IP y por correo, errores genéricos y redirecciones solo a rutas internas
+- Login demo (`demo@screening.local`) **deshabilitado** en producción salvo `ALLOW_DEMO_LOGIN=true`; si lo activas, define `DEMO_LOGIN_PASSWORD`
+
+**Datos**
+
+- RLS en PostgreSQL por organización (`get_user_organization_ids()`) + RBAC clínico (investigator, sub-investigator, coordinator, monitor solo lectura)
+- Roles: un investigador solo puede gestionar usuarios de su propia organización (`20261007010000_security_hardening.sql`)
+- Bitácora de auditoría append-only; el actor siempre es el usuario de la sesión y el registro debe pertenecer a su organización
+- Validación Zod en las APIs, límites de tamaño (importación 2,000 filas, PDF 10 MB) y respuestas de error sin mensajes internos de Postgres
+- Portal público: rate limiting compartido en Postgres (`rate_limit_hit`), vista `portal_sites` sin secretos y `anon` sin `SELECT` sobre `organizations`
+- Las llamadas a OpenAI (justificación del match, extracción de notas y de protocolos) pasan por permisos y límite por usuario; la justificación recibe iniciales, pero las **notas libres** que pegues para extraer el perfil se envían tal cual a OpenAI: no pegues datos que no quieras compartir con ese proveedor
+
+**Navegador**
+
+- Cabeceras: CSP (sin framing, sin plugins, `connect-src` limitado a la app y a tu proyecto Supabase), HSTS, `nosniff`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy` y `Cache-Control: no-store` en `/api`
+- `script-src` conserva `'unsafe-inline'` porque Next inyecta scripts de hidratación; pasar a CSP con nonce es la siguiente mejora
+
+**Lo que no hay (sé explícito con clientes)**
+
+- No es una certificación HIPAA, GDPR ni 21 CFR Part 11; el diseño busca alinearse a esos marcos y la evaluación de cumplimiento es tuya y de tu cliente
+- No hay cifrado a nivel de campo: los datos se cifran en reposo y en tránsito por la infraestructura de Supabase y Vercel
+- Los recordatorios por WhatsApp / SMS / correo los envía la persona desde su dispositivo; esos proveedores quedan fuera del control de Crisvia
+
+**Verificación**: `yarn verify:security` (cabeceras, redirecciones, rate limit, que toda API privada tenga control de acceso y no filtre errores internos) y `yarn audit`. Las advertencias restantes de `yarn audit` son dependencias transitivas de Swagger UI (`/docs/api`) y de herramientas MCP locales.
 
 Backups y restore (PITR): [`docs/BACKUP.md`](docs/BACKUP.md).
 
-Antes de producción con datos reales de pacientes: revisá políticas RLS, rotá claves, activá MFA en el dashboard de Auth, configurá PITR en Pro y completá evaluación de cumplimiento (HIPAA / GDPR según jurisdicción).
+Antes de producción con datos reales de pacientes: aplica las migraciones `20261007000000` y `20261007010000` en Supabase, rota claves, activa MFA en Auth, configura PITR en Pro y completa la evaluación de cumplimiento que corresponda a tu jurisdicción.
 
 ---
 

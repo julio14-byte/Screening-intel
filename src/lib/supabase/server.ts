@@ -1,3 +1,4 @@
+import { hardenAuthCookieOptions } from "@/lib/security/safe-redirect";
 import { createServerClient } from "@supabase/ssr";
 import { createClient as createSupabaseJsClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
@@ -21,7 +22,7 @@ export async function createClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              cookieStore.set(name, value, hardenAuthCookieOptions(options))
             );
           } catch {
             // Server Component: el middleware refresca la sesión.

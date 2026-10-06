@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { serverError } from "@/lib/security/http";
+import { rateLimit, tooManyRequests } from "@/lib/security/rate-limit";
 import { z } from "zod";
 import { generateMatchRationale } from "@/lib/matching/generateMatchRationale";
 import {
@@ -33,8 +35,10 @@ const bodySchema = z.object({
 });
 
 export async function POST(request: Request) {
+  let userId = "";
   try {
-    await requirePermission("screenings:read");
+    const ctx = await requirePermission("screenings:read");
+    userId = ctx.user.id;
   } catch (e) {
     if (e instanceof AuthorizationError) {
       const status = e.code === "UNAUTHENTICATED" ? 401 : 403;
@@ -42,6 +46,9 @@ export async function POST(request: Request) {
     }
     throw e;
   }
+
+  const limited = await rateLimit(`ai:rationale:${userId}`, 60, 600);
+  if (!limited.allowed) return tooManyRequests(limited);
 
   let body: unknown;
   try {
@@ -60,14 +67,10 @@ export async function POST(request: Request) {
     const rationale = await generateMatchRationale(parsed.data);
     return NextResponse.json({ rationale });
   } catch (err) {
-    return NextResponse.json(
-      {
-        error:
-          err instanceof Error
-            ? err.message
-            : "Error al generar justificación clínica.",
-      },
-      { status: 500 }
+    return serverError(
+      "matching/rationale",
+      err,
+      "No se pudo generar la justificación clínica."
     );
   }
 }

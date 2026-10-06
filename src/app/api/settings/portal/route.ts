@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { serverError } from "@/lib/security/http";
 import {
   AuthorizationError,
   requireAuth,
@@ -65,7 +66,7 @@ export async function GET() {
     .order("title");
 
   if (protocolsError) {
-    return NextResponse.json({ error: protocolsError.message }, { status: 500 });
+    return serverError("settings/portal", protocolsError);
   }
 
   const slug = org.slug ?? "";

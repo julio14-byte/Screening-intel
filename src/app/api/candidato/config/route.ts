@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
+import { serverError } from "@/lib/security/http";
 import { loadPortalOrganization } from "@/lib/candidato/load-portal-org";
+import { clientIp, rateLimit, tooManyRequests } from "@/lib/security/rate-limit";
 import { createPortalReadClient } from "@/lib/candidato/portal-supabase";
 
 export async function GET(request: Request) {
+  const limited = await rateLimit(`candidato-config:ip:${clientIp(request)}`, 120, 600);
+  if (!limited.allowed) return tooManyRequests(limited);
+
   const { searchParams } = new URL(request.url);
   const orgSlug = searchParams.get("org")?.trim().toLowerCase();
   const protocolCode = searchParams.get("protocolo")?.trim();
@@ -15,7 +20,7 @@ export async function GET(request: Request) {
 
   if (portal.status === "not_found") {
     return NextResponse.json(
-      { error: "Centro no encontrado. Revisá el código con tu coordinador." },
+      { error: "Centro no encontrado. Revisa el código con tu coordinador." },
       { status: 404 }
     );
   }
@@ -31,7 +36,7 @@ export async function GET(request: Request) {
   }
 
   if (portal.status === "error") {
-    return NextResponse.json({ error: portal.message }, { status: 503 });
+    return serverError("candidato/config", portal.message, "El portal no está disponible por ahora.", 503);
   }
 
   const org = portal.org;
@@ -45,7 +50,7 @@ export async function GET(request: Request) {
     .order("title");
 
   if (protocolsError) {
-    return NextResponse.json({ error: protocolsError.message }, { status: 500 });
+    return serverError("candidato/config", protocolsError);
   }
 
   let protocol = null;

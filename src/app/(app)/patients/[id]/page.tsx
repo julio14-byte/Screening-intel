@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { use } from "react";
 import { ArrowLeft } from "lucide-react";
+import { PatientVisits } from "@/components/citas/PatientVisits";
 import { AuditTimeline } from "@/components/audit/audit-timeline";
 import { InclusionApprovalPanel } from "@/components/rbac/InclusionApprovalPanel";
 import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
@@ -38,6 +39,10 @@ export default function PatientDetailPage({
         profile={profile}
         onSave={saveProfile}
       />
+
+      <div className="mt-6">
+        <PatientVisits patientId={patient.id} />
+      </div>
 
       <div className="mt-6">
         <AuditTimeline tableName="patients" recordId={patient.id} />

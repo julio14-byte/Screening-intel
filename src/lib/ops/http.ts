@@ -20,8 +20,13 @@ export function opsSchemaErrorResponse(error: {
     error.code === "42703" ||
     /schema cache/i.test(message) ||
     /does not exist/i.test(message);
+  console.error("[ops]", error.code ?? "", message);
   return NextResponse.json(
-    { error: missing ? `${message}. ${MIGRATION_HINT}` : message },
+    {
+      error: missing
+        ? `Falta aplicar el esquema de operaciones. ${MIGRATION_HINT}`
+        : "No se pudo completar la operación.",
+    },
     { status: 500 }
   );
 }
@@ -40,9 +45,13 @@ export async function opsContext(write: boolean) {
       .maybeSingle();
 
     if (error) {
+      console.error("[ops] organization_members:", error.message);
       return {
         ok: false as const,
-        response: NextResponse.json({ error: error.message }, { status: 500 }),
+        response: NextResponse.json(
+          { error: "No se pudo validar tu organización." },
+          { status: 500 }
+        ),
       };
     }
     if (!data?.organization_id) {

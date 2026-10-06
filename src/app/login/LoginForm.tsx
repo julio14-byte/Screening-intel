@@ -1,5 +1,6 @@
 "use client";
 
+import { safeRedirectPath } from "@/lib/security/safe-redirect";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { Activity, Lock, Mail, Sparkles } from "lucide-react";
@@ -66,10 +67,7 @@ export function LoginForm({
       }
 
       const fromParam = searchParams.get("from");
-      const from =
-        fromParam && fromParam.startsWith("/") && !fromParam.startsWith("//")
-          ? fromParam
-          : routes.afterLogin;
+      const from = safeRedirectPath(fromParam, routes.afterLogin);
       window.location.assign(new URL(from, window.location.origin).href);
     } catch {
       setError("Error de conexión. Intentá de nuevo.");

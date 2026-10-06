@@ -23,7 +23,11 @@ export async function POST(request: Request) {
   let planId = "pro";
   try {
     const body = (await request.json()) as { planId?: string };
-    if (body?.planId) planId = body.planId;
+    if (body?.planId === "pro" || body?.planId === "pro_plus") {
+      planId = body.planId;
+    } else if (body?.planId) {
+      return NextResponse.json({ error: "Plan inválido." }, { status: 400 });
+    }
   } catch {
     // default pro
   }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { serverError } from "@/lib/security/http";
 import { createClient } from "@/lib/supabase/server";
 import {
   getUserAppRole,
@@ -8,7 +9,12 @@ import {
   AuthorizationError,
   requirePermission,
 } from "@/lib/rbac/require-permission";
-import type { AppRole } from "@/lib/rbac/types";
+import { z } from "zod";
+
+const bodySchema = z.object({
+  userId: z.string().uuid(),
+  role: z.enum(["investigator", "sub_investigator", "coordinator", "monitor"]),
+});
 
 export async function GET() {
   try {
@@ -28,17 +34,20 @@ export async function PUT(request: Request) {
   try {
     await requirePermission("roles:manage");
 
-    const body = (await request.json()) as {
-      userId?: string;
-      role?: AppRole;
-    };
-
-    if (!body.userId || !body.role) {
+    let raw: unknown;
+    try {
+      raw = await request.json();
+    } catch {
+      return NextResponse.json({ error: "JSON inválido." }, { status: 400 });
+    }
+    const parsed = bodySchema.safeParse(raw);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Campos requeridos: userId, role" },
+        { error: "Campos requeridos: userId (uuid), role válido." },
         { status: 400 }
       );
     }
+    const body = parsed.data;
 
     const supabase = await createClient();
     const { error } = await supabase.rpc("assign_user_clinical_role", {
@@ -47,7 +56,7 @@ export async function PUT(request: Request) {
     });
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return serverError("rbac/roles", error, "No se pudo asignar el rol.", 400);
     }
 
     return NextResponse.json({ ok: true });

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { serverError } from "@/lib/security/http";
 import {
   AuthorizationError,
   requirePermission,
@@ -29,7 +30,7 @@ export async function POST(
     .neq("status", "converted");
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return serverError("candidatos/archivar", error);
   }
 
   return NextResponse.json({ ok: true });

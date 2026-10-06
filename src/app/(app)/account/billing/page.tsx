@@ -142,6 +142,10 @@ export default async function BillingPage({
                 {organization?.protocol_limit ?? "—"}
               </dd>
             </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-slate-500">Usuarios</dt>
+              <dd className="tabular-nums">{organization?.user_limit ?? "—"}</dd>
+            </div>
           </dl>
 
           {paymentsEnabled && organization?.stripe_customer_id ? (
