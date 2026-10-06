@@ -3,8 +3,8 @@ import type { AppRole } from "./types";
 
 /**
  * Transiciones de estatus permitidas por rol (arrastre en el tracker).
- * `randomized` a mano requiere PI/sub. Con IWRS activo el coordinador
- * randomiza por RPC (`iwrs_randomize`), no arrastrando la tarjeta.
+ * Randomizado lo marca el coordinador o el PI cuando el IRT del sponsor
+ * ya asignó kit. Crisvia no opera IWRS.
  */
 const ALLOWED_TRANSITIONS: Record<
   AppRole,
@@ -22,7 +22,12 @@ const ALLOWED_TRANSITIONS: Record<
     "randomized",
     "screen_failure",
   ],
-  coordinator: ["pre_screening", "screening", "screen_failure"],
+  coordinator: [
+    "pre_screening",
+    "screening",
+    "randomized",
+    "screen_failure",
+  ],
   monitor: [],
 };
 

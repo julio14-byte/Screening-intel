@@ -11,6 +11,7 @@ import {
   listOrganizationMembersWithRoles,
 } from "@/lib/rbac/get-user-role";
 import { requirePermission } from "@/lib/rbac/require-permission";
+import { toErrorMessage } from "@/lib/errors";
 import type { AppRole, OrganizationMemberWithRole } from "@/lib/rbac/types";
 
 export async function getMembersWithRolesAction(): Promise<
@@ -24,7 +25,7 @@ export async function getMembersWithRolesAction(): Promise<
   } catch (e) {
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "Error al cargar miembros",
+      error: toErrorMessage(e, "Error al cargar miembros"),
     };
   }
 }
@@ -49,7 +50,7 @@ export async function assignClinicalRoleAction(input: {
   } catch (e) {
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "Error al asignar rol",
+      error: toErrorMessage(e, "Error al asignar rol"),
     };
   }
 }
@@ -95,7 +96,7 @@ export async function createSiteUserAction(input: {
   } catch (e) {
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "Error al crear usuario",
+      error: toErrorMessage(e, "Error al crear usuario"),
     };
   }
 }

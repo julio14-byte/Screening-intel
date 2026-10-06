@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Field, SelectInput, TextArea, TextInput } from "@/components/ui/Field";
 import { formatIcd11Condition, type Icd11SearchResult } from "@/lib/icd11/utils";
+import { toErrorMessage } from "@/lib/errors";
 import {
   ALLERGY_CATEGORIES,
   ALLERGY_CATEGORY_LABEL,
@@ -49,7 +50,7 @@ export function AnamnesisEditor({
       if (!response.ok) throw new Error(data.error ?? "No se pudo consultar ICD-11.");
       setResults(data.results ?? []);
     } catch (error) {
-      setSearchError(error instanceof Error ? error.message : "Error ICD-11.");
+      setSearchError(toErrorMessage(error, "Error ICD-11."));
     } finally {
       setSearching(false);
     }

@@ -17,9 +17,9 @@ const config = {
         icon: "LayoutDashboard",
       },
       {
-        href: "/candidatos",
-        label: "Candidatos",
-        icon: "UserPlus",
+        href: "/patients",
+        label: "Registro",
+        icon: "Users",
         section: "screening" as const,
       },
       {
@@ -41,15 +41,15 @@ const config = {
         section: "screening" as const,
       },
       {
-        href: "/avisos",
-        label: "Avisos",
-        icon: "Bell",
+        href: "/candidatos",
+        label: "Candidatos",
+        icon: "UserPlus",
         section: "screening" as const,
       },
       {
-        href: "/patients",
-        label: "Registro",
-        icon: "Users",
+        href: "/avisos",
+        label: "Avisos",
+        icon: "Bell",
         section: "screening" as const,
       },
       {

@@ -10,6 +10,7 @@ import {
   isMissingDemographicsColumn,
   type PatientDemographics,
 } from "@/lib/profile/demographics";
+import { toErrorMessage } from "@/lib/errors";
 import type { ClinicalProfile, Patient } from "@/lib/types";
 
 export interface ProfileUpdate {
@@ -79,7 +80,7 @@ export function usePatientDetail(patientId: string) {
       setPatient(patientRes.data as Patient);
       setProfile((profileRes.data as ClinicalProfile) ?? null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al cargar el paciente");
+      setError(toErrorMessage(e, "Error al cargar el paciente"));
     } finally {
       setLoading(false);
     }

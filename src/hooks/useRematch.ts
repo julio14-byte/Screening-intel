@@ -8,9 +8,12 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 import {
   PATIENT_WITH_PROFILE_COLUMNS,
   PATIENT_WITH_PROFILE_COLUMNS_LEGACY,
+  PATIENT_WITH_PROFILE_COLUMNS_NO_ANAMNESIS,
   PROTOCOL_LIST_COLUMNS,
+  isMissingAnamnesisColumn,
 } from "@/lib/supabase/query-columns";
 import { isMissingDemographicsColumn } from "@/lib/profile/demographics";
+import { toErrorMessage } from "@/lib/errors";
 import type {
   ClinicalProfile,
   MatchResult,
@@ -77,14 +80,24 @@ export function useRematch() {
         .from("patients")
         .select(PATIENT_WITH_PROFILE_COLUMNS)
         .in("id", patientIds);
-      const patientsRes =
-        fullPatients.error &&
-        isMissingDemographicsColumn(fullPatients.error.message)
-          ? await supabase
-              .from("patients")
-              .select(PATIENT_WITH_PROFILE_COLUMNS_LEGACY)
-              .in("id", patientIds)
-          : fullPatients;
+      let patientsError = fullPatients.error;
+      let patientsUnknown: unknown = fullPatients.data;
+      if (patientsError && isMissingAnamnesisColumn(patientsError.message)) {
+        const retry = await supabase
+          .from("patients")
+          .select(PATIENT_WITH_PROFILE_COLUMNS_NO_ANAMNESIS)
+          .in("id", patientIds);
+        patientsError = retry.error;
+        patientsUnknown = retry.data;
+      }
+      if (patientsError && isMissingDemographicsColumn(patientsError.message)) {
+        const retry = await supabase
+          .from("patients")
+          .select(PATIENT_WITH_PROFILE_COLUMNS_LEGACY)
+          .in("id", patientIds);
+        patientsError = retry.error;
+        patientsUnknown = retry.data;
+      }
 
       const [protocolsRes, enrolledRes] = await Promise.all([
         supabase
@@ -97,11 +110,11 @@ export function useRematch() {
           .in("patient_id", patientIds),
       ]);
 
-      if (patientsRes.error) throw patientsRes.error;
+      if (patientsError) throw patientsError;
       if (protocolsRes.error) throw protocolsRes.error;
       if (enrolledRes.error) throw enrolledRes.error;
 
-      setPatients((patientsRes.data ?? []) as unknown as PatientWithProfile[]);
+      setPatients((patientsUnknown ?? []) as unknown as PatientWithProfile[]);
       setProtocols((protocolsRes.data ?? []) as Protocol[]);
       setScreenings(failures);
       setEnrolledPairs(
@@ -113,7 +126,7 @@ export function useRematch() {
         )
       );
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al cargar datos");
+      setError(toErrorMessage(e, "Error al cargar datos"));
     } finally {
       setLoading(false);
     }

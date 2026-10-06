@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSupabaseReady } from "@/hooks/useSupabaseReady";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { rankPatientsForProtocol } from "@/lib/matching";
+import { toErrorMessage } from "@/lib/errors";
 import type { MatchResult, Protocol, Screening } from "@/lib/types";
 import {
   usePatientsWithProfiles,
@@ -59,7 +60,7 @@ export function useProtocolMatch(protocolId: string) {
         )
       );
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al cargar el protocolo");
+      setError(toErrorMessage(e, "Error al cargar el protocolo"));
     } finally {
       setLoading(false);
     }

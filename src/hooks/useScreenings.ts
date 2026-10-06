@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRole } from "@/contexts/role-context";
 import { useSupabaseReady } from "@/hooks/useSupabaseReady";
 import { canSetScreeningStatus } from "@/lib/rbac/screening-transitions";
+import { firstEmbeddedOr } from "@/lib/supabase/embed";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { screeningUpdateConflict } from "@/lib/ops/model";
 import {
@@ -13,11 +14,44 @@ import {
   SCREENING_LIST_WITH_DETAILS_LEGACY,
 } from "@/lib/supabase/query-columns";
 import { isMissingDemographicsColumn } from "@/lib/profile/demographics";
+import { toErrorMessage } from "@/lib/errors";
 import type {
   CriterionResult,
+  Patient,
+  Protocol,
   ScreeningStatus,
   ScreeningWithRelations,
 } from "@/lib/types";
+
+function normalizeScreening(
+  row: ScreeningWithRelations
+): ScreeningWithRelations {
+  const raw = row as ScreeningWithRelations & {
+    patients: Patient | Patient[] | null;
+    protocols:
+      | Pick<Protocol, "id" | "title" | "code_name" | "status">
+      | Pick<Protocol, "id" | "title" | "code_name" | "status">[]
+      | null;
+  };
+  return {
+    ...row,
+    patients: firstEmbeddedOr(raw.patients, {
+      id: row.patient_id,
+      clinic_id: "",
+      first_name: "Paciente",
+      last_name: "sin ficha",
+      birth_date: "",
+      gender: "other",
+      created_at: row.created_at,
+    }),
+    protocols: firstEmbeddedOr(raw.protocols, {
+      id: row.protocol_id,
+      title: "Protocolo",
+      code_name: "—",
+      status: "active",
+    }),
+  };
+}
 
 export function useScreenings(options?: { includeMatchDetails?: boolean }) {
   const [screenings, setScreenings] = useState<ScreeningWithRelations[]>([]);
@@ -51,9 +85,13 @@ export function useScreenings(options?: { includeMatchDetails?: boolean }) {
               .order("updated_at", { ascending: false })
           : full;
       if (result.error) throw result.error;
-      setScreenings((result.data ?? []) as unknown as ScreeningWithRelations[]);
+      setScreenings(
+        ((result.data ?? []) as unknown as ScreeningWithRelations[]).map(
+          normalizeScreening
+        )
+      );
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al cargar screenings");
+      setError(toErrorMessage(e, "Error al cargar screenings"));
     } finally {
       setLoading(false);
     }
@@ -71,11 +109,7 @@ export function useScreenings(options?: { includeMatchDetails?: boolean }) {
       }
 
       if (!canSetScreeningStatus(role, status)) {
-        throw new Error(
-          status === "randomized"
-            ? "Solo el Investigador Principal puede marcar Randomización (Apto)."
-            : "Tu rol no puede mover pacientes a esta etapa."
-        );
+        throw new Error("Tu rol no puede mover pacientes a esta etapa.");
       }
 
       const previous = screenings.find((s) => s.id === screeningId);

@@ -12,6 +12,7 @@ import {
   parseScreeningImportCsv,
 } from "@/lib/import/vendorScreeningCsv";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
+import { toErrorMessage } from "@/lib/errors";
 
 const PASTE_PLACEHOLDER = [
   "USUBJID\tBRTHDTC\tSEX\tMHTERM\tCMTRT\tLBTESTCD\tLBSTRESN",
@@ -67,7 +68,7 @@ export function ImportPatientsModal({
       );
       onImported();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al importar el listado.");
+      setError(toErrorMessage(err, "Error al importar el listado."));
     } finally {
       setLoading(false);
     }

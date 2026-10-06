@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { isMissingSchemaError } from "@/lib/errors";
 import { opsContext, opsSchemaErrorResponse } from "@/lib/ops/http";
 
 const patchSchema = z.object({
@@ -19,6 +20,9 @@ export async function GET() {
     .limit(40);
 
   if (error) {
+    if (isMissingSchemaError(error)) {
+      return NextResponse.json({ items: [], unread: 0 });
+    }
     return opsSchemaErrorResponse(error);
   }
 
@@ -31,9 +35,12 @@ export async function GET() {
       .eq("user_id", gate.ctx.user.id)
       .in("notification_id", ids);
     if (readError) {
-      return opsSchemaErrorResponse(readError);
+      if (!isMissingSchemaError(readError)) {
+        return opsSchemaErrorResponse(readError);
+      }
+    } else {
+      for (const row of reads ?? []) readIds.add(row.notification_id);
     }
-    for (const row of reads ?? []) readIds.add(row.notification_id);
   }
 
   const items = (notes ?? []).map((note) => ({
@@ -70,7 +77,12 @@ export async function PATCH(request: Request) {
       .select("id")
       .eq("organization_id", gate.organizationId)
       .limit(40);
-    if (error) return opsSchemaErrorResponse(error);
+    if (error) {
+      if (isMissingSchemaError(error)) {
+        return NextResponse.json({ ok: true });
+      }
+      return opsSchemaErrorResponse(error);
+    }
     ids = (data ?? []).map((row) => row.id);
   } else if (parsed.data.id) {
     ids = [parsed.data.id];
@@ -88,6 +100,9 @@ export async function PATCH(request: Request) {
     .upsert(rows, { onConflict: "notification_id,user_id", ignoreDuplicates: true });
 
   if (error) {
+    if (isMissingSchemaError(error)) {
+      return NextResponse.json({ ok: true });
+    }
     return opsSchemaErrorResponse(error);
   }
 

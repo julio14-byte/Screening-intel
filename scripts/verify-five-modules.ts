@@ -60,6 +60,14 @@ assert(audit.includes("no es una certificación"), "21 CFR sin sello");
 assert(matching.length > 100, "motor de matching presente");
 assert(funnel.includes("Embudo de screening"), "embudo en dashboard");
 assert(funnelModel.includes("Inbox del portal"), "captación ya no es el discurso");
+const transitions = readFileSync(
+  resolve("src/lib/rbac/screening-transitions.ts"),
+  "utf8"
+);
+assert(
+  /coordinator:\s*\[[^\]]*randomized/.test(transitions),
+  "coordinador puede marcar randomizado"
+);
 
 if (failed) process.exit(1);
 console.log("verify-five-modules: V1 screening intelligence, sin vender DB ni TrialGPT OK");

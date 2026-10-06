@@ -10,7 +10,9 @@ import { useProtocols } from "@/hooks/useProtocols";
 
 export default function ProtocolPage({
   params,
-}: PageProps<"/protocols/[id]">) {
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = use(params);
   const { protocols, loading, error } = useProtocols();
   const protocol = protocols.find((item) => item.id === id);

@@ -11,7 +11,9 @@ import { usePatientDetail } from "@/hooks/usePatientDetail";
 
 export default function PatientDetailPage({
   params,
-}: PageProps<"/patients/[id]">) {
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = use(params);
   const { patient, profile, loading, error, saveProfile } =
     usePatientDetail(id);

@@ -114,7 +114,7 @@ export function isMissingDemographicsColumn(message: string | undefined): boolea
   if (!message) return false;
   if (/duplicate|unique constraint/i.test(message)) return false;
   const mentionsColumn =
-    /subject_code|ethnicity|address_line|address_city|address_state|address_postal_code|address_country/i.test(
+    /subject_code|ethnicity|phone|email|address_line|address_city|address_state|address_postal_code|address_country/i.test(
       message
     );
   const missing =

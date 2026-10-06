@@ -30,7 +30,7 @@ export function RoleGuard({
   fallback = null,
   disableOnly = false,
 }: RoleGuardProps) {
-  const { role, loading, hasPermission, hasAnyPermission, hasRole } =
+  const { loading, hasPermission, hasAnyPermission, hasRole } =
     useRole();
 
   if (loading) return null;

@@ -18,7 +18,9 @@ import { useProtocolMatch } from "@/hooks/useProtocolMatch";
 
 export default function ProtocolMatchPage({
   params,
-}: PageProps<"/protocols/[id]/match">) {
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = use(params);
   const { protocol, results, existing, loading, error, enroll } =
     useProtocolMatch(id);

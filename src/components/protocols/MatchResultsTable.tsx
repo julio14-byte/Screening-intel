@@ -14,6 +14,8 @@ import {
 import { ScoreBar } from "@/components/ui/ScoreBar";
 import { VerdictBadge } from "@/components/ui/VerdictBadge";
 import { MatchRationalePanel } from "@/components/matching/MatchRationalePanel";
+import { ErrorState } from "@/components/ui/StateMessage";
+import { toErrorMessage } from "@/lib/errors";
 import type { CriterionResult, MatchResult, Protocol, Screening } from "@/lib/types";
 import { ethnicityLabel, studySubjectCaption } from "@/lib/profile/demographics";
 import {
@@ -151,6 +153,7 @@ export function MatchResultsTable({
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [enrolling, setEnrolling] = useState<string | null>(null);
+  const [enrollError, setEnrollError] = useState<string | null>(null);
 
   const toggle = (id: string) => {
     setExpanded((prev) => {
@@ -163,8 +166,13 @@ export function MatchResultsTable({
 
   const handleEnroll = async (result: MatchResult) => {
     setEnrolling(result.patient.id);
+    setEnrollError(null);
     try {
       await onEnroll(result);
+    } catch (e) {
+      setEnrollError(
+        toErrorMessage(e, "No se pudo agregar a pre-screening")
+      );
     } finally {
       setEnrolling(null);
     }
@@ -172,6 +180,11 @@ export function MatchResultsTable({
 
   return (
     <>
+      {enrollError ? (
+        <div className="mb-3 px-1">
+          <ErrorState message={enrollError} />
+        </div>
+      ) : null}
       {/* Móvil: cards */}
       <ul className="space-y-3 md:hidden">
         {results.map((result) => {

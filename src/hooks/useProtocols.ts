@@ -11,6 +11,7 @@ import type {
   Protocol,
   ProtocolStatus,
 } from "@/lib/types";
+import { toErrorMessage } from "@/lib/errors";
 
 export interface NewProtocolInput {
   title: string;
@@ -38,7 +39,7 @@ export function useProtocols() {
       if (error) throw error;
       setProtocols((data ?? []) as Protocol[]);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al cargar protocolos");
+      setError(toErrorMessage(e, "Error al cargar protocolos"));
     } finally {
       setLoading(false);
     }

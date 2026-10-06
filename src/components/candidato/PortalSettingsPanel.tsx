@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/Field";
 import { ErrorState } from "@/components/ui/StateMessage";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
+import { toErrorMessage } from "@/lib/errors";
 
 type PortalData = {
   organization: {
@@ -63,7 +64,7 @@ export function PortalSettingsPanel() {
       setSlug(json.organization.slug ?? "");
       setEnabled(json.organization.portal_enabled);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error");
+      setError(toErrorMessage(e, "Error"));
     } finally {
       setLoading(false);
     }
@@ -92,7 +93,7 @@ export function PortalSettingsPanel() {
       setData(json);
       setMessage("Configuración guardada.");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error");
+      setError(toErrorMessage(e, "Error"));
     } finally {
       setSaving(false);
     }

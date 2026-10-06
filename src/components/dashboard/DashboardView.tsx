@@ -51,8 +51,8 @@ export function DashboardView({
 
       if (!term) return true;
 
-      const patient = `${screening.patients.first_name} ${screening.patients.last_name} ${screening.patients.subject_code ?? ""}`;
-      const protocol = `${screening.protocols.code_name} ${screening.protocols.title}`;
+      const patient = `${screening.patients?.first_name ?? ""} ${screening.patients?.last_name ?? ""} ${screening.patients?.subject_code ?? ""}`;
+      const protocol = `${screening.protocols?.code_name ?? ""} ${screening.protocols?.title ?? ""}`;
 
       return (
         normalizeTerm(patient).includes(term) ||

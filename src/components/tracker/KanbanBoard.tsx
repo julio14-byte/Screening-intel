@@ -22,13 +22,11 @@ const COLUMN_STYLES: Record<ScreeningStatus, { header: string; count: string }> 
 function KanbanCard({
   screening,
   onMove,
-  usesIwrs,
   readOnly,
   canMoveTo,
 }: {
   screening: ScreeningWithRelations;
   onMove: (id: string, status: ScreeningStatus) => void;
-  usesIwrs: boolean;
   readOnly: boolean;
   canMoveTo: (status: ScreeningStatus) => boolean;
 }) {
@@ -37,13 +35,11 @@ function KanbanCard({
     index > 0 && canMoveTo(SCREENING_STATUS_ORDER[index - 1])
       ? SCREENING_STATUS_ORDER[index - 1]
       : null;
-  const rawNext =
+  const next =
     index < SCREENING_STATUS_ORDER.length - 1 &&
     canMoveTo(SCREENING_STATUS_ORDER[index + 1])
       ? SCREENING_STATUS_ORDER[index + 1]
       : null;
-  const next =
-    rawNext === "randomized" && usesIwrs ? null : rawNext;
 
   return (
     <div
@@ -113,11 +109,9 @@ function KanbanCard({
 export function KanbanBoard({
   screenings,
   onMove,
-  iwrsProtocolIds,
 }: {
   screenings: ScreeningWithRelations[];
   onMove: (id: string, status: ScreeningStatus) => void;
-  iwrsProtocolIds?: Set<string>;
 }) {
   const [dragOver, setDragOver] = useState<ScreeningStatus | null>(null);
   const { role, isReadOnly } = useRole();
@@ -146,14 +140,6 @@ export function KanbanBoard({
               if (isReadOnly || !canMoveTo(status)) return;
               const id = e.dataTransfer.getData("text/plain");
               if (!id) return;
-              if (
-                status === "randomized" &&
-                iwrsProtocolIds?.has(
-                  screenings.find((row) => row.id === id)?.protocol_id ?? ""
-                )
-              ) {
-                return;
-              }
               onMove(id, status);
             }}
             className={cn(
@@ -187,7 +173,6 @@ export function KanbanBoard({
                     key={s.id}
                     screening={s}
                     onMove={onMove}
-                    usesIwrs={Boolean(iwrsProtocolIds?.has(s.protocol_id))}
                     readOnly={isReadOnly}
                     canMoveTo={canMoveTo}
                   />

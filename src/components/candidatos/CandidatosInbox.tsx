@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { ErrorState } from "@/components/ui/StateMessage";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
+import { toErrorMessage } from "@/lib/errors";
 import { routes } from "@/lib/app/routes";
 
 type SubmissionRow = {
@@ -52,7 +53,7 @@ export function CandidatosInbox() {
       if (!res.ok) throw new Error(data?.error ?? "Error al cargar.");
       setRows(data?.submissions ?? []);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error");
+      setError(toErrorMessage(e, "Error"));
     } finally {
       setLoading(false);
     }
@@ -70,7 +71,7 @@ export function CandidatosInbox() {
       if (!res.ok) throw new Error(data?.error ?? "Error");
       await load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error");
+      setError(toErrorMessage(e, "Error"));
     } finally {
       setActing(null);
     }
@@ -84,7 +85,7 @@ export function CandidatosInbox() {
       if (!res.ok) throw new Error(data?.error ?? "Error");
       await load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error");
+      setError(toErrorMessage(e, "Error"));
     } finally {
       setActing(null);
     }

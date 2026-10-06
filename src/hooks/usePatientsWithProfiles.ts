@@ -4,8 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import { useSupabaseReady } from "@/hooks/useSupabaseReady";
 import { firstEmbedded } from "@/lib/supabase/embed";
 import { getSupabaseClient } from "@/lib/supabase/client";
-import { PATIENT_WITH_PROFILE_COLUMNS, PATIENT_WITH_PROFILE_COLUMNS_LEGACY } from "@/lib/supabase/query-columns";
+import {
+  PATIENT_WITH_PROFILE_COLUMNS,
+  PATIENT_WITH_PROFILE_COLUMNS_LEGACY,
+  PATIENT_WITH_PROFILE_COLUMNS_NO_ANAMNESIS,
+  isMissingAnamnesisColumn,
+} from "@/lib/supabase/query-columns";
 import { isMissingDemographicsColumn } from "@/lib/profile/demographics";
+import { toErrorMessage } from "@/lib/errors";
 import type {
   ClinicalProfile,
   Patient,
@@ -33,15 +39,26 @@ export function usePatientsWithProfiles() {
         .from("patients")
         .select(PATIENT_WITH_PROFILE_COLUMNS)
         .order("last_name");
-      const result =
-        full.error && isMissingDemographicsColumn(full.error.message)
-          ? await supabase
-              .from("patients")
-              .select(PATIENT_WITH_PROFILE_COLUMNS_LEGACY)
-              .order("last_name")
-          : full;
-      if (result.error) throw result.error;
-      const rows = (result.data ?? []) as unknown as PatientWithProfile[];
+      let queryError = full.error;
+      let rowsUnknown: unknown = full.data;
+      if (queryError && isMissingAnamnesisColumn(queryError.message)) {
+        const retry = await supabase
+          .from("patients")
+          .select(PATIENT_WITH_PROFILE_COLUMNS_NO_ANAMNESIS)
+          .order("last_name");
+        queryError = retry.error;
+        rowsUnknown = retry.data;
+      }
+      if (queryError && isMissingDemographicsColumn(queryError.message)) {
+        const retry = await supabase
+          .from("patients")
+          .select(PATIENT_WITH_PROFILE_COLUMNS_LEGACY)
+          .order("last_name");
+        queryError = retry.error;
+        rowsUnknown = retry.data;
+      }
+      if (queryError) throw queryError;
+      const rows = (rowsUnknown ?? []) as unknown as PatientWithProfile[];
       setPairs(
         rows.map((row) => {
           const { clinical_profiles, ...patient } = row;
@@ -52,7 +69,7 @@ export function usePatientsWithProfiles() {
         })
       );
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al cargar pacientes");
+      setError(toErrorMessage(e, "Error al cargar pacientes"));
     } finally {
       setLoading(false);
     }

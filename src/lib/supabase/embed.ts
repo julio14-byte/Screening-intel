@@ -10,3 +10,10 @@ export function firstEmbedded<T extends object>(
   if (Array.isArray(value)) return value[0] ?? null;
   return value;
 }
+
+export function firstEmbeddedOr<T extends object>(
+  value: T | T[] | null | undefined,
+  fallback: T
+): T {
+  return firstEmbedded(value) ?? fallback;
+}

@@ -10,6 +10,7 @@ import { LabCriteriaEditor } from "@/components/protocols/LabCriteriaEditor";
 import type { ExtractedProtocolDraft } from "@/lib/protocols/extractCriteria";
 import { ProtocolPdfImport } from "@/components/protocols/ProtocolPdfImport";
 import type { NewProtocolInput } from "@/hooks/useProtocols";
+import { toErrorMessage } from "@/lib/errors";
 import type { LabCriterion } from "@/lib/types";
 
 export function NewProtocolModal({
@@ -87,9 +88,7 @@ export function NewProtocolModal({
       reset();
       onClose();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "No se pudo crear el protocolo"
-      );
+      setError(toErrorMessage(err, "No se pudo crear el protocolo"));
     } finally {
       setSaving(false);
     }
