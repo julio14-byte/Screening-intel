@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { use } from "react";
 import { ArrowLeft, Target } from "lucide-react";
+import { ProtocolVisitCalendarPanel } from "@/components/follow-up/ProtocolVisitCalendarPanel";
+import { ProtocolStudyMedsPanel } from "@/components/pharmacy/ProtocolStudyMedsPanel";
 import { Button } from "@/components/ui/Button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
@@ -33,7 +35,7 @@ export default function ProtocolPage({
 
       <PageHeader
         title={`${protocol.code_name} · screening`}
-        description={`${protocol.title}. Criterios de inclusión y exclusión del protocolo.`}
+        description={`${protocol.title}. Calendario de visitas y medicamento del estudio.`}
         actions={
           <Link href={`/protocols/${protocol.id}/match`}>
             <Button variant="secondary">
@@ -43,6 +45,9 @@ export default function ProtocolPage({
           </Link>
         }
       />
+
+      <ProtocolVisitCalendarPanel protocolId={protocol.id} />
+      <ProtocolStudyMedsPanel protocolId={protocol.id} />
     </>
   );
 }

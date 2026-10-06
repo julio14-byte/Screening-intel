@@ -17,7 +17,9 @@
     "verify:vendor-import": "tsx --tsconfig tsconfig.json scripts/verify-vendor-import.ts",
     "verify:matching-aliases": "tsx --tsconfig tsconfig.json scripts/verify-matching-aliases.ts",
     "verify:security": "tsx --tsconfig tsconfig.json scripts/verify-security.ts",
-    "verify:citas": "tsx --tsconfig tsconfig.json scripts/verify-citas.ts"
+    "verify:citas": "tsx --tsconfig tsconfig.json scripts/verify-citas.ts",
+    "verify:follow-up": "tsx --tsconfig tsconfig.json scripts/verify-follow-up.ts",
+    "verify:pharmacy-inventory": "tsx --tsconfig tsconfig.json scripts/verify-pharmacy-inventory.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
