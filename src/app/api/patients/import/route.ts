@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { serverError } from "@/lib/security/http";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/supabase/server";
 import {
@@ -7,6 +8,37 @@ import {
 } from "@/lib/rbac/require-permission";
 import { isMissingDemographicsColumn } from "@/lib/profile/demographics";
 import type { ParsedPatientRow } from "@/lib/import/parsePatientCsv";
+import { readJsonBody } from "@/lib/security/http";
+import { z } from "zod";
+
+const MAX_IMPORT_ROWS = 2000;
+
+const short = (max: number) => z.string().trim().max(max);
+
+const rowSchema = z.object({
+  first_name: short(120).min(1),
+  last_name: short(120).min(1),
+  birth_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  gender: z.enum(["male", "female", "other"]),
+  phone: short(40).optional(),
+  email: short(254).optional(),
+  ethnicity: short(60).optional(),
+  subject_code: short(60).optional(),
+  address_line: short(200).optional(),
+  address_city: short(120).optional(),
+  conditions: z.array(short(200)).max(60).default([]),
+  medications: z.array(short(200)).max(60).default([]),
+  laboratories: z.record(z.string().max(60), z.number().finite()).default({}),
+});
+
+const bodySchema = z.object({
+  patients: z.array(rowSchema).max(MAX_IMPORT_ROWS),
+});
+
+function rowError(index: number, message: string | undefined, fallback: string) {
+  const safe = message && /Límite del plan/i.test(message) ? message : fallback;
+  return `Fila ${index + 2}: ${safe}`;
+}
 
 export async function POST(request: Request) {
   try {
@@ -24,8 +56,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No autenticado." }, { status: 401 });
   }
 
-  const body = (await request.json()) as { patients?: ParsedPatientRow[] };
-  const rows = body.patients ?? [];
+  const parsedBody = await readJsonBody(request, 5_000_000);
+  if (!parsedBody.ok) return parsedBody.response;
+  const parsed = bodySchema.safeParse(parsedBody.body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      {
+        error: `Formato inválido o más de ${MAX_IMPORT_ROWS} filas. Revisa el archivo e inténtalo de nuevo.`,
+      },
+      { status: 400 }
+    );
+  }
+  const rows = parsed.data.patients as ParsedPatientRow[];
 
   if (!rows.length) {
     return NextResponse.json({ error: "No hay filas para importar." }, { status: 400 });
@@ -40,7 +82,7 @@ export async function POST(request: Request) {
     .maybeSingle();
 
   if (orgError) {
-    return NextResponse.json({ error: orgError.message }, { status: 500 });
+    return serverError("patients/import", orgError);
   }
 
   const clinicId = membership?.organization_id as string | undefined;
@@ -83,7 +125,7 @@ export async function POST(request: Request) {
           .eq("id", patientId)
           .eq("clinic_id", clinicId);
         if (updated.error && !isMissingDemographicsColumn(updated.error.message)) {
-          errors.push(`Fila ${index + 2}: ${updated.error.message}`);
+          errors.push(rowError(index, updated.error.message, "no se pudo actualizar"));
           continue;
         }
       }
@@ -125,9 +167,7 @@ export async function POST(request: Request) {
           .single();
       }
       if (inserted.error || !inserted.data) {
-        errors.push(
-          `Fila ${index + 2}: ${inserted.error?.message ?? "error al crear paciente"}`
-        );
+        errors.push(rowError(index, inserted.error?.message, "no se pudo crear el paciente"));
         continue;
       }
       patientId = inserted.data.id as string;
@@ -149,7 +189,7 @@ export async function POST(request: Request) {
       );
 
       if (profileError) {
-        errors.push(`Fila ${index + 2} perfil: ${profileError.message}`);
+        errors.push(rowError(index, profileError.message, "no se pudo guardar el perfil clínico"));
       }
     }
 

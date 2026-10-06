@@ -65,6 +65,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
       { name: "Auth", description: "Autenticación y sesión" },
       { name: "Patients", description: "Registro e importación de pacientes" },
       { name: "Protocols", description: "Protocolos clínicos" },
+      { name: "Citas", description: "Agenda de citas de pacientes" },
       { name: "Audit", description: "Bitácora de auditoría" },
       { name: "RBAC", description: "Roles clínicos" },
       { name: "ICD-11", description: "Terminología WHO ICD-11" },
@@ -103,7 +104,6 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           properties: {
             authenticated: { type: "boolean" },
             email: { type: "string", nullable: true },
-            userId: { type: "string", format: "uuid", nullable: true },
             role: { ...appRoleSchema, nullable: true },
           },
         },
@@ -177,9 +177,8 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
               enum: ["patients", "clinical_profiles", "screenings", "protocols"],
             },
             recordId: { type: "string", format: "uuid" },
-            description: { type: "string", maxLength: 2000 },
+            description: { type: "string", maxLength: 1000 },
             metadata: { type: "object", additionalProperties: true },
-            userId: { type: "string", format: "uuid", nullable: true },
           },
           example: EXAMPLES.audit,
         },
@@ -373,6 +372,34 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           },
         },
       },
+      "/api/ops/visits": {
+        get: {
+          tags: ["Citas"],
+          summary: "Listar citas (últimos 60 días a próximos 180)",
+          security: [{ cookieAuth: [] }],
+          parameters: [
+            { name: "patient_id", in: "query", schema: { type: "string", format: "uuid" } },
+            { name: "from", in: "query", schema: { type: "string", format: "date-time" } },
+            { name: "to", in: "query", schema: { type: "string", format: "date-time" } },
+          ],
+          responses: { "200": { description: "Citas del centro" } },
+        },
+        post: {
+          tags: ["Citas"],
+          summary: "Agendar cita (409 si el paciente ya tiene una en esa hora; `force` la omite)",
+          security: [{ cookieAuth: [] }],
+          responses: {
+            "200": { description: "Cita creada" },
+            "409": { description: "Conflicto de horario", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+          },
+        },
+        patch: {
+          tags: ["Citas"],
+          summary: "Cambiar estado, reprogramar o editar nota",
+          security: [{ cookieAuth: [] }],
+          responses: { "200": { description: "Cita actualizada" } },
+        },
+      },
       "/api/audit": {
         get: {
           tags: ["Audit"],
@@ -381,7 +408,7 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
           parameters: [
             { name: "table_name", in: "query", required: true, schema: { type: "string", enum: ["patients", "clinical_profiles", "screenings", "protocols"] } },
             { name: "record_id", in: "query", required: true, schema: { type: "string", format: "uuid" } },
-            { name: "limit", in: "query", schema: { type: "integer", default: 100, maximum: 500 } },
+            { name: "limit", in: "query", schema: { type: "integer", default: 100, maximum: 200 } },
           ],
           responses: {
             "200": {

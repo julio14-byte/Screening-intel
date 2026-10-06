@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { candidatoPaths } from "@/lib/candidato/paths";
-import {
-  checkPublicRateLimit,
-  clientIpFromRequest,
-} from "@/lib/candidato/rate-limit";
+import { clientIp, rateLimit, tooManyRequests } from "@/lib/security/rate-limit";
 import { generateReferralCode } from "@/lib/candidato/referral";
 import {
   candidatoSubmitSchema,
@@ -25,18 +22,9 @@ function intakeMessage(verdict: string): string {
 }
 
 export async function POST(request: Request) {
-  const ip = clientIpFromRequest(request);
-  const limited = checkPublicRateLimit(`candidato:ip:${ip}`, 5, 3600);
+  const limited = await rateLimit(`candidato:ip:${clientIp(request)}`, 5, 3600);
   if (!limited.allowed) {
-    return NextResponse.json(
-      { error: "Demasiados envíos. Intentá más tarde." },
-      {
-        status: 429,
-        headers: {
-          "Retry-After": String(limited.retryAfterSec ?? 3600),
-        },
-      }
-    );
+    return tooManyRequests(limited, "Demasiados envíos. Inténtalo más tarde.");
   }
 
   let supabase;
@@ -46,7 +34,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "El servidor no está configurado para recibir candidatos. Falta SUPABASE_SERVICE_ROLE_KEY en Vercel.",
+          "El portal no está disponible por ahora. Contacta al centro.",
       },
       { status: 503 }
     );
@@ -75,6 +63,11 @@ export async function POST(request: Request) {
 
   if (orgError || !org) {
     return NextResponse.json({ error: "Centro no encontrado." }, { status: 404 });
+  }
+
+  const orgLimited = await rateLimit(`candidato:org:${org.id}`, 60, 3600);
+  if (!orgLimited.allowed) {
+    return tooManyRequests(orgLimited, "El portal recibió muchos envíos. Inténtalo más tarde.");
   }
 
   if (!org.portal_enabled) {

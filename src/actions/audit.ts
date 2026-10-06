@@ -17,9 +17,10 @@ export async function logCustomAuditEventAction(
     const auditId = await recordCustomAuditEvent(input);
     return { ok: true, auditId };
   } catch (e) {
+    console.error("[audit action]", e instanceof Error ? e.message : e);
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "Error al registrar auditoría",
+      error: "No se pudo registrar la auditoría.",
     };
   }
 }
@@ -39,9 +40,10 @@ export async function logInclusionApprovalAction(input: {
     });
     return { ok: true, auditId };
   } catch (e) {
+    console.error("[audit action]", e instanceof Error ? e.message : e);
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "Error al registrar aprobación",
+      error: "No se pudo registrar la aprobación.",
     };
   }
 }
@@ -58,10 +60,10 @@ export async function logScreeningStatusAction(input: {
     const auditId = await recordScreeningStatusAudit(input);
     return { ok: true, auditId };
   } catch (e) {
+    console.error("[audit action]", e instanceof Error ? e.message : e);
     return {
       ok: false,
-      error:
-        e instanceof Error ? e.message : "Error al registrar cambio de estatus",
+      error: "No se pudo registrar el cambio de estatus.",
     };
   }
 }
@@ -75,9 +77,10 @@ export async function getAuditLogsAction(input: {
     const logs = await fetchAuditLogs(input);
     return { ok: true, logs };
   } catch (e) {
+    console.error("[audit action]", e instanceof Error ? e.message : e);
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "Error al cargar auditoría",
+      error: "No se pudo cargar la auditoría.",
     };
   }
 }

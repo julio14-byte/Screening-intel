@@ -10,7 +10,9 @@ export function isProtectedPath(pathname: string): boolean {
 }
 
 export function isPublicApiPath(pathname: string): boolean {
-  return routes.publicApis.some((p) => pathname.startsWith(p));
+  return routes.publicApis.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`)
+  );
 }
 
 export function loginUrlWithFrom(path: string): string {

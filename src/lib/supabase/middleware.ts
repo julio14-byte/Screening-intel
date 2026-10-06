@@ -18,6 +18,10 @@ import {
   isWriteApiPath,
 } from "@/lib/rbac/permissions";
 import type { AppRole } from "@/lib/rbac/types";
+import {
+  hardenAuthCookieOptions,
+  safeRedirectPath,
+} from "@/lib/security/safe-redirect";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { getPaywallRedirect } from "@/plugins/stripe/paywall";
 
@@ -62,6 +66,19 @@ export async function updateSession(request: NextRequest) {
     return await runUpdateSession(request);
   } catch (err) {
     console.error("[middleware] updateSession failed:", (err as Error)?.message);
+    const { pathname } = request.nextUrl;
+    if (pathname.startsWith("/api/") && !isPublicApiPath(pathname)) {
+      return NextResponse.json(
+        { error: "Servicio no disponible. Inténtalo de nuevo." },
+        { status: 503 }
+      );
+    }
+    if (isProtectedPath(pathname)) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = config.auth.loginUrl;
+      loginUrl.search = "";
+      return NextResponse.redirect(loginUrl);
+    }
     return NextResponse.next({ request });
   }
 }
@@ -100,11 +117,15 @@ async function runUpdateSession(request: NextRequest) {
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
             request.cookies.set(name, value);
-            sessionCookies.push({ name, value, options });
+            sessionCookies.push({
+              name,
+              value,
+              options: hardenAuthCookieOptions(options),
+            });
           });
           response = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
+            response.cookies.set(name, value, hardenAuthCookieOptions(options))
           );
         },
       },
@@ -228,12 +249,13 @@ async function runUpdateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
     const from = request.nextUrl.searchParams.get("from");
     const next = request.nextUrl.searchParams.get("next");
-    const redirectPath =
-      (from && from.startsWith("/") && !from.startsWith("//") ? from : null) ??
-      (next && next.startsWith("/") && !next.startsWith("//") ? next : null) ??
-      config.auth.afterLoginUrl;
-    url.pathname = redirectPath;
-    url.search = "";
+    const redirectPath = safeRedirectPath(
+      from ?? next,
+      config.auth.afterLoginUrl
+    );
+    const target = new URL(redirectPath, request.nextUrl.origin);
+    url.pathname = target.pathname;
+    url.search = target.search;
     return finish(NextResponse.redirect(url));
   }
 
@@ -241,6 +263,10 @@ async function runUpdateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = config.auth.afterLoginUrl;
     return finish(NextResponse.redirect(url));
+  }
+
+  if (!user && pathname.startsWith("/api/") && !isPublicApiPath(pathname)) {
+    return NextResponse.json({ error: "No autenticado." }, { status: 401 });
   }
 
   if (isProtectedPath(pathname) && !user) {

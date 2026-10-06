@@ -9,6 +9,9 @@ import {
   shouldSkipMfaForUser,
 } from "@/lib/auth/session-policy";
 import type { AppRole } from "@/lib/rbac/types";
+import { clientIp, rateLimit, tooManyRequests } from "@/lib/security/rate-limit";
+import { hardenAuthCookieOptions } from "@/lib/security/safe-redirect";
+import { readJsonBody } from "@/lib/security/http";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 type SessionCookie = {
@@ -27,11 +30,14 @@ function applySessionCookies(
 }
 
 export async function POST(request: NextRequest) {
-  const body = (await request.json()) as { email?: string; password?: string };
-  const email = body.email?.trim().toLowerCase() ?? "";
-  const password = body.password ?? "";
+  const parsedBody = await readJsonBody(request, 10_000);
+  if (!parsedBody.ok) return parsedBody.response;
+  const body = (parsedBody.body ?? {}) as { email?: unknown; password?: unknown };
+  const email =
+    typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+  const password = typeof body.password === "string" ? body.password : "";
 
-  if (!email || !password) {
+  if (!email || !password || email.length > 320 || password.length > 256) {
     return NextResponse.json(
       { error: "Email y contraseña requeridos." },
       { status: 400 }
@@ -40,10 +46,15 @@ export async function POST(request: NextRequest) {
 
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
-      { error: "Supabase no configurado en el servidor." },
+      { error: "El servicio de acceso no está disponible." },
       { status: 503 }
     );
   }
+
+  const ipLimit = await rateLimit(`login:ip:${clientIp(request)}`, 30, 600);
+  if (!ipLimit.allowed) return tooManyRequests(ipLimit);
+  const emailLimit = await rateLimit(`login:email:${email}`, 8, 600);
+  if (!emailLimit.allowed) return tooManyRequests(emailLimit);
 
   if (isDemoEmail(email) && !isDemoLoginEnabled()) {
     return NextResponse.json(
@@ -64,7 +75,11 @@ export async function POST(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
-            sessionCookies.push({ name, value, options });
+            sessionCookies.push({
+              name,
+              value,
+              options: hardenAuthCookieOptions(options),
+            });
           });
         },
       },
@@ -100,7 +115,13 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
-    return NextResponse.json({ error: error.message }, { status: 401 });
+    if (/not confirmed/i.test(error.message)) {
+      return NextResponse.json(
+        { error: "Confirma tu correo antes de iniciar sesión." },
+        { status: 401 }
+      );
+    }
+    return NextResponse.json({ error: "Credenciales inválidas." }, { status: 401 });
   }
 
   let mfaRequired = false;

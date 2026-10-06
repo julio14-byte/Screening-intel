@@ -1,8 +1,6 @@
 import {
-  createSupabaseAdminClient,
   createClient,
   getUser,
-  isAuditAdminConfigured,
 } from "@/lib/supabase/server";
 import type { AuditLog, RecordCustomAuditInput } from "./types";
 
@@ -18,53 +16,35 @@ export class AuditRecordError extends Error {
 
 /**
  * Registra un evento de auditoría manual vía RPC `record_custom_audit_event`.
- * Preferir esta función para aprobaciones, notas del investigador principal, etc.
+ * El actor siempre es el usuario de la sesión: `input.userId` se ignora para que
+ * nadie pueda atribuir eventos a otra persona. La RPC verifica además que el
+ * registro pertenezca a la organización del usuario.
  */
 export async function recordCustomAuditEvent(
   input: RecordCustomAuditInput
 ): Promise<string> {
-  const payload = {
+  const supabase = await createClient();
+  const user = await getUser();
+  if (!user) {
+    throw new AuditRecordError("Se requiere sesión para registrar auditoría.");
+  }
+
+  const { data, error } = await supabase.rpc("record_custom_audit_event", {
     p_table_name: input.tableName,
     p_record_id: input.recordId,
     p_description: input.description,
     p_metadata: input.metadata ?? {},
-    p_user_id: input.userId ?? null,
-  };
-
-  const supabase = await createClient();
-  const user = await getUser();
-
-  const { data, error } = await supabase.rpc("record_custom_audit_event", {
-    ...payload,
-    p_user_id: payload.p_user_id ?? user?.id ?? null,
+    p_user_id: user.id,
   });
 
-  if (!error && data) {
-    return data as string;
-  }
-
-  // Fallback con service role si la RPC falla por permisos (entornos sin auth)
-  if (isAuditAdminConfigured()) {
-    const admin = createSupabaseAdminClient();
-    const { data: adminData, error: adminError } = await admin.rpc(
-      "record_custom_audit_event",
-      payload
+  if (error || !data) {
+    throw new AuditRecordError(
+      "No se pudo registrar el evento de auditoría.",
+      error
     );
-
-    if (adminError) {
-      throw new AuditRecordError(
-        `No se pudo registrar el evento de auditoría: ${adminError.message}`,
-        adminError
-      );
-    }
-
-    return adminData as string;
   }
 
-  throw new AuditRecordError(
-    error?.message ?? "No se pudo registrar el evento de auditoría.",
-    error
-  );
+  return data as string;
 }
 
 /** Consulta entradas de auditoría para un registro concreto. */
@@ -73,7 +53,7 @@ export async function fetchAuditLogs(params: {
   recordId: string;
   limit?: number;
 }): Promise<AuditLog[]> {
-  const limit = params.limit ?? 100;
+  const limit = Math.min(Math.max(Math.trunc(params.limit ?? 100) || 100, 1), 200);
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -85,10 +65,7 @@ export async function fetchAuditLogs(params: {
     .limit(limit);
 
   if (error) {
-    throw new AuditRecordError(
-      `No se pudieron cargar los registros de auditoría: ${error.message}`,
-      error
-    );
+    throw new AuditRecordError("No se pudieron cargar los registros de auditoría.", error);
   }
 
   return (data ?? []) as AuditLog[];
