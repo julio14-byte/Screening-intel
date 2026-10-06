@@ -55,4 +55,5 @@ export const PRODUCT_MODULES: Record<
 
 export const PRODUCT_MODULE_NAV_LABEL: Record<string, string> = {
   screening: "Screening",
+  estudio: "Estudio en curso",
 };

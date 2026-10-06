@@ -56,6 +56,7 @@ Crisvia no se vende como “base de pacientes” ni como “te conseguimos reclu
 | **Motor de elegibilidad** | Semáforo 🟢 Cumple / 🟡 Pendiente / 🔴 No cumple + `match_score` + justificación IA. No es un sorteo: filtra por criterios. |
 | **4. Screening Tracker** | Kanban: Pre-screening → Screening → Randomización → Screen Failure. Randomizado lo marca el coordinador cuando el IRT del sponsor ya asignó kit. |
 | **5. Re-Match & Follow-up** | Screen failure → otros protocolos activos. |
+| **Estudio en curso (opcional)** | Tras randomizar: **Seguimiento** (calendario de visitas con ventana −/+ días, adherencia, desviaciones), **Inventario** (lotes de medicamento del estudio, caducidad, stock) y **Dispensación** (entrega al paciente descontando lote, primera dosis). Registro operativo del site; no es IWRS/IRT, EDC ni ePRO: la randomización y el kit los asigna el sponsor y aquí solo se registra el código. |
 | **Portal candidatos** | Pre-registro público (`/candidato`) + inbox (`/candidatos`) + settings del portal |
 | **Expediente interno** | Pacientes y perfil clínico en tablas de la app, para matching. |
 | **Audit Trail** | Bitácora inmutable alineada a 21 CFR Part 11 (diseño; no es una certificación) |
@@ -175,7 +176,7 @@ supabase/migrations/20260925040000_protocol_closeout.sql
 supabase/migrations/20260925050000_protocol_integrations.sql
 ```
 
-> Varias migraciones crean tablas heredadas (ePRO, IWRS, farmacia, visitas, cierre, FHIR) que la app **ya no usa**. Se conservan como historial; no hace falta ejecutarlas en un proyecto nuevo salvo que quieras el orden completo.
+> Seguimiento, Inventario y Dispensación usan `20260924001000_protocol_medication_inventory.sql`, `20260925010000_dispense_first_dose_diary.sql` y `20260925030000_follow_up_visits.sql`. Otras migraciones crean tablas heredadas (ePRO, IWRS, diario, cierre, FHIR) que la app **ya no usa**. Se conservan como historial; no hace falta ejecutarlas en un proyecto nuevo salvo que quieras el orden completo.
 
 Si 0016 falló porque no existía `get_user_organization_ids()`, 0018 la crea y recrea las políticas tenant. Si el slug `demo` falló en 0009, aplica también `0011_fix_organization_slug_backfill.sql`.
 

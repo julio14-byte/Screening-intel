@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { use } from "react";
 import { ArrowLeft } from "lucide-react";
+import { PatientFollowUpCard } from "@/components/follow-up/PatientFollowUpCard";
 import { PatientVisits } from "@/components/citas/PatientVisits";
 import { AuditTimeline } from "@/components/audit/audit-timeline";
 import { InclusionApprovalPanel } from "@/components/rbac/InclusionApprovalPanel";
 import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
 import { ClinicalProfileEditor } from "@/components/profile/ClinicalProfileEditor";
 import { usePatientDetail } from "@/hooks/usePatientDetail";
+import { useProtocols } from "@/hooks/useProtocols";
 
 export default function PatientDetailPage({
   params,
@@ -18,6 +20,7 @@ export default function PatientDetailPage({
   const { id } = use(params);
   const { patient, profile, loading, error, saveProfile } =
     usePatientDetail(id);
+  const { protocols } = useProtocols();
 
   if (loading) return <LoadingState label="Cargando perfil clínico…" />;
   if (error || !patient)
@@ -43,6 +46,8 @@ export default function PatientDetailPage({
       <div className="mt-6">
         <PatientVisits patientId={patient.id} />
       </div>
+
+      <PatientFollowUpCard patientId={patient.id} protocols={protocols} />
 
       <div className="mt-6">
         <AuditTimeline tableName="patients" recordId={patient.id} />

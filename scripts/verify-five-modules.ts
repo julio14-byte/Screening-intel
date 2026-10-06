@@ -64,21 +64,15 @@ const RETIRED = [
   "src/app/(app)/epro",
   "src/app/(app)/cierre",
   "src/app/(app)/agenda",
-  "src/app/(app)/seguimiento",
-  "src/app/(app)/inventario",
-  "src/app/(app)/dispensacion",
   "src/app/(app)/integraciones",
   "src/app/(app)/cola",
   "src/app/epro-app",
   "src/app/diario",
   "src/app/api/iwrs",
   "src/app/api/epro-app",
-  "src/app/api/pharmacy",
-  "src/app/api/follow-up",
   "src/app/api/cierre",
   "src/lib/iwrs",
   "src/lib/ehr",
-  "src/lib/pharmacy",
 ];
 for (const path of RETIRED) {
   assert(!existsSync(resolve(path)), `módulo retirado no debe existir: ${path}`);

@@ -75,6 +75,8 @@ export const WRITE_API_PREFIXES = [
   "/api/rbac",
   "/api/candidatos",
   "/api/settings/portal",
+  "/api/pharmacy",
+  "/api/follow-up",
 ] as const;
 
 export function isWriteApiPath(pathname: string): boolean {
