@@ -383,12 +383,12 @@ async function createOrgForUser(
     .from("organizations")
     .insert({
       name: "Crisvia demo",
-      plan_id: "starter",
-      subscription_status: "trialing",
+      plan_id: "pro_plus",
+      subscription_status: "active",
       trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-      patient_limit: 50,
-      protocol_limit: 3,
-      user_limit: 1,
+      patient_limit: 2000,
+      protocol_limit: 100,
+      user_limit: 10,
     })
     .select("id")
     .single();
@@ -464,6 +464,20 @@ export async function ensureDemoPatientData(userId?: string): Promise<void> {
   const admin = createAdminClient();
   const clinicId = await resolveDemoClinicId(admin, userId);
 
+  const { error: orgError } = await admin
+    .from("organizations")
+    .update({
+      plan_id: "pro_plus",
+      subscription_status: "active",
+      patient_limit: 2000,
+      protocol_limit: 100,
+      user_limit: 10,
+    })
+    .eq("id", clinicId);
+  if (orgError) {
+    console.warn("[demo-seed] plan demo no actualizado:", orgError.code ?? "error");
+  }
+
   let { error: patientsError } = await admin.from("patients").upsert(
     DEMO_PATIENTS.map((patient) => ({ ...patient, clinic_id: clinicId })),
     { onConflict: "id" }
@@ -513,5 +527,53 @@ export async function ensureDemoPatientData(userId?: string): Promise<void> {
 
   if (screeningsError) {
     throw new Error(`demo screenings: ${screeningsError.message}`);
+  }
+
+  await seedDemoVisits(admin, clinicId);
+}
+
+function demoVisitAt(dayOffset: number, hour: number, minute = 0): string {
+  const date = new Date();
+  date.setDate(date.getDate() + dayOffset);
+  date.setHours(hour, minute, 0, 0);
+  return date.toISOString();
+}
+
+async function seedDemoVisits(
+  admin: ReturnType<typeof createAdminClient>,
+  clinicId: string
+): Promise<void> {
+  const patientIds = DEMO_PATIENTS.map((patient) => patient.id);
+  const { count, error: countError } = await admin
+    .from("study_visits")
+    .select("id", { count: "exact", head: true })
+    .eq("organization_id", clinicId)
+    .in("patient_id", patientIds);
+  if (countError || (count ?? 0) > 0) return;
+
+  const protocol = DEMO_PROTOCOLS[0].id;
+  const rows = [
+    { p: 0, at: demoVisitAt(0, 9), kind: "screening", where: "Consultorio 1", who: "Dra. Ramírez", protocol },
+    { p: 1, at: demoVisitAt(0, 11, 30), kind: "pre_screening", where: "Consultorio 2", who: "Dr. Soto", protocol },
+    { p: 4, at: demoVisitAt(1, 10), kind: "consulta", where: "Consultorio 1", who: "Dra. Ramírez", protocol: null },
+    { p: 2, at: demoVisitAt(3, 16), kind: "follow_up", where: "Consultorio 2", who: "Dr. Soto", protocol: null },
+    { p: 5, at: demoVisitAt(-2, 12), kind: "pre_screening", where: "Consultorio 1", who: "Dra. Ramírez", protocol: null },
+  ];
+
+  const { error } = await admin.from("study_visits").insert(
+    rows.map((row) => ({
+      organization_id: clinicId,
+      patient_id: patientIds[row.p],
+      protocol_id: row.protocol,
+      scheduled_at: row.at,
+      kind: row.kind,
+      location: row.where,
+      clinician_name: row.who,
+      status: "scheduled",
+      notes: "",
+    }))
+  );
+  if (error) {
+    console.warn("[demo-seed] citas de demo omitidas:", error.code ?? "error");
   }
 }

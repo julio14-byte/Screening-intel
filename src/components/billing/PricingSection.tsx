@@ -44,7 +44,7 @@ export function PricingSection() {
               {plan.price === 0 ? "Gratis" : `$${plan.price}`}
               {plan.price > 0 ? (
                 <span className="text-sm font-normal text-slate-500">
-                  /{plan.interval}
+                  {" "}{plan.currency}/{plan.interval}
                 </span>
               ) : null}
             </p>
