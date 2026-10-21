@@ -24,7 +24,12 @@ jobs:
       - run: yarn lint
       - run: yarn verify:security
       - name: Dependencias de producción (alta o crítica bloquea)
-        run: yarn audit --groups dependencies --level high
+        # Yarn 1 devuelve una máscara de bits (4 = moderada, 8 = alta, 16 = crítica) aunque se pase --level.
+        run: |
+          set +e
+          yarn audit --groups dependencies
+          code=$?
+          if [ $((code & 24)) -ne 0 ]; then exit 1; fi
 
   secrets:
     runs-on: ubuntu-latest
