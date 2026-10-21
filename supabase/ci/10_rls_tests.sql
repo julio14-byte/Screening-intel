@@ -74,6 +74,15 @@ values
 insert into public.candidate_contact_attempts (organization_id, submission_id, channel, outcome)
 select organization_id, id, 'phone', 'no_answer' from public.pre_screen_submissions;
 
+insert into public.site_staff (organization_id, full_name, role_title)
+values ((select org_a from _t_orgs), 'Staff A', 'coordinator'),
+       ((select org_b from _t_orgs), 'Staff B', 'coordinator');
+
+insert into public.delegation_assignments (organization_id, staff_id, protocol_id, tasks)
+select st.organization_id, st.id, pr.id, array['consent']
+  from public.site_staff st
+  join public.protocols pr on pr.clinic_id = st.organization_id;
+
 grant select on all tables in schema pg_temp to public;
 
 create function pg_temp.act_as(p_alias text) returns void language plpgsql as $$
@@ -146,6 +155,9 @@ select set_config('t.org_a', (select org_a::text from _t_orgs), true),
        set_config('t.org_b', (select org_b::text from _t_orgs), true),
        set_config('t.sub_a', (select id::text from public.pre_screen_submissions where organization_id = (select org_a from _t_orgs)), true),
        set_config('t.sub_b', (select id::text from public.pre_screen_submissions where organization_id = (select org_b from _t_orgs)), true),
+       set_config('t.staff_a', (select id::text from public.site_staff where organization_id = (select org_a from _t_orgs)), true),
+       set_config('t.staff_b', (select id::text from public.site_staff where organization_id = (select org_b from _t_orgs)), true),
+       set_config('t.proto_a', (select id::text from public.protocols where clinic_id = (select org_a from _t_orgs)), true),
        set_config('t.proto_b', (select id::text from public.protocols where clinic_id = (select org_b from _t_orgs)), true);
 
 -- ── anon: sin acceso a nada ─────────────────────────────────────────────
@@ -155,6 +167,8 @@ select pg_temp.expect_count('anon no ve screenings', 'select 1 from public.scree
 select pg_temp.expect_count('anon no ve perfil de sitio', 'select 1 from public.site_profiles', 0);
 select pg_temp.expect_count('anon no ve metas de enrolamiento', 'select 1 from public.protocol_enrollment_targets', 0);
 select pg_temp.expect_count('anon no ve bitácora de contacto', 'select 1 from public.candidate_contact_attempts', 0);
+select pg_temp.expect_count('anon no ve equipo ni delegaciones',
+  'select 1 from public.site_staff union all select 1 from public.delegation_assignments', 0);
 select pg_temp.expect_denied('anon no inserta pacientes',
   format($q$insert into public.patients (clinic_id, first_name, last_name, birth_date, gender)
             values (%L, 'X', 'Y', '1990-01-01', 'male')$q$, current_setting('t.org_a')));
@@ -185,6 +199,31 @@ select pg_temp.expect_denied('inv_a no edita la bitácora de contacto',
   'update public.candidate_contact_attempts set outcome = ''reached''');
 select pg_temp.expect_denied('inv_a no borra la bitácora de contacto',
   'delete from public.candidate_contact_attempts');
+select pg_temp.expect_count('inv_a ve solo su equipo', 'select 1 from public.site_staff', 1);
+select pg_temp.expect_count('inv_a ve solo sus delegaciones', 'select 1 from public.delegation_assignments', 1);
+select pg_temp.expect_allowed('inv_a da de alta personal',
+  format($q$insert into public.site_staff (organization_id, full_name, role_title)
+            values (%L, 'Nueva Enfermera', 'nurse')$q$, current_setting('t.org_a')));
+select pg_temp.expect_denied('inv_a no da de alta personal en B',
+  format($q$insert into public.site_staff (organization_id, full_name, role_title)
+            values (%L, 'Intruso', 'nurse')$q$, current_setting('t.org_b')));
+select pg_temp.expect_allowed('inv_a delega tareas',
+  format($q$insert into public.delegation_assignments (organization_id, staff_id, protocol_id, tasks)
+            values (%L, %L, %L, array['vitals','ecg'])$q$, current_setting('t.org_a'), current_setting('t.staff_a'), current_setting('t.proto_a')));
+select pg_temp.expect_denied('inv_a no delega personal de B',
+  format($q$insert into public.delegation_assignments (organization_id, staff_id, protocol_id, tasks)
+            values (%L, %L, %L, array['vitals'])$q$, current_setting('t.org_a'), current_setting('t.staff_b'), current_setting('t.proto_a')));
+select pg_temp.expect_denied('inv_a no delega tareas inexistentes',
+  format($q$insert into public.delegation_assignments (organization_id, staff_id, protocol_id, tasks)
+            values (%L, %L, %L, array['hackear'])$q$, current_setting('t.org_a'), current_setting('t.staff_a'), current_setting('t.proto_a')));
+select pg_temp.expect_allowed('inv_a cierra una delegación con fecha de término',
+  'update public.delegation_assignments set ended_on = current_date');
+select pg_temp.expect_denied('inv_a no reescribe las tareas delegadas',
+  'update public.delegation_assignments set tasks = array[''consent'',''randomization'']');
+select pg_temp.expect_denied('inv_a no borra delegaciones',
+  'delete from public.delegation_assignments');
+select pg_temp.expect_denied('inv_a no edita personal de B',
+  format('update public.site_staff set full_name = ''X'' where organization_id = %L', current_setting('t.org_b')));
 select pg_temp.expect_allowed('inv_a actualiza su perfil de sitio',
   format('update public.site_profiles set site_name = ''Sitio A2'' where organization_id = %L', current_setting('t.org_a')));
 select pg_temp.expect_allowed('inv_a actualiza sus pacientes',
@@ -200,6 +239,12 @@ select pg_temp.expect_denied('coord_a no edita perfil de sitio',
   'update public.site_profiles set site_name = ''Hack''');
 select pg_temp.expect_denied('coord_a no borra pacientes (solo investigador)',
   'delete from public.patients');
+select pg_temp.expect_count('coord_a lee el equipo', 'select 1 from public.site_staff', 2);
+select pg_temp.expect_denied('coord_a no edita personal',
+  'update public.site_staff set full_name = ''X''');
+select pg_temp.expect_denied('coord_a no delega',
+  format($q$insert into public.delegation_assignments (organization_id, staff_id, protocol_id, tasks)
+            values (%L, %L, %L, array['consent'])$q$, current_setting('t.org_a'), current_setting('t.staff_a'), current_setting('t.proto_a')));
 select pg_temp.expect_allowed('coord_a registra un intento de contacto',
   format($q$insert into public.candidate_contact_attempts (organization_id, submission_id, channel, outcome)
             values (%L, %L, 'whatsapp', 'reached')$q$, current_setting('t.org_a'), current_setting('t.sub_a')));
