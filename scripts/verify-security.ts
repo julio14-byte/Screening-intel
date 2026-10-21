@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import nextConfig from "../next.config";
+import { buildContentSecurityPolicy } from "../src/lib/security/csp";
 import config from "../src/config";
 import { rateLimit } from "../src/lib/security/rate-limit";
 import { isSameOriginMutation } from "../src/lib/security/csrf";
@@ -71,11 +72,18 @@ async function main() {
   const rules = (await nextConfig.headers?.()) ?? [];
   const all = rules.find((r) => r.source === "/:path*")?.headers ?? [];
   const header = (name: string) => all.find((h) => h.key === name)?.value ?? "";
-  const csp = header("Content-Security-Policy");
+  assert(header("Content-Security-Policy") === "", "la CSP la fija el middleware con nonce, no una cabecera estática");
+  const csp = buildContentSecurityPolicy("abc123", false);
   assert(csp.includes("frame-ancestors 'none'"), "CSP bloquea framing");
   assert(csp.includes("object-src 'none'"), "CSP sin plugins");
   assert(csp.includes("base-uri 'self'"), "CSP fija base-uri");
   assert(!/script-src[^;]*\*/.test(csp), "CSP sin comodines en script-src");
+  assert(!/script-src[^;]*'unsafe-inline'/.test(csp), "CSP sin unsafe-inline en script-src");
+  assert(!/script-src[^;]*'unsafe-eval'/.test(csp), "CSP sin unsafe-eval en producción");
+  assert(/script-src[^;]*'nonce-abc123'[^;]*'strict-dynamic'/.test(csp), "CSP usa nonce con strict-dynamic");
+  assert(csp.includes("upgrade-insecure-requests"), "CSP fuerza HTTPS en producción");
+  const rootMw = readFileSync(resolve("middleware.ts"), "utf8");
+  assert(rootMw.includes("buildContentSecurityPolicy") && rootMw.includes("x-nonce"), "middleware aplica CSP con nonce");
   assert(header("X-Content-Type-Options") === "nosniff", "nosniff");
   assert(header("X-Frame-Options") === "DENY", "X-Frame-Options");
   assert(header("Strict-Transport-Security").includes("max-age="), "HSTS");

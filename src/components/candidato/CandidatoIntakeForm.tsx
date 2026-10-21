@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { SelectInput, TextInput } from "@/components/ui/Field";
@@ -203,7 +204,18 @@ export function CandidatoIntakeForm({
         />
         <span>
           Entiendo que esto es una pre-evaluación orientativa, no una decisión
-          médica. Acepto que el centro me contacte con los datos proporcionados.
+          médica. Autorizo de forma expresa el tratamiento de mis datos
+          personales sensibles de salud y que el centro me contacte, conforme
+          al{" "}
+          <Link
+            href="/privacidad"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium underline underline-offset-2"
+          >
+            Aviso de Privacidad
+          </Link>
+          .
         </span>
       </label>
 

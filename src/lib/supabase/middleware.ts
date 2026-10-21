@@ -108,6 +108,7 @@ async function runUpdateSession(request: NextRequest) {
   const isMfaChallenge = pathname === routes.loginMfa;
   const isPublic =
     isPublicMarketingPath(pathname) ||
+    pathname === routes.privacy ||
     isLogin ||
     isMfaChallenge ||
     isPublicApiPath(pathname);
