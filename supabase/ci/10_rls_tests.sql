@@ -91,6 +91,21 @@ select p.clinic_id, p.id, pr.id, 'Edad 18 a 65 años', 'inclusion', 'pass', 'cla
 insert into public.patient_medications (organization_id, patient_id, drug_name)
 select p.clinic_id, p.id, 'Metformina' from public.patients p;
 
+insert into public.protocol_visit_schedules (organization_id, protocol_id, visit_code, title, target_day)
+select clinic_id, id, 'V1', 'Semana 4', 28 from public.protocols;
+
+insert into public.follow_up_visits
+  (organization_id, patient_id, protocol_id, schedule_id, baseline_on, target_on, window_start_on, window_end_on, scheduled_on)
+select p.clinic_id, p.id, pr.id, sc.id, current_date - 28, current_date, current_date - 2, current_date + 2, current_date
+  from public.patients p
+  join public.protocols pr on pr.clinic_id = p.clinic_id
+  join public.protocol_visit_schedules sc on sc.protocol_id = pr.id;
+
+insert into public.diary_reviews
+  (organization_id, patient_id, protocol_id, source_system, source_ref, period_start, period_end, expected_days, completed_days)
+select p.clinic_id, p.id, pr.id, 'veeva', 'Sujeto seed', current_date - 27, current_date, 28, 28
+  from public.patients p join public.protocols pr on pr.clinic_id = p.clinic_id;
+
 grant select on all tables in schema pg_temp to public;
 
 create function pg_temp.act_as(p_alias text) returns void language plpgsql as $$
@@ -168,6 +183,8 @@ select set_config('t.org_a', (select org_a::text from _t_orgs), true),
        set_config('t.proto_a', (select id::text from public.protocols where clinic_id = (select org_a from _t_orgs)), true),
        set_config('t.pat_a', (select id::text from public.patients where clinic_id = (select org_a from _t_orgs)), true),
        set_config('t.pat_b', (select id::text from public.patients where clinic_id = (select org_b from _t_orgs)), true),
+       set_config('t.visit_a', (select id::text from public.follow_up_visits where organization_id = (select org_a from _t_orgs)), true),
+       set_config('t.visit_b', (select id::text from public.follow_up_visits where organization_id = (select org_b from _t_orgs)), true),
        set_config('t.proto_b', (select id::text from public.protocols where clinic_id = (select org_b from _t_orgs)), true);
 
 -- ── anon: sin acceso a nada ─────────────────────────────────────────────
@@ -181,6 +198,7 @@ select pg_temp.expect_count('anon no ve equipo ni delegaciones',
   'select 1 from public.site_staff union all select 1 from public.delegation_assignments', 0);
 select pg_temp.expect_count('anon no ve revisiones ni medicación',
   'select 1 from public.criterion_reviews union all select 1 from public.patient_medications', 0);
+select pg_temp.expect_count('anon no ve revisiones de diario', 'select 1 from public.diary_reviews', 0);
 select pg_temp.expect_denied('anon no inserta pacientes',
   format($q$insert into public.patients (clinic_id, first_name, last_name, birth_date, gender)
             values (%L, 'X', 'Y', '1990-01-01', 'male')$q$, current_setting('t.org_a')));
@@ -242,6 +260,10 @@ select pg_temp.expect_denied('inv_a no edita ni corrige revisiones',
   'update public.criterion_reviews set decision = ''confirmed''');
 select pg_temp.expect_denied('inv_a no borra revisiones',
   'delete from public.criterion_reviews');
+select pg_temp.expect_count('inv_a ve solo sus revisiones de diario', 'select 1 from public.diary_reviews', 1);
+select pg_temp.expect_denied('inv_a no edita ni borra revisiones de diario',
+  'update public.diary_reviews set missed_doses = 5');
+select pg_temp.expect_denied('inv_a no borra revisiones de diario', 'delete from public.diary_reviews');
 select pg_temp.expect_allowed('inv_a actualiza su perfil de sitio',
   format('update public.site_profiles set site_name = ''Sitio A2'' where organization_id = %L', current_setting('t.org_a')));
 select pg_temp.expect_allowed('inv_a actualiza sus pacientes',
@@ -292,6 +314,39 @@ select pg_temp.expect_denied('coord_a no renombra un medicamento conciliado',
 select pg_temp.expect_denied('coord_a no concilia medicación de otra sede',
   format($q$insert into public.patient_medications (organization_id, patient_id, drug_name)
             values (%L, %L, 'Aspirina')$q$, current_setting('t.org_a'), current_setting('t.pat_b')));
+select pg_temp.expect_allowed('coord_a registra una revisión de diario ligada a la visita',
+  format($q$insert into public.diary_reviews
+              (organization_id, patient_id, protocol_id, visit_id, source_system, source_ref,
+               period_start, period_end, expected_days, completed_days, missed_doses, possible_ae, ae_note)
+            values (%L, %L, %L, %L, 'veeva', 'Sujeto 1042', current_date - 27, current_date, 28, 24, 3, true, 'Mareo leve')$q$,
+         current_setting('t.org_a'), current_setting('t.pat_a'), current_setting('t.proto_a'), current_setting('t.visit_a')));
+select pg_temp.expect_allowed('coord_a registra un diario de Clinical Ink',
+  format($q$insert into public.diary_reviews
+              (organization_id, patient_id, protocol_id, source_system, source_ref, period_start, period_end, expected_days, completed_days)
+            values (%L, %L, %L, 'clinical_ink', 'Sujeto 2001', current_date - 6, current_date, 7, 7)$q$,
+         current_setting('t.org_a'), current_setting('t.pat_a'), current_setting('t.proto_a')));
+select pg_temp.expect_count('la revisión de diario guarda el rol real del revisor',
+  'select 1 from public.diary_reviews where reviewer_role = ''coordinator'' and reviewer_id is not null', 2);
+select pg_temp.expect_denied('revisión de diario con más días completados que esperados',
+  format($q$insert into public.diary_reviews
+              (organization_id, patient_id, protocol_id, source_system, source_ref, period_start, period_end, expected_days, completed_days)
+            values (%L, %L, %L, 'veeva', 'x', current_date - 6, current_date, 7, 8)$q$,
+         current_setting('t.org_a'), current_setting('t.pat_a'), current_setting('t.proto_a')));
+select pg_temp.expect_denied('posible EA sin descripción se rechaza',
+  format($q$insert into public.diary_reviews
+              (organization_id, patient_id, protocol_id, source_system, source_ref, period_start, period_end, expected_days, completed_days, possible_ae)
+            values (%L, %L, %L, 'veeva', 'x', current_date - 6, current_date, 7, 7, true)$q$,
+         current_setting('t.org_a'), current_setting('t.pat_a'), current_setting('t.proto_a')));
+select pg_temp.expect_denied('no se liga el diario a una visita de otra sede',
+  format($q$insert into public.diary_reviews
+              (organization_id, patient_id, protocol_id, visit_id, source_system, source_ref, period_start, period_end, expected_days, completed_days)
+            values (%L, %L, %L, %L, 'veeva', 'x', current_date - 6, current_date, 7, 7)$q$,
+         current_setting('t.org_a'), current_setting('t.pat_a'), current_setting('t.proto_a'), current_setting('t.visit_b')));
+select pg_temp.expect_denied('no se registra diario de un paciente de otra sede',
+  format($q$insert into public.diary_reviews
+              (organization_id, patient_id, protocol_id, source_system, source_ref, period_start, period_end, expected_days, completed_days)
+            values (%L, %L, %L, 'veeva', 'x', current_date - 6, current_date, 7, 7)$q$,
+         current_setting('t.org_a'), current_setting('t.pat_b'), current_setting('t.proto_a')));
 select pg_temp.expect_allowed('coord_a registra un intento de contacto',
   format($q$insert into public.candidate_contact_attempts (organization_id, submission_id, channel, outcome)
             values (%L, %L, 'whatsapp', 'reached')$q$, current_setting('t.org_a'), current_setting('t.sub_a')));
@@ -326,6 +381,11 @@ select pg_temp.expect_denied('mon_a no registra revisiones',
 select pg_temp.expect_denied('mon_a no concilia medicación',
   format($q$insert into public.patient_medications (organization_id, patient_id, drug_name)
             values (%L, %L, 'Aspirina')$q$, current_setting('t.org_a'), current_setting('t.pat_a')));
+select pg_temp.expect_denied('mon_a no registra revisiones de diario',
+  format($q$insert into public.diary_reviews
+              (organization_id, patient_id, protocol_id, source_system, source_ref, period_start, period_end, expected_days, completed_days)
+            values (%L, %L, %L, 'veeva', 'x', current_date - 6, current_date, 7, 7)$q$,
+         current_setting('t.org_a'), current_setting('t.pat_a'), current_setting('t.proto_a')));
 select pg_temp.expect_denied('mon_a no actualiza screenings',
   'update public.screenings set status = ''screening''');
 reset role;
