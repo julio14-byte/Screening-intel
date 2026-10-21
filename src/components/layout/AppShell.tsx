@@ -65,7 +65,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/40 to-violet-50/50">
       {/* Sidebar desktop */}
-      <div className="fixed inset-y-0 left-0 z-30 hidden lg:block">
+      <div className="fixed inset-y-0 left-0 z-30 hidden lg:block print:hidden">
         <AppSidebar navItems={navItems} role={role} />
       </div>
 
@@ -81,7 +81,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 transition-transform duration-200 ease-out lg:hidden",
+          "fixed inset-y-0 left-0 z-50 w-64 transition-transform duration-200 ease-out print:hidden lg:hidden",
           menuOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"
         )}
       >
@@ -96,7 +96,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       {/* Barra superior móvil */}
-      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-violet-200/60 bg-white/90 px-4 py-3 backdrop-blur-md lg:hidden">
+      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-violet-200/60 bg-white/90 px-4 py-3 backdrop-blur-md print:hidden lg:hidden">
         <button
           type="button"
           onClick={() => setMenuOpen(true)}
@@ -121,14 +121,14 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="min-w-0 px-4 py-4 sm:px-6 sm:py-6 lg:ml-64 lg:py-6">
+      <main className="min-w-0 px-4 py-4 sm:px-6 sm:py-6 print:ml-0 print:px-0 print:py-0 lg:ml-64 lg:py-6">
         <div
           className={cn(
             "mx-auto w-full",
             pathname.startsWith("/account") ? "max-w-7xl" : "max-w-6xl"
           )}
         >
-          <div className="mb-4 hidden items-center justify-end gap-2 lg:mb-5 lg:flex">
+          <div className="mb-4 hidden items-center justify-end gap-2 print:hidden lg:mb-5 lg:flex">
             <NotificationBell />
             <AccountMenu
               email={email}

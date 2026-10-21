@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/StateMessage";
 import { VerdictDot } from "@/components/ui/VerdictBadge";
 import { CriteriaSummary } from "@/components/protocols/CriteriaSummary";
+import { FeasibilityReport } from "@/components/protocols/FeasibilityReport";
 import { MatchResultsTable } from "@/components/protocols/MatchResultsTable";
 import { ScreeningProcessNote } from "@/components/screening/ScreeningProcessNote";
 import { useProtocolMatch } from "@/hooks/useProtocolMatch";
@@ -42,20 +43,27 @@ export default function ProtocolMatchPage({
     <>
       <Link
         href="/protocols"
-        className="mb-3 inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-800"
+        className="mb-3 inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-800 print:hidden"
       >
         <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
         Volver a protocolos
       </Link>
 
+      <div className="print:hidden">
       <PageHeader
         title={`Matching · ${protocol.code_name}`}
         description={`${protocol.title}. Filtro de criterios, no un sorteo de pacientes.`}
       />
 
       <ScreeningProcessNote compact />
+      </div>
 
-      <Card className="mb-4">
+      <FeasibilityReport
+        results={results}
+        protocol={{ code_name: protocol.code_name, title: protocol.title }}
+      />
+
+      <Card className="mb-4 print:hidden">
         <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">
           <CriteriaSummary protocol={protocol} />
           <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 sm:gap-4">
@@ -75,7 +83,7 @@ export default function ProtocolMatchPage({
         </div>
       </Card>
 
-      <Card>
+      <Card className="print:hidden">
         {results.length === 0 ? (
           <EmptyState
             title="No hay pacientes para evaluar"
