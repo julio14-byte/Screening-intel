@@ -4,11 +4,12 @@ import { addUtcDays } from "@/lib/follow-up/model";
 export const DIARY_MIGRATION_HINT =
   "Falta aplicar supabase/migrations/20261021120000_diary_review.sql en Supabase.";
 
-export const DIARY_SOURCES = ["veeva", "other_ediary", "paper_diary"] as const;
+export const DIARY_SOURCES = ["veeva", "clinical_ink", "other_ediary", "paper_diary"] as const;
 export type DiarySource = (typeof DIARY_SOURCES)[number];
 
 export const DIARY_SOURCE_LABELS: Record<DiarySource, string> = {
   veeva: "Veeva (diario del patrocinador)",
+  clinical_ink: "Clinical Ink (diario / eSource del patrocinador)",
   other_ediary: "Otro diario electrónico",
   paper_diary: "Diario en papel",
 };

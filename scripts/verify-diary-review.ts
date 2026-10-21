@@ -38,6 +38,8 @@ const base = {
 
 assert(diaryInputSchema.safeParse(base).success, "acepta una revisión completa");
 assert(!diaryInputSchema.safeParse({ ...base, source_ref: " " }).success, "exige la referencia de la fuente");
+assert(diaryInputSchema.safeParse({ ...base, source_system: "clinical_ink" }).success, "acepta Clinical Ink como sistema del diario");
+assert(/'clinical_ink'/.test(read("supabase/migrations/20261021120000_diary_review.sql")), "la BD acepta Clinical Ink");
 assert(!diaryInputSchema.safeParse({ ...base, source_system: "excel" }).success, "rechaza sistemas desconocidos");
 assert(!diaryInputSchema.safeParse({ ...base, period_end: "2026-02-28" }).success, "rechaza fin anterior al inicio");
 assert(!diaryInputSchema.safeParse({ ...base, expected_days: 40 }).success, "no se esperan más días que los del periodo");

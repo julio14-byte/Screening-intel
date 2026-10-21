@@ -320,8 +320,13 @@ select pg_temp.expect_allowed('coord_a registra una revisión de diario ligada a
                period_start, period_end, expected_days, completed_days, missed_doses, possible_ae, ae_note)
             values (%L, %L, %L, %L, 'veeva', 'Sujeto 1042', current_date - 27, current_date, 28, 24, 3, true, 'Mareo leve')$q$,
          current_setting('t.org_a'), current_setting('t.pat_a'), current_setting('t.proto_a'), current_setting('t.visit_a')));
+select pg_temp.expect_allowed('coord_a registra un diario de Clinical Ink',
+  format($q$insert into public.diary_reviews
+              (organization_id, patient_id, protocol_id, source_system, source_ref, period_start, period_end, expected_days, completed_days)
+            values (%L, %L, %L, 'clinical_ink', 'Sujeto 2001', current_date - 6, current_date, 7, 7)$q$,
+         current_setting('t.org_a'), current_setting('t.pat_a'), current_setting('t.proto_a')));
 select pg_temp.expect_count('la revisión de diario guarda el rol real del revisor',
-  'select 1 from public.diary_reviews where reviewer_role = ''coordinator'' and reviewer_id is not null', 1);
+  'select 1 from public.diary_reviews where reviewer_role = ''coordinator'' and reviewer_id is not null', 2);
 select pg_temp.expect_denied('revisión de diario con más días completados que esperados',
   format($q$insert into public.diary_reviews
               (organization_id, patient_id, protocol_id, source_system, source_ref, period_start, period_end, expected_days, completed_days)

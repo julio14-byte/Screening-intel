@@ -15,7 +15,7 @@ create table if not exists public.diary_reviews (
   visit_id             uuid
     references public.follow_up_visits (id) on delete set null,
   source_system        text not null
-    check (source_system in ('veeva', 'other_ediary', 'paper_diary')),
+    check (source_system in ('veeva', 'clinical_ink', 'other_ediary', 'paper_diary')),
   source_ref           text not null
     check (char_length(btrim(source_ref)) between 1 and 200),
   period_start         date not null,
