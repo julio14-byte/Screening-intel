@@ -53,6 +53,8 @@ export interface LabCriterion {
   min?: number | null;
   max?: number | null;
   unit?: string;
+  /** Antigüedad máxima aceptada del resultado, en días (p. ej. 30). */
+  max_age_days?: number | null;
 }
 
 export interface InclusionCriteria {
@@ -66,6 +68,8 @@ export interface InclusionCriteria {
 export interface ExclusionCriteria {
   excluded_conditions?: string[];
   excluded_medications?: string[];
+  /** Días sin tomar un medicamento excluyente antes de poder ingresar. */
+  washout_days?: number | null;
 }
 
 export interface Protocol {

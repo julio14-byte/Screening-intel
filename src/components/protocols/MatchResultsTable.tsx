@@ -60,11 +60,19 @@ function ExpandedDetails({
   protocol,
 }: {
   result: MatchResult;
-  protocol: Pick<Protocol, "code_name" | "title">;
+  protocol: Pick<Protocol, "code_name" | "title"> & { id?: string };
 }) {
   return (
     <div className="space-y-3">
       <CriterionEvidenceList details={result.details} />
+      {protocol.id ? (
+        <Link
+          href={`/protocols/${protocol.id}/revision/${result.patient.id}`}
+          className="inline-block text-xs font-medium text-violet-700 underline"
+        >
+          Revisar expediente con evidencia
+        </Link>
+      ) : null}
       <MatchRationalePanel
         compact
         input={{
@@ -97,7 +105,7 @@ export function MatchResultsTable({
   results: MatchResult[];
   existing: Map<string, Screening>;
   onEnroll: (result: MatchResult) => Promise<void>;
-  protocol: Pick<Protocol, "code_name" | "title">;
+  protocol: Pick<Protocol, "code_name" | "title"> & { id?: string };
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [enrolling, setEnrolling] = useState<string | null>(null);

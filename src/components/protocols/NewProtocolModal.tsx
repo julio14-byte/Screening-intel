@@ -33,6 +33,7 @@ export function NewProtocolModal({
   const [requiredLabs, setRequiredLabs] = useState<LabCriterion[]>([]);
   const [excludedConditions, setExcludedConditions] = useState<string[]>([]);
   const [excludedMedications, setExcludedMedications] = useState<string[]>([]);
+  const [washoutDays, setWashoutDays] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,6 +47,7 @@ export function NewProtocolModal({
     setRequiredLabs([]);
     setExcludedConditions([]);
     setExcludedMedications([]);
+    setWashoutDays("");
   };
 
   function applyDraft(draft: ExtractedProtocolDraft) {
@@ -58,6 +60,7 @@ export function NewProtocolModal({
     setRequiredLabs(draft.inclusion_criteria.required_labs ?? []);
     setExcludedConditions(draft.exclusion_criteria.excluded_conditions ?? []);
     setExcludedMedications(draft.exclusion_criteria.excluded_medications ?? []);
+    setWashoutDays(draft.exclusion_criteria.washout_days?.toString() ?? "");
   }
 
   useEffect(() => {
@@ -83,6 +86,10 @@ export function NewProtocolModal({
         exclusion_criteria: {
           excluded_conditions: excludedConditions,
           excluded_medications: excludedMedications,
+          washout_days:
+            washoutDays.trim() === "" || Number(washoutDays) <= 0
+              ? null
+              : Math.round(Number(washoutDays)),
         },
       });
       reset();
@@ -202,6 +209,16 @@ export function NewProtocolModal({
               placeholder="ej: insulina"
               emptyText="Sin medicación excluyente."
             />
+            <div className="mt-2 max-w-xs">
+              <TextInput
+                label="Lavado (washout) en días"
+                type="number"
+                min={1}
+                value={washoutDays}
+                onChange={(e) => setWashoutDays(e.target.value)}
+                hint="Días sin tomarlos antes de ingresar. Déjalo vacío si no aplica."
+              />
+            </div>
           </div>
         </fieldset>
 

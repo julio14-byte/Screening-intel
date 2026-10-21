@@ -16,6 +16,7 @@ export function LabCriteriaEditor({
   const [min, setMin] = useState("");
   const [max, setMax] = useState("");
   const [unit, setUnit] = useState("");
+  const [maxAgeDays, setMaxAgeDays] = useState("");
 
   const add = () => {
     const key = name.trim().toLowerCase();
@@ -25,8 +26,18 @@ export function LabCriteriaEditor({
     if (minNum === null && maxNum === null) return;
     onChange([
       ...labs.filter((l) => l.name !== key),
-      { name: key, min: minNum, max: maxNum, unit: unit.trim() || undefined },
+      {
+        name: key,
+        min: minNum,
+        max: maxNum,
+        unit: unit.trim() || undefined,
+        max_age_days:
+          maxAgeDays.trim() === "" || Number(maxAgeDays) <= 0
+            ? undefined
+            : Math.round(Number(maxAgeDays)),
+      },
     ]);
+    setMaxAgeDays("");
     setName("");
     setMin("");
     setMax("");
@@ -71,6 +82,15 @@ export function LabCriteriaEditor({
           aria-label="Unidad"
           className={`${inputClass} w-24`}
         />
+        <input
+          value={maxAgeDays}
+          onChange={(e) => setMaxAgeDays(e.target.value)}
+          type="number"
+          min={1}
+          placeholder="Vigencia (días)"
+          aria-label="Antigüedad máxima del resultado en días"
+          className={`${inputClass} w-32`}
+        />
         <button
           type="button"
           onClick={add}
@@ -98,6 +118,7 @@ export function LabCriteriaEditor({
                 {lab.min != null ? ` · mín ${lab.min}` : ""}
                 {lab.max != null ? ` · máx ${lab.max}` : ""}
                 {lab.unit ? ` ${lab.unit}` : ""}
+                {lab.max_age_days ? ` · vigencia ${lab.max_age_days} d` : ""}
               </span>
               <button
                 type="button"

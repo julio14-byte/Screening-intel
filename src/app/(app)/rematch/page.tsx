@@ -240,6 +240,13 @@ function OpportunityCard({
                         Matching
                         <ArrowRight className="h-3 w-3 shrink-0" aria-hidden />
                       </Link>
+                      <Link
+                        href={`/protocols/${protocol.id}/revision/${patient.id}`}
+                        className="inline-flex flex-1 items-center justify-center rounded-md border border-slate-200 bg-white px-2 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 sm:flex-initial sm:py-1"
+                        title="Revisar el expediente criterio por criterio"
+                      >
+                        Revisar
+                      </Link>
                     </div>
                   </div>
                 </div>

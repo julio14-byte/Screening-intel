@@ -83,6 +83,14 @@ select st.organization_id, st.id, pr.id, array['consent']
   from public.site_staff st
   join public.protocols pr on pr.clinic_id = st.organization_id;
 
+insert into public.criterion_reviews
+  (organization_id, patient_id, protocol_id, criterion, criterion_type, engine_status, decision, note)
+select p.clinic_id, p.id, pr.id, 'Edad 18 a 65 años', 'inclusion', 'pass', 'clarify', 'Pendiente de acta'
+  from public.patients p join public.protocols pr on pr.clinic_id = p.clinic_id;
+
+insert into public.patient_medications (organization_id, patient_id, drug_name)
+select p.clinic_id, p.id, 'Metformina' from public.patients p;
+
 grant select on all tables in schema pg_temp to public;
 
 create function pg_temp.act_as(p_alias text) returns void language plpgsql as $$
@@ -158,6 +166,8 @@ select set_config('t.org_a', (select org_a::text from _t_orgs), true),
        set_config('t.staff_a', (select id::text from public.site_staff where organization_id = (select org_a from _t_orgs)), true),
        set_config('t.staff_b', (select id::text from public.site_staff where organization_id = (select org_b from _t_orgs)), true),
        set_config('t.proto_a', (select id::text from public.protocols where clinic_id = (select org_a from _t_orgs)), true),
+       set_config('t.pat_a', (select id::text from public.patients where clinic_id = (select org_a from _t_orgs)), true),
+       set_config('t.pat_b', (select id::text from public.patients where clinic_id = (select org_b from _t_orgs)), true),
        set_config('t.proto_b', (select id::text from public.protocols where clinic_id = (select org_b from _t_orgs)), true);
 
 -- ── anon: sin acceso a nada ─────────────────────────────────────────────
@@ -169,6 +179,8 @@ select pg_temp.expect_count('anon no ve metas de enrolamiento', 'select 1 from p
 select pg_temp.expect_count('anon no ve bitácora de contacto', 'select 1 from public.candidate_contact_attempts', 0);
 select pg_temp.expect_count('anon no ve equipo ni delegaciones',
   'select 1 from public.site_staff union all select 1 from public.delegation_assignments', 0);
+select pg_temp.expect_count('anon no ve revisiones ni medicación',
+  'select 1 from public.criterion_reviews union all select 1 from public.patient_medications', 0);
 select pg_temp.expect_denied('anon no inserta pacientes',
   format($q$insert into public.patients (clinic_id, first_name, last_name, birth_date, gender)
             values (%L, 'X', 'Y', '1990-01-01', 'male')$q$, current_setting('t.org_a')));
@@ -224,6 +236,12 @@ select pg_temp.expect_denied('inv_a no borra delegaciones',
   'delete from public.delegation_assignments');
 select pg_temp.expect_denied('inv_a no edita personal de B',
   format('update public.site_staff set full_name = ''X'' where organization_id = %L', current_setting('t.org_b')));
+select pg_temp.expect_count('inv_a ve solo sus revisiones', 'select 1 from public.criterion_reviews', 1);
+select pg_temp.expect_count('inv_a ve solo su medicación', 'select 1 from public.patient_medications', 1);
+select pg_temp.expect_denied('inv_a no edita ni corrige revisiones',
+  'update public.criterion_reviews set decision = ''confirmed''');
+select pg_temp.expect_denied('inv_a no borra revisiones',
+  'delete from public.criterion_reviews');
 select pg_temp.expect_allowed('inv_a actualiza su perfil de sitio',
   format('update public.site_profiles set site_name = ''Sitio A2'' where organization_id = %L', current_setting('t.org_a')));
 select pg_temp.expect_allowed('inv_a actualiza sus pacientes',
@@ -245,6 +263,35 @@ select pg_temp.expect_denied('coord_a no edita personal',
 select pg_temp.expect_denied('coord_a no delega',
   format($q$insert into public.delegation_assignments (organization_id, staff_id, protocol_id, tasks)
             values (%L, %L, %L, array['consent'])$q$, current_setting('t.org_a'), current_setting('t.staff_a'), current_setting('t.proto_a')));
+select pg_temp.expect_allowed('coord_a registra una revisión con fuente',
+  format($q$insert into public.criterion_reviews
+              (organization_id, patient_id, protocol_id, criterion, criterion_type, engine_status,
+               decision, source_type, source_ref, observed_on)
+            select %L, %L, id, 'Lab hba1c', 'inclusion', 'pass', 'confirmed', 'lab_report', 'Folio 123', current_date
+            from public.protocols where clinic_id = %L$q$, current_setting('t.org_a'), current_setting('t.pat_a'), current_setting('t.org_a')));
+select pg_temp.expect_count('la revisión guarda el rol real del revisor',
+  'select 1 from public.criterion_reviews where reviewer_role = ''coordinator'' and reviewer_id is not null', 1);
+select pg_temp.expect_denied('una decisión firme sin fuente se rechaza',
+  format($q$insert into public.criterion_reviews
+              (organization_id, patient_id, protocol_id, criterion, criterion_type, engine_status, decision)
+            select %L, %L, id, 'Lab x', 'inclusion', 'pass', 'confirmed' from public.protocols where clinic_id = %L$q$,
+         current_setting('t.org_a'), current_setting('t.pat_a'), current_setting('t.org_a')));
+select pg_temp.expect_denied('no se revisa un paciente de otra sede',
+  format($q$insert into public.criterion_reviews
+              (organization_id, patient_id, protocol_id, criterion, criterion_type, engine_status,
+               decision, source_type, source_ref, observed_on)
+            select %L, %L, id, 'Lab x', 'inclusion', 'pass', 'confirmed', 'other', 'x', current_date
+            from public.protocols where clinic_id = %L$q$, current_setting('t.org_a'), current_setting('t.pat_b'), current_setting('t.org_a')));
+select pg_temp.expect_allowed('coord_a concilia un medicamento',
+  format($q$insert into public.patient_medications (organization_id, patient_id, drug_name, dose, started_on)
+            values (%L, %L, 'Atorvastatina', '20 mg', '2025-01-01')$q$, current_setting('t.org_a'), current_setting('t.pat_a')));
+select pg_temp.expect_allowed('coord_a cierra la vigencia de un medicamento',
+  'update public.patient_medications set ended_on = current_date where drug_name = ''Atorvastatina''');
+select pg_temp.expect_denied('coord_a no renombra un medicamento conciliado',
+  'update public.patient_medications set drug_name = ''Otro''');
+select pg_temp.expect_denied('coord_a no concilia medicación de otra sede',
+  format($q$insert into public.patient_medications (organization_id, patient_id, drug_name)
+            values (%L, %L, 'Aspirina')$q$, current_setting('t.org_a'), current_setting('t.pat_b')));
 select pg_temp.expect_allowed('coord_a registra un intento de contacto',
   format($q$insert into public.candidate_contact_attempts (organization_id, submission_id, channel, outcome)
             values (%L, %L, 'whatsapp', 'reached')$q$, current_setting('t.org_a'), current_setting('t.sub_a')));
@@ -271,6 +318,14 @@ select pg_temp.expect_denied('mon_a no inserta pacientes',
 select pg_temp.expect_denied('mon_a no registra contactos',
   format($q$insert into public.candidate_contact_attempts (organization_id, submission_id, channel, outcome)
             values (%L, %L, 'phone', 'reached')$q$, current_setting('t.org_a'), current_setting('t.sub_a')));
+select pg_temp.expect_denied('mon_a no registra revisiones',
+  format($q$insert into public.criterion_reviews
+              (organization_id, patient_id, protocol_id, criterion, criterion_type, engine_status, decision, note)
+            select %L, %L, id, 'x', 'inclusion', 'pass', 'clarify', 'nota' from public.protocols where clinic_id = %L$q$,
+         current_setting('t.org_a'), current_setting('t.pat_a'), current_setting('t.org_a')));
+select pg_temp.expect_denied('mon_a no concilia medicación',
+  format($q$insert into public.patient_medications (organization_id, patient_id, drug_name)
+            values (%L, %L, 'Aspirina')$q$, current_setting('t.org_a'), current_setting('t.pat_a')));
 select pg_temp.expect_denied('mon_a no actualiza screenings',
   'update public.screenings set status = ''screening''');
 reset role;
