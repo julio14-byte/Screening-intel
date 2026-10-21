@@ -8,6 +8,8 @@ import { DashboardKpiCards } from "@/components/dashboard/DashboardKpiCards";
 import { DashboardPatientsTable } from "@/components/dashboard/DashboardPatientsTable";
 import { Button } from "@/components/ui/Button";
 import { downloadCsv, screeningsToCsv } from "@/lib/export/dashboardCsv";
+import { useSiteProfile } from "@/hooks/useSiteProfile";
+import { siteFileSlug } from "@/lib/site/profile";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import {
@@ -33,6 +35,7 @@ export function DashboardView({
   defaultTrafficFilter = "all",
 }: DashboardViewProps) {
   const { screenings, loading, error } = useScreenings();
+  const { site } = useSiteProfile();
   const [search, setSearch] = useState("");
   const [trafficFilter, setTrafficFilter] =
     useState<TrafficLightFilter>(defaultTrafficFilter);
@@ -71,8 +74,8 @@ export function DashboardView({
               variant="secondary"
               onClick={() =>
                 downloadCsv(
-                  `dashboard-screening-${new Date().toISOString().slice(0, 10)}.csv`,
-                  screeningsToCsv(filteredRows)
+                  `${siteFileSlug(site) || "dashboard"}-screening-${new Date().toISOString().slice(0, 10)}.csv`,
+                  screeningsToCsv(filteredRows, site)
                 )
               }
             >

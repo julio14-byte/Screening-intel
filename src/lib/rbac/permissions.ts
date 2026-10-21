@@ -75,6 +75,7 @@ export const WRITE_API_PREFIXES = [
   "/api/rbac",
   "/api/candidatos",
   "/api/settings/portal",
+  "/api/settings/site",
   "/api/pharmacy",
   "/api/follow-up",
 ] as const;
@@ -87,6 +88,7 @@ export function isWriteApiPath(pathname: string): boolean {
 export const ROLE_RESTRICTED_ROUTES: Record<string, AppRole[]> = {
   "/settings/roles": ["investigator"],
   "/settings/portal": ["investigator"],
+  "/settings/site": ["investigator"],
   "/account/billing": ["investigator"],
 };
 

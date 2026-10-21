@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Printer } from "lucide-react";
+import config from "@/config";
+import {
+  hasSiteIdentity,
+  siteDisplayName,
+  siteHeaderRows,
+  type SiteProfile,
+} from "@/lib/site/profile";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import {
   buildFeasibilityReport,
@@ -41,9 +49,11 @@ function Count({
 export function FeasibilityReport({
   results,
   protocol,
+  site,
 }: {
   results: MatchResult[];
   protocol: { code_name: string; title: string };
+  site?: SiteProfile | null;
 }) {
   const report: FeasibilityReportData = buildFeasibilityReport(results);
   const [stamp, setStamp] = useState<string | null>(null);
@@ -76,6 +86,29 @@ export function FeasibilityReport({
         }
       />
       <CardBody className="space-y-4">
+        {site && hasSiteIdentity(site) ? (
+          <div className="border-b border-slate-200 pb-3">
+            <p className="text-base font-semibold text-slate-900">
+              {siteDisplayName(site)}
+            </p>
+            <dl className="mt-1 grid gap-x-6 gap-y-0.5 text-xs text-slate-600 sm:grid-cols-2">
+              {siteHeaderRows(site).map((row) => (
+                <div key={row.label} className="flex gap-1">
+                  <dt className="shrink-0 font-medium text-slate-500">{row.label}:</dt>
+                  <dd>{row.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        ) : site ? (
+          <Link
+            href={config.routes.app.siteSettings}
+            className="block text-xs font-medium text-violet-700 underline print:hidden"
+          >
+            Agregar los datos del centro al informe
+          </Link>
+        ) : null}
+
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <Count label="Evaluados" value={report.evaluated} total={report.evaluated} showShare={false} />
           <Count label="Parecen cumplir" value={report.eligible} total={report.evaluated} />
