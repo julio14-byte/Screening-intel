@@ -1,4 +1,19 @@
-# Crisvia — pitch de incubadora (para pegar en Gamma)
+# Crisvia — pitch de incubadora
+
+Hay dos formatos del mismo deck.
+
+## Canva
+
+Archivo: `docs/pitch/crisvia-incubadora.pptx` (16 slides, 16:9). Canva lo convierte en una presentación editable. Este entorno no tiene acceso a tu cuenta de Canva.
+
+1. Entra a [canva.com](https://canva.com) desde el navegador de la computadora.
+2. Arrastra el PPTX a la página de inicio, o usa **Subir**.
+3. Abre el diseño importado. El texto queda en cajas editables.
+4. Canva puede cambiar la fuente Inter por una parecida. Si quieres la misma, aplícala una vez a todo el deck.
+
+Gráficos, SmartArt y WordArt no se importan; este archivo no los usa.
+
+Para regenerarlo: `python3 docs/pitch/build_incubator_pptx.py`.
 
 ## Cómo publicarlo en Gamma
 
