@@ -273,6 +273,10 @@ const config = {
           a: "Free $0, Pro $149 USD/mes (500 pacientes, 50 protocolos, 3 usuarios) y Pro+ $329 USD/mes (2,000 pacientes, 100 protocolos, 10 usuarios). Los límites se aplican en la base de datos: al llegar al tope no se pueden agregar más, pero tus datos siguen disponibles.",
         },
         {
+          q: "¿Qué datos de mis pacientes ve la IA?",
+          a: "Ninguno de identificación. Antes de cada consulta se enmascaran nombre, correo, teléfono, CURP, RFC, dirección y fecha de nacimiento, y la elegibilidad la decide el motor de reglas del protocolo, no el modelo.",
+        },
+        {
           q: "¿Los datos están aislados por sitio?",
           a: "Sí. Cada clinical research site es una organización con RLS en Supabase; solo tu equipo ve tus pacientes y protocolos.",
         },

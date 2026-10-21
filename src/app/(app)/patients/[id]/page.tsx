@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { use } from "react";
+import { use, useMemo } from "react";
 import { ArrowLeft } from "lucide-react";
 import { PatientFollowUpCard } from "@/components/follow-up/PatientFollowUpCard";
 import { PatientVisits } from "@/components/citas/PatientVisits";
 import { AuditTimeline } from "@/components/audit/audit-timeline";
 import { InclusionApprovalPanel } from "@/components/rbac/InclusionApprovalPanel";
 import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
+import { PatientGaps } from "@/components/matching/PatientGaps";
+import { buildPatientGaps } from "@/lib/matching/missing-data";
 import { ClinicalProfileEditor } from "@/components/profile/ClinicalProfileEditor";
 import { usePatientDetail } from "@/hooks/usePatientDetail";
 import { useProtocols } from "@/hooks/useProtocols";
@@ -21,6 +23,10 @@ export default function PatientDetailPage({
   const { patient, profile, loading, error, saveProfile } =
     usePatientDetail(id);
   const { protocols } = useProtocols();
+  const gaps = useMemo(
+    () => (patient ? buildPatientGaps({ patient, profile }, protocols) : []),
+    [patient, profile, protocols]
+  );
 
   if (loading) return <LoadingState label="Cargando perfil clínico…" />;
   if (error || !patient)
@@ -35,6 +41,12 @@ export default function PatientDetailPage({
         <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
         Volver al registro
       </Link>
+
+      {gaps.length > 0 ? (
+        <div className="mb-4">
+          <PatientGaps gaps={gaps} />
+        </div>
+      ) : null}
 
       <ClinicalProfileEditor
         key={`${profile?.id ?? "new"}-${patient.updated_at ?? patient.subject_code ?? patient.id}`}

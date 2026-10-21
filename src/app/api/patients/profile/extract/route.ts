@@ -6,12 +6,14 @@ import {
   AuthorizationError,
   requirePermission,
 } from "@/lib/rbac/require-permission";
+import { redactIdentifiers } from "@/lib/privacy/redact";
 import { extractClinicalProfileFromNotes } from "@/lib/profile/extractClinicalProfileFromNotes";
 
 export const runtime = "nodejs";
 
 const bodySchema = z.object({
   notes: z.string().trim().min(1).max(8000),
+  known_names: z.array(z.string().trim().min(1).max(120)).max(8).optional(),
 });
 
 export async function POST(request: Request) {
@@ -44,10 +46,15 @@ export async function POST(request: Request) {
   }
 
   try {
-    const draft = await extractClinicalProfileFromNotes(parsed.data.notes);
+    const knownNames = parsed.data.known_names;
+    const masked = redactIdentifiers(parsed.data.notes, { names: knownNames });
+    const draft = await extractClinicalProfileFromNotes(parsed.data.notes, {
+      knownNames,
+    });
     return NextResponse.json({
       draft,
       charCount: parsed.data.notes.length,
+      masked: masked.total,
     });
   } catch (err) {
     return serverError(

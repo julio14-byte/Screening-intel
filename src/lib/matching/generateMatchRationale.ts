@@ -1,3 +1,5 @@
+import { chatCompletion } from "@/lib/ai/openai";
+import { redactIdentifiers } from "@/lib/privacy/redact";
 import type {
   CriterionResult,
   Gender,
@@ -30,11 +32,6 @@ const VERDICT_LABELS: Record<MatchVerdict, string> = {
 export async function generateMatchRationale(
   input: MatchRationaleInput
 ): Promise<string> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY no configurada.");
-  }
-
   if (!input.details.length) {
     return (
       `El protocolo ${input.protocol.code_name} no tiene criterios definidos. ` +
@@ -68,56 +65,35 @@ export async function generateMatchRationale(
             ? "no_cumple"
             : "faltante",
       detalle: d.detail,
-      evidencia: d.evidence ?? [],
+      evidencia: (d.evidence ?? []).map((e) => redactIdentifiers(e).text),
     })),
   };
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      temperature: 0,
-      messages: [
-        {
-          role: "system",
-          content:
-            "Eres un asistente clínico de Crisvia para clinical research sites. " +
-            "Explica en español latinoamericano el resultado del motor de matching usando SOLO el JSON provisto. " +
-            "NO cambies el veredicto, NO inventes datos clínicos ni valores de laboratorio. " +
-            "Cita los criterios y, si el JSON trae 'evidencia', cita ese texto del expediente. " +
-            "Si 'evidencia' está vacía, di que no hay evidencia cargada para ese criterio. " +
-            "Identifica al paciente solo por iniciales; nunca escribas un nombre completo. " +
-            "Si un criterio está en 'faltante', indica qué falta cargar. " +
-            "Si contexto es 'rematch', menciona brevemente que es una evaluación para un protocolo alternativo tras screen failure. " +
-            "Formato: 1 párrafo breve (2-4 oraciones) con el veredicto y motivo principal; " +
-            "luego hasta 5 viñetas con los criterios más relevantes (fallas o pendientes primero). " +
-            "Tono profesional para coordinadores de estudios.",
-        },
-        {
-          role: "user",
-          content: JSON.stringify(payload, null, 2),
-        },
-      ],
-    }),
+  const content = await chatCompletion({
+    model: "gpt-4o-mini",
+    temperature: 0,
+    messages: [
+      {
+        role: "system",
+        content:
+          "Eres un asistente clínico de Crisvia para clinical research sites. " +
+          "Explica en español latinoamericano el resultado del motor de matching usando SOLO el JSON provisto. " +
+          "NO cambies el veredicto, NO inventes datos clínicos ni valores de laboratorio. " +
+          "Cita los criterios y, si el JSON trae 'evidencia', cita ese texto del expediente. " +
+          "Si 'evidencia' está vacía, di que no hay evidencia cargada para ese criterio. " +
+          "Identifica al paciente solo por iniciales; nunca escribas un nombre completo. " +
+          "Si un criterio está en 'faltante', indica qué falta cargar. " +
+          "Si contexto es 'rematch', menciona brevemente que es una evaluación para un protocolo alternativo tras screen failure. " +
+          "Formato: 1 párrafo breve (2-4 oraciones) con el veredicto y motivo principal; " +
+          "luego hasta 5 viñetas con los criterios más relevantes (fallas o pendientes primero). " +
+          "Tono profesional para coordinadores de estudios.",
+      },
+      {
+        role: "user",
+        content: JSON.stringify(payload, null, 2),
+      },
+    ],
   });
-
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error(`OpenAI error: ${err.slice(0, 200)}`);
-  }
-
-  const data = (await response.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-
-  const content = data.choices?.[0]?.message?.content?.trim();
-  if (!content) {
-    throw new Error("OpenAI no devolvió justificación.");
-  }
 
   return content;
 }
