@@ -15,6 +15,7 @@ import { CriteriaSummary } from "@/components/protocols/CriteriaSummary";
 import { FeasibilityReport } from "@/components/protocols/FeasibilityReport";
 import { MatchResultsTable } from "@/components/protocols/MatchResultsTable";
 import { useProtocolMatch } from "@/hooks/useProtocolMatch";
+import { useSiteProfile } from "@/hooks/useSiteProfile";
 
 export default function ProtocolMatchPage({
   params,
@@ -24,6 +25,7 @@ export default function ProtocolMatchPage({
   const { id } = use(params);
   const { protocol, results, existing, loading, error, enroll } =
     useProtocolMatch(id);
+  const { site } = useSiteProfile();
 
   const counts = useMemo(
     () => ({
@@ -58,6 +60,7 @@ export default function ProtocolMatchPage({
       <FeasibilityReport
         results={results}
         protocol={{ code_name: protocol.code_name, title: protocol.title }}
+        site={site}
       />
 
       <Card className="mb-4 print:hidden">

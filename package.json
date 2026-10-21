@@ -22,7 +22,8 @@
     "verify:dispense-date": "tsx --tsconfig tsconfig.json scripts/verify-dispense-date.ts",
     "verify:explainable-rematch": "tsx --tsconfig tsconfig.json scripts/verify-explainable-rematch.ts",
     "verify:feasibility-report": "tsx --tsconfig tsconfig.json scripts/verify-feasibility-report.ts",
-    "verify:morning-list": "tsx --tsconfig tsconfig.json scripts/verify-morning-list.ts"
+    "verify:morning-list": "tsx --tsconfig tsconfig.json scripts/verify-morning-list.ts",
+    "verify:site-profile": "tsx --tsconfig tsconfig.json scripts/verify-site-profile.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

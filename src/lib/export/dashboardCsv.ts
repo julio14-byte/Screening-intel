@@ -1,6 +1,7 @@
 import type { ScreeningWithRelations } from "@/lib/types";
 import { screeningToVerdict } from "@/lib/dashboard/traffic-light";
 import { SCREENING_STATUS_LABELS } from "@/lib/utils";
+import { siteDisplayName, type SiteProfile } from "@/lib/site/profile";
 
 const VERDICT_LABELS = {
   eligible: "Cumple",
@@ -8,8 +9,15 @@ const VERDICT_LABELS = {
   excluded: "No cumple",
 } as const;
 
-export function screeningsToCsv(rows: ScreeningWithRelations[]): string {
+export function screeningsToCsv(
+  rows: ScreeningWithRelations[],
+  site?: SiteProfile | null,
+  reportDate: Date = new Date()
+): string {
+  const siteName = siteDisplayName(site);
+  const siteColumns = site && siteName;
   const header = [
+    ...(siteColumns ? ["sitio", "investigador_principal", "fecha_reporte"] : []),
     "sujeto",
     "paciente",
     "protocolo_codigo",
@@ -24,6 +32,13 @@ export function screeningsToCsv(rows: ScreeningWithRelations[]): string {
     const verdict = screeningToVerdict(row);
     const patient = `${row.patients.last_name}, ${row.patients.first_name}`;
     return [
+      ...(siteColumns
+        ? [
+            csvEscape(siteName),
+            csvEscape(site.pi_name),
+            reportDate.toISOString().slice(0, 10),
+          ]
+        : []),
       csvEscape(row.patients.subject_code ?? ""),
       csvEscape(patient),
       csvEscape(row.protocols.code_name),
