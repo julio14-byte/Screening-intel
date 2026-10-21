@@ -63,32 +63,36 @@ export async function POST(request: Request) {
 
   let baselineOn = parsed.data.baseline_on ?? null;
   if (!baselineOn) {
-    const { data: rx } = await gate.supabase
-      .from("prescriptions")
-      .select("first_dose_at")
-      .eq("patient_id", parsed.data.patient_id)
-      .eq("protocol_id", parsed.data.protocol_id)
-      .not("first_dose_at", "is", null)
-      .order("first_dose_at", { ascending: true })
-      .limit(1)
-      .maybeSingle();
-    if (rx?.first_dose_at) baselineOn = String(rx.first_dose_at).slice(0, 10);
-  }
-  if (!baselineOn) {
-    const { data: screening } = await gate.supabase
+    const screening = await gate.supabase
       .from("screenings")
-      .select("updated_at")
+      .select("medication_delivered_on, updated_at")
       .eq("patient_id", parsed.data.patient_id)
       .eq("protocol_id", parsed.data.protocol_id)
       .eq("status", "randomized")
       .maybeSingle();
-    if (screening?.updated_at) baselineOn = String(screening.updated_at).slice(0, 10);
+    if (screening.error && /medication_delivered_on/i.test(screening.error.message)) {
+      const legacy = await gate.supabase
+        .from("screenings")
+        .select("updated_at")
+        .eq("patient_id", parsed.data.patient_id)
+        .eq("protocol_id", parsed.data.protocol_id)
+        .eq("status", "randomized")
+        .maybeSingle();
+      if (legacy.error) return schemaError(legacy.error);
+      if (legacy.data?.updated_at) baselineOn = String(legacy.data.updated_at).slice(0, 10);
+    } else if (screening.error) {
+      return schemaError(screening.error);
+    } else if (screening.data?.medication_delivered_on) {
+      baselineOn = String(screening.data.medication_delivered_on).slice(0, 10);
+    } else if (screening.data?.updated_at) {
+      baselineOn = String(screening.data.updated_at).slice(0, 10);
+    }
   }
   if (!baselineOn) {
     return NextResponse.json(
       {
         error:
-          "Falta el día 0. Registra la primera dosis, marca al paciente como Randomizado o indica la fecha del día 0.",
+          "Falta el día 0. Anota la fecha de entrega en Dispensación, marca al paciente como Randomizado o indica la fecha del día 0.",
       },
       { status: 400 }
     );

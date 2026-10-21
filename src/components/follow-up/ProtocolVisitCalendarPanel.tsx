@@ -85,7 +85,7 @@ export function ProtocolVisitCalendarPanel({ protocolId }: { protocolId: string 
     <Card className="mt-6">
       <CardHeader
         title="Calendario de seguimiento"
-        description="Día objetivo desde randomización/primera dosis y ventana permitida (ej. día 14, −2/+2 → días 12 a 16). Aplica a todos los brazos si no elegís uno."
+        description="Día objetivo desde la fecha de entrega del medicamento y ventana permitida (ej. día 14, −2/+2 → días 12 a 16). Aplica a todos los brazos si no elegís uno."
       />
       <CardBody className="space-y-4">
         {error ? <ErrorState message={error} /> : null}

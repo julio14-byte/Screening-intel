@@ -1,97 +1,47 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Pill } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
-import { SelectInput, TextInput } from "@/components/ui/Field";
-import {
-  EmptyState,
-  ErrorState,
-  LoadingState,
-} from "@/components/ui/StateMessage";
-import { readJsonResponse } from "@/lib/http/readJsonResponse";
+import { TextInput } from "@/components/ui/Field";
+import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateMessage";
 import { useRole } from "@/contexts/role-context";
-import { formatQuantity } from "@/lib/pharmacy/model";
-import { FIRST_DOSE_MODE_LABEL, type FirstDoseMode } from "@/lib/pharmacy/dispense";
+import { readJsonResponse } from "@/lib/http/readJsonResponse";
+import { formatDeliveryDate } from "@/lib/pharmacy/delivery";
 import { studySubjectCaption } from "@/lib/profile/demographics";
-import { formatDate } from "@/lib/utils";
 
-type Pending = {
-  key: string;
+type Row = {
+  id: string;
   patient_id: string;
   protocol_id: string;
+  delivered_on: string | null;
   patient_name: string;
   subject_code: string | null;
   protocol_code: string;
 };
 
-type Med = {
-  id: string;
-  protocol_id: string;
-  name: string;
-  strength: string;
-  unit: string;
-};
-
-type Lot = {
-  id: string;
-  protocol_id: string;
-  study_medication_id: string;
-  lot_number: string;
-  quantity_on_hand: number;
-};
-
-type Dispensed = {
-  id: string;
-  patient_id: string;
-  protocol_id: string;
-  kit_code?: string;
-  first_dose_at?: string | null;
-  first_dose_mode?: FirstDoseMode | null;
-  patient_name?: string;
-  status: string;
-};
+function localToday(): string {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
+}
 
 export function DispenseBoard() {
   const { isReadOnly } = useRole();
-  const [pending, setPending] = useState<Pending[]>([]);
-  const [dispensed, setDispensed] = useState<Dispensed[]>([]);
-  const [medications, setMedications] = useState<Med[]>([]);
-  const [lots, setLots] = useState<Lot[]>([]);
+  const [rows, setRows] = useState<Row[]>([]);
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [workingId, setWorkingId] = useState<string | null>(null);
-  const [drafts, setDrafts] = useState<
-    Record<
-      string,
-      {
-        medicationId: string;
-        kitCode: string;
-        lotId: string;
-        quantity: string;
-        directions: string;
-        mode: FirstDoseMode;
-        at: string;
-      }
-    >
-  >({});
 
   const load = useCallback(async () => {
     const res = await fetch("/api/pharmacy/dispense");
-    const json = await readJsonResponse<{
-      pending?: Pending[];
-      dispensed?: Dispensed[];
-      medications?: Med[];
-      lots?: Lot[];
-      error?: string;
-    }>(res);
+    const json = await readJsonResponse<{ rows?: Row[]; error?: string }>(res);
     if (!res.ok) throw new Error(json?.error ?? "No se pudo cargar dispensación.");
-    setPending(json?.pending ?? []);
-    setDispensed(json?.dispensed ?? []);
-    setMedications(json?.medications ?? []);
-    setLots(json?.lots ?? []);
+    setRows(json?.rows ?? []);
   }, []);
 
   useEffect(() => {
@@ -111,24 +61,8 @@ export function DispenseBoard() {
     };
   }, [load]);
 
-  function draftFor(id: string) {
-    return (
-      drafts[id] ?? {
-        medicationId: "",
-        kitCode: "",
-        lotId: "",
-        quantity: "1",
-        directions: "Según protocolo",
-        mode: "clinic" as FirstDoseMode,
-        at: new Date().toISOString().slice(0, 16),
-      }
-    );
-  }
-
-  async function onDispense(event: FormEvent, row: Pending) {
-    event.preventDefault();
-    const draft = draftFor(row.key);
-    setWorkingId(row.key);
+  async function save(row: Row, deliveredOn: string | null) {
+    setWorkingId(row.id);
     setError(null);
     try {
       const res = await fetch("/api/pharmacy/dispense", {
@@ -137,31 +71,23 @@ export function DispenseBoard() {
         body: JSON.stringify({
           patient_id: row.patient_id,
           protocol_id: row.protocol_id,
-          kit_code: draft.kitCode,
-          study_medication_id: draft.medicationId,
-          lot_id: draft.lotId,
-          quantity: draft.quantity,
-          directions: draft.directions,
-          first_dose_mode: draft.mode,
-          first_dose_at: new Date(draft.at).toISOString(),
+          delivered_on: deliveredOn,
         }),
       });
       const json = await readJsonResponse<{ error?: string }>(res);
-      if (!res.ok) throw new Error(json?.error ?? "No se pudo dispensar.");
+      if (!res.ok) throw new Error(json?.error ?? "No se pudo guardar la fecha.");
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo dispensar.");
+      setError(err instanceof Error ? err.message : "No se pudo guardar la fecha.");
     } finally {
       setWorkingId(null);
     }
   }
 
-  const dosedToday = useMemo(
-    () => dispensed.filter((row) => row.first_dose_at).length,
-    [dispensed]
-  );
+  if (loading) return <LoadingState label="Cargando dispensación…" />;
 
-  if (loading) return <LoadingState label="Cargando farmacia del estudio…" />;
+  const pending = rows.filter((row) => !row.delivered_on);
+  const delivered = rows.filter((row) => row.delivered_on);
 
   return (
     <div className="space-y-4">
@@ -169,15 +95,15 @@ export function DispenseBoard() {
 
       <Card>
         <CardHeader
-          title="Medicamento por entregar"
-          description="Pacientes en estado Randomizado (lo marca el equipo cuando el sponsor ya asignó tratamiento). Elige el lote de stock y registra la primera dosis."
+          title="Sin fecha de entrega"
+          description="Pacientes en Randomizado. Anota el día en que se les entregó el medicamento."
           actions={<Pill className="h-4 w-4 text-teal-600" aria-hidden />}
         />
         <CardBody>
           {pending.length === 0 ? (
             <EmptyState
-              title="Nadie espera medicamento"
-              description="Cuando un paciente pase a Randomizado en el Tracker aparecerá aquí."
+              title="Nadie espera la fecha"
+              description="Cuando un paciente pase a Randomizado en el Tracker aparecerá aquí, hasta que anotes el día de la entrega."
               action={
                 <Link href="/tracker" className="text-xs font-medium text-sky-700">
                   Ir al Tracker →
@@ -185,181 +111,20 @@ export function DispenseBoard() {
               }
             />
           ) : (
-            <ul className="space-y-4">
-              {pending.map((row) => {
-                const draft = draftFor(row.key);
-                const meds = medications.filter(
-                  (med) => med.protocol_id === row.protocol_id
-                );
-                const lotsFor = lots.filter(
-                  (lot) =>
-                    lot.protocol_id === row.protocol_id &&
-                    lot.study_medication_id === draft.medicationId
-                );
-                const med = meds.find((item) => item.id === draft.medicationId);
-                return (
-                  <li
-                    key={row.key}
-                    className="rounded-md border border-teal-100 bg-white px-3 py-3"
-                  >
-                    <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-                      <div>
-                        <p className="text-sm font-semibold text-indigo-950">
-                          Entregar medicamento
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          <Link
-                            href={`/patients/${row.patient_id}`}
-                            className="font-medium text-indigo-900 hover:text-violet-700"
-                          >
-                            {row.patient_name}
-                          </Link>
-                          {row.subject_code
-                            ? ` · ${studySubjectCaption({ subject_code: row.subject_code })}`
-                            : ""}{" "}
-                          · {row.protocol_code}
-                        </p>
-                      </div>
-                    </div>
-                    {isReadOnly ? (
-                      <p className="text-xs text-slate-400">Solo lectura</p>
-                    ) : (
-                      <form
-                        onSubmit={(event) => void onDispense(event, row)}
-                        className="grid gap-2 sm:grid-cols-2"
-                      >
-                        <SelectInput
-                          label="Medicamento"
-                          value={draft.medicationId}
-                          onChange={(e) =>
-                            setDrafts((prev) => ({
-                              ...prev,
-                              [row.key]: {
-                                ...draft,
-                                medicationId: e.target.value,
-                                lotId: "",
-                              },
-                            }))
-                          }
-                          required
-                        >
-                          <option value="">Seleccionar</option>
-                          {meds.map((item) => (
-                            <option key={item.id} value={item.id}>
-                              {item.name}
-                              {item.strength ? ` ${item.strength}` : ""}
-                            </option>
-                          ))}
-                        </SelectInput>
-                        <SelectInput
-                          label="Lote de stock"
-                          value={draft.lotId}
-                          onChange={(e) =>
-                            setDrafts((prev) => ({
-                              ...prev,
-                              [row.key]: { ...draft, lotId: e.target.value },
-                            }))
-                          }
-                          required
-                          disabled={!draft.medicationId}
-                        >
-                          <option value="">Lote con stock</option>
-                          {lotsFor.map((lot) => (
-                            <option key={lot.id} value={lot.id}>
-                              {lot.lot_number} ·{" "}
-                              {formatQuantity(Number(lot.quantity_on_hand), med?.unit)}
-                            </option>
-                          ))}
-                        </SelectInput>
-                        <TextInput
-                          label="Cantidad"
-                          type="number"
-                          min="0.01"
-                          step="0.01"
-                          value={draft.quantity}
-                          onChange={(e) =>
-                            setDrafts((prev) => ({
-                              ...prev,
-                              [row.key]: {
-                                ...draft,
-                                quantity: e.target.value,
-                              },
-                            }))
-                          }
-                          required
-                        />
-                        <SelectInput
-                          label="Primera dosis"
-                          value={draft.mode}
-                          onChange={(e) =>
-                            setDrafts((prev) => ({
-                              ...prev,
-                              [row.key]: {
-                                ...draft,
-                                mode: e.target.value as FirstDoseMode,
-                              },
-                            }))
-                          }
-                        >
-                          {(Object.keys(FIRST_DOSE_MODE_LABEL) as FirstDoseMode[]).map(
-                            (key) => (
-                              <option key={key} value={key}>
-                                {FIRST_DOSE_MODE_LABEL[key]}
-                              </option>
-                            )
-                          )}
-                        </SelectInput>
-                        <TextInput
-                          label="Fecha y hora"
-                          type="datetime-local"
-                          value={draft.at}
-                          onChange={(e) =>
-                            setDrafts((prev) => ({
-                              ...prev,
-                              [row.key]: { ...draft, at: e.target.value },
-                            }))
-                          }
-                          required
-                        />
-                        <TextInput
-                          label="Caja / kit del sponsor (opcional)"
-                          value={draft.kitCode}
-                          maxLength={60}
-                          onChange={(e) =>
-                            setDrafts((prev) => ({
-                              ...prev,
-                              [row.key]: { ...draft, kitCode: e.target.value },
-                            }))
-                          }
-                        />
-                        <TextInput
-                          label="Indicaciones"
-                          value={draft.directions}
-                          onChange={(e) =>
-                            setDrafts((prev) => ({
-                              ...prev,
-                              [row.key]: {
-                                ...draft,
-                                directions: e.target.value,
-                              },
-                            }))
-                          }
-                        />
-                        <div className="sm:col-span-2">
-                          <Button
-                            type="submit"
-                            disabled={workingId === row.key}
-                          >
-                            {workingId === row.key
-                              ? "Entregando…"
-                              : "Registrar entrega y primera dosis"}
-                          </Button>
-                        </div>
-                      </form>
-                    )}
-                  </li>
-                );
-              })}
+            <ul className="divide-y divide-violet-50">
+              {pending.map((row) => (
+                <DeliveryRow
+                  key={row.id}
+                  row={row}
+                  draft={drafts[row.id] ?? localToday()}
+                  readOnly={isReadOnly}
+                  busy={workingId === row.id}
+                  onDraft={(value) =>
+                    setDrafts((current) => ({ ...current, [row.id]: value }))
+                  }
+                  onSave={(value) => save(row, value)}
+                />
+              ))}
             </ul>
           )}
         </CardBody>
@@ -367,41 +132,95 @@ export function DispenseBoard() {
 
       <Card>
         <CardHeader
-          title="Primera dosis hecha"
-          description={`${dosedToday} registros con primera dosis. Cada registro descuenta el lote del inventario.`}
+          title="Entregado"
+          description="Fecha en que se entregó el medicamento. Puedes corregirla si te equivocaste."
         />
         <CardBody>
-          {dispensed.filter((row) => row.first_dose_at).length === 0 ? (
-            <p className="text-sm text-slate-500">Todavía no hay primeras dosis.</p>
+          {delivered.length === 0 ? (
+            <p className="text-sm text-slate-500">Todavía no hay entregas registradas.</p>
           ) : (
-            <ul className="space-y-2">
-              {dispensed
-                .filter((row) => row.first_dose_at)
-                .map((row) => {
-                  return (
-                    <li
-                      key={row.id}
-                      className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-violet-100 px-3 py-2 text-sm"
-                    >
-                      <div>
-                        <p className="font-mono text-xs text-teal-700">
-                          {row.kit_code || "Sin kit"}
-                          {row.patient_name ? ` · ${row.patient_name}` : ""}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          {row.first_dose_mode
-                            ? FIRST_DOSE_MODE_LABEL[row.first_dose_mode]
-                            : "Primera dosis"}{" "}
-                          · {row.first_dose_at ? formatDate(row.first_dose_at) : ""}
-                        </p>
-                      </div>
-                    </li>
-                  );
-                })}
+            <ul className="divide-y divide-violet-50">
+              {delivered.map((row) => (
+                <DeliveryRow
+                  key={row.id}
+                  row={row}
+                  draft={drafts[row.id] ?? row.delivered_on ?? localToday()}
+                  readOnly={isReadOnly}
+                  busy={workingId === row.id}
+                  onDraft={(value) =>
+                    setDrafts((current) => ({ ...current, [row.id]: value }))
+                  }
+                  onSave={(value) => save(row, value)}
+                  onClear={() => save(row, null)}
+                />
+              ))}
             </ul>
           )}
         </CardBody>
       </Card>
     </div>
+  );
+}
+
+function DeliveryRow({
+  row,
+  draft,
+  readOnly,
+  busy,
+  onDraft,
+  onSave,
+  onClear,
+}: {
+  row: Row;
+  draft: string;
+  readOnly: boolean;
+  busy: boolean;
+  onDraft: (value: string) => void;
+  onSave: (value: string) => void;
+  onClear?: () => void;
+}) {
+  const subject = studySubjectCaption({ subject_code: row.subject_code });
+  return (
+    <li className="flex flex-col gap-3 py-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-indigo-950">{row.patient_name}</p>
+        <p className="text-xs text-slate-500">
+          {row.protocol_code || "Protocolo"}
+          {subject ? ` · ${subject}` : ""}
+          {row.delivered_on ? ` · ${formatDeliveryDate(row.delivered_on)}` : ""}
+        </p>
+      </div>
+      {readOnly ? null : (
+        <form
+          className="flex flex-wrap items-end gap-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            onSave(draft);
+          }}
+        >
+          <TextInput
+            label="Fecha de entrega"
+            type="date"
+            required
+            value={draft}
+            max={localToday()}
+            onChange={(event) => onDraft(event.target.value)}
+          />
+          <Button type="submit" disabled={busy || !draft}>
+            {busy ? "Guardando…" : "Guardar fecha"}
+          </Button>
+          {onClear ? (
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={busy}
+              onClick={() => onClear()}
+            >
+              Quitar
+            </Button>
+          ) : null}
+        </form>
+      )}
+    </li>
   );
 }

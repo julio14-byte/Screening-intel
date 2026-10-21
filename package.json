@@ -19,7 +19,7 @@
     "verify:security": "tsx --tsconfig tsconfig.json scripts/verify-security.ts",
     "verify:citas": "tsx --tsconfig tsconfig.json scripts/verify-citas.ts",
     "verify:follow-up": "tsx --tsconfig tsconfig.json scripts/verify-follow-up.ts",
-    "verify:pharmacy-inventory": "tsx --tsconfig tsconfig.json scripts/verify-pharmacy-inventory.ts",
+    "verify:dispense-date": "tsx --tsconfig tsconfig.json scripts/verify-dispense-date.ts",
     "verify:explainable-rematch": "tsx --tsconfig tsconfig.json scripts/verify-explainable-rematch.ts",
     "verify:feasibility-report": "tsx --tsconfig tsconfig.json scripts/verify-feasibility-report.ts",
     "verify:morning-list": "tsx --tsconfig tsconfig.json scripts/verify-morning-list.ts"

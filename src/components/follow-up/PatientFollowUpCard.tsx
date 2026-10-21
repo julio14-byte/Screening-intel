@@ -117,7 +117,7 @@ export function PatientFollowUpCard({
               </SelectInput>
             ) : null}
             <TextInput
-              label="Día 0 (si no hay primera dosis)"
+              label="Día 0 (si no hay fecha de entrega)"
               type="date"
               value={baselineOn}
               onChange={(e) => setBaselineOn(e.target.value)}
