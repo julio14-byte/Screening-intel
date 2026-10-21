@@ -65,7 +65,6 @@ export function DashboardView({
     <>
       <PageHeader
         title={title}
-        description="Embudo del site: quién está en screening, el semáforo y los screen failures a recuperar."
         actions={
           filteredRows.length > 0 ? (
             <Button
@@ -92,8 +91,7 @@ export function DashboardView({
         <div className="grid gap-5 lg:grid-cols-5">
           <Card className="lg:col-span-3">
             <EmptyState
-              title="Todavía no hay screening"
-              description="Cargá pacientes que YA están en tu site, completá el perfil clínico y corré el matcher de un protocolo."
+              title="Sin pacientes en screening"
               action={
                 <Link
                   href={routes.app.protocols}
@@ -124,7 +122,6 @@ export function DashboardView({
           <Card>
             <CardHeader
               title="Pacientes en screening"
-              description="Semáforo de inclusión y exclusión por protocolo activo."
             />
             <CardBody className="space-y-4">
               <DashboardFilters

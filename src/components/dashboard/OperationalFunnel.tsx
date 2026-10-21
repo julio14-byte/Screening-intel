@@ -45,7 +45,6 @@ export function OperationalFunnel({
     <Card className="h-full">
       <CardHeader
         title="Embudo de screening"
-        description="De candidatos a randomizado. A la derecha, screen failures a recuperar."
       />
       <CardBody className="space-y-3">
         {funnel.stages.map((stage) => (

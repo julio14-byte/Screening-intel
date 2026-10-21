@@ -1,6 +1,4 @@
-/**
- * Versión 1: inteligencia de screening para clinical research sites.
- */
+/** Módulos de screening del producto. */
 export const PRODUCT_MODULE_IDS = [
   "registry",
   "profile",
@@ -20,36 +18,31 @@ export const PRODUCT_MODULES: Record<
     id: "registry",
     label: "1. Patient Registry",
     href: "/patients",
-    summary:
-      "Quienes YA están en tu site. Alta, pegar Excel o CSV, y búsqueda. Entrada al matching, no una base para vender.",
+    summary: "Registro de pacientes del centro.",
   },
   profile: {
     id: "profile",
     label: "2. Clinical Profile",
     href: "/patients",
-    summary:
-      "Historia, antecedentes, medicamentos y laboratorios. El coordinador lo llena; el matcher lo usa.",
+    summary: "Perfil clínico.",
   },
   matcher: {
     id: "matcher",
     label: "3. Protocol Matcher",
     href: "/protocols",
-    summary:
-      "Paciente ↔ protocolo. Reglas 🟢🟡🔴. La IA explica; no cambia la elegibilidad.",
+    summary: "Criterios de inclusión y exclusión.",
   },
   tracker: {
     id: "tracker",
     label: "4. Screening Tracker",
     href: "/tracker",
-    summary:
-      "Pre-screening → Screening → Randomizado → Screen failure. No es un sorteo.",
+    summary: "Pipeline de screening.",
   },
   rematch: {
     id: "rematch",
     label: "5. Re-Match & Follow-up",
     href: "/rematch",
-    summary:
-      "Un screen failure no es un paciente perdido: otros protocolos activos donde todavía califica.",
+    summary: "Screen failures en otros protocolos.",
   },
 };
 

@@ -114,7 +114,6 @@ export function ScreeningFunnelDashboard({
     <>
       <PageHeader
         title="Dashboard"
-        description="El Embudo de Screening — tracker en tiempo real del pipeline de tu clínica."
         actions={
           <div className="flex flex-wrap gap-2">
             <Link href={routes.app.tracker}>
@@ -149,8 +148,7 @@ export function ScreeningFunnelDashboard({
       ) : screenings.length === 0 ? (
         <Card>
           <EmptyState
-            title="El embudo está vacío"
-            description="Ejecutá matching en un protocolo para poblar el pipeline de screening."
+            title="Sin pacientes en screening"
             action={
               <Link href={routes.app.protocols} className="text-xs font-medium text-indigo-700">
                 Ir a Protocol Matcher →
@@ -194,8 +192,7 @@ export function ScreeningFunnelDashboard({
           <div className="grid gap-5 xl:grid-cols-5">
             <Card className="xl:col-span-3">
               <CardHeader
-                title="El Embudo de Screening"
-                description="Flujo en tiempo real por etapa del tracker."
+                title="Embudo de screening"
               />
               <CardBody className="space-y-4">
                 {SCREENING_STATUS_ORDER.map((status, index) => {
@@ -249,7 +246,6 @@ export function ScreeningFunnelDashboard({
             <Card className="xl:col-span-2">
               <CardHeader
                 title="Actividad reciente"
-                description="Últimos movimientos en el pipeline."
               />
               <CardBody className="space-y-2 p-3">
                 {recent.map((screening) => (

@@ -24,10 +24,6 @@ export function MorningList({
         <h2 id="morning-list-heading" className="text-sm font-semibold text-indigo-950">
           Lista de la mañana
         </h2>
-        <p className="mt-0.5 max-w-2xl text-xs leading-relaxed text-slate-500">
-          Pacientes citados mañana, el protocolo activo que mejor les queda y el criterio
-          que todavía falta. No es una elegibilidad confirmada: revisa la ficha antes de la cita.
-        </p>
       </div>
 
       {blocked ? (

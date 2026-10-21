@@ -25,8 +25,7 @@ export default function ProtocolsPage() {
   return (
     <>
       <PageHeader
-        title="Protocol Matcher"
-        description="Paciente ↔ protocolo. Criterios estructurados; el motor de reglas marca 🟢🟡🔴. La IA no cambia la elegibilidad."
+        title="Protocolos"
         actions={
           <RoleGuard permission="protocols:write">
             <Button onClick={() => setModalOpen(true)}>
@@ -44,8 +43,7 @@ export default function ProtocolsPage() {
       ) : protocols.length === 0 ? (
         <Card>
           <EmptyState
-            title="Todavía no hay protocolos"
-            description="Dá de alta un protocolo con sus criterios de inclusión y exclusión para empezar a matchear pacientes."
+            title="Sin protocolos"
           />
         </Card>
       ) : (

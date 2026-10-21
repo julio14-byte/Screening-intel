@@ -34,7 +34,7 @@ export default function ProtocolPage({
 
       <PageHeader
         title={`${protocol.code_name} · screening`}
-        description={`${protocol.title}. Calendario de visitas de seguimiento.`}
+        description={protocol.title}
         actions={
           <Link href={`/protocols/${protocol.id}/match`}>
             <Button variant="secondary">

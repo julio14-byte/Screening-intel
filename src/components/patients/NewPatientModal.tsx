@@ -61,10 +61,6 @@ export function NewPatientModal({
     <Modal open={open} title="Nuevo paciente" onClose={onClose} wide>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error ? <ErrorState message={error} /> : null}
-        <p className="text-xs text-slate-500">
-          Nombre y contacto quedan en el expediente confidencial. Al crear se
-          asigna un código numérico de sujeto para disociarlos del estudio.
-        </p>
         <div className="grid grid-cols-2 gap-3">
           <TextInput
             label="Nombre"
@@ -100,9 +96,7 @@ export function NewPatientModal({
             value={form.birth_date}
             onChange={(e) => setForm({ ...form, birth_date: e.target.value })}
             hint={
-              age != null && Number.isFinite(age)
-                ? `Edad actual: ${age} años (rango del protocolo)`
-                : "Para verificar el rango de edad permitido"
+              age != null && Number.isFinite(age) ? `${age} años` : undefined
             }
           />
           <SelectInput
@@ -111,7 +105,6 @@ export function NewPatientModal({
             onChange={(e) =>
               setForm({ ...form, gender: e.target.value as Gender })
             }
-            hint="Variable farmacológica; no es identidad de género."
           >
             <option value="female">Femenino</option>
             <option value="male">Masculino</option>

@@ -27,7 +27,6 @@ export function PatientVisits({ patientId }: { patientId: string }) {
     <Card>
       <CardHeader
         title="Citas"
-        description="Próximas y pasadas de este paciente."
         actions={
           isReadOnly ? null : (
             <Button onClick={() => setCreating(true)}>

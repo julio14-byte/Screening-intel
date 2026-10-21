@@ -129,25 +129,21 @@ export function ClinicalProfileEditor({
       ) : null}
 
       {!profile && canEdit ? (
-        <p className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-          Este paciente todavía no tiene perfil clínico (historia, antecedentes,
-          medicamentos y laboratorios). Cargalo y guardá: el matcher no puede
-          cruzar un expediente vacío.
+        <p className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          Sin perfil clínico.
         </p>
       ) : null}
 
       {isReadOnly ? (
         <p className="mb-4 rounded-md border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-800">
-          Modo solo lectura (Monitor CRA). Podés revisar el expediente y la
-          bitácora de auditoría, sin modificar datos clínicos.
+          Solo lectura.
         </p>
       ) : null}
 
       <div className={`grid gap-4 lg:grid-cols-2 ${!canEdit ? "pointer-events-none opacity-80" : ""}`}>
         <Card className="lg:col-span-2">
           <CardHeader
-            title="Datos demográficos y básicos"
-            description="Identificación confidencial, código de sujeto, edad, sexo biológico y etnia"
+            title="Datos demográficos"
             actions={<IdCard className="h-4 w-4 text-slate-400" aria-hidden />}
           />
           <CardBody>
@@ -163,8 +159,7 @@ export function ClinicalProfileEditor({
 
         <Card className="lg:col-span-2">
           <CardHeader
-            title="Historial médico completo (anamnesis)"
-            description="Diagnósticos con fecha, síntomas, gravedad y evolución; cirugías; hospitalizaciones; medicación con dosis; alergias"
+            title="Anamnesis"
             actions={<BookOpen className="h-4 w-4 text-slate-400" aria-hidden />}
           />
           <CardBody>
@@ -180,8 +175,7 @@ export function ClinicalProfileEditor({
 
         <Card className="lg:col-span-2">
           <CardHeader
-            title="Datos biométricos y clínicos"
-            description="Mediciones directas: signos vitales, antropometría, laboratorio dirigido y prueba de embarazo"
+            title="Mediciones clínicas"
             actions={<Stethoscope className="h-4 w-4 text-slate-400" aria-hidden />}
           />
           <CardBody>
@@ -199,7 +193,6 @@ export function ClinicalProfileEditor({
         <Card className="lg:col-span-2">
           <CardHeader
             title="Otros analitos"
-            description="Valores extra para matching (ej. HbA1c). Los campos de arriba no se duplican acá."
             actions={<TestTubes className="h-4 w-4 text-slate-400" aria-hidden />}
           />
           <CardBody>

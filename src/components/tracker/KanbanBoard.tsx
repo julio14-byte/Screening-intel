@@ -235,10 +235,6 @@ export function KanbanBoard({
             <h3 className="text-sm font-semibold text-slate-900">
               Motivo del screen failure
             </h3>
-            <p className="mt-1 text-xs text-slate-500">
-              Queda en el expediente del sitio y se usa para buscar otros
-              protocolos. No es el consentimiento informado del patrocinador.
-            </p>
             <textarea
               value={reason}
               onChange={(event) => setReason(event.target.value)}

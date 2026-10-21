@@ -219,66 +219,41 @@ const config = {
       ],
     },
     features: {
-      eyebrow: "Versión 1",
-      title: "Cinco módulos de screening. Nada de vender una base de pacientes.",
-      subtitle:
-        "Para coordinadores de clinical research sites.",
+      eyebrow: "Producto",
+      title: "Screening para clinical research sites",
+      subtitle: "Registro, perfil, matching, tracker y re-match.",
       items: [
         {
           icon: "Users",
-          title: "1. Patient Registry",
-          body: "Quienes YA están en tu site. Alta, pegar Excel o CSV, y búsqueda. Entrada al matching, no un listado para reclutar.",
+          title: "Registro",
+          body: "Pacientes del centro, alta e importación.",
         },
         {
           icon: "ClipboardList",
-          title: "2. Clinical Profile",
-          body: "Historia, antecedentes, medicamentos y laboratorios. El coordinador lo llena; el matcher lo usa.",
+          title: "Perfil clínico",
+          body: "Historia, medicamentos y laboratorios.",
         },
         {
           icon: "FlaskConical",
-          title: "3. Protocol Matcher",
-          body: "Paciente ↔ protocolo. Motor de reglas 🟢🟡🔴. La IA explica; no cambia quién entra.",
+          title: "Matching",
+          body: "Criterios de inclusión y exclusión.",
         },
         {
           icon: "KanbanSquare",
-          title: "4. Screening Tracker",
-          body: "Pre-screening → Screening → Randomizado → Screen failure. No es un sorteo. Randomizado lo marca el coordinador cuando el sponsor ya asignó kit.",
+          title: "Tracker",
+          body: "Pre-screening, screening, randomizado y screen failure.",
         },
         {
           icon: "RefreshCw",
-          title: "5. Re-Match & Follow-up",
-          body: "Un screen failure no es el final: otros protocolos activos donde todavía califica.",
+          title: "Re-Match",
+          body: "Screen failures frente a otros protocolos activos.",
         },
       ],
     },
     faq: {
       eyebrow: "Preguntas frecuentes",
-      title: "Lo que preguntan los clinical research sites.",
+      title: "Planes y acceso",
       items: [
-        {
-          q: "¿Crisvia es una base de datos de pacientes?",
-          a: "No. El registro es la entrada al matching. Vendemos inteligencia de screening para el clinical research site, no un listado para reclutar ni para revender. La propuesta es aprovechar a quienes YA llegan a tu clínica.",
-        },
-        {
-          q: "¿Crisvia reemplaza al EDC del estudio?",
-          a: "No. Crisvia es screening (elegibilidad). El matcher no randomiza ni captura datos clínicos del estudio; eso lo hacen los sistemas del sponsor. Seguimiento y la fecha de entrega del medicamento son registro operativo del site, no sustituyen al EDC ni al IWRS.",
-        },
-        {
-          q: "¿El matching reduce el tiempo de screening un 42,6%?",
-          a: "Esa cifra no es de Crisvia. Un trabajo sobre TrialGPT la reportó en su evaluación; no es una garantía de esta app. El recorte real se mide en tu site: 100 pacientes históricos y 2 protocolos, cronómetro en mano.",
-        },
-        {
-          q: "¿El screening es un sorteo digital para elegir pacientes?",
-          a: "No. El screening es un filtro de elegibilidad: el motor de reglas compara el expediente con inclusión y exclusión (🟢 cumple, 🟡 falta un dato, 🔴 no cumple). No hay azar y la IA no decide quién entra. El paso aleatorio lo hace el sponsor cuando el paciente ya está en Screening.",
-        },
-        {
-          q: "¿Cómo paso datos de Clinical Ink o de IQVIA al screening?",
-          a: "En Pacientes → Importar pegá el listado de screening (DM+MH+CM+LB) copiado de Excel, o subí el CSV. Después: Protocolos → Ejecutar matching. El motor de reglas compara edad, sexo, diagnósticos, medicación y labs (también sinónimos EN/ES: Type 2 diabetes → diabetes tipo 2). La IA no cambia el veredicto.",
-        },
-        {
-          q: "¿Hay una forma más fácil que un CSV?",
-          a: "Sí. Copiá las celdas en Excel o Sheets (con cabecera) y pegalas en Pacientes → Importar. Evitás Guardar como CSV, punto y coma y encoding. El archivo CSV sigue disponible. Un expediente suelto se carga en el perfil con notas + IA. No hay botón Clinical Ink/IQVIA en vivo: no hay API pública de listing. El import no enrola solo.",
-        },
         {
           q: "¿Cuánto dura el trial?",
           a: "14 días en el plan Free: hasta 50 pacientes y 3 protocolos activos, sin tarjeta.",
@@ -295,8 +270,8 @@ const config = {
     },
     testimonials: {
       eyebrow: "Prueba social",
-      title: "Diseñado con coordinadores de estudios.",
-      subtitle: "Testimonios de referencia del MVP — reemplázalos con casos reales de tu site.",
+      title: "Para equipos de investigación clínica.",
+      subtitle: "",
       items: [
         {
           quote:

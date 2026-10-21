@@ -1,6 +1,5 @@
 "use client";
 
-import { Shield } from "lucide-react";
 import { SelectInput, TextInput } from "@/components/ui/Field";
 import {
   ETHNICITY_LABEL,
@@ -26,21 +25,8 @@ export function DemographicsEditor({
 
   return (
     <div className="space-y-6">
-      <p className="flex gap-2 rounded-md border border-violet-100 bg-violet-50/70 px-3 py-2 text-xs text-indigo-800">
-        <Shield className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-600" aria-hidden />
-        <span>
-          Nombre y contacto se guardan bajo estricta confidencialidad en el
-          expediente del centro. En el estudio el paciente se identifica con el{" "}
-          <strong>código numérico de sujeto</strong>, no con sus datos personales.
-        </span>
-      </p>
-
       <section>
-        <h3 className="text-sm font-semibold text-indigo-950">Identificación</h3>
-        <p className="mb-3 text-xs text-slate-500">
-          Datos de contacto del participante. Quedan disociados del protocolo
-          mediante el código de sujeto.
-        </p>
+        <h3 className="mb-3 text-sm font-semibold text-indigo-950">Identificación</h3>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <TextInput
             label="Nombre"
@@ -63,11 +49,6 @@ export function DemographicsEditor({
               patch({ subject_code: e.target.value.replace(/[^\d]/g, "") })
             }
             inputMode="numeric"
-            hint={
-              value.subject_code
-                ? "Identificador numérico en el estudio. No es el nombre."
-                : "Si lo dejás vacío, se asigna un número automático al crear el paciente."
-            }
             placeholder="10001"
           />
           <TextInput
@@ -117,13 +98,9 @@ export function DemographicsEditor({
       </section>
 
       <section>
-        <h3 className="text-sm font-semibold text-indigo-950">
+        <h3 className="mb-3 text-sm font-semibold text-indigo-950">
           Edad y fecha de nacimiento
         </h3>
-        <p className="mb-3 text-xs text-slate-500">
-          Sirve para verificar que está en el rango de edad permitido del
-          protocolo. El matching usa la edad calculada, no un campo aparte.
-        </p>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <TextInput
             label="Fecha de nacimiento"
@@ -148,17 +125,11 @@ export function DemographicsEditor({
         <h3 className="text-sm font-semibold text-indigo-950">
           Sexo biológico y etnia
         </h3>
-        <p className="mb-3 text-xs text-slate-500">
-          Algunos medicamentos actúan de forma distinta según estas variables.
-          El matching usa el sexo biológico; la etnia queda registrada en el
-          expediente.
-        </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <SelectInput
             label="Sexo biológico"
             value={value.gender}
             onChange={(e) => patch({ gender: e.target.value as Gender })}
-            hint="No es identidad de género: es la variable que usa el protocolo y la farmacología."
           >
             <option value="female">Femenino</option>
             <option value="male">Masculino</option>

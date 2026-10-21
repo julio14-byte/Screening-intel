@@ -52,7 +52,7 @@ assert(!board.includes("lote"), "la pantalla no habla de lotes");
 assert(!board.includes("inventario"), "la pantalla no habla de inventario");
 assert(!board.includes("primera dosis"), "la pantalla no pide primera dosis");
 assert(board.includes("Fecha de entrega"), "la pantalla pide la fecha");
-assert(page.includes("Fecha de entrega"), "el título es la fecha de entrega");
+assert(page.includes("Dispensación"), "la página sigue siendo dispensación");
 assert(!protocolPage.includes("ProtocolStudyMedsPanel"), "el protocolo no carga inventario");
 assert(
   followUp.includes("medication_delivered_on"),

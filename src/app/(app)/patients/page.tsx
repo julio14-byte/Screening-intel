@@ -37,8 +37,7 @@ export default function PatientsPage() {
   return (
     <>
       <PageHeader
-        title="Registro de pacientes"
-        description="Quienes YA están en tu site. Entrada al matching — no una base de datos para vender ni para reclutar."
+        title="Pacientes"
         actions={
           <RoleGuard permission="patients:write">
             <div className="flex flex-wrap gap-2">
@@ -81,12 +80,7 @@ export default function PatientsPage() {
           </div>
         ) : filtered.length === 0 ? (
           <EmptyState
-            title={query ? "Sin resultados" : "Todavía no hay pacientes"}
-            description={
-              query
-                ? "Probá con otro término de búsqueda."
-                : "Cargá a quienes YA están en tu site (alta, pegar Excel o CSV) para cruzarlos contra protocolos."
-            }
+            title={query ? "Sin resultados" : "Sin pacientes"}
           />
         ) : (
           <div className="overflow-x-auto">

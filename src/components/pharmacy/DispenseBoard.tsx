@@ -96,14 +96,12 @@ export function DispenseBoard() {
       <Card>
         <CardHeader
           title="Sin fecha de entrega"
-          description="Pacientes en Randomizado. Anota el día en que se les entregó el medicamento."
           actions={<Pill className="h-4 w-4 text-teal-600" aria-hidden />}
         />
         <CardBody>
           {pending.length === 0 ? (
             <EmptyState
-              title="Nadie espera la fecha"
-              description="Cuando un paciente pase a Randomizado en el Tracker aparecerá aquí, hasta que anotes el día de la entrega."
+              title="Sin entregas pendientes"
               action={
                 <Link href="/tracker" className="text-xs font-medium text-sky-700">
                   Ir al Tracker →
@@ -133,11 +131,10 @@ export function DispenseBoard() {
       <Card>
         <CardHeader
           title="Entregado"
-          description="Fecha en que se entregó el medicamento. Puedes corregirla si te equivocaste."
         />
         <CardBody>
           {delivered.length === 0 ? (
-            <p className="text-sm text-slate-500">Todavía no hay entregas registradas.</p>
+            <p className="text-sm text-slate-500">Sin entregas.</p>
           ) : (
             <ul className="divide-y divide-violet-50">
               {delivered.map((row) => (

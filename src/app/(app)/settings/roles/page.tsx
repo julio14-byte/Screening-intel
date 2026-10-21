@@ -12,8 +12,8 @@ export default async function RolesAdminPage() {
   return (
     <>
       <PageHeader
-        title="Usuarios y roles clínicos"
-        description={`Tu rol: ${APP_ROLE_LABELS[access.role]}. Creá usuarios del sitio y asigná permisos RBAC al personal.`}
+        title="Usuarios y roles"
+        description={APP_ROLE_LABELS[access.role]}
       />
       <RoleAdminPanel />
     </>

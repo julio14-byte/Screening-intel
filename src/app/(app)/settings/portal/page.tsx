@@ -10,10 +10,7 @@ export default async function PortalSettingsPage() {
 
   return (
     <>
-      <PageHeader
-        title="Portal de candidatos"
-        description="Activa el pre-registro público, define el slug del centro y copia links para pacientes."
-      />
+      <PageHeader title="Portal de candidatos" />
       <PortalSettingsPanel />
     </>
   );

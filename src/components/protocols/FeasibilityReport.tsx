@@ -76,13 +76,6 @@ export function FeasibilityReport({
         }
       />
       <CardBody className="space-y-4">
-        <p className="text-xs leading-relaxed text-slate-600">
-          Conteos del motor de reglas sobre la base del sitio. No incluye
-          nombres, notas ni valores del expediente. Sirve para contestarle al
-          patrocinador el mismo día. No es una garantía de enrolamiento ni un
-          censo del expediente electrónico.
-        </p>
-
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <Count label="Evaluados" value={report.evaluated} total={report.evaluated} showShare={false} />
           <Count label="Parecen cumplir" value={report.eligible} total={report.evaluated} />
@@ -92,8 +85,7 @@ export function FeasibilityReport({
 
         {!report.criteriaDefined ? (
           <p className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-900">
-            Este protocolo no tiene criterios cargados. El conteo no responde
-            una factibilidad.
+            Sin criterios cargados.
           </p>
         ) : (
           <>
@@ -143,11 +135,9 @@ export function FeasibilityReport({
           </>
         )}
 
-        <p className="text-[11px] text-slate-500">
-          Generado en Crisvia
-          {stamp ? ` el ${stamp}` : ""}. El patrocinador no entra a esta base.
-          Para guardar el PDF: Imprimir y elegir “Guardar como PDF”.
-        </p>
+        {stamp ? (
+          <p className="text-[11px] text-slate-500">Crisvia · {stamp}</p>
+        ) : null}
       </CardBody>
     </Card>
     </section>

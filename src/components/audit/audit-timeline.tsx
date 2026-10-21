@@ -189,8 +189,8 @@ function AuditTimelineItem({ log }: { log: AuditLog }) {
 export function AuditTimeline({
   tableName,
   recordId,
-  title = "Bitácora de auditoría",
-  description = "Registro inmutable de cambios. Diseño alineado a 21 CFR Part 11; no es una certificación. Solo lectura.",
+  title = "Auditoría",
+  description,
   className,
 }: {
   tableName: string;
@@ -215,8 +215,7 @@ export function AuditTimeline({
           <ErrorState message={error} />
         ) : logs.length === 0 ? (
           <p className="rounded-md border border-dashed border-slate-200 bg-slate-50 px-3 py-6 text-center text-xs text-slate-500">
-            Sin registros de auditoría para este expediente. Los cambios en
-            datos demográficos del paciente se registran automáticamente.
+            Sin registros.
           </p>
         ) : (
           <ol className="relative border-l border-slate-200 ml-1">
