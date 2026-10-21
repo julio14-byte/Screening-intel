@@ -3,6 +3,9 @@ import { join, resolve } from "node:path";
 import nextConfig from "../next.config";
 import config from "../src/config";
 import { rateLimit } from "../src/lib/security/rate-limit";
+import { isSameOriginMutation } from "../src/lib/security/csrf";
+import { validatePassword } from "../src/lib/security/password";
+import { hasPdfSignature, looksLikeText } from "../src/lib/security/file-signature";
 import { safeRedirectPath } from "../src/lib/security/safe-redirect";
 
 let failed = 0;
@@ -39,6 +42,31 @@ async function main() {
   assert(results.slice(0, 3).every((r) => r.allowed), "rate limit permite hasta el máximo");
   assert(!results[3].allowed && results[3].retryAfterSec > 0, "rate limit bloquea al exceder");
 
+  // CSRF
+  const req = (method: string, headers: Record<string, string>) =>
+    new Request("https://app.example.com/api/x", { method, headers: { host: "app.example.com", ...headers } });
+  assert(isSameOriginMutation(req("GET", { "sec-fetch-site": "cross-site" })), "GET no se bloquea");
+  assert(!isSameOriginMutation(req("POST", { "sec-fetch-site": "cross-site" })), "POST cross-site bloqueado");
+  assert(!isSameOriginMutation(req("POST", { origin: "https://evil.com" })), "POST con Origin ajeno bloqueado");
+  assert(isSameOriginMutation(req("POST", { origin: "https://app.example.com" })), "POST mismo origen permitido");
+  assert(isSameOriginMutation(req("POST", { "sec-fetch-site": "same-origin" })), "POST same-origin permitido");
+
+  // Contraseñas y archivos
+  assert(validatePassword("corta1") !== null, "contraseña corta rechazada");
+  assert(validatePassword("password") !== null, "contraseña común rechazada");
+  assert(validatePassword("aaaaaaaaaaaaaaaa") !== null, "contraseña repetida rechazada");
+  assert(validatePassword("juanperez-correo-largo!", ["juanperez@x.com"]) !== null, "contraseña con correo rechazada");
+  assert(validatePassword("caballo-bateria-grapa-azul") === null, "frase larga aceptada");
+  assert(hasPdfSignature(new TextEncoder().encode("%PDF-1.7\n").buffer as ArrayBuffer), "firma PDF válida");
+  assert(!hasPdfSignature(new TextEncoder().encode("MZ\u0090\u0000").buffer as ArrayBuffer), "ejecutable no es PDF");
+  assert(!looksLikeText(new Uint8Array([65, 0, 66]).buffer), "binario no es texto");
+
+  // Middleware aplica CSRF, rate limit de escrituras y no-store
+  const mw = readFileSync(resolve("src/lib/supabase/middleware.ts"), "utf8");
+  assert(mw.includes("isSameOriginMutation"), "middleware aplica CSRF");
+  assert(mw.includes("write:${user.id}"), "middleware limita escrituras por usuario");
+  assert(mw.includes("no-store"), "middleware marca no-store en pantallas protegidas");
+
   // Cabeceras de seguridad
   const rules = (await nextConfig.headers?.()) ?? [];
   const all = rules.find((r) => r.source === "/:path*")?.headers ?? [];
@@ -52,6 +80,7 @@ async function main() {
   assert(header("X-Frame-Options") === "DENY", "X-Frame-Options");
   assert(header("Strict-Transport-Security").includes("max-age="), "HSTS");
   assert(header("Referrer-Policy") !== "", "Referrer-Policy");
+  assert(header("Cross-Origin-Resource-Policy") === "same-origin", "CORP");
   assert(nextConfig.poweredByHeader === false, "sin X-Powered-By");
 
   // Toda API no pública exige autenticación o permiso

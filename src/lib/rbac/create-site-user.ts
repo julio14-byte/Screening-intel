@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { validatePassword } from "@/lib/security/password";
 import type { AppRole } from "./types";
 
 export interface CreateSiteUserInput {
@@ -34,9 +35,8 @@ export async function createSiteUser(
   if (!email.includes("@")) {
     throw new CreateSiteUserError("Email inválido.");
   }
-  if (input.password.length < 8) {
-    throw new CreateSiteUserError("La contraseña debe tener al menos 8 caracteres.");
-  }
+  const passwordIssue = validatePassword(input.password, [email, input.fullName]);
+  if (passwordIssue) throw new CreateSiteUserError(passwordIssue);
 
   const admin = createAdminClient();
 

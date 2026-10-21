@@ -18,6 +18,9 @@ import {
   isWriteApiPath,
 } from "@/lib/rbac/permissions";
 import type { AppRole } from "@/lib/rbac/types";
+import { isSameOriginMutation } from "@/lib/security/csrf";
+import { clientIp, rateLimit, tooManyRequests } from "@/lib/security/rate-limit";
+import { securityEvent } from "@/lib/security/log";
 import {
   hardenAuthCookieOptions,
   safeRedirectPath,
@@ -88,6 +91,19 @@ async function runUpdateSession(request: NextRequest) {
   const sessionCookies: CookieToSet[] = [];
   const { pathname } = request.nextUrl;
 
+  if (
+    pathname.startsWith("/api/") &&
+    !pathname.startsWith("/api/webhooks/") &&
+    !isSameOriginMutation(request)
+  ) {
+    securityEvent("csrf_blocked", {
+      path: pathname,
+      method: request.method,
+      ip: clientIp(request),
+    });
+    return NextResponse.json({ error: "Origen no permitido." }, { status: 403 });
+  }
+
   const isLogin = pathname === config.auth.loginUrl;
   const isMfaChallenge = pathname === routes.loginMfa;
   const isPublic =
@@ -142,6 +158,9 @@ async function runUpdateSession(request: NextRequest) {
       applySessionActivityCookies(res, request, Date.now(), options);
     }
     res.headers.set("x-pathname", pathname);
+    if (isProtectedPath(pathname)) {
+      res.headers.set("Cache-Control", "private, no-store, max-age=0");
+    }
     return res;
   }
 
@@ -298,6 +317,14 @@ async function runUpdateSession(request: NextRequest) {
     }
 
     const isWriteMethod = !["GET", "HEAD", "OPTIONS"].includes(request.method);
+
+    if (isWriteMethod && pathname.startsWith("/api/") && user) {
+      const limited = await rateLimit(`write:${user.id}`, 240, 60);
+      if (!limited.allowed) {
+        securityEvent("write_rate_limited", { path: pathname, user: user.id });
+        return tooManyRequests(limited);
+      }
+    }
     const isWriteApi = isWriteApiPath(pathname);
 
     if (isWriteMethod && isWriteApi && role === "monitor") {
