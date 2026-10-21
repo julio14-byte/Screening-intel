@@ -6,73 +6,21 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
-  CircleAlert,
-  CircleCheck,
-  CircleX,
   UserPlus,
 } from "lucide-react";
 import { ScoreBar } from "@/components/ui/ScoreBar";
 import { VerdictBadge } from "@/components/ui/VerdictBadge";
+import { CriterionEvidenceList } from "@/components/matching/CriterionEvidenceList";
 import { MatchRationalePanel } from "@/components/matching/MatchRationalePanel";
 import { ErrorState } from "@/components/ui/StateMessage";
 import { toErrorMessage } from "@/lib/errors";
-import type { CriterionResult, MatchResult, Protocol, Screening } from "@/lib/types";
+import type { MatchResult, Protocol, Screening } from "@/lib/types";
 import { ethnicityLabel, studySubjectCaption } from "@/lib/profile/demographics";
 import {
   calculateAge,
-  cn,
   GENDER_LABELS,
   SCREENING_STATUS_LABELS,
 } from "@/lib/utils";
-
-function CriterionRow({ result }: { result: CriterionResult }) {
-  const icon =
-    result.status === "pass" ? (
-      <CircleCheck className="h-3.5 w-3.5 text-emerald-500" aria-hidden />
-    ) : result.status === "fail" ? (
-      <CircleX className="h-3.5 w-3.5 text-rose-500" aria-hidden />
-    ) : (
-      <CircleAlert className="h-3.5 w-3.5 text-amber-500" aria-hidden />
-    );
-  return (
-    <li className="flex items-start gap-2 py-1">
-      {icon}
-      <div className="min-w-0">
-        <p className="text-xs font-medium text-indigo-950">
-          {result.criterion}
-          <span
-            className={cn(
-              "ml-1.5 rounded px-1 py-px text-[10px] font-semibold uppercase",
-              result.type === "inclusion"
-                ? "bg-emerald-50 text-emerald-600"
-                : "bg-rose-50 text-rose-600"
-            )}
-          >
-            {result.type === "inclusion" ? "Inclusión" : "Exclusión"}
-          </span>
-        </p>
-        <p className="text-[11px] text-indigo-500">{result.detail}</p>
-      </div>
-    </li>
-  );
-}
-
-function DetailsList({ details }: { details: CriterionResult[] }) {
-  if (details.length === 0) {
-    return (
-      <p className="py-1 text-xs text-indigo-400">
-        El protocolo no tiene criterios definidos.
-      </p>
-    );
-  }
-  return (
-    <ul className="divide-y divide-violet-100">
-      {details.map((d, i) => (
-        <CriterionRow key={i} result={d} />
-      ))}
-    </ul>
-  );
-}
 
 function EnrollAction({
   result,
@@ -116,7 +64,7 @@ function ExpandedDetails({
 }) {
   return (
     <div className="space-y-3">
-      <DetailsList details={result.details} />
+      <CriterionEvidenceList details={result.details} />
       <MatchRationalePanel
         compact
         input={{

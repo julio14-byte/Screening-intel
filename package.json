@@ -19,7 +19,8 @@
     "verify:security": "tsx --tsconfig tsconfig.json scripts/verify-security.ts",
     "verify:citas": "tsx --tsconfig tsconfig.json scripts/verify-citas.ts",
     "verify:follow-up": "tsx --tsconfig tsconfig.json scripts/verify-follow-up.ts",
-    "verify:pharmacy-inventory": "tsx --tsconfig tsconfig.json scripts/verify-pharmacy-inventory.ts"
+    "verify:pharmacy-inventory": "tsx --tsconfig tsconfig.json scripts/verify-pharmacy-inventory.ts",
+    "verify:explainable-rematch": "tsx --tsconfig tsconfig.json scripts/verify-explainable-rematch.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

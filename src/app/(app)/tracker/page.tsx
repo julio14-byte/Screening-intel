@@ -21,10 +21,14 @@ export default function TrackerPage() {
   });
   const [moveError, setMoveError] = useState<string | null>(null);
 
-  const handleMove = async (id: string, status: ScreeningStatus) => {
+  const handleMove = async (
+    id: string,
+    status: ScreeningStatus,
+    failureReason?: string
+  ) => {
     setMoveError(null);
     try {
-      await updateStatus(id, status);
+      await updateStatus(id, status, failureReason);
     } catch (e) {
       setMoveError(toErrorMessage(e, "No se pudo mover al paciente"));
     }
