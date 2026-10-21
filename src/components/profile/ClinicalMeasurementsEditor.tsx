@@ -120,10 +120,6 @@ export function ClinicalMeasurementsEditor({
           <TestTubes className="h-4 w-4 text-slate-400" aria-hidden />
           Laboratorio dirigido
         </h3>
-        <p className="mb-3 text-xs text-slate-500">
-          Glucosa, función renal, enzimas hepáticas y hemograma. El matching usa
-          estos nombres de analito.
-        </p>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {fieldsInGroup("labs").map((field) => (
             <NumberField
@@ -140,14 +136,9 @@ export function ClinicalMeasurementsEditor({
         <h3 className="mb-2 text-sm font-semibold text-indigo-950">
           Prueba de embarazo
         </h3>
-        <p className="mb-3 text-xs text-slate-500">
-          Obligatoria en sangre u orina cuando hay potencial de gestación. En
-          matching, 0 = negativo y 1 = positivo.
-        </p>
         {pregnancyMissing ? (
           <p className="mb-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-            Falta la prueba de embarazo (sangre u orina). Cargala antes de
-            screening si el protocolo la exige.
+            Falta la prueba de embarazo.
           </p>
         ) : null}
         <div className="grid gap-3 sm:grid-cols-2">

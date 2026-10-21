@@ -8,8 +8,7 @@ export function ProductModulesStrip() {
   return (
     <Card className="h-full">
       <CardHeader
-        title="Ir al screening"
-        description="Registro, matcher, tracker y re-match."
+        title="Módulos"
       />
       <CardBody className="p-2">
         <ul className="divide-y divide-violet-50">

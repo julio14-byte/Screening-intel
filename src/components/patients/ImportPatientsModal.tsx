@@ -8,7 +8,6 @@ import { ErrorState } from "@/components/ui/StateMessage";
 import { PATIENT_CSV_TEMPLATE } from "@/lib/import/parsePatientCsv";
 import {
   VENDOR_SCREENING_CSV_TEMPLATE,
-  VENDOR_SCREENING_HINT,
   parseScreeningImportCsv,
 } from "@/lib/import/vendorScreeningCsv";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
@@ -100,29 +99,6 @@ export function ImportPatientsModal({
   return (
     <Modal open={open} title="Importar al screening" onClose={onClose} wide>
       <div className="space-y-4">
-        <p className="text-sm text-slate-600">{VENDOR_SCREENING_HINT}</p>
-        <p className="text-sm text-slate-600">
-          Lo más rápido: en Excel o Google Sheets seleccioná las celdas (con cabecera) y
-          pegá acá. El portapapeles viene con tabuladores; no hace falta Guardar como CSV
-          ni pelear con punto y coma o encoding. El archivo CSV sigue disponible.
-        </p>
-        <p className="text-sm text-slate-600">
-          Para el matcher necesitás demografía, antecedentes, medicación y labs de{" "}
-          <strong>screening</strong> (DM + MH + CM + LB). Un paciente suelto: abrilo y usá notas +
-          IA en el perfil. El import no enrola solo.
-        </p>
-        <p className="text-sm text-slate-600">
-          Aceptamos la plantilla Crisvia o un listado largo estilo CDISC (
-          <code className="rounded bg-slate-100 px-1">USUBJID</code>,{" "}
-          <code className="rounded bg-slate-100 px-1">BRTHDTC</code>,{" "}
-          <code className="rounded bg-slate-100 px-1">SEX</code>,{" "}
-          <code className="rounded bg-slate-100 px-1">MHTERM</code>,{" "}
-          <code className="rounded bg-slate-100 px-1">CMTRT</code>,{" "}
-          <code className="rounded bg-slate-100 px-1">LBTESTCD</code>,{" "}
-          <code className="rounded bg-slate-100 px-1">LBSTRESN</code>
-          ). Si el sujeto ya existe, se actualiza por código.
-        </p>
-
         <label className="block space-y-1.5">
           <span className="text-sm font-medium text-slate-800">Pegar desde Excel</span>
           <textarea

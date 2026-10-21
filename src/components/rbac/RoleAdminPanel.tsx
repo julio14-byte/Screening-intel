@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
-import { Shield, UserCog } from "lucide-react";
+import { UserCog } from "lucide-react";
 import {
   assignClinicalRoleAction,
   getMembersWithRolesAction,
@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
 import {
-  APP_ROLE_DESCRIPTIONS,
   APP_ROLE_LABELS,
   type AppRole,
   type OrganizationMemberWithRole,
@@ -110,8 +109,7 @@ export function RoleAdminPanel() {
 
       <Card>
         <CardHeader
-          title="Usuarios del sitio"
-          description="Personal con acceso y rol clínico asignado (RBAC / GCP)."
+          title="Usuarios"
           actions={<UserCog className="h-4 w-4 text-slate-400" aria-hidden />}
         />
         <CardBody>
@@ -126,23 +124,6 @@ export function RoleAdminPanel() {
                   {message}
                 </p>
               ) : null}
-
-              <div className="mb-4 grid gap-2 sm:grid-cols-3">
-                {ROLES.map((role) => (
-                  <div
-                    key={role}
-                    className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2"
-                  >
-                    <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
-                      <Shield className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                      {APP_ROLE_LABELS[role]}
-                    </p>
-                    <p className="mt-1 text-[11px] leading-snug text-slate-500">
-                      {APP_ROLE_DESCRIPTIONS[role]}
-                    </p>
-                  </div>
-                ))}
-              </div>
 
               <div className="space-y-3 sm:hidden">
                 {members.map((member) => (

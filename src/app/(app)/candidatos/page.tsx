@@ -6,10 +6,7 @@ import { routes } from "@/lib/app/routes";
 export default function CandidatosPage() {
   return (
     <>
-      <PageHeader
-        title="Candidatos (portal)"
-        description="Leads del pre-registro público. Convierte a paciente cuando confirmes los datos en llamada o visita."
-      />
+      <PageHeader title="Candidatos" />
       <p className="mb-4 text-sm text-indigo-600">
         <Link href={routes.app.portalSettings} className="text-violet-600 underline">
           Configurar portal y copiar links

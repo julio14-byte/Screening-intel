@@ -89,9 +89,7 @@ function OpportunityCard({
                 {failure.protocols.code_name}
               </span>
               <p className="mt-0.5 text-rose-800">
-                {failure.failure_reason?.trim()
-                  ? failure.failure_reason
-                  : "Motivo no registrado. Anótalo desde el tracker antes de reutilizar el expediente."}
+                {failure.failure_reason?.trim() || "Sin motivo"}
               </p>
             </li>
           ))}
@@ -124,15 +122,7 @@ function OpportunityCard({
                 .finally(() => setSavingConsent(false));
             }}
           >
-            <p className="text-xs font-medium text-slate-800">
-              Para buscar otros protocolos hace falta registrar que el paciente
-              autorizó reutilizar su expediente en este sitio.
-            </p>
-            <p className="text-[11px] text-slate-500">
-              Lo anota alguien con permiso de escritura. El monitor solo puede
-              leer. Esto no reemplaza el consentimiento informado del
-              patrocinador.
-            </p>
+            <p className="text-xs font-medium text-slate-800">Autorización del paciente</p>
             <label className="block text-xs text-slate-700">
               Cómo se obtuvo
               <select
@@ -280,10 +270,7 @@ export default function RematchPage() {
 
   return (
     <>
-      <PageHeader
-        title="Re-Match & Follow-up"
-        description="Un screen failure no es un paciente perdido. Con el motivo registrado y la autorización del paciente, ves en qué otros protocolos activos todavía califica, criterio por criterio."
-      />
+      <PageHeader title="Re-Match" />
 
       {loading ? (
         <LoadingState label="Analizando alternativas de re-matching…" />
@@ -292,8 +279,7 @@ export default function RematchPage() {
       ) : opportunities.length === 0 ? (
         <Card>
           <EmptyState
-            title="No hay pacientes con screen failure"
-            description="Cuando un paciente falle el screening de un protocolo, acá vas a ver automáticamente en qué otros estudios activos podría participar."
+            title="Sin screen failures"
             action={
               <Link
                 href="/tracker"

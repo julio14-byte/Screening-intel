@@ -14,7 +14,6 @@ import { VerdictDot } from "@/components/ui/VerdictBadge";
 import { CriteriaSummary } from "@/components/protocols/CriteriaSummary";
 import { FeasibilityReport } from "@/components/protocols/FeasibilityReport";
 import { MatchResultsTable } from "@/components/protocols/MatchResultsTable";
-import { ScreeningProcessNote } from "@/components/screening/ScreeningProcessNote";
 import { useProtocolMatch } from "@/hooks/useProtocolMatch";
 
 export default function ProtocolMatchPage({
@@ -52,10 +51,8 @@ export default function ProtocolMatchPage({
       <div className="print:hidden">
       <PageHeader
         title={`Matching · ${protocol.code_name}`}
-        description={`${protocol.title}. Filtro de criterios, no un sorteo de pacientes.`}
+        description={protocol.title}
       />
-
-      <ScreeningProcessNote compact />
       </div>
 
       <FeasibilityReport
@@ -86,8 +83,7 @@ export default function ProtocolMatchPage({
       <Card className="print:hidden">
         {results.length === 0 ? (
           <EmptyState
-            title="No hay pacientes para evaluar"
-            description="Cargá pacientes en el registro para ejecutar el matching."
+            title="Sin pacientes para evaluar"
           />
         ) : (
           <MatchResultsTable

@@ -41,19 +41,22 @@ assert(
   PRODUCT_MODULE_IDS.join(",") === SCREENING_MODULE_IDS.join(","),
   "sin módulo Integraciones aparte"
 );
-assert(config.includes("Aprovechá mejor los pacientes que YA llegan"), "hero V1");
-assert(config.includes("¿Crisvia es una base de datos de pacientes?"), "FAQ no vende DB");
-assert(config.includes("Esa cifra no es de Crisvia"), "FAQ TrialGPT no es métrica nuestra");
-assert(!config.includes("42,6% de Crisvia"), "no apropia TrialGPT");
-assert(patients.includes("no una base de datos para vender"), "registro no se vende como DB");
-assert(rematch.includes("no es un paciente perdido"), "re-match = follow-up de SF");
+assert(config.includes("Aprovechá mejor los pacientes que YA llegan"), "hero comercial");
+assert(!config.includes("Versión 1"), "sin etiqueta de prototipo");
+assert(!config.includes("Esa cifra no es de Crisvia"), "sin desmentir métricas ajenas en la landing");
+assert(!config.includes("42,6%"), "sin cifra de TrialGPT");
+assert(!config.includes("base de datos de pacientes"), "sin FAQ defensiva");
+assert(!patients.includes("base de datos para vender"), "el registro no se explica");
+assert(!rematch.includes("no es un paciente perdido"), "re-match sin texto de producto");
+assert(!existsSync(resolve("src/components/screening/ScreeningProcessNote.tsx")), "sin nota de sorteo");
 assert(!dashboard.includes("Versión 1"), "dashboard sin banner Versión 1");
 assert(!dashboard.includes("ScreeningVersionNote"), "dashboard sin nota de producto");
 assert(!dashboard.includes("Notas clínicas"), "dashboard sin notas médicas");
 assert(!dashboard.includes("notas médicas"), "dashboard sin notas médicas");
-assert(dashboard.includes("Embudo"), "dashboard muestra el embudo");
+assert(dashboard.includes("OperationalFunnel"), "dashboard muestra el embudo");
 assert(dashboard.includes("DashboardKpiCards"), "dashboard muestra KPIs");
-assert(audit.includes("no es una certificación"), "21 CFR sin sello");
+assert(!audit.includes("certificación"), "la bitácora no se explica");
+assert(!audit.includes("21 CFR"), "sin citar una norma en la pantalla");
 assert(matching.length > 100, "motor de matching presente");
 assert(funnel.includes("Embudo de screening"), "embudo en dashboard");
 assert(funnelModel.includes("Inbox del portal"), "captación ya no es el discurso");

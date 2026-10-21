@@ -84,10 +84,7 @@ export function FollowUpBoard() {
       {visits.length === 0 ? (
         <Card>
           <CardBody>
-            <p className="text-sm text-slate-600">
-              Todavía no hay calendarios generados. Definí las visitas en el protocolo y generá el
-              seguimiento desde el expediente del paciente.
-            </p>
+            <p className="text-sm text-slate-600">Sin calendarios.</p>
           </CardBody>
         </Card>
       ) : (

@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/StateMessage";
 import { Card } from "@/components/ui/Card";
 import { KanbanBoard } from "@/components/tracker/KanbanBoard";
-import { ScreeningProcessNote } from "@/components/screening/ScreeningProcessNote";
 import { useScreenings } from "@/hooks/useScreenings";
 import { toErrorMessage } from "@/lib/errors";
 import type { ScreeningStatus } from "@/lib/types";
@@ -36,12 +35,7 @@ export default function TrackerPage() {
 
   return (
     <>
-      <PageHeader
-        title="Screening Tracker"
-        description="Pipeline de elegibilidad, no un sorteo. Randomizado lo marca el coordinador cuando el sponsor ya asignó kit."
-      />
-
-      <ScreeningProcessNote />
+      <PageHeader title="Screening Tracker" />
 
       {moveError ? (
         <div className="mb-4">
@@ -56,8 +50,7 @@ export default function TrackerPage() {
       ) : screenings.length === 0 ? (
         <Card>
           <EmptyState
-            title="El pipeline está vacío"
-            description="Ejecutá el matching de un protocolo y agregá pacientes a pre-screening para verlos acá."
+            title="Sin pacientes en el pipeline"
             action={
               <Link
                 href="/protocols"

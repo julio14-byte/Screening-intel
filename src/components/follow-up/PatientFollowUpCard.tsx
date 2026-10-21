@@ -97,7 +97,6 @@ export function PatientFollowUpCard({
     <Card className="mt-6">
       <CardHeader
         title="Seguimiento del protocolo"
-        description="Visitas obligatorias con ventana de tiempo. Completar exige signos vitales. Si la fecha real cae fuera de la ventana, se marca desviación de protocolo. Distinto de la agenda de consultas."
       />
       <CardBody className="space-y-3">
         {error ? <ErrorState message={error} /> : null}

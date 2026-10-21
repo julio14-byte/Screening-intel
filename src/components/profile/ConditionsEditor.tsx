@@ -84,11 +84,6 @@ export function ConditionsEditor({
         }
         className="w-full resize-y rounded-xl border border-violet-200 bg-white px-3 py-2.5 text-sm leading-relaxed text-indigo-950 placeholder:text-violet-300 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
       />
-      <p className="text-[11px] text-indigo-500">
-        Texto libre compatible con ICD-11. Podés escribir a mano o buscar
-        diagnósticos oficiales abajo.
-      </p>
-
       <div className="rounded-xl border border-indigo-100 bg-gradient-to-r from-indigo-50/80 to-violet-50/50 p-3">
         <div className="mb-2 flex items-center gap-2 text-xs font-medium text-indigo-800">
           <Sparkles className="h-3.5 w-3.5 text-violet-500" aria-hidden />

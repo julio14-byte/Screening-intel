@@ -113,7 +113,6 @@ export function CitasBoard() {
     <>
       <PageHeader
         title="Citas"
-        description="Agenda de pacientes: agenda, recuerda por WhatsApp, SMS o correo y cierra cada cita sin salir de esta pantalla."
         actions={
           isReadOnly ? null : (
             <Button onClick={() => setCreating(true)}>
@@ -181,11 +180,6 @@ export function CitasBoard() {
       ) : groups.length === 0 ? (
         <EmptyState
           title={emptyTitle(view, search)}
-          description={
-            view === "por_cerrar"
-              ? "Las citas pasadas sin marcar aparecerán aquí."
-              : "Agenda la primera cita con un paciente del registro."
-          }
           action={
             isReadOnly || view === "por_cerrar" ? null : (
               <Button onClick={() => setCreating(true)}>
@@ -220,12 +214,6 @@ export function CitasBoard() {
           ))}
         </div>
       )}
-
-      <p className="mt-6 max-w-2xl text-xs text-slate-500">
-        Los recordatorios abren WhatsApp, SMS o tu correo con el mensaje listo: tú decides
-        cuándo enviarlo y solo con pacientes que aceptaron ser contactados por ese medio.
-        Crisvia no envía mensajes por su cuenta.
-      </p>
 
       <NewVisitModal
         open={creating}

@@ -56,8 +56,7 @@ export function CreateSiteUserForm({ onCreated }: { onCreated?: () => void }) {
   return (
     <Card className="mb-6">
       <CardHeader
-        title="Crear usuario del sitio"
-        description="Alta de personal con acceso a la app y rol clínico asignado."
+        title="Nuevo usuario"
         actions={<UserPlus className="h-4 w-4 text-slate-400" aria-hidden />}
       />
       <CardBody>
@@ -92,7 +91,6 @@ export function CreateSiteUserForm({ onCreated }: { onCreated?: () => void }) {
               required
               minLength={12}
               autoComplete="new-password"
-              hint="Compartila de forma segura; el usuario puede cambiarla después."
             />
             <SelectInput
               label="Rol clínico"
