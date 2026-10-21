@@ -206,7 +206,9 @@ const config = {
   landing: {
     nav: [
       { label: "Documentación", href: "#docs" },
+      { label: "Programa", href: "#programa" },
       { label: "Precios", href: "#pricing" },
+      { label: "Hoy", href: "#hoy" },
       { label: "Waitlist", href: "#waitlist" },
       { label: "Entrar", href: "#entrar" },
     ],
@@ -214,7 +216,7 @@ const config = {
       eyebrow: "Inteligencia de screening · Clinical research sites",
       title: "Aprovechá mejor los pacientes que YA llegan a tu clínica.",
       subtitle:
-        "Cada llegada es una oportunidad de investigación. Crisvia identifica para qué protocolo puede ser candidato y evita que un screen failure se convierta en un paciente perdido.",
+        "El programa de screening del site: cruza a quien ya llegó, deja evidencia de cada criterio y lo recupera si el primer protocolo no entra.",
     },
     enterApp: {
       eyebrow: "Acceso",
@@ -244,10 +246,38 @@ const config = {
         },
       ],
     },
+    program: {
+      eyebrow: "El programa",
+      title: "Lo que un screening de site tiene que hacer",
+      subtitle:
+        "Crisvia está armado sobre estas cuatro obligaciones. El reclutamiento de pacientes nuevos lo hace el centro. Veeva, Clinical Ink y el IRT los opera el patrocinador.",
+      items: [
+        {
+          n: "01",
+          title: "Decidir con las reglas del protocolo",
+          body: "El semáforo sale de inclusión y exclusión. La IA escribe la justificación en español y deja el veredicto donde lo puso el motor.",
+        },
+        {
+          n: "02",
+          title: "Recuperar el screen failure en el mismo centro",
+          body: "Si un estudio no entra, el paciente se vuelve a cruzar contra los protocolos abiertos de ese site. El coordinador confirma.",
+        },
+        {
+          n: "03",
+          title: "Guardar la evidencia antes de firmar",
+          body: "Una decisión firme exige fuente, referencia y fecha del dato. El revisor y su rol los registra la base, en una bitácora de solo agregar.",
+        },
+        {
+          n: "04",
+          title: "Revisar el diario en la visita",
+          body: "Queda el periodo, los días completados, las dosis omitidas, el posible evento adverso y la medicación nueva. Las entradas del diario siguen en Veeva o Clinical Ink.",
+        },
+      ],
+    },
     features: {
       eyebrow: "Producto",
       title: "Screening para clinical research sites",
-      subtitle: "Registro, perfil, matching, tracker y re-match.",
+      subtitle: "Registro, perfil, matching, tracker, re-match y la visita.",
       items: [
         {
           icon: "Users",
@@ -262,7 +292,7 @@ const config = {
         {
           icon: "FlaskConical",
           title: "Matching",
-          body: "Criterios de inclusión y exclusión.",
+          body: "Criterios de inclusión y exclusión, revisados contra la fuente.",
         },
         {
           icon: "KanbanSquare",
@@ -273,6 +303,11 @@ const config = {
           icon: "RefreshCw",
           title: "Re-Match",
           body: "Screen failures frente a otros protocolos activos.",
+        },
+        {
+          icon: "CalendarCheck",
+          title: "Visita y diario",
+          body: "Calendario del site y revisión de lo visto en Veeva o Clinical Ink. El diario sigue en el sistema del patrocinador.",
         },
       ],
     },
@@ -296,32 +331,33 @@ const config = {
           q: "¿Los datos están aislados por sitio?",
           a: "Sí. Cada clinical research site es una organización con RLS en Supabase; solo tu equipo ve tus pacientes y protocolos.",
         },
+        {
+          q: "¿Dónde queda el EDC y el diario del estudio?",
+          a: "En el sistema del patrocinador. Crisvia guarda el screening del site: el cruce, la evidencia y la revisión de lo que se vio en Veeva o Clinical Ink durante la visita.",
+        },
       ],
     },
-    testimonials: {
-      eyebrow: "Prueba social",
-      title: "Para equipos de investigación clínica.",
-      subtitle: "",
+    status: {
+      eyebrow: "Hoy",
+      title: "Lo que está listo para mostrar",
+      subtitle:
+        "Se recorre el día del coordinador. Los sites de pago se publican cuando existan.",
       items: [
         {
-          quote:
-            "El matcher nos dice en minutos quién de los que YA están en el site califica. Un screen failure ya no se pierde.",
-          author: "Coordinadora de clinical research site",
-          role: "Site piloto · Oncología",
+          title: "Producto",
+          body: "Portal, expediente, matcher de reglas, revisión con evidencia, tracker, Re-Match, visitas y revisión del diario. Veeva o Clinical Ink siguen siendo el sistema del patrocinador.",
         },
         {
-          quote:
-            "El tracker tipo Kanban es lo que nuestro equipo pedía: todos ven el mismo estado de screening.",
-          author: "Investigador principal",
-          role: "Centro universitario",
+          title: "Modelo",
+          body: "Paga el clinical research site. Free 14 días, Pro $149 y Pro+ $329 USD al mes por sitio, sin costo de implementación.",
         },
         {
-          quote:
-            "El re-match propone otros protocolos activos cuando alguien queda screen failure. El coordinador confirma cada paso.",
-          author: "Study coordinator",
-          role: "Clinical research site regional",
+          title: "Mercado",
+          body: "México tenía del orden de 5,000 estudios clínicos documentados en abril de 2024, y más de 5,200 registrados hacia febrero de 2025, incluidos estudios ya cerrados.",
         },
       ],
+      source:
+        "Mercado: UNAM / CIC, 2025; Statista, febrero de 2025. Buscamos tres sites piloto para el trial de 14 días.",
     },
     finalCta: {
       eyebrow: "Tu turno",

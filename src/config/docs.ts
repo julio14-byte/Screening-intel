@@ -19,7 +19,7 @@ export const productDocs = {
         },
         {
           heading: "Matching",
-          body: "Criterios de inclusión y exclusión.",
+          body: "Criterios de inclusión y exclusión, revisados contra la fuente.",
         },
         {
           heading: "Tracker",
@@ -28,6 +28,10 @@ export const productDocs = {
         {
           heading: "Re-Match",
           body: "Screen failures en otros protocolos activos.",
+        },
+        {
+          heading: "Visita y diario",
+          body: "Calendario del site y revisión de lo visto en Veeva o Clinical Ink. El diario sigue en el sistema del patrocinador.",
         },
       ],
     },
