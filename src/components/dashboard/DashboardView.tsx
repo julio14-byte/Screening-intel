@@ -17,6 +17,7 @@ import {
   ErrorState,
   LoadingState,
 } from "@/components/ui/StateMessage";
+import { EnrollmentGoals } from "@/components/dashboard/EnrollmentGoals";
 import { OperationalFunnel } from "@/components/dashboard/OperationalFunnel";
 import { ProductModulesStrip } from "@/components/product/ProductModulesStrip";
 import { computeDashboardMetrics } from "@/lib/dashboard/metrics";
@@ -121,6 +122,8 @@ export function DashboardView({
               <ProductModulesStrip />
             </div>
           </div>
+
+          <EnrollmentGoals screenings={screenings} />
 
           <Card>
             <CardHeader
