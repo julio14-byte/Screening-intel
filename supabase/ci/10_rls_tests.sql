@@ -62,6 +62,9 @@ select p.id, pr.id
 insert into public.site_profiles (organization_id, site_name)
 values ((select org_a from _t_orgs), 'Sitio A'), ((select org_b from _t_orgs), 'Sitio B');
 
+insert into public.protocol_enrollment_targets (organization_id, protocol_id, target_randomized)
+select pr.clinic_id, pr.id, 10 from public.protocols pr;
+
 grant select on all tables in schema pg_temp to public;
 
 create function pg_temp.act_as(p_alias text) returns void language plpgsql as $$
@@ -131,13 +134,15 @@ grant execute on function pg_temp.expect_allowed(text, text) to public;
 
 -- Los alias de tablas temporales no son visibles tras `set role`; guardamos IDs en GUCs.
 select set_config('t.org_a', (select org_a::text from _t_orgs), true),
-       set_config('t.org_b', (select org_b::text from _t_orgs), true);
+       set_config('t.org_b', (select org_b::text from _t_orgs), true),
+       set_config('t.proto_b', (select id::text from public.protocols where clinic_id = (select org_b from _t_orgs)), true);
 
 -- ── anon: sin acceso a nada ─────────────────────────────────────────────
 select pg_temp.act_as('anon');
 select pg_temp.expect_count('anon no ve pacientes', 'select 1 from public.patients', 0);
 select pg_temp.expect_count('anon no ve screenings', 'select 1 from public.screenings', 0);
 select pg_temp.expect_count('anon no ve perfil de sitio', 'select 1 from public.site_profiles', 0);
+select pg_temp.expect_count('anon no ve metas de enrolamiento', 'select 1 from public.protocol_enrollment_targets', 0);
 select pg_temp.expect_denied('anon no inserta pacientes',
   format($q$insert into public.patients (clinic_id, first_name, last_name, birth_date, gender)
             values (%L, 'X', 'Y', '1990-01-01', 'male')$q$, current_setting('t.org_a')));
@@ -160,6 +165,9 @@ select pg_temp.expect_denied('inv_a no borra paciente de B',
   format('delete from public.patients where clinic_id = %L', current_setting('t.org_b')));
 select pg_temp.expect_denied('inv_a no actualiza perfil de sitio de B',
   format('update public.site_profiles set site_name = ''Hack'' where organization_id = %L', current_setting('t.org_b')));
+select pg_temp.expect_count('inv_a ve solo sus metas de enrolamiento', 'select 1 from public.protocol_enrollment_targets', 1);
+select pg_temp.expect_denied('inv_a no cambia metas de B',
+  format('update public.protocol_enrollment_targets set target_randomized = 1 where organization_id = %L', current_setting('t.org_b')));
 select pg_temp.expect_allowed('inv_a actualiza su perfil de sitio',
   format('update public.site_profiles set site_name = ''Sitio A2'' where organization_id = %L', current_setting('t.org_a')));
 select pg_temp.expect_allowed('inv_a actualiza sus pacientes',
@@ -175,6 +183,10 @@ select pg_temp.expect_denied('coord_a no edita perfil de sitio',
   'update public.site_profiles set site_name = ''Hack''');
 select pg_temp.expect_denied('coord_a no borra pacientes (solo investigador)',
   'delete from public.patients');
+select pg_temp.expect_allowed('coord_a actualiza metas de enrolamiento',
+  'update public.protocol_enrollment_targets set target_randomized = 20');
+select pg_temp.expect_denied('coord_a no mueve una meta a un protocolo de B',
+  format('update public.protocol_enrollment_targets set protocol_id = %L', current_setting('t.proto_b')));
 reset role;
 
 -- ── monitor A: solo lectura ─────────────────────────────────────────────

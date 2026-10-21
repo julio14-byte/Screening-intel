@@ -76,6 +76,7 @@ export const WRITE_API_PREFIXES = [
   "/api/candidatos",
   "/api/settings/portal",
   "/api/settings/site",
+  "/api/enrollment-targets",
   "/api/pharmacy",
   "/api/follow-up",
 ] as const;
