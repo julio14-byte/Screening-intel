@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { CalendarPlus, Search } from "lucide-react";
+import { MorningList } from "@/components/citas/MorningList";
 import { NewVisitModal, RescheduleModal } from "@/components/citas/NewVisitModal";
 import { VisitCard } from "@/components/citas/VisitCard";
 import { Button } from "@/components/ui/Button";
@@ -10,8 +11,10 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateMessage";
 import { useRole } from "@/contexts/role-context";
 import { usePatients } from "@/hooks/usePatients";
+import { usePatientsWithProfiles } from "@/hooks/usePatientsWithProfiles";
 import { useProtocols } from "@/hooks/useProtocols";
 import { useVisits } from "@/hooks/useVisits";
+import { buildMorningList } from "@/lib/matching/morning-list";
 import {
   addDays,
   dayKey,
@@ -36,7 +39,8 @@ const VIEW_LABEL: Record<View, string> = {
 export function CitasBoard() {
   const { isReadOnly } = useRole();
   const { patients } = usePatients();
-  const { protocols } = useProtocols();
+  const { pairs, loading: profilesLoading, error: profilesError } = usePatientsWithProfiles();
+  const { protocols, loading: protocolsLoading, error: protocolsError } = useProtocols();
   const { visits, loading, error, setError, createVisit, patchVisit } = useVisits();
   const [view, setView] = useState<View>("proximas");
   const [search, setSearch] = useState("");
@@ -94,6 +98,17 @@ export function CitasBoard() {
     return view === "historial" ? grouped.reverse() : grouped;
   }, [filtered, view]);
 
+  const morningReady = !loading && !profilesLoading && !protocolsLoading;
+  const morningBlocked = profilesError
+    ? "No se pudo leer la ficha clínica para armar la lista de la mañana."
+    : protocolsError
+      ? "No se pudieron leer los protocolos activos."
+      : null;
+  const morning = useMemo(() => {
+    if (!morningReady || morningBlocked) return [];
+    return buildMorningList({ visits, pairs, protocols, now: new Date() });
+  }, [morningReady, morningBlocked, visits, pairs, protocols]);
+
   return (
     <>
       <PageHeader
@@ -124,6 +139,8 @@ export function CitasBoard() {
           onClick={() => setView("por_cerrar")}
         />
       </div>
+
+      <MorningList items={morning} loading={!morningReady} blocked={morningBlocked} />
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div role="tablist" className="flex flex-wrap gap-1">
