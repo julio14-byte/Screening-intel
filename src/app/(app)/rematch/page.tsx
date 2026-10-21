@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ArrowRight, CircleX, RefreshCw, UserPlus } from "lucide-react";
 import { CriterionEvidenceList } from "@/components/matching/CriterionEvidenceList";
 import { MatchRationalePanel } from "@/components/matching/MatchRationalePanel";
+import { PatientGaps } from "@/components/matching/PatientGaps";
+import { buildPatientGaps } from "@/lib/matching/missing-data";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ScoreBar } from "@/components/ui/ScoreBar";
@@ -47,6 +49,17 @@ function OpportunityCard({
   const [note, setNote] = useState("");
   const [consentError, setConsentError] = useState<string | null>(null);
   const [savingConsent, setSavingConsent] = useState(false);
+
+  const gaps = useMemo(
+    () =>
+      reuse
+        ? buildPatientGaps(
+            { patient, profile: opportunity.profile },
+            candidates.map((candidate) => candidate.protocol)
+          )
+        : [],
+    [reuse, patient, opportunity.profile, candidates]
+  );
 
   const handleSend = async (protocolId: string) => {
     setSending(protocolId);
@@ -190,6 +203,7 @@ function OpportunityCard({
             Revisá el perfil clínico o esperá nuevos protocolos.
           </p>
         ) : null}
+        {reuse && gaps.length > 0 ? <PatientGaps gaps={gaps} /> : null}
         {reuse && candidates.length > 0 ? (
           <ul className="divide-y divide-slate-100">
             {candidates.map(({ protocol, result }) => (

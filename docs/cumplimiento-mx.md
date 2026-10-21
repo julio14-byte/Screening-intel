@@ -38,3 +38,11 @@ La autoridad de datos personales para particulares es ahora la Secretaría Antic
 - Pentest externo anual y reporte de remediación.
 - Plan de respuesta a incidentes y de continuidad (`docs/BACKUP.md`).
 - Siguiente nivel comercial: SOC 2 Tipo I o ISO/IEC 27001. Es una certificación de la organización; el código por sí solo no la otorga.
+
+## Inteligencia artificial y datos personales
+
+- Todo texto que sale hacia el proveedor de IA pasa por `redactIdentifiers` (`src/lib/privacy/redact.ts`): correo, teléfono, CURP, RFC, identificadores etiquetados (NSS, expediente, folio), fecha de nacimiento etiquetada, direcciones y nombres (los del paciente y los precedidos de título o etiqueta). Se conservan laboratorios, medicamentos y fechas clínicas.
+- El enmascarado es heurístico: reduce el riesgo, no garantiza anonimato. Nombres sueltos sin etiqueta solo se detectan si se pasan como nombres conocidos.
+- Toda llamada pasa por `src/lib/ai/openai.ts`, que envía `store: false` y ningún identificador de usuario.
+- La elegibilidad la calcula el motor de reglas. La IA solo extrae datos de texto y redacta la explicación del resultado.
+- El proveedor puede conservar las solicitudes un tiempo limitado para detectar abuso. Solicita retención cero o un acuerdo equivalente antes de enviar datos reales, y añade al proveedor a la lista de subencargados del contrato.

@@ -1,4 +1,5 @@
 import { extractText, getDocumentProxy } from "unpdf";
+import { chatCompletion } from "@/lib/ai/openai";
 import type { ExclusionCriteria, InclusionCriteria } from "@/lib/types";
 
 export async function extractTextFromPdf(buffer: ArrayBuffer): Promise<string> {
@@ -33,55 +34,31 @@ const EXTRACTION_SCHEMA = `{
 export async function extractProtocolCriteriaFromText(
   text: string
 ): Promise<ExtractedProtocolDraft> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY no configurada para extracción NLP.");
-  }
-
   const trimmed = text.slice(0, 12000);
   if (!trimmed) {
     throw new Error("No se encontró texto en el documento.");
   }
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      temperature: 0,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content:
-            "Extraé criterios de inclusión y exclusión de protocolos clínicos en español. " +
-            "Respondé SOLO JSON válido con esta forma:\n" +
-            EXTRACTION_SCHEMA,
-        },
-        {
-          role: "user",
-          content:
-            "Extraé título, código sugerido y criterios estructurados de este protocolo:\n\n" +
-            trimmed,
-        },
-      ],
-    }),
+  const content = await chatCompletion({
+    model: "gpt-4o-mini",
+    temperature: 0,
+    response_format: { type: "json_object" },
+    messages: [
+      {
+        role: "system",
+        content:
+          "Extraé criterios de inclusión y exclusión de protocolos clínicos en español. " +
+          "Respondé SOLO JSON válido con esta forma:\n" +
+          EXTRACTION_SCHEMA,
+      },
+      {
+        role: "user",
+        content:
+          "Extraé título, código sugerido y criterios estructurados de este protocolo:\n\n" +
+          trimmed,
+      },
+    ],
   });
-
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error(`OpenAI error: ${err.slice(0, 200)}`);
-  }
-
-  const data = (await response.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-
-  const content = data.choices?.[0]?.message?.content;
-  if (!content) throw new Error("OpenAI no devolvió contenido.");
 
   const parsed = JSON.parse(content) as ExtractedProtocolDraft;
 

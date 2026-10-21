@@ -31,6 +31,13 @@ const sections: { title: string; items: string[] }[] = [
     ],
   },
   {
+    title: "Inteligencia artificial",
+    items: [
+      "Cuando una herramienta de IA lee notas o resultados, recibe el texto sin nombre, correo, teléfono, CURP, RFC, dirección ni fecha de nacimiento.",
+      "La IA no decide si cumples un estudio: el resultado lo calcula el motor de criterios del protocolo y lo confirma el equipo del centro.",
+    ],
+  },
+  {
     title: "Limitar el uso o retirar tu consentimiento",
     items: [
       "Puedes retirar tu consentimiento o limitar el uso de tus datos en cualquier momento, sin efectos retroactivos, escribiendo al contacto indicado abajo.",

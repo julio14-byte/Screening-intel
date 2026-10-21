@@ -1,3 +1,5 @@
+import { chatCompletion } from "@/lib/ai/openai";
+import { redactIdentifiers } from "@/lib/privacy/redact";
 import { withComputedBmi } from "@/lib/profile/clinical-measurements";
 import {
   emptyAnamnesis,
@@ -46,58 +48,37 @@ function normalizeLabs(value: unknown): Record<string, number> {
 
 /** Extrae perfil clínico estructurado desde notas libres (GPT-4o-mini). */
 export async function extractClinicalProfileFromNotes(
-  notes: string
+  notes: string,
+  options: { knownNames?: string[] } = {}
 ): Promise<ExtractedClinicalProfileDraft> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENAI_API_KEY no configurada para extracción NLP.");
-  }
-
-  const trimmed = notes.trim().slice(0, 8000);
+  const { text: trimmed } = redactIdentifiers(notes.trim().slice(0, 8000), {
+    names: options.knownNames,
+  });
   if (!trimmed) {
     throw new Error("Las notas clínicas están vacías.");
   }
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      temperature: 0,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content:
-            "Sos un asistente clínico para clinical research sites. Extraé anamnesis de notas en español: " +
-            "diagnósticos (fecha, síntomas, gravedad, evolución), cirugías, hospitalizaciones, " +
-            "medicación con dosis y horario, alergias, signos vitales y laboratorios. " +
-            "No inventes datos que no estén en el texto. " +
-            "Respondé SOLO JSON válido con esta forma:\n" +
-            EXTRACTION_SCHEMA,
-        },
-        {
-          role: "user",
-          content: "Extraé el perfil clínico de estas notas:\n\n" + trimmed,
-        },
-      ],
-    }),
+  const content = await chatCompletion({
+    model: "gpt-4o-mini",
+    temperature: 0,
+    response_format: { type: "json_object" },
+    messages: [
+      {
+        role: "system",
+        content:
+          "Sos un asistente clínico para clinical research sites. Extraé anamnesis de notas en español: " +
+          "diagnósticos (fecha, síntomas, gravedad, evolución), cirugías, hospitalizaciones, " +
+          "medicación con dosis y horario, alergias, signos vitales y laboratorios. " +
+          "No inventes datos que no estén en el texto. " +
+          "Respondé SOLO JSON válido con esta forma:\n" +
+          EXTRACTION_SCHEMA,
+      },
+      {
+        role: "user",
+        content: "Extraé el perfil clínico de estas notas:\n\n" + trimmed,
+      },
+    ],
   });
-
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error(`OpenAI error: ${err.slice(0, 200)}`);
-  }
-
-  const data = (await response.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-
-  const content = data.choices?.[0]?.message?.content;
-  if (!content) throw new Error("OpenAI no devolvió contenido.");
 
   const parsed = JSON.parse(content) as Partial<ExtractedClinicalProfileDraft>;
   const conditions = normalizeStringList(parsed.conditions);

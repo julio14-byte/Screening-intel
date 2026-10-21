@@ -83,7 +83,9 @@ export async function POST(request: Request) {
 
   if (data.raw_notes?.trim()) {
     try {
-      const extracted = await extractClinicalProfileFromNotes(data.raw_notes);
+      const extracted = await extractClinicalProfileFromNotes(data.raw_notes, {
+        knownNames: [data.first_name, data.last_name],
+      });
       conditions = [...new Set([...conditions, ...extracted.conditions])];
       medications = [...new Set([...medications, ...extracted.medications])];
     } catch {
