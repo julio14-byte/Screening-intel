@@ -5,6 +5,22 @@
 --   clinic_id IN (SELECT public.get_user_organization_ids())
 -- Postgres cachea el subquery. Requiere migraciones 0008+.
 
+-- Definida aquí porque 0008 no está en el repositorio; 0017 y 0018 la repiten.
+create or replace function public.get_user_organization_ids()
+returns setof uuid
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select om.organization_id
+  from public.organization_members om
+  where om.user_id = auth.uid();
+$$;
+
+revoke all on function public.get_user_organization_ids() from public;
+grant execute on function public.get_user_organization_ids() to authenticated;
+
 -- patients
 drop policy if exists "tenant_select_patients" on public.patients;
 create policy "tenant_select_patients"

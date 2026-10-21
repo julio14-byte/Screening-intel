@@ -40,3 +40,13 @@ where schemaname = 'public' and not rowsecurity;
 7. Configurar alertas sobre los eventos `level: "security"` del log de la plataforma.
 8. Plan de respuesta a incidentes: la LFPDPPP (art. 19) exige informar de inmediato a los titulares cuando una vulneración afecte de forma significativa sus derechos patrimoniales o morales. Define quién decide, quién notifica al centro (Responsable) y en qué plazo contractual.
 9. Completar `NEXT_PUBLIC_LEGAL_ENTITY_NAME`, `NEXT_PUBLIC_LEGAL_ADDRESS` y `NEXT_PUBLIC_PRIVACY_EMAIL` para que `/privacidad` muestre la identidad y el contacto ARCO.
+
+## Pruebas en CI sobre Postgres real
+
+El workflow `Security` ejecuta, además de `verify:all`, un job `database`:
+
+- `scripts/db/apply-migrations.sh` aplica `supabase/ci/00_supabase_shim.sql` (roles `anon`/`authenticated`/`service_role`, esquema `auth`) y todas las migraciones, en orden, sobre un Postgres 16 vacío.
+- `scripts/db/run-rls-tests.sh` ejecuta `supabase/ci/*_tests.sql`: aislamiento entre organizaciones, acceso nulo de `anon`, solo lectura del monitor y escritura de `site_profiles` limitada al investigador.
+
+En local: `createdb crisvia_ci && DATABASE_URL=postgres:///crisvia_ci yarn db:migrate:ci && DATABASE_URL=postgres:///crisvia_ci yarn db:test`.
+Cada migración nueva con tablas de datos de paciente debe añadir aserciones de aislamiento en `supabase/ci/`.
