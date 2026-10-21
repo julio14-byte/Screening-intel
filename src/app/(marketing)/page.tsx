@@ -7,7 +7,7 @@ import { LandingFinalCta } from "@/components/landing/LandingFinalCta";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { LandingPricing } from "@/components/landing/LandingPricing";
 import { LandingProblem } from "@/components/landing/LandingProblem";
-import { LandingTestimonials } from "@/components/landing/LandingTestimonials";
+import { LandingStatus } from "@/components/landing/LandingStatus";
 import { LandingWaitlist } from "@/components/landing/LandingWaitlist";
 
 /** Landing pública: info, documentación, waitlist, precios y acceso */
@@ -19,7 +19,7 @@ export default function MarketingHomePage() {
       <LandingFeatures />
       <LandingDocs />
       {config.features.pricing ? <LandingPricing /> : null}
-      <LandingTestimonials />
+      <LandingStatus />
       <LandingFAQ />
       {config.features.waitlist ? <LandingWaitlist /> : null}
       <LandingFinalCta />

@@ -207,6 +207,7 @@ const config = {
     nav: [
       { label: "Documentación", href: "#docs" },
       { label: "Precios", href: "#pricing" },
+      { label: "Hoy", href: "#hoy" },
       { label: "Waitlist", href: "#waitlist" },
       { label: "Entrar", href: "#entrar" },
     ],
@@ -247,7 +248,7 @@ const config = {
     features: {
       eyebrow: "Producto",
       title: "Screening para clinical research sites",
-      subtitle: "Registro, perfil, matching, tracker y re-match.",
+      subtitle: "Registro, perfil, matching, tracker, re-match y la visita.",
       items: [
         {
           icon: "Users",
@@ -262,7 +263,7 @@ const config = {
         {
           icon: "FlaskConical",
           title: "Matching",
-          body: "Criterios de inclusión y exclusión.",
+          body: "Criterios de inclusión y exclusión, revisados contra la fuente.",
         },
         {
           icon: "KanbanSquare",
@@ -273,6 +274,11 @@ const config = {
           icon: "RefreshCw",
           title: "Re-Match",
           body: "Screen failures frente a otros protocolos activos.",
+        },
+        {
+          icon: "CalendarCheck",
+          title: "Visita y diario",
+          body: "Calendario del site y revisión de lo visto en Veeva o Clinical Ink. El diario sigue en el sistema del patrocinador.",
         },
       ],
     },
@@ -298,30 +304,27 @@ const config = {
         },
       ],
     },
-    testimonials: {
-      eyebrow: "Prueba social",
-      title: "Para equipos de investigación clínica.",
-      subtitle: "",
+    status: {
+      eyebrow: "Hoy",
+      title: "Lo que está listo para mostrar",
+      subtitle:
+        "Se recorre el día del coordinador. Los sites de pago se publican cuando existan.",
       items: [
         {
-          quote:
-            "El matcher nos dice en minutos quién de los que YA están en el site califica. Un screen failure ya no se pierde.",
-          author: "Coordinadora de clinical research site",
-          role: "Site piloto · Oncología",
+          title: "Producto",
+          body: "Portal, expediente, matcher de reglas, revisión con evidencia, tracker, Re-Match, visitas y revisión del diario. Veeva o Clinical Ink siguen siendo el sistema del patrocinador.",
         },
         {
-          quote:
-            "El tracker tipo Kanban es lo que nuestro equipo pedía: todos ven el mismo estado de screening.",
-          author: "Investigador principal",
-          role: "Centro universitario",
+          title: "Modelo",
+          body: "Paga el clinical research site. Free 14 días, Pro $149 y Pro+ $329 USD al mes por sitio, sin costo de implementación.",
         },
         {
-          quote:
-            "El re-match propone otros protocolos activos cuando alguien queda screen failure. El coordinador confirma cada paso.",
-          author: "Study coordinator",
-          role: "Clinical research site regional",
+          title: "Mercado",
+          body: "México tenía del orden de 5,000 estudios clínicos documentados en abril de 2024, y más de 5,200 registrados hacia febrero de 2025, incluidos estudios ya cerrados.",
         },
       ],
+      source:
+        "Mercado: UNAM / CIC, 2025; Statista, febrero de 2025. Buscamos tres sites piloto para el trial de 14 días.",
     },
     finalCta: {
       eyebrow: "Tu turno",
