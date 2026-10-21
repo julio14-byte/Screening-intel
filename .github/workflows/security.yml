@@ -22,7 +22,7 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn tsc --noEmit
       - run: yarn lint
-      - run: yarn verify:security
+      - run: yarn verify:all
       - name: Dependencias de producción (alta o crítica bloquea)
         # Yarn 1 devuelve una máscara de bits (4 = moderada, 8 = alta, 16 = crítica) aunque se pase --level.
         run: |
@@ -30,6 +30,44 @@ jobs:
           yarn audit --groups dependencies
           code=$?
           if [ $((code & 24)) -ne 0 ]; then exit 1; fi
+
+  database:
+    name: Migraciones y RLS (Postgres 16)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: crisvia_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/crisvia_ci
+    steps:
+      - uses: actions/checkout@v4
+      - name: Aplicar todas las migraciones sobre una base vacía
+        run: bash scripts/db/apply-migrations.sh
+      - name: Pruebas de aislamiento multi-tenant y roles
+        run: bash scripts/db/run-rls-tests.sh
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      - run: yarn build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
 
   secrets:
     runs-on: ubuntu-latest
