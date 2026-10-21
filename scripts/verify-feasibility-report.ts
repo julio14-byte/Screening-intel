@@ -2,8 +2,11 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { evaluatePatientAgainstProtocol } from "../src/lib/matching";
 import {
+  applyCohort,
   buildFeasibilityReport,
   feasibilityPercent,
+  monthsBefore,
+  sponsorFeasibilityLetter,
 } from "../src/lib/matching/feasibility";
 import type { ClinicalProfile, Patient, Protocol } from "../src/lib/types";
 
@@ -98,6 +101,37 @@ assert(!component.includes(".evidence"), "la hoja no renderiza evidencia clínic
 assert(!component.includes(".detail"), "la hoja no renderiza el detalle del paciente");
 assert(page.includes("FeasibilityReport"), "el matching muestra el informe");
 assert(page.includes("print:hidden"), "al imprimir se oculta la lista de pacientes");
+
+const today = new Date(2026, 9, 21);
+assert(monthsBefore("2026-03-31", 1) === "2026-02-28", "la ventana recorta el día al mes destino");
+const rows = [
+  { id: "reciente", registeredOn: "2026-10-01", chartUpdatedOn: "2026-09-15" },
+  { id: "viejo", registeredOn: "2024-01-01", chartUpdatedOn: "2024-06-01" },
+  { id: "sin", registeredOn: "2026-10-01", chartUpdatedOn: null },
+];
+const windowed = applyCohort(rows, { kind: "chart_window", months: 12 }, today);
+assert(windowed.kept.map((row) => row.id).join() === "reciente", "la ventana de 12 meses se queda con el expediente reciente");
+assert(windowed.leftOut === 2, "sin expediente o con expediente viejo quedan fuera");
+assert(windowed.from === "2025-10-21" && windowed.to === "2026-10-21", "la ventana corre hacia atrás desde hoy");
+const full = applyCohort(rows, { kind: "registry" }, today);
+assert(full.kept.length === 3 && full.leftOut === 0, "el registro completo no descarta pacientes");
+
+const letter = sponsorFeasibilityLetter({
+  siteName: "Centro Norte",
+  protocolCode: protocol.code_name,
+  protocolTitle: protocol.title,
+  preparedOn: "2026-10-21",
+  cohortLabel: full.label,
+  report,
+});
+assert(letter.includes("antes de aceptar el estudio"), "la hoja dice para qué sirve");
+assert(letter.includes("21 de octubre de 2026"), "la hoja lleva la fecha");
+assert(letter.includes("Centro Norte"), "la hoja nombra al centro, no al paciente");
+assert(letter.includes("No incluyen nombres"), "la hoja declara que no van identificadores");
+assert(!letter.includes("Ana") && !letter.includes("Secreto"), "la hoja no arrastra nombres");
+assert(!letter.includes("8.4") && !letter.includes("1980-05-02"), "la hoja no arrastra expediente");
+assert(component.includes("Copiar texto para el patrocinador"), "se puede copiar la hoja");
+assert(component.includes("Expediente actualizado en los últimos"), "se elige la ventana de la cohorte");
 
 if (failed) process.exit(1);
 console.log("verify-feasibility-report: conteos sin nombres ni expediente OK");

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Printer } from "lucide-react";
 import config from "@/config";
@@ -11,9 +11,15 @@ import {
   type SiteProfile,
 } from "@/lib/site/profile";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { SelectInput } from "@/components/ui/Field";
 import {
+  applyCohort,
   buildFeasibilityReport,
+  CHART_WINDOW_MONTHS,
   feasibilityPercent,
+  sponsorFeasibilityLetter,
+  type ChartWindowMonths,
+  type CohortChoice,
   type FeasibilityReportData,
 } from "@/lib/matching/feasibility";
 import type { MatchResult } from "@/lib/types";
@@ -55,17 +61,53 @@ export function FeasibilityReport({
   protocol: { code_name: string; title: string };
   site?: SiteProfile | null;
 }) {
-  const report: FeasibilityReportData = buildFeasibilityReport(results);
-  const [stamp, setStamp] = useState<string | null>(null);
+  const [cohortKey, setCohortKey] = useState("registry");
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
+  const [preparedOn, setPreparedOn] = useState<Date | null>(null);
+  useEffect(() => {
+    setPreparedOn(new Date());
+  }, []);
+  const cohort = useMemo(() => {
+    const mapped = results.map((result) => ({
+      result,
+      registeredOn: result.patient.created_at,
+      chartUpdatedOn: result.profile?.updated_at ?? null,
+    }));
+    if (!preparedOn) {
+      return { kept: mapped, leftOut: 0, from: null as string | null, to: "", label: "" };
+    }
+    const choice: CohortChoice =
+      cohortKey === "registry"
+        ? { kind: "registry" }
+        : { kind: "chart_window", months: Number(cohortKey) as ChartWindowMonths };
+    return applyCohort(mapped, choice, preparedOn);
+  }, [results, cohortKey, preparedOn]);
+  const report: FeasibilityReportData = buildFeasibilityReport(
+    cohort.kept.map((row) => row.result)
+  );
+  const siteName = site && hasSiteIdentity(site) ? siteDisplayName(site) : null;
+  const letter = preparedOn
+    ? sponsorFeasibilityLetter({
+        siteName,
+        protocolCode: protocol.code_name,
+        protocolTitle: protocol.title,
+        preparedOn: cohort.to,
+        cohortLabel: cohort.label,
+        report,
+      })
+    : "";
 
   const printReport = () => {
-    setStamp(
-      new Date().toLocaleString("es-MX", {
-        dateStyle: "long",
-        timeStyle: "short",
-      })
-    );
     requestAnimationFrame(() => window.print());
+  };
+
+  const copyLetter = async () => {
+    try {
+      await navigator.clipboard.writeText(letter);
+      setCopyState("copied");
+    } catch {
+      setCopyState("failed");
+    }
   };
 
   return (
@@ -86,6 +128,45 @@ export function FeasibilityReport({
         }
       />
       <CardBody className="space-y-4">
+        <div className="rounded-md border border-violet-200 bg-violet-50/60 px-3 py-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-md print:hidden">
+              <SelectInput
+                label="Cohorte de la hoja"
+                value={cohortKey}
+                onChange={(event) => {
+                  setCohortKey(event.target.value);
+                  setCopyState("idle");
+                }}
+              >
+                <option value="registry">Registro completo del centro</option>
+                {CHART_WINDOW_MONTHS.map((months) => (
+                  <option key={months} value={String(months)}>
+                    Expediente actualizado en los últimos {months} meses
+                  </option>
+                ))}
+              </SelectInput>
+            </div>
+            <button
+              type="button"
+              onClick={() => void copyLetter()}
+              disabled={!preparedOn}
+              className="inline-flex items-center rounded-md border border-violet-300 bg-white px-2 py-1 text-xs font-medium text-violet-800 hover:bg-violet-50 disabled:opacity-50 print:hidden"
+            >
+              {copyState === "copied" ? "Texto copiado" : "Copiar texto para el patrocinador"}
+            </button>
+          </div>
+          {preparedOn ? (
+            <p className="mt-3 whitespace-pre-wrap text-xs leading-5 text-slate-800">{letter}</p>
+          ) : (
+            <p className="mt-3 text-xs text-slate-500">Preparando la fecha de la hoja…</p>
+          )}
+          {copyState === "failed" ? (
+            <p className="mt-2 text-xs text-amber-800 print:hidden">
+              No se pudo copiar. Selecciona el texto de la hoja.
+            </p>
+          ) : null}
+        </div>
         {site && hasSiteIdentity(site) ? (
           <div className="border-b border-slate-200 pb-3">
             <p className="text-base font-semibold text-slate-900">
@@ -168,9 +249,6 @@ export function FeasibilityReport({
           </>
         )}
 
-        {stamp ? (
-          <p className="text-[11px] text-slate-500">Crisvia · {stamp}</p>
-        ) : null}
       </CardBody>
     </Card>
     </section>
