@@ -7,6 +7,9 @@ import { SelectInput, TextArea, TextInput } from "@/components/ui/Field";
 import { ErrorState } from "@/components/ui/StateMessage";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
 import { useRole } from "@/contexts/role-context";
+import { useDiaryReviews } from "@/hooks/useDiaryReviews";
+import { latestByVisit, suggestPeriod } from "@/lib/diary/review";
+import { DiaryReviewForm, DiaryReviewSummary } from "@/components/follow-up/DiaryReviewPanel";
 import {
   FOLLOW_UP_STATUS_LABEL,
   reimbursementTotal,
@@ -16,6 +19,8 @@ import type { Protocol } from "@/lib/types";
 
 type Visit = {
   id: string;
+  protocol_id: string;
+  baseline_on: string;
   status: FollowUpStatus;
   protocol_deviation: boolean;
   overdue?: boolean;
@@ -54,6 +59,9 @@ export function PatientFollowUpCard({
   const [baselineOn, setBaselineOn] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [diaryOpenId, setDiaryOpenId] = useState<string | null>(null);
+  const diary = useDiaryReviews(patientId);
+  const diaryByVisit = latestByVisit(diary.reviews);
 
   const selectedProtocolId = protocolId || protocols[0]?.id || "";
 
@@ -100,6 +108,7 @@ export function PatientFollowUpCard({
       />
       <CardBody className="space-y-3">
         {error ? <ErrorState message={error} /> : null}
+        {diary.error ? <ErrorState message={diary.error} /> : null}
         {!isReadOnly ? (
           <div className="grid gap-2 sm:grid-cols-3">
             {protocols.length > 1 ? (
@@ -175,7 +184,32 @@ export function PatientFollowUpCard({
                         </Button>
                       </div>
                     ) : null}
+                    {!isReadOnly &&
+                    (visit.status === "completed" || visit.status === "out_of_window") ? (
+                      <Button
+                        variant="secondary"
+                        onClick={() => setDiaryOpenId(diaryOpenId === visit.id ? null : visit.id)}
+                      >
+                        {diaryByVisit.has(visit.id) ? "Nueva revisión del diario" : "Revisar diario"}
+                      </Button>
+                    ) : null}
                   </div>
+                  {diaryByVisit.get(visit.id) ? (
+                    <DiaryReviewSummary
+                      review={diaryByVisit.get(visit.id)!}
+                      visit={visit}
+                      patientId={patientId}
+                    />
+                  ) : null}
+                  {diaryOpenId === visit.id ? (
+                    <DiaryReviewForm
+                      patientId={patientId}
+                      visit={visit}
+                      suggested={suggestPeriod(visits, visit.id)}
+                      onSave={diary.addReview}
+                      onClose={() => setDiaryOpenId(null)}
+                    />
+                  ) : null}
                   {openId === visit.id ? (
                     <CompleteForm
                       visitId={visit.id}
