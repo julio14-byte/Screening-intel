@@ -100,11 +100,19 @@ const config = {
     founderEmails: [] as string[],
   },
 
+  legal: {
+    entityName: process.env.NEXT_PUBLIC_LEGAL_ENTITY_NAME ?? "",
+    address: process.env.NEXT_PUBLIC_LEGAL_ADDRESS ?? "",
+    privacyEmail: process.env.NEXT_PUBLIC_PRIVACY_EMAIL ?? "",
+    privacyNoticeUpdated: "2026-10-21",
+  },
+
   /** URLs canónicas — middleware, nav y landing leen desde aquí. */
   routes: {
     landing: "/",
     login: "/login",
     loginMfa: "/login/mfa",
+    privacy: "/privacidad",
     afterLogin: "/dashboard",
     protected: [
       "/dashboard",
@@ -316,6 +324,7 @@ const config = {
         { label: "Precios", href: "#pricing" },
         { label: "Waitlist", href: "#waitlist" },
         { label: "Documentación", href: "/docs" },
+        { label: "Privacidad", href: "/privacidad" },
       ],
     },
   },
