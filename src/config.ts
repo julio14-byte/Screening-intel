@@ -206,6 +206,7 @@ const config = {
   landing: {
     nav: [
       { label: "Documentación", href: "#docs" },
+      { label: "Programa", href: "#programa" },
       { label: "Precios", href: "#pricing" },
       { label: "Hoy", href: "#hoy" },
       { label: "Waitlist", href: "#waitlist" },
@@ -215,7 +216,7 @@ const config = {
       eyebrow: "Inteligencia de screening · Clinical research sites",
       title: "Aprovechá mejor los pacientes que YA llegan a tu clínica.",
       subtitle:
-        "Cada llegada es una oportunidad de investigación. Crisvia identifica para qué protocolo puede ser candidato y evita que un screen failure se convierta en un paciente perdido.",
+        "El programa de screening del site: cruza a quien ya llegó, deja evidencia de cada criterio y lo recupera si el primer protocolo no entra.",
     },
     enterApp: {
       eyebrow: "Acceso",
@@ -242,6 +243,34 @@ const config = {
           icon: "UserX",
           title: "Screen failure = paciente perdido",
           body: "Si falló un estudio, casi nunca se re-evalúa contra los otros protocolos activos del mismo centro.",
+        },
+      ],
+    },
+    program: {
+      eyebrow: "El programa",
+      title: "Lo que un screening de site tiene que hacer",
+      subtitle:
+        "Crisvia está armado sobre estas cuatro obligaciones. El reclutamiento de pacientes nuevos lo hace el centro. Veeva, Clinical Ink y el IRT los opera el patrocinador.",
+      items: [
+        {
+          n: "01",
+          title: "Decidir con las reglas del protocolo",
+          body: "El semáforo sale de inclusión y exclusión. La IA escribe la justificación en español y deja el veredicto donde lo puso el motor.",
+        },
+        {
+          n: "02",
+          title: "Recuperar el screen failure en el mismo centro",
+          body: "Si un estudio no entra, el paciente se vuelve a cruzar contra los protocolos abiertos de ese site. El coordinador confirma.",
+        },
+        {
+          n: "03",
+          title: "Guardar la evidencia antes de firmar",
+          body: "Una decisión firme exige fuente, referencia y fecha del dato. El revisor y su rol los registra la base, en una bitácora de solo agregar.",
+        },
+        {
+          n: "04",
+          title: "Revisar el diario en la visita",
+          body: "Queda el periodo, los días completados, las dosis omitidas, el posible evento adverso y la medicación nueva. Las entradas del diario siguen en Veeva o Clinical Ink.",
         },
       ],
     },
@@ -301,6 +330,10 @@ const config = {
         {
           q: "¿Los datos están aislados por sitio?",
           a: "Sí. Cada clinical research site es una organización con RLS en Supabase; solo tu equipo ve tus pacientes y protocolos.",
+        },
+        {
+          q: "¿Dónde queda el EDC y el diario del estudio?",
+          a: "En el sistema del patrocinador. Crisvia guarda el screening del site: el cruce, la evidencia y la revisión de lo que se vio en Veeva o Clinical Ink durante la visita.",
         },
       ],
     },
