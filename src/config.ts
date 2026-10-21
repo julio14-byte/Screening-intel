@@ -77,6 +77,12 @@ const config = {
         section: "estudio" as const,
       },
       {
+        href: "/equipo",
+        label: "Equipo",
+        icon: "UsersRound",
+        section: "estudio" as const,
+      },
+      {
         href: "/account/billing",
         label: "Facturación",
         icon: "CreditCard",
@@ -138,6 +144,7 @@ const config = {
       "/avisos",
       "/seguimiento",
       "/dispensacion",
+      "/equipo",
     ],
     publicApis: [
       "/api/auth/login",
@@ -169,6 +176,7 @@ const config = {
       citas: "/citas",
       seguimiento: "/seguimiento",
       dispensacion: "/dispensacion",
+      equipo: "/equipo",
       avisos: "/avisos",
       pacientes: "/patients",
       docs: "/docs",
