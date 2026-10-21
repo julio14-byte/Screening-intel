@@ -25,9 +25,10 @@
     "verify:morning-list": "tsx --tsconfig tsconfig.json scripts/verify-morning-list.ts",
     "verify:gaps-privacy": "tsx --tsconfig tsconfig.json scripts/verify-gaps-privacy.ts",
     "verify:site-profile": "tsx --tsconfig tsconfig.json scripts/verify-site-profile.ts",
-    "verify:all": "yarn -s verify:clinical-profile-embed && yarn -s verify:clinical-measurements && yarn -s verify:clinical-anamnesis && yarn -s verify:patient-demographics && yarn -s verify:five-modules && yarn -s verify:vendor-import && yarn -s verify:matching-aliases && yarn -s verify:security && yarn -s verify:citas && yarn -s verify:follow-up && yarn -s verify:dispense-date && yarn -s verify:explainable-rematch && yarn -s verify:feasibility-report && yarn -s verify:morning-list && yarn -s verify:gaps-privacy && yarn -s verify:site-profile",
+    "verify:all": "yarn -s verify:clinical-profile-embed && yarn -s verify:clinical-measurements && yarn -s verify:clinical-anamnesis && yarn -s verify:patient-demographics && yarn -s verify:five-modules && yarn -s verify:vendor-import && yarn -s verify:matching-aliases && yarn -s verify:security && yarn -s verify:citas && yarn -s verify:follow-up && yarn -s verify:dispense-date && yarn -s verify:explainable-rematch && yarn -s verify:feasibility-report && yarn -s verify:morning-list && yarn -s verify:gaps-privacy && yarn -s verify:site-profile && yarn -s verify:screening-log",
     "db:migrate:ci": "bash scripts/db/apply-migrations.sh",
-    "db:test": "bash scripts/db/run-rls-tests.sh"
+    "db:test": "bash scripts/db/run-rls-tests.sh",
+    "verify:screening-log": "tsx --tsconfig tsconfig.json scripts/verify-screening-log.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
