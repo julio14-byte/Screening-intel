@@ -65,6 +65,15 @@ values ((select org_a from _t_orgs), 'Sitio A'), ((select org_b from _t_orgs), '
 insert into public.protocol_enrollment_targets (organization_id, protocol_id, target_randomized)
 select pr.clinic_id, pr.id, 10 from public.protocols pr;
 
+insert into public.pre_screen_submissions
+  (organization_id, referral_code, first_name, last_name, birth_date, gender, consent_at)
+values
+  ((select org_a from _t_orgs), 'REF-A', 'Cande', 'A', '1990-01-01', 'female', now()),
+  ((select org_b from _t_orgs), 'REF-B', 'Cande', 'B', '1990-01-01', 'female', now());
+
+insert into public.candidate_contact_attempts (organization_id, submission_id, channel, outcome)
+select organization_id, id, 'phone', 'no_answer' from public.pre_screen_submissions;
+
 grant select on all tables in schema pg_temp to public;
 
 create function pg_temp.act_as(p_alias text) returns void language plpgsql as $$
@@ -135,6 +144,8 @@ grant execute on function pg_temp.expect_allowed(text, text) to public;
 -- Los alias de tablas temporales no son visibles tras `set role`; guardamos IDs en GUCs.
 select set_config('t.org_a', (select org_a::text from _t_orgs), true),
        set_config('t.org_b', (select org_b::text from _t_orgs), true),
+       set_config('t.sub_a', (select id::text from public.pre_screen_submissions where organization_id = (select org_a from _t_orgs)), true),
+       set_config('t.sub_b', (select id::text from public.pre_screen_submissions where organization_id = (select org_b from _t_orgs)), true),
        set_config('t.proto_b', (select id::text from public.protocols where clinic_id = (select org_b from _t_orgs)), true);
 
 -- ── anon: sin acceso a nada ─────────────────────────────────────────────
@@ -143,6 +154,7 @@ select pg_temp.expect_count('anon no ve pacientes', 'select 1 from public.patien
 select pg_temp.expect_count('anon no ve screenings', 'select 1 from public.screenings', 0);
 select pg_temp.expect_count('anon no ve perfil de sitio', 'select 1 from public.site_profiles', 0);
 select pg_temp.expect_count('anon no ve metas de enrolamiento', 'select 1 from public.protocol_enrollment_targets', 0);
+select pg_temp.expect_count('anon no ve bitácora de contacto', 'select 1 from public.candidate_contact_attempts', 0);
 select pg_temp.expect_denied('anon no inserta pacientes',
   format($q$insert into public.patients (clinic_id, first_name, last_name, birth_date, gender)
             values (%L, 'X', 'Y', '1990-01-01', 'male')$q$, current_setting('t.org_a')));
@@ -168,6 +180,11 @@ select pg_temp.expect_denied('inv_a no actualiza perfil de sitio de B',
 select pg_temp.expect_count('inv_a ve solo sus metas de enrolamiento', 'select 1 from public.protocol_enrollment_targets', 1);
 select pg_temp.expect_denied('inv_a no cambia metas de B',
   format('update public.protocol_enrollment_targets set target_randomized = 1 where organization_id = %L', current_setting('t.org_b')));
+select pg_temp.expect_count('inv_a ve solo su bitácora de contacto', 'select 1 from public.candidate_contact_attempts', 1);
+select pg_temp.expect_denied('inv_a no edita la bitácora de contacto',
+  'update public.candidate_contact_attempts set outcome = ''reached''');
+select pg_temp.expect_denied('inv_a no borra la bitácora de contacto',
+  'delete from public.candidate_contact_attempts');
 select pg_temp.expect_allowed('inv_a actualiza su perfil de sitio',
   format('update public.site_profiles set site_name = ''Sitio A2'' where organization_id = %L', current_setting('t.org_a')));
 select pg_temp.expect_allowed('inv_a actualiza sus pacientes',
@@ -183,6 +200,15 @@ select pg_temp.expect_denied('coord_a no edita perfil de sitio',
   'update public.site_profiles set site_name = ''Hack''');
 select pg_temp.expect_denied('coord_a no borra pacientes (solo investigador)',
   'delete from public.patients');
+select pg_temp.expect_allowed('coord_a registra un intento de contacto',
+  format($q$insert into public.candidate_contact_attempts (organization_id, submission_id, channel, outcome)
+            values (%L, %L, 'whatsapp', 'reached')$q$, current_setting('t.org_a'), current_setting('t.sub_a')));
+select pg_temp.expect_denied('coord_a no registra contacto sobre candidato de B',
+  format($q$insert into public.candidate_contact_attempts (organization_id, submission_id, channel, outcome)
+            values (%L, %L, 'phone', 'reached')$q$, current_setting('t.org_a'), current_setting('t.sub_b')));
+select pg_temp.expect_denied('coord_a no registra contacto en la org de B',
+  format($q$insert into public.candidate_contact_attempts (organization_id, submission_id, channel, outcome)
+            values (%L, %L, 'phone', 'reached')$q$, current_setting('t.org_b'), current_setting('t.sub_b')));
 select pg_temp.expect_allowed('coord_a actualiza metas de enrolamiento',
   'update public.protocol_enrollment_targets set target_randomized = 20');
 select pg_temp.expect_denied('coord_a no mueve una meta a un protocolo de B',
@@ -197,6 +223,9 @@ select pg_temp.expect_denied('mon_a no actualiza pacientes',
 select pg_temp.expect_denied('mon_a no inserta pacientes',
   format($q$insert into public.patients (clinic_id, first_name, last_name, birth_date, gender)
             values (%L, 'X', 'Y', '1990-01-01', 'male')$q$, current_setting('t.org_a')));
+select pg_temp.expect_denied('mon_a no registra contactos',
+  format($q$insert into public.candidate_contact_attempts (organization_id, submission_id, channel, outcome)
+            values (%L, %L, 'phone', 'reached')$q$, current_setting('t.org_a'), current_setting('t.sub_a')));
 select pg_temp.expect_denied('mon_a no actualiza screenings',
   'update public.screenings set status = ''screening''');
 reset role;

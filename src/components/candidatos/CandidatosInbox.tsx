@@ -7,6 +7,16 @@ import { ErrorState } from "@/components/ui/StateMessage";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
 import { toErrorMessage } from "@/lib/errors";
 import { routes } from "@/lib/app/routes";
+import { useRole } from "@/contexts/role-context";
+import { ContactLogPanel } from "@/components/candidatos/ContactLogPanel";
+import {
+  buildContactStatus,
+  CONTACT_STATE_LABELS,
+  summarizeContact,
+  type ContactAttempt,
+  type ContactState,
+} from "@/lib/candidato/contact-log";
+import { cn } from "@/lib/utils";
 
 type SubmissionRow = {
   id: string;
@@ -36,7 +46,19 @@ const VERDICT_LABEL: Record<string, string> = {
   excluded: "🔴 Probable no",
 };
 
+const STATE_STYLE: Record<ContactState, string> = {
+  overdue: "bg-rose-50 text-rose-800",
+  follow_up_due: "bg-amber-50 text-amber-900",
+  due_soon: "bg-amber-50 text-amber-900",
+  new: "bg-slate-100 text-slate-700",
+  unreachable: "bg-slate-100 text-slate-700",
+  waiting: "bg-sky-50 text-sky-800",
+  closed: "bg-emerald-50 text-emerald-800",
+};
+
 export function CandidatosInbox() {
+  const { isReadOnly } = useRole();
+  const [attempts, setAttempts] = useState<ContactAttempt[]>([]);
   const [rows, setRows] = useState<SubmissionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,13 +67,25 @@ export function CandidatosInbox() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/candidatos");
+      const [res, contactRes] = await Promise.all([
+        fetch("/api/candidatos"),
+        fetch("/api/candidatos/contactos"),
+      ]);
       const data = await readJsonResponse<{
         submissions?: SubmissionRow[];
         error?: string;
       }>(res);
       if (!res.ok) throw new Error(data?.error ?? "Error al cargar.");
       setRows(data?.submissions ?? []);
+      const contact = await readJsonResponse<{
+        attempts?: ContactAttempt[];
+        error?: string;
+      }>(contactRes);
+      if (contactRes.ok) {
+        setAttempts(contact?.attempts ?? []);
+      } else {
+        setError(contact?.error ?? "No se pudo cargar la bitácora de contacto.");
+      }
     } catch (e) {
       setError(toErrorMessage(e, "Error"));
     } finally {
@@ -95,11 +129,39 @@ export function CandidatosInbox() {
     return <p className="text-sm text-indigo-600">Cargando candidatos…</p>;
   }
 
-  const pending = rows.filter((r) => r.status === "pending");
+  const now = new Date();
+  const withStatus = rows
+    .filter((r) => r.status === "pending")
+    .map((row) => ({
+      row,
+      attempts: attempts.filter((a) => a.submission_id === row.id),
+    }))
+    .map((item) => ({
+      ...item,
+      status: buildContactStatus(item.row.created_at, item.attempts, now),
+    }))
+    .sort(
+      (a, b) =>
+        b.status.urgency - a.status.urgency ||
+        a.row.created_at.localeCompare(b.row.created_at)
+    );
+  const pending = withStatus;
+  const contactSummary = summarizeContact(withStatus.map((i) => i.status));
 
   return (
     <div className="space-y-4">
       {error ? <ErrorState message={error} /> : null}
+
+      {contactSummary.overdue + contactSummary.followUpDue > 0 ? (
+        <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-900">
+          {contactSummary.overdue > 0
+            ? `${contactSummary.overdue} candidato(s) llevan más de 48 h sin contacto. `
+            : ""}
+          {contactSummary.followUpDue > 0
+            ? `${contactSummary.followUpDue} tienen un reintento pendiente.`
+            : ""}
+        </p>
+      ) : null}
 
       {pending.length === 0 ? (
         <p className="text-sm text-indigo-600">
@@ -111,7 +173,7 @@ export function CandidatosInbox() {
         </p>
       ) : (
         <ul className="space-y-3">
-          {pending.map((row) => {
+          {pending.map(({ row, attempts: rowAttempts, status }) => {
             const topMatch = row.match_results[0];
             return (
               <li
@@ -133,12 +195,25 @@ export function CandidatosInbox() {
                       <p className="text-sm text-indigo-700">{row.contact_phone}</p>
                     ) : null}
                   </div>
-                  {topMatch ? (
-                    <span className="text-sm font-medium text-indigo-800">
-                      {VERDICT_LABEL[topMatch.verdict] ?? topMatch.verdict} ·{" "}
-                      {topMatch.protocol_code}
+                  <div className="flex flex-col items-end gap-1">
+                    <span
+                      className={cn(
+                        "rounded-full px-2 py-0.5 text-[11px] font-medium",
+                        STATE_STYLE[status.state]
+                      )}
+                    >
+                      {CONTACT_STATE_LABELS[status.state]}
+                      {status.state === "overdue" && status.hoursWithoutContact !== null
+                        ? ` (${status.hoursWithoutContact} h)`
+                        : ""}
                     </span>
-                  ) : null}
+                    {topMatch ? (
+                      <span className="text-sm font-medium text-indigo-800">
+                        {VERDICT_LABEL[topMatch.verdict] ?? topMatch.verdict} ·{" "}
+                        {topMatch.protocol_code}
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
 
                 {(row.extracted_profile.conditions?.length ?? 0) > 0 ? (
@@ -151,6 +226,13 @@ export function CandidatosInbox() {
                     Medicación: {row.extracted_profile.medications?.join(", ")}
                   </p>
                 ) : null}
+
+                <ContactLogPanel
+                  submissionId={row.id}
+                  attempts={rowAttempts}
+                  canWrite={!isReadOnly}
+                  onSaved={(attempt) => setAttempts((prev) => [attempt, ...prev])}
+                />
 
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Button
