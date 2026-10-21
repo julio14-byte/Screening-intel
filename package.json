@@ -21,7 +21,8 @@
     "verify:follow-up": "tsx --tsconfig tsconfig.json scripts/verify-follow-up.ts",
     "verify:pharmacy-inventory": "tsx --tsconfig tsconfig.json scripts/verify-pharmacy-inventory.ts",
     "verify:explainable-rematch": "tsx --tsconfig tsconfig.json scripts/verify-explainable-rematch.ts",
-    "verify:feasibility-report": "tsx --tsconfig tsconfig.json scripts/verify-feasibility-report.ts"
+    "verify:feasibility-report": "tsx --tsconfig tsconfig.json scripts/verify-feasibility-report.ts",
+    "verify:morning-list": "tsx --tsconfig tsconfig.json scripts/verify-morning-list.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
