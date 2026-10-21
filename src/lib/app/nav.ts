@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   LogOut,
   RefreshCw,
+  ScrollText,
   Settings,
   Bell,
   Users,
@@ -24,6 +25,7 @@ export const APP_ICONS: Record<string, LucideIcon> = {
   FlaskConical,
   KanbanSquare,
   RefreshCw,
+  ScrollText,
   CreditCard,
   Settings,
   Activity,
@@ -85,6 +87,10 @@ export const APP_NAV_STYLES: Record<
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
   "/tracker": {
+    activeClass: "bg-amber-400/20 text-amber-100 ring-1 ring-amber-300/30",
+    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
+  },
+  "/bitacora": {
     activeClass: "bg-amber-400/20 text-amber-100 ring-1 ring-amber-300/30",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },

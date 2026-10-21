@@ -35,6 +35,12 @@ const config = {
         section: "screening" as const,
       },
       {
+        href: "/bitacora",
+        label: "Bitácora",
+        icon: "ScrollText",
+        section: "screening" as const,
+      },
+      {
         href: "/rematch",
         label: "Re-Match",
         icon: "RefreshCw",
@@ -119,6 +125,7 @@ const config = {
       "/patients",
       "/protocols",
       "/tracker",
+      "/bitacora",
       "/rematch",
       "/account",
       "/settings",
@@ -151,6 +158,7 @@ const config = {
       patients: "/patients",
       protocols: "/protocols",
       tracker: "/tracker",
+      bitacora: "/bitacora",
       rematch: "/rematch",
       billing: "/account/billing",
       roles: "/settings/roles",
