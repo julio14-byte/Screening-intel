@@ -65,12 +65,6 @@ const config = {
         section: "estudio" as const,
       },
       {
-        href: "/inventario",
-        label: "Inventario",
-        icon: "Package",
-        section: "estudio" as const,
-      },
-      {
         href: "/dispensacion",
         label: "Dispensación",
         icon: "Pill",
@@ -127,7 +121,6 @@ const config = {
       "/citas",
       "/avisos",
       "/seguimiento",
-      "/inventario",
       "/dispensacion",
     ],
     publicApis: [
@@ -157,7 +150,6 @@ const config = {
       candidatos: "/candidatos",
       citas: "/citas",
       seguimiento: "/seguimiento",
-      inventario: "/inventario",
       dispensacion: "/dispensacion",
       avisos: "/avisos",
       pacientes: "/patients",
@@ -269,7 +261,7 @@ const config = {
         },
         {
           q: "¿Crisvia reemplaza al EDC del estudio?",
-          a: "No. Crisvia es screening (elegibilidad). El matcher no randomiza ni captura datos clínicos del estudio; eso lo hacen los sistemas del sponsor. Seguimiento, inventario y dispensación son registro operativo del site, no sustituyen al EDC ni al IWRS.",
+          a: "No. Crisvia es screening (elegibilidad). El matcher no randomiza ni captura datos clínicos del estudio; eso lo hacen los sistemas del sponsor. Seguimiento y la fecha de entrega del medicamento son registro operativo del site, no sustituyen al EDC ni al IWRS.",
         },
         {
           q: "¿El matching reduce el tiempo de screening un 42,6%?",

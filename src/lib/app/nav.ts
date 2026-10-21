@@ -3,7 +3,6 @@ import {
   Activity,
   CalendarCheck,
   CalendarDays,
-  Package,
   Pill,
   ClipboardList,
   CreditCard,
@@ -33,7 +32,6 @@ export const APP_ICONS: Record<string, LucideIcon> = {
   Bell,
   CalendarDays,
   CalendarCheck,
-  Package,
   Pill,
 };
 
@@ -72,10 +70,6 @@ export const APP_NAV_STYLES: Record<
   },
   "/seguimiento": {
     activeClass: "bg-cyan-400/20 text-cyan-100 ring-1 ring-cyan-300/30",
-    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
-  },
-  "/inventario": {
-    activeClass: "bg-teal-400/20 text-teal-100 ring-1 ring-teal-300/30",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
   "/dispensacion": {

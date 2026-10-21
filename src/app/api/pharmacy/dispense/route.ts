@@ -1,144 +1,75 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { firstEmbedded } from "@/lib/supabase/embed";
+import { recordCustomAuditEvent } from "@/lib/audit/record-audit-event";
 import { opsContext, opsSchemaErrorResponse } from "@/lib/ops/http";
-import { parseQuantity } from "@/lib/pharmacy/model";
-import { isMissingDispenseSchema } from "@/lib/pharmacy/dispense";
+import {
+  DELIVERY_MIGRATION_HINT,
+  isMissingDeliveryColumn,
+  isPlausibleDeliveryDate,
+} from "@/lib/pharmacy/delivery";
+import { firstEmbedded } from "@/lib/supabase/embed";
 
-const createSchema = z.object({
+const saveSchema = z.object({
   patient_id: z.string().uuid(),
   protocol_id: z.string().uuid(),
-  kit_code: z.string().trim().max(60).optional(),
-  study_medication_id: z.string().uuid(),
-  lot_id: z.string().uuid(),
-  quantity: z.union([z.number(), z.string()]),
-  directions: z.string().trim().max(400).optional(),
-  first_dose_mode: z.enum(["clinic", "home"]),
-  first_dose_at: z.string().min(1),
-  first_dose_notes: z.string().trim().max(400).optional(),
+  delivered_on: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
 });
+
+const SCREENING_COLUMNS =
+  "id, patient_id, protocol_id, updated_at, medication_delivered_on, patients!inner(first_name, last_name, subject_code, clinic_id), protocols(code_name, title)";
+
+function deliveryColumnMissing(error: { message?: string } | null) {
+  return isMissingDeliveryColumn(error?.message);
+}
 
 export async function GET() {
   const gate = await opsContext(false);
   if (!gate.ok) return gate.response;
 
-  const [randomizedRes, rxRes, medsRes, lotsRes] = await Promise.all([
-    gate.supabase
-      .from("screenings")
-      .select(
-        "patient_id, protocol_id, updated_at, patients!inner(first_name, last_name, subject_code, clinic_id), protocols(code_name, title)"
-      )
-      .eq("status", "randomized")
-      .eq("patients.clinic_id", gate.organizationId)
-      .order("updated_at", { ascending: false })
-      .limit(200),
-    gate.supabase
-      .from("prescriptions")
-      .select(
-        "id, patient_id, protocol_id, kit_code, first_dose_at, first_dose_mode, first_dose_notes, status, quantity, directions, delivered_at, patients(first_name, last_name), protocol_study_medications(name, strength, unit), medication_lots(lot_number)"
-      )
-      .eq("organization_id", gate.organizationId)
-      .order("created_at", { ascending: false })
-      .limit(80),
-    gate.supabase
-      .from("protocol_study_medications")
-      .select("id, protocol_id, name, strength, form, unit")
-      .eq("organization_id", gate.organizationId)
-      .order("name"),
-    gate.supabase
-      .from("medication_lots")
-      .select(
-        "id, protocol_id, study_medication_id, lot_number, quantity_on_hand, expires_on"
-      )
-      .eq("organization_id", gate.organizationId)
-      .gt("quantity_on_hand", 0)
-      .order("received_at", { ascending: false }),
-  ]);
+  const { data, error } = await gate.supabase
+    .from("screenings")
+    .select(SCREENING_COLUMNS)
+    .eq("status", "randomized")
+    .eq("patients.clinic_id", gate.organizationId)
+    .order("updated_at", { ascending: false })
+    .limit(200);
 
-  if (randomizedRes.error) return opsSchemaErrorResponse(randomizedRes.error);
-
-  let prescriptions = rxRes.data ?? [];
-  if (rxRes.error && isMissingDispenseSchema(rxRes.error.message)) {
-    const legacy = await gate.supabase
-      .from("prescriptions")
-      .select(
-        "id, patient_id, protocol_id, status, quantity, directions, delivered_at, patients(first_name, last_name), protocol_study_medications(name, strength, unit), medication_lots(lot_number)"
-      )
-      .eq("organization_id", gate.organizationId)
-      .order("created_at", { ascending: false })
-      .limit(80);
-    if (legacy.error) return opsSchemaErrorResponse(legacy.error);
-    prescriptions = (legacy.data ?? []).map((row) => ({
-      ...row,
-      kit_code: "",
-      first_dose_at: null,
-      first_dose_mode: null,
-      first_dose_notes: "",
-    }));
-  } else if (rxRes.error) {
-    return opsSchemaErrorResponse(rxRes.error);
+  if (error) {
+    if (deliveryColumnMissing(error)) {
+      return NextResponse.json({ error: DELIVERY_MIGRATION_HINT }, { status: 500 });
+    }
+    return opsSchemaErrorResponse(error);
   }
 
-  const dosedKeys = new Set(
-    prescriptions
-      .filter((row) => row.status === "delivered" && Boolean(row.first_dose_at))
-      .map((row) => `${row.patient_id}:${row.protocol_id}`)
-  );
-
-  const pending = (randomizedRes.data ?? [])
-    .filter((row) => !dosedKeys.has(`${row.patient_id}:${row.protocol_id}`))
-    .map((row) => {
-      const patient = firstEmbedded(
-        row.patients as
-          | { first_name: string; last_name: string; subject_code: string | null }
-          | { first_name: string; last_name: string; subject_code: string | null }[]
-          | null
-      );
-      const protocol = firstEmbedded(
-        row.protocols as
-          | { code_name: string; title: string }
-          | { code_name: string; title: string }[]
-          | null
-      );
-      return {
-        key: `${row.patient_id}:${row.protocol_id}`,
-        patient_id: row.patient_id as string,
-        protocol_id: row.protocol_id as string,
-        randomized_at: row.updated_at as string,
-        patient_name: patient
-          ? `${patient.last_name}, ${patient.first_name}`
-          : "Paciente",
-        subject_code: patient?.subject_code ?? null,
-        protocol_code: protocol?.code_name ?? "",
-        protocol_title: protocol?.title ?? "",
-      };
-    });
-
-  return NextResponse.json({
-    pending,
-    dispensed: prescriptions
-      .filter((row) => row.status === "delivered")
-      .map((row) => {
-        const patient = firstEmbedded(
-          (
-            row as {
-              patients?: {
-                first_name: string;
-                last_name: string;
-              } | { first_name: string; last_name: string }[] | null;
-            }
-          ).patients
-        );
-        return {
-          ...row,
-          patient_name: patient
-            ? `${patient.last_name}, ${patient.first_name}`
-            : "Paciente",
-        };
-      }),
-    medications: medsRes.data ?? [],
-    lots: lotsRes.data ?? [],
+  const rows = (data ?? []).map((row) => {
+    const patient = firstEmbedded(
+      row.patients as
+        | { first_name: string; last_name: string; subject_code: string | null }
+        | { first_name: string; last_name: string; subject_code: string | null }[]
+        | null
+    );
+    const protocol = firstEmbedded(
+      row.protocols as
+        | { code_name: string; title: string }
+        | { code_name: string; title: string }[]
+        | null
+    );
+    return {
+      id: row.id as string,
+      patient_id: row.patient_id as string,
+      protocol_id: row.protocol_id as string,
+      randomized_at: row.updated_at as string,
+      delivered_on: (row.medication_delivered_on as string | null) ?? null,
+      patient_name: patient
+        ? `${patient.last_name}, ${patient.first_name}`
+        : "Paciente",
+      subject_code: patient?.subject_code ?? null,
+      protocol_code: protocol?.code_name ?? "",
+      protocol_title: protocol?.title ?? "",
+    };
   });
+
+  return NextResponse.json({ rows });
 }
 
 export async function POST(request: Request) {
@@ -152,23 +83,26 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "JSON inválido." }, { status: 400 });
   }
 
-  const parsed = createSchema.safeParse(body);
-  const quantity = parsed.success ? parseQuantity(parsed.data.quantity) : null;
-  if (!parsed.success || quantity === null) {
+  const parsed = saveSchema.safeParse(body);
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: "Indica lote, cantidad y cómo se da la primera dosis." },
+      { error: "Indica el paciente y la fecha de entrega." },
+      { status: 400 }
+    );
+  }
+  if (
+    parsed.data.delivered_on &&
+    !isPlausibleDeliveryDate(parsed.data.delivered_on)
+  ) {
+    return NextResponse.json(
+      { error: "La fecha de entrega no es válida." },
       { status: 400 }
     );
   }
 
-  const doseAt = new Date(parsed.data.first_dose_at);
-  if (Number.isNaN(doseAt.getTime())) {
-    return NextResponse.json({ error: "Fecha de primera dosis inválida." }, { status: 400 });
-  }
-
   const { data: screening, error: screeningError } = await gate.supabase
     .from("screenings")
-    .select("patient_id, protocol_id, status, patients!inner(clinic_id)")
+    .select("id, status, patients!inner(clinic_id)")
     .eq("patient_id", parsed.data.patient_id)
     .eq("protocol_id", parsed.data.protocol_id)
     .eq("patients.clinic_id", gate.organizationId)
@@ -176,123 +110,58 @@ export async function POST(request: Request) {
 
   if (screeningError) return opsSchemaErrorResponse(screeningError);
   if (!screening) {
-    return NextResponse.json({ error: "Paciente o protocolo fuera de tu centro." }, { status: 404 });
+    return NextResponse.json(
+      { error: "Paciente o protocolo fuera de tu centro." },
+      { status: 404 }
+    );
   }
   if (screening.status !== "randomized") {
     return NextResponse.json(
-      { error: "Solo se entrega medicamento a pacientes en estado Randomizado." },
-      { status: 409 }
-    );
-  }
-  const randomization = {
-    patient_id: parsed.data.patient_id,
-    protocol_id: parsed.data.protocol_id,
-    kit_code: parsed.data.kit_code ?? "",
-  };
-
-  const [medRes, lotRes] = await Promise.all([
-    gate.supabase
-      .from("protocol_study_medications")
-      .select("id, protocol_id")
-      .eq("id", parsed.data.study_medication_id)
-      .eq("organization_id", gate.organizationId)
-      .maybeSingle(),
-    gate.supabase
-      .from("medication_lots")
-      .select("id, study_medication_id, protocol_id, quantity_on_hand")
-      .eq("id", parsed.data.lot_id)
-      .eq("organization_id", gate.organizationId)
-      .maybeSingle(),
-  ]);
-
-  if (!medRes.data || !lotRes.data) {
-    return NextResponse.json({ error: "Medicamento o lote fuera de tu centro." }, { status: 404 });
-  }
-  if (
-    medRes.data.protocol_id !== randomization.protocol_id ||
-    lotRes.data.protocol_id !== randomization.protocol_id ||
-    lotRes.data.study_medication_id !== parsed.data.study_medication_id
-  ) {
-    return NextResponse.json(
-      { error: "El lote no corresponde al medicamento de este protocolo." },
-      { status: 400 }
-    );
-  }
-  if (Number(lotRes.data.quantity_on_hand) < quantity) {
-    return NextResponse.json({ error: "Stock insuficiente en el lote." }, { status: 409 });
-  }
-
-  const insert = await gate.supabase
-    .from("prescriptions")
-    .insert({
-      organization_id: gate.organizationId,
-      protocol_id: randomization.protocol_id,
-      patient_id: randomization.patient_id,
-      study_medication_id: parsed.data.study_medication_id,
-      lot_id: parsed.data.lot_id,
-      quantity,
-      directions: parsed.data.directions ?? "",
-      status: "draft",
-      prescribed_by: gate.ctx.user.id,
-      kit_code: randomization.kit_code,
-    })
-    .select("id")
-    .single();
-
-  let prescriptionId = insert.data?.id as string | undefined;
-  if (insert.error && isMissingDispenseSchema(insert.error.message)) {
-    const retry = await gate.supabase
-      .from("prescriptions")
-      .insert({
-        organization_id: gate.organizationId,
-        protocol_id: randomization.protocol_id,
-        patient_id: randomization.patient_id,
-        study_medication_id: parsed.data.study_medication_id,
-        lot_id: parsed.data.lot_id,
-        quantity,
-        directions: parsed.data.directions ?? "",
-        status: "draft",
-        prescribed_by: gate.ctx.user.id,
-      })
-      .select("id")
-      .single();
-    if (retry.error) return opsSchemaErrorResponse(retry.error);
-    prescriptionId = retry.data?.id;
-  } else if (insert.error || !prescriptionId) {
-    return opsSchemaErrorResponse(insert.error ?? { message: "No se creó la receta." });
-  }
-
-  const { data: delivered, error: deliverError } = await gate.supabase.rpc(
-    "deliver_study_prescription",
-    { p_prescription_id: prescriptionId }
-  );
-  if (deliverError) {
-    console.error("[pharmacy/dispense] deliver:", deliverError.message);
-    const stock = /stock|insuficien/i.test(deliverError.message);
-    return NextResponse.json(
-      { error: stock ? "Stock insuficiente en el lote." : "No se pudo registrar la entrega." },
+      { error: "La fecha de entrega solo se anota en pacientes randomizados." },
       { status: 409 }
     );
   }
 
-  const firstDose = await gate.supabase
-    .from("prescriptions")
-    .update({
-      first_dose_at: doseAt.toISOString(),
-      first_dose_mode: parsed.data.first_dose_mode,
-      first_dose_by: gate.ctx.user.id,
-      first_dose_notes: parsed.data.first_dose_notes ?? "",
-    })
-    .eq("id", prescriptionId)
-    .select("id, kit_code, first_dose_at, first_dose_mode, status")
+  const { data: saved, error: saveError } = await gate.supabase
+    .from("screenings")
+    .update({ medication_delivered_on: parsed.data.delivered_on })
+    .eq("id", screening.id)
+    .select("id, medication_delivered_on, status")
     .maybeSingle();
 
-  if (firstDose.error && !isMissingDispenseSchema(firstDose.error.message)) {
-    return opsSchemaErrorResponse(firstDose.error);
+  if (saveError) {
+    if (deliveryColumnMissing(saveError)) {
+      return NextResponse.json({ error: DELIVERY_MIGRATION_HINT }, { status: 500 });
+    }
+    return opsSchemaErrorResponse(saveError);
+  }
+  if (!saved || (parsed.data.delivered_on && !saved.medication_delivered_on)) {
+    return NextResponse.json(
+      { error: "Solo se registra la fecha si el paciente sigue en Randomizado." },
+      { status: 409 }
+    );
+  }
+
+  try {
+    await recordCustomAuditEvent({
+      tableName: "screenings",
+      recordId: screening.id,
+      description: parsed.data.delivered_on
+        ? "Se registró la fecha de entrega del medicamento."
+        : "Se quitó la fecha de entrega del medicamento.",
+      metadata: {
+        event_type: "medication_delivered_on",
+        protocol_id: parsed.data.protocol_id,
+        patient_id: parsed.data.patient_id,
+        delivered_on: parsed.data.delivered_on,
+      },
+    });
+  } catch {
+    // La fecha quedó guardada; la bitácora no debe bloquear al coordinador.
   }
 
   return NextResponse.json({
-    prescription: firstDose.data ?? delivered,
-    kit_code: randomization.kit_code,
+    id: saved.id,
+    delivered_on: saved.medication_delivered_on,
   });
 }
