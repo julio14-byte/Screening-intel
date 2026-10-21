@@ -28,9 +28,19 @@ const SCREENING_JOINS_LEGACY =
   "patients(id, first_name, last_name, birth_date, gender), protocols(id, title, code_name, status)";
 
 /** Tracker / kanban: sin match_details (JSONB pesado). */
-export const SCREENING_LIST_COLUMNS = `id, patient_id, protocol_id, status, match_score, created_at, updated_at, ${SCREENING_JOINS}`;
+export const SCREENING_LIST_COLUMNS = `id, patient_id, protocol_id, status, match_score, failure_reason, failure_recorded_at, created_at, updated_at, ${SCREENING_JOINS}`;
 export const SCREENING_LIST_COLUMNS_LEGACY = `id, patient_id, protocol_id, status, match_score, created_at, updated_at, ${SCREENING_JOINS_LEGACY}`;
+export const SCREENING_LIST_COLUMNS_NO_FAILURE = `id, patient_id, protocol_id, status, match_score, created_at, updated_at, ${SCREENING_JOINS}`;
 
 /** Dashboard: necesita match_details para el semáforo. */
-export const SCREENING_LIST_WITH_DETAILS = `id, patient_id, protocol_id, status, match_score, match_details, created_at, updated_at, ${SCREENING_JOINS}`;
+export const SCREENING_LIST_WITH_DETAILS = `id, patient_id, protocol_id, status, match_score, match_details, failure_reason, failure_recorded_at, created_at, updated_at, ${SCREENING_JOINS}`;
 export const SCREENING_LIST_WITH_DETAILS_LEGACY = `id, patient_id, protocol_id, status, match_score, match_details, created_at, updated_at, ${SCREENING_JOINS_LEGACY}`;
+export const SCREENING_LIST_WITH_DETAILS_NO_FAILURE = `id, patient_id, protocol_id, status, match_score, match_details, created_at, updated_at, ${SCREENING_JOINS}`;
+
+export function isMissingFailureColumn(message: string | undefined): boolean {
+  if (!message) return false;
+  return (
+    /failure_reason|failure_recorded_at/i.test(message) &&
+    /does not exist|schema cache|could not find the '/i.test(message)
+  );
+}

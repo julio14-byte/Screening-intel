@@ -8,8 +8,8 @@ import type {
 } from "./types";
 import { calculateAge, GENDER_LABELS, normalizeTerm } from "./utils";
 import {
-  clinicalTermMatches,
-  labValueForCriterion,
+  findLabEvidence,
+  findMatchingTerms,
 } from "./matching/aliases";
 
 /**
@@ -45,11 +45,15 @@ export function evaluatePatientAgainstProtocol(
     const min = inclusion.min_age ?? -Infinity;
     const max = inclusion.max_age ?? Infinity;
     const label = `Edad ${inclusion.min_age ?? "–"} a ${inclusion.max_age ?? "–"} años`;
+    const agePass = age >= min && age <= max;
     details.push({
       type: "inclusion",
       criterion: label,
-      status: age >= min && age <= max ? "pass" : "fail",
-      detail: `El paciente tiene ${age} años`,
+      status: agePass ? "pass" : "fail",
+      detail: agePass
+        ? `La edad calculada (${age} años) cae dentro del rango.`
+        : `La edad calculada (${age} años) queda fuera del rango.`,
+      evidence: [`Fecha de nacimiento ${patient.birth_date} (${age} años)`],
     });
   }
 
@@ -60,7 +64,10 @@ export function evaluatePatientAgainstProtocol(
       type: "inclusion",
       criterion: `Sexo biológico requerido: ${GENDER_LABELS[inclusion.gender]}`,
       status: pass ? "pass" : "fail",
-      detail: `Sexo biológico del paciente: ${GENDER_LABELS[patient.gender]}`,
+      detail: pass
+        ? "El sexo registrado coincide con el criterio."
+        : "El sexo registrado no coincide con el criterio.",
+      evidence: [`Sexo registrado: ${GENDER_LABELS[patient.gender]}`],
     });
   }
 
@@ -71,18 +78,21 @@ export function evaluatePatientAgainstProtocol(
         type: "inclusion",
         criterion: `Diagnóstico requerido: ${required}`,
         status: "missing",
-        detail: "El paciente no tiene perfil clínico cargado",
+        detail: "No hay perfil clínico para citar evidencia.",
+        evidence: [],
       });
       continue;
     }
-    const pass = clinicalTermMatches(conditions, required);
+    const hits = findMatchingTerms(conditions, required);
     details.push({
       type: "inclusion",
       criterion: `Diagnóstico requerido: ${required}`,
-      status: pass ? "pass" : "fail",
-      detail: pass
-        ? "Presente en el perfil clínico"
-        : "No figura entre las condiciones del paciente",
+      status: hits.length > 0 ? "pass" : "fail",
+      detail:
+        hits.length > 0
+          ? "Hay un término compatible en las condiciones del perfil."
+          : "Ninguna condición del perfil es compatible con este criterio.",
+      evidence: hits,
     });
   }
 
@@ -95,25 +105,31 @@ export function evaluatePatientAgainstProtocol(
       .filter(Boolean)
       .join(" y ");
     const label = `Lab ${lab.name} ${range}${lab.unit ? ` ${lab.unit}` : ""}`;
-    const value = labValueForCriterion(normalizedLabs, lab.name);
+    const found = findLabEvidence(normalizedLabs, lab.name);
 
-    if (value == null || Number.isNaN(value)) {
+    if (!found || Number.isNaN(found.value)) {
       details.push({
         type: "inclusion",
         criterion: label,
         status: "missing",
-        detail: `Sin resultado de ${lab.name} cargado`,
+        detail: `No hay un resultado de ${lab.name} en los laboratorios del perfil.`,
+        evidence: [],
       });
       continue;
     }
     const pass =
-      (lab.min == null || value >= lab.min) &&
-      (lab.max == null || value <= lab.max);
+      (lab.min == null || found.value >= lab.min) &&
+      (lab.max == null || found.value <= lab.max);
     details.push({
       type: "inclusion",
       criterion: label,
       status: pass ? "pass" : "fail",
-      detail: `Valor registrado: ${value}${lab.unit ? ` ${lab.unit}` : ""}`,
+      detail: pass
+        ? "El valor citado cae dentro del rango."
+        : "El valor citado queda fuera del rango.",
+      evidence: [
+        `${found.key}: ${found.value}${lab.unit ? ` ${lab.unit}` : ""}`,
+      ],
     });
   }
 
@@ -124,18 +140,21 @@ export function evaluatePatientAgainstProtocol(
         type: "exclusion",
         criterion: `Condición excluyente: ${excluded}`,
         status: "missing",
-        detail: "Sin perfil clínico para verificar",
+        detail: "No hay perfil clínico para citar evidencia.",
+        evidence: [],
       });
       continue;
     }
-    const triggered = clinicalTermMatches(conditions, excluded);
+    const hits = findMatchingTerms(conditions, excluded);
     details.push({
       type: "exclusion",
       criterion: `Condición excluyente: ${excluded}`,
-      status: triggered ? "fail" : "pass",
-      detail: triggered
-        ? "El paciente presenta esta condición"
-        : "No presenta esta condición",
+      status: hits.length > 0 ? "fail" : "pass",
+      detail:
+        hits.length > 0
+          ? "El perfil lista un término compatible con esta exclusión."
+          : "El perfil cargado no lista un término compatible. Eso no prueba que la condición no exista fuera de este expediente.",
+      evidence: hits,
     });
   }
 
@@ -146,18 +165,21 @@ export function evaluatePatientAgainstProtocol(
         type: "exclusion",
         criterion: `Medicación excluyente: ${excluded}`,
         status: "missing",
-        detail: "Sin perfil clínico para verificar",
+        detail: "No hay perfil clínico para citar evidencia.",
+        evidence: [],
       });
       continue;
     }
-    const triggered = clinicalTermMatches(medications, excluded);
+    const hits = findMatchingTerms(medications, excluded);
     details.push({
       type: "exclusion",
       criterion: `Medicación excluyente: ${excluded}`,
-      status: triggered ? "fail" : "pass",
-      detail: triggered
-        ? "El paciente la recibe actualmente"
-        : "No la recibe actualmente",
+      status: hits.length > 0 ? "fail" : "pass",
+      detail:
+        hits.length > 0
+          ? "El perfil lista un medicamento compatible con esta exclusión."
+          : "El perfil cargado no lista un medicamento compatible. Eso no prueba que no lo reciba fuera de este expediente.",
+      evidence: hits,
     });
   }
 

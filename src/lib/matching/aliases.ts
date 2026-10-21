@@ -59,28 +59,41 @@ export function matchingTokens(term: string): string[] {
   return [...tokens];
 }
 
+function tokensOverlap(left: string, right: string): boolean {
+  const have = matchingTokens(left);
+  const need = matchingTokens(right);
+  return have.some((a) => need.some((b) => a === b || a.includes(b) || b.includes(a)));
+}
+
+/** Términos del expediente que respaldan el criterio. Vacío si no hay coincidencia. */
+export function findMatchingTerms(
+  patientTerms: string[],
+  criterion: string
+): string[] {
+  return patientTerms.filter((item) => tokensOverlap(item, criterion));
+}
+
 /** ¿El expediente cubre el criterio? Substring o sinónimo EN/ES. */
 export function clinicalTermMatches(
   patientTerms: string[],
   criterion: string
 ): boolean {
-  const need = matchingTokens(criterion);
-  return patientTerms.some((item) => {
-    const have = matchingTokens(item);
-    return have.some((a) => need.some((b) => a.includes(b) || b.includes(a)));
-  });
+  return findMatchingTerms(patientTerms, criterion).length > 0;
+}
+
+export function findLabEvidence(
+  labs: Map<string, number>,
+  criterionName: string
+): { key: string; value: number } | undefined {
+  for (const [key, value] of labs) {
+    if (tokensOverlap(key, criterionName)) return { key, value };
+  }
+  return undefined;
 }
 
 export function labValueForCriterion(
   labs: Map<string, number>,
   criterionName: string
 ): number | undefined {
-  const need = matchingTokens(criterionName);
-  for (const [key, value] of labs) {
-    const have = matchingTokens(key);
-    if (have.some((a) => need.some((b) => a === b || a.includes(b) || b.includes(a)))) {
-      return value;
-    }
-  }
-  return undefined;
+  return findLabEvidence(labs, criterionName)?.value;
 }

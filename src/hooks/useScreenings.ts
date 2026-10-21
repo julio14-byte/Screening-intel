@@ -8,13 +8,16 @@ import { firstEmbeddedOr } from "@/lib/supabase/embed";
 import { getSupabaseClient } from "@/lib/supabase/client";
 import { screeningUpdateConflict } from "@/lib/ops/model";
 import {
+  isMissingFailureColumn,
   SCREENING_LIST_COLUMNS,
   SCREENING_LIST_COLUMNS_LEGACY,
+  SCREENING_LIST_COLUMNS_NO_FAILURE,
   SCREENING_LIST_WITH_DETAILS,
   SCREENING_LIST_WITH_DETAILS_LEGACY,
+  SCREENING_LIST_WITH_DETAILS_NO_FAILURE,
 } from "@/lib/supabase/query-columns";
 import { isMissingDemographicsColumn } from "@/lib/profile/demographics";
-import { toErrorMessage } from "@/lib/errors";
+import { isMissingSchemaError, toErrorMessage } from "@/lib/errors";
 import type {
   CriterionResult,
   Patient,
@@ -69,12 +72,23 @@ export function useScreenings(options?: { includeMatchDetails?: boolean }) {
       const fullSelect = includeMatchDetails
         ? SCREENING_LIST_WITH_DETAILS
         : SCREENING_LIST_COLUMNS;
+      const withoutFailure = includeMatchDetails
+        ? SCREENING_LIST_WITH_DETAILS_NO_FAILURE
+        : SCREENING_LIST_COLUMNS_NO_FAILURE;
       const full = await supabase
         .from("screenings")
         .select(fullSelect)
         .order("updated_at", { ascending: false });
+      const afterFailure =
+        full.error && isMissingFailureColumn(full.error.message)
+          ? await supabase
+              .from("screenings")
+              .select(withoutFailure)
+              .order("updated_at", { ascending: false })
+          : full;
       const result =
-        full.error && isMissingDemographicsColumn(full.error.message)
+        afterFailure.error &&
+        isMissingDemographicsColumn(afterFailure.error.message)
           ? await supabase
               .from("screenings")
               .select(
@@ -83,7 +97,7 @@ export function useScreenings(options?: { includeMatchDetails?: boolean }) {
                   : SCREENING_LIST_COLUMNS_LEGACY
               )
               .order("updated_at", { ascending: false })
-          : full;
+          : afterFailure;
       if (result.error) throw result.error;
       setScreenings(
         ((result.data ?? []) as unknown as ScreeningWithRelations[]).map(
@@ -103,7 +117,11 @@ export function useScreenings(options?: { includeMatchDetails?: boolean }) {
   }, [supabaseReady, fetchScreenings]);
 
   const updateStatus = useCallback(
-    async (screeningId: string, status: ScreeningStatus) => {
+    async (
+      screeningId: string,
+      status: ScreeningStatus,
+      failureReason?: string
+    ) => {
       if (isReadOnly || !role) {
         throw new Error("Monitor CRA: acceso de solo lectura.");
       }
@@ -112,16 +130,34 @@ export function useScreenings(options?: { includeMatchDetails?: boolean }) {
         throw new Error("Tu rol no puede mover pacientes a esta etapa.");
       }
 
+      const reason = failureReason?.trim() ?? "";
+      if (status === "screen_failure" && reason.length < 8) {
+        throw new Error(
+          "Registra el motivo del screen failure (al menos 8 caracteres)."
+        );
+      }
+
       const previous = screenings.find((s) => s.id === screeningId);
 
       // Actualización optimista para que el Kanban responda al instante.
       setScreenings((prev) =>
-        prev.map((s) => (s.id === screeningId ? { ...s, status } : s))
+        prev.map((s) =>
+          s.id === screeningId
+            ? {
+                ...s,
+                status,
+                failure_reason:
+                  status === "screen_failure" ? reason : s.failure_reason,
+              }
+            : s
+        )
       );
       const supabase = getSupabaseClient();
+      const patch =
+        status === "screen_failure" ? { status, failure_reason: reason } : { status };
       let query = supabase
         .from("screenings")
-        .update({ status })
+        .update(patch)
         .eq("id", screeningId);
       if (previous?.updated_at) {
         query = query.eq("updated_at", previous.updated_at);
@@ -129,6 +165,11 @@ export function useScreenings(options?: { includeMatchDetails?: boolean }) {
       const { data, error } = await query.select("id");
       if (error) {
         await fetchScreenings();
+        if (isMissingSchemaError(error)) {
+          throw new Error(
+            "Falta aplicar la migración 20261021040000_explainable_rematch_consent.sql para guardar el motivo."
+          );
+        }
         throw error;
       }
       if (screeningUpdateConflict(data?.length ?? 0)) {
@@ -145,13 +186,16 @@ export function useScreenings(options?: { includeMatchDetails?: boolean }) {
           body: JSON.stringify({
             tableName: "patients",
             recordId: previous.patient_id,
-            description: `Cambio de estatus de screening: ${previous.status} → ${status}.`,
+            description: `Cambio de estatus de screening: ${previous.status} → ${status}.${
+              status === "screen_failure" ? ` Motivo: ${reason}` : ""
+            }`,
             metadata: {
               event_type: "screening_status_change",
               screening_id: screeningId,
               protocol_id: previous.protocol_id,
               previous_status: previous.status,
               new_status: status,
+              failure_reason: status === "screen_failure" ? reason : undefined,
             },
           }),
         }).catch(() => {

@@ -86,6 +86,9 @@ export interface Screening {
   status: ScreeningStatus;
   match_score: number;
   match_details: CriterionResult[];
+  /** Motivo clínico u operativo del screen failure. Vacío en filas anteriores a la migración. */
+  failure_reason?: string | null;
+  failure_recorded_at?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -103,7 +106,10 @@ export interface CriterionResult {
   type: "inclusion" | "exclusion";
   criterion: string;
   status: CriterionStatus;
+  /** Frase del motor. No sustituye a la evidencia citada. */
   detail: string;
+  /** Texto tal como está en el expediente (condición, medicación, laboratorio o fecha). */
+  evidence?: string[];
 }
 
 export interface MatchResult {

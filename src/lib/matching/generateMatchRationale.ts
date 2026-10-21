@@ -68,6 +68,7 @@ export async function generateMatchRationale(
             ? "no_cumple"
             : "faltante",
       detalle: d.detail,
+      evidencia: d.evidence ?? [],
     })),
   };
 
@@ -87,7 +88,8 @@ export async function generateMatchRationale(
             "Eres un asistente clínico de Crisvia para clinical research sites. " +
             "Explica en español latinoamericano el resultado del motor de matching usando SOLO el JSON provisto. " +
             "NO cambies el veredicto, NO inventes datos clínicos ni valores de laboratorio. " +
-            "Cita los criterios tal cual aparecen en el JSON. " +
+            "Cita los criterios y, si el JSON trae 'evidencia', cita ese texto del expediente. " +
+            "Si 'evidencia' está vacía, di que no hay evidencia cargada para ese criterio. " +
             "Identifica al paciente solo por iniciales; nunca escribas un nombre completo. " +
             "Si un criterio está en 'faltante', indica qué falta cargar. " +
             "Si contexto es 'rematch', menciona brevemente que es una evaluación para un protocolo alternativo tras screen failure. " +
