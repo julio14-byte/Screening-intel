@@ -3,7 +3,7 @@ export const stripePlugin = {
   id: "stripe",
   name: "Stripe Subscriptions",
   description:
-    "Checkout, portal de cliente, webhook y paywall para planes mensuales vía Stripe.",
+    "Checkout, portal de cliente, webhook y paywall para planes mensuales y anuales vía Stripe.",
   featureKey: "payments",
   migration: "0002_profiles_saas_fase1.sql",
   envVars: [
@@ -11,6 +11,9 @@ export const stripePlugin = {
     "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
     "STRIPE_WEBHOOK_SECRET",
     "STRIPE_PRICE_ID_PRO",
+    "STRIPE_PRICE_ID_PRO_ANNUAL",
+    "STRIPE_PRICE_ID_PRO_PLUS",
+    "STRIPE_PRICE_ID_PRO_PLUS_ANNUAL",
     "SUPABASE_SERVICE_ROLE_KEY",
   ],
   routes: {

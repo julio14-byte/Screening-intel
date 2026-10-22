@@ -31,7 +31,7 @@ const EXAMPLES = {
     userId: "00000000-0000-0000-0000-000000000003",
     role: "coordinator",
   },
-  stripeCheckout: { planId: "pro" },
+  stripeCheckout: { planId: "pro", interval: "year" },
 } as const;
 
 /** Especificación OpenAPI 3.0 — Crisvia REST API. */
@@ -215,7 +215,13 @@ export function buildOpenApiSpec(baseUrl: string): OpenAPIV3.Document {
         StripeCheckoutRequest: {
           type: "object",
           properties: {
-            planId: { type: "string", example: "pro" },
+            planId: { type: "string", enum: ["pro", "pro_plus"], example: "pro" },
+            interval: {
+              type: "string",
+              enum: ["month", "year"],
+              description: "month cobra cada mes. year cobra 10 meses del mismo plan.",
+              example: "year",
+            },
           },
           example: EXAMPLES.stripeCheckout,
         },

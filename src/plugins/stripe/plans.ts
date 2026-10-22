@@ -1,4 +1,5 @@
 import config from "@/config";
+import type { BillingInterval } from "@/lib/billing/interval";
 
 /** Límites por plan — Fase 1 SaaS (clinical research sites). */
 export const SAAS_PLAN_LIMITS = {
@@ -21,6 +22,7 @@ export interface PricingPlan {
   cta: string;
   highlighted?: boolean;
   stripePriceId?: string;
+  stripeAnnualPriceId?: string;
 }
 
 export interface OrganizationRow {
@@ -35,6 +37,7 @@ export interface OrganizationRow {
   patient_limit: number;
   protocol_limit: number;
   user_limit: number;
+  billing_interval: BillingInterval | null;
   created_at: string;
 }
 
@@ -47,22 +50,35 @@ export function getPlanConfig(planId: string): PricingPlan | undefined {
   return getPricingPlans().find((p) => p.id === normalized);
 }
 
-export function getStripePriceId(planId: string): string {
+export function stripePriceEnv(planId: string, interval: BillingInterval = "month"): string {
+  if (planId === "pro_plus") {
+    return interval === "year" ? "STRIPE_PRICE_ID_PRO_PLUS_ANNUAL" : "STRIPE_PRICE_ID_PRO_PLUS";
+  }
+  return interval === "year" ? "STRIPE_PRICE_ID_PRO_ANNUAL" : "STRIPE_PRICE_ID_PRO";
+}
+
+export function getStripePriceId(planId: string, interval: BillingInterval = "month"): string {
+  const annual = interval === "year";
   if (planId === "pro") {
     return (
-      process.env.STRIPE_PRICE_ID_PRO ||
-      getPlanConfig("pro")?.stripePriceId ||
+      process.env[stripePriceEnv("pro", interval)] ||
+      (annual ? getPlanConfig("pro")?.stripeAnnualPriceId : getPlanConfig("pro")?.stripePriceId) ||
       ""
     );
   }
   if (planId === "pro_plus") {
     return (
-      process.env.STRIPE_PRICE_ID_PRO_PLUS ||
-      getPlanConfig("pro_plus")?.stripePriceId ||
+      process.env[stripePriceEnv("pro_plus", interval)] ||
+      (annual
+        ? getPlanConfig("pro_plus")?.stripeAnnualPriceId
+        : getPlanConfig("pro_plus")?.stripePriceId) ||
       ""
     );
   }
-  return getPlanConfig(planId)?.stripePriceId || "";
+  return (
+    (annual ? getPlanConfig(planId)?.stripeAnnualPriceId : getPlanConfig(planId)?.stripePriceId) ||
+    ""
+  );
 }
 
 export function getPlanLimits(planId: string) {

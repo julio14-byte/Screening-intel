@@ -3,6 +3,7 @@ import config from "@/config";
 import { routes } from "@/lib/app/routes";
 import { getUser } from "@/lib/supabase/server";
 import { getOrganizationForUser } from "@/plugins/stripe/organization";
+import { billingIntervalLabel, type BillingInterval } from "@/lib/billing/interval";
 import {
   getPlanConfig,
   isSubscriptionActive,
@@ -44,6 +45,9 @@ export default async function BillingPage({
 
   const planId = organization?.plan_id ?? "free";
   const plan = getPlanConfig(planId);
+  const billingInterval = organization?.billing_interval ?? null;
+  const initialInterval: BillingInterval =
+    params?.intervalo?.toString() === "anual" || billingInterval === "year" ? "year" : "month";
   const active = organization ? isSubscriptionActive(organization) : false;
   const paymentsEnabled = config.features.payments;
 
@@ -105,6 +109,12 @@ export default async function BillingPage({
                 {plan?.name ?? planId}
               </dd>
             </div>
+            {billingInterval ? (
+              <div className="flex justify-between gap-4">
+                <dt className="text-slate-500">Cobro</dt>
+                <dd className="font-medium">{billingIntervalLabel(billingInterval)}</dd>
+              </div>
+            ) : null}
             <div className="flex justify-between gap-4">
               <dt className="text-slate-500">Estado</dt>
               <dd>
@@ -160,6 +170,8 @@ export default async function BillingPage({
         <h2 className="text-lg font-bold text-slate-900">Planes disponibles</h2>
         <PlanUpgradeCards
           currentPlanId={planId}
+          currentInterval={billingInterval}
+          initialInterval={initialInterval}
           showCheckout={paymentsEnabled}
         />
       </div>

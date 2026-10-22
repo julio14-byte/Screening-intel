@@ -14,7 +14,7 @@ Plataforma de **inteligencia de screening** para **clinical research sites**. No
 | Feature | Descripción |
 |---------|-------------|
 | **Citas** | Agenda para coordinadores en `/citas` y en cada paciente: agendar con búsqueda, atajos de fecha y hora, aviso de choque de horario, reprogramar, marcar hecha / no asistió y recordatorio listo por WhatsApp, SMS, llamada o correo (lo envía la persona, la app no envía mensajes). |
-| **Precios** | Free $0, Pro $149 y Pro+ $329 USD/mes. Los límites de pacientes, protocolos y usuarios se aplican en la base de datos. |
+| **Precios** | Free $0. Pro $149/mes o $1,490/año. Pro+ $329/mes o $3,290/año. El año cobra 10 meses. Los límites se aplican en la base de datos. |
 | **Expediente interno** | Pacientes y perfil clínico en tablas de la app. Alta manual, pegar Excel o CSV. |
 | **MFA TOTP** | Obligatorio en producción para investigator y sub-investigator (`/settings/security`, `/login/mfa`). |
 | **Sesión** | Timeout de inactividad (30 min) y tope absoluto (8 h); login demo apagado en production. |
@@ -307,9 +307,9 @@ Los pacientes se ingresan a mano, pegando el listado de Excel, por CSV o por el 
 ## SaaS y Stripe
 
 - Trial 14 días por organization
-- Planes **Free** ($0), **Pro** ($149 USD/mes) y **Pro+** ($329 USD/mes) en `src/config.ts`
-- Límites por plan (pacientes / protocolos activos / usuarios) aplicados por triggers en Postgres (`20261007000000_enforce_plan_limits.sql`): al llegar al tope no se agregan más, los datos existentes no se tocan
-- Crea los precios en Stripe y pon sus IDs en `STRIPE_PRICE_ID_PRO` y `STRIPE_PRICE_ID_PRO_PLUS` (o en `stripePriceId`); sin ellos el checkout responde 503
+- Planes **Free** ($0), **Pro** ($149 USD/mes o $1,490 USD/año) y **Pro+** ($329 USD/mes o $3,290 USD/año) en `src/config.ts`. El anual cobra 10 meses del mismo plan.
+- Límites por plan (pacientes / protocolos activos / usuarios) aplicados por triggers en Postgres (`20261007000000_enforce_plan_limits.sql`): al llegar al tope no se agregan más, los datos existentes no se tocan. El intervalo no cambia los límites.
+- Crea el precio mensual y el anual en Stripe. IDs en `STRIPE_PRICE_ID_PRO`, `STRIPE_PRICE_ID_PRO_ANNUAL`, `STRIPE_PRICE_ID_PRO_PLUS` y `STRIPE_PRICE_ID_PRO_PLUS_ANNUAL`. Sin el ID del intervalo elegido, el checkout responde 500.
 - Webhook: `POST /api/webhooks/stripe`
 
 Variables: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_PRO`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_APP_URL`.

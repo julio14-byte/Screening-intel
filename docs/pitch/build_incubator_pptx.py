@@ -256,8 +256,8 @@ def build() -> Presentation:
     chrome(s, "MODELO", "SaaS por site, en dólares, sin implementación")
     plans = [
         ("Free", "$0", "14 días para probar", "Hasta 50 pacientes, 3 protocolos, 1 usuario."),
-        ("Pro", "$149", "al mes, por site", "500 pacientes, 3 usuarios, Re-Match y portal."),
-        ("Pro+", "$329", "al mes, por site", "2,000 pacientes, 10 usuarios, roles, MFA y bitácora."),
+        ("Pro", "$149", "al mes, o $1,490 al año", "500 pacientes, 3 usuarios, Re-Match y portal."),
+        ("Pro+", "$329", "al mes, o $3,290 al año", "2,000 pacientes, 10 usuarios, roles, MFA y bitácora."),
     ]
     for i, (name, price, cadence, body) in enumerate(plans):
         x = 0.55 + i * 4.2
@@ -270,7 +270,7 @@ def build() -> Presentation:
         write(s, x + 0.3, 2.5, 3.3, 0.7, price, 36, price_c, bold=True)
         write(s, x + 0.3, 3.3, 3.3, 0.4, cadence, 14, body_c)
         write(s, x + 0.3, 4.1, 3.3, 1.6, body, 16, body_c)
-    write(s, 0.55, 6.6, 12.2, 0.35, "Precio por sitio. Se cancela cuando el centro quiere. Cobro con Stripe.", 14, MUTED)
+    write(s, 0.55, 6.6, 12.2, 0.35, "Precio por sitio. El año cobra 10 meses. Se cancela la renovación cuando el centro quiere.", 14, MUTED)
 
     # 13. Construido
     s = prs.slides.add_slide(blank)

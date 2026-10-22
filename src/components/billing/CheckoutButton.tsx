@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { BillingInterval } from "@/lib/billing/interval";
 import { routes } from "@/lib/app/routes";
 import { readJsonResponse } from "@/lib/http/readJsonResponse";
 import { toErrorMessage } from "@/lib/errors";
@@ -8,10 +9,12 @@ import { Button } from "@/components/ui/Button";
 
 export function CheckoutButton({
   planId = "pro",
+  interval = "month",
   label = "Suscribirse",
   className,
 }: {
   planId?: string;
+  interval?: BillingInterval;
   label?: string;
   className?: string;
 }) {
@@ -27,7 +30,7 @@ export function CheckoutButton({
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId }),
+        body: JSON.stringify({ planId, interval }),
       });
 
       const data = await readJsonResponse<{ url?: string; error?: string }>(res);

@@ -1,17 +1,25 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import config from "@/config";
+import { BillingIntervalToggle } from "@/components/billing/BillingIntervalToggle";
 import { routes, loginUrlWithFrom } from "@/lib/app/routes";
+import { formatPlanAmount, planQuote, type BillingInterval } from "@/lib/billing/interval";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 
-function planLoginHref(planId: string, price: number) {
+function planLoginHref(price: number, interval: BillingInterval) {
   if (price === 0) {
     return loginUrlWithFrom(routes.app.dashboard);
   }
-  return loginUrlWithFrom(routes.app.billing);
+  const billing =
+    interval === "year" ? `${routes.app.billing}?intervalo=anual` : routes.app.billing;
+  return loginUrlWithFrom(billing);
 }
 
 export function LandingPricing() {
+  const [interval, setInterval] = useState<BillingInterval>("month");
   if (!config.features.pricing) return null;
 
   const { eyebrow, title, subtitle, plans } = config.pricing;
@@ -32,11 +40,19 @@ export function LandingPricing() {
           <p className="mx-auto mt-3 max-w-2xl text-sm text-violet-200 sm:text-base">
             {subtitle}
           </p>
+          <div className="mt-6 flex justify-center">
+            <BillingIntervalToggle
+              value={interval}
+              onChange={setInterval}
+              tone="marketing"
+            />
+          </div>
         </div>
 
         <div className="mt-8 grid gap-4 sm:mt-12 sm:grid-cols-3 sm:gap-6">
           {plans.map((plan) => {
-            const href = planLoginHref(plan.id, plan.price);
+            const href = planLoginHref(plan.price, interval);
+            const quote = planQuote(plan.price, interval);
 
             return (
               <div
@@ -59,13 +75,16 @@ export function LandingPricing() {
                 <p className="mt-1 text-sm text-violet-200/80">{plan.description}</p>
 
                 <p className="mt-4 text-2xl font-bold tabular-nums text-white sm:mt-5 sm:text-3xl">
-                  {plan.price === 0 ? "Gratis" : `$${plan.price}`}
-                  {plan.price > 0 ? (
+                  {quote.amount === 0 ? "Gratis" : `$${formatPlanAmount(quote.amount)}`}
+                  {quote.cadence ? (
                     <span className="text-sm font-normal text-violet-300 sm:text-base">
-                      {" "}{plan.currency}/{plan.interval}
+                      {" "}{quote.cadence}
                     </span>
                   ) : null}
                 </p>
+                {quote.note ? (
+                  <p className="mt-1 text-xs font-medium text-violet-200">{quote.note}</p>
+                ) : null}
 
                 <ul className="mt-4 flex-1 space-y-2 sm:mt-5">
                   {plan.features.map((feature) => (
