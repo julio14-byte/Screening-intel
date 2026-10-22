@@ -184,10 +184,10 @@ Diseño alineado a una operación de site. La certificación regulatoria del dia
 | Plan | Precio | Para quién |
 |---|---|---|
 | Free | $0 · 14 días | Probar con hasta 50 pacientes, 3 protocolos, 1 usuario |
-| Pro | $149 / mes | Un site con varios protocolos: 500 pacientes, 3 usuarios, Re-Match y portal |
-| Pro+ | $329 / mes | Varios coordinadores: 2,000 pacientes, 10 usuarios, roles, MFA y bitácora |
+| Pro | $149 / mes o $1,490 / año | Un site con varios protocolos: 500 pacientes, 3 usuarios, Re-Match y portal |
+| Pro+ | $329 / mes o $3,290 / año | Varios coordinadores: 2,000 pacientes, 10 usuarios, roles, MFA y bitácora |
 
-Precio por sitio. Se cancela cuando el centro quiere. Cobro con Stripe.
+Precio por sitio. El año cobra 10 meses. Se cancela la renovación cuando el centro quiere. Cobro con Stripe.
 
 ---
 
@@ -251,6 +251,6 @@ Si una migración nueva todavía no está aplicada en Supabase, sáltate esa pan
 
 **2:40–6:40 — Demo.** Tabla de arriba.
 
-**6:40–7:20 — Modelo.** Free para probar, 149 y 329 dólares por site al mes. Sin proyecto de implementación.
+**6:40–7:20 — Modelo.** Free para probar, 149 y 329 dólares por site al mes, o el anual que cobra 10 meses. Sin proyecto de implementación.
 
 **7:20–8:00 — Pedido.** Tres sites piloto, mentoría para venderle al centro, y una lectura de alguien que ya recibió un monitor. Las cifras de tracción se presentan cuando sean reales.

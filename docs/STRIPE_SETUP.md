@@ -6,21 +6,23 @@
 |----------|-------------|-----|
 | `STRIPE_SECRET_KEY` | Sí | Checkout, portal, webhook (`sk_test_...` o `sk_live_...`) |
 | `STRIPE_WEBHOOK_SECRET` | Sí (prod) | Firma del webhook (`whsec_...`) |
-| `STRIPE_PRICE_ID_PRO` | Sí para Pro | Price ID del plan Pro (`price_...`) |
-| `STRIPE_PRICE_ID_PRO_PLUS` | Solo Pro+ | Price ID del plan Pro+ |
+| `STRIPE_PRICE_ID_PRO` | Sí para Pro mensual | Price ID mensual de Pro (`price_...`) |
+| `STRIPE_PRICE_ID_PRO_ANNUAL` | Sí para Pro anual | Price ID anual de Pro. Cobra $1,490 (10 meses) |
+| `STRIPE_PRICE_ID_PRO_PLUS` | Solo Pro+ mensual | Price ID mensual de Pro+ |
+| `STRIPE_PRICE_ID_PRO_PLUS_ANNUAL` | Solo Pro+ anual | Price ID anual de Pro+. Cobra $3,290 (10 meses) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Sí | Webhook actualiza `organizations` |
 | `NEXT_PUBLIC_APP_URL` | Sí | URLs de success/cancel en Checkout |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Opcional hoy | No usada en UI actual (Checkout hosted) |
 
-`isStripeConfigured()` solo comprueba `STRIPE_SECRET_KEY`. Sin price ID, Checkout falla con:
-*"Falta STRIPE_PRICE_ID_PRO en .env"*.
+`isStripeConfigured()` solo comprueba `STRIPE_SECRET_KEY`. Sin el Price ID del intervalo elegido, Checkout responde 500 con el nombre de la variable que falta, por ejemplo *"Falta STRIPE_PRICE_ID_PRO_ANNUAL en .env"*.
 
 ## Stripe Dashboard
 
 1. **Productos → Precios**  
-   - Crear producto "Crisvia Pro" → precio mensual recurrente  
-   - Copiar **Price ID** → `STRIPE_PRICE_ID_PRO`  
-   - (Opcional) Pro+ → `STRIPE_PRICE_ID_PRO_PLUS`
+   - Crear producto "Crisvia Pro" → precio mensual recurrente de $149  
+   - En el mismo producto, precio anual recurrente de $1,490  
+   - Copiar los Price ID → `STRIPE_PRICE_ID_PRO` y `STRIPE_PRICE_ID_PRO_ANNUAL`  
+   - (Opcional) Pro+ mensual $329 y anual $3,290 → `STRIPE_PRICE_ID_PRO_PLUS` y `STRIPE_PRICE_ID_PRO_PLUS_ANNUAL`
 
 2. **Developers → Webhooks → Add endpoint**  
    - URL: `https://TU-DOMINIO.vercel.app/api/webhooks/stripe`  
@@ -58,4 +60,5 @@ Eso pone `plan_id = pro`, `subscription_status = active` y límites Pro (500 pac
 ## Config vacía en repo
 
 En `src/config.ts`, `stripePriceId` de Pro y Pro+ está en `""`.  
-Los Price ID deben venir de **env** (`STRIPE_PRICE_ID_PRO`) o rellenar en config.
+Los Price ID deben venir de **env** o de `stripePriceId` / `stripeAnnualPriceId` en config.  
+El plan en la base sigue siendo `pro` o `pro_plus`. `billing_interval` guarda `month` o `year`.

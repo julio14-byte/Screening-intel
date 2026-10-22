@@ -1,35 +1,57 @@
+"use client";
+
+import { useState } from "react";
 import config from "@/config";
 import { getPricingPlans } from "@/plugins/stripe/plans";
 import type { PricingPlan } from "@/plugins/stripe/plans";
+import { BillingIntervalToggle } from "@/components/billing/BillingIntervalToggle";
 import { CheckoutButton } from "@/components/billing/CheckoutButton";
 import { Card } from "@/components/ui/Card";
+import {
+  formatPlanAmount,
+  planQuote,
+  type BillingInterval,
+} from "@/lib/billing/interval";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 
 export function PlanUpgradeCards({
   currentPlanId,
+  currentInterval = null,
+  initialInterval = "month",
   showCheckout = true,
 }: {
   currentPlanId: string;
+  currentInterval?: BillingInterval | null;
+  initialInterval?: BillingInterval;
   showCheckout?: boolean;
 }) {
+  const [interval, setInterval] = useState<BillingInterval>(initialInterval);
   if (!config.features.pricing) return null;
 
   const plans = getPricingPlans();
   const normalizedCurrent =
     currentPlanId === "starter" ? "free" : currentPlanId;
+  const activeInterval = currentInterval ?? (normalizedCurrent === "free" ? null : "month");
 
   return (
     <div className="overflow-visible pt-3">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {plans.map((plan) => (
-          <PlanCard
-            key={plan.id}
-            plan={plan}
-            isCurrent={plan.id === normalizedCurrent}
-            showCheckout={showCheckout}
-          />
-        ))}
+      <BillingIntervalToggle value={interval} onChange={setInterval} />
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {plans.map((plan) => {
+          const samePlan = plan.id === normalizedCurrent;
+          const sameCycle = plan.price === 0 || interval === activeInterval;
+          return (
+            <PlanCard
+              key={plan.id}
+              plan={plan}
+              interval={interval}
+              isCurrent={samePlan && sameCycle}
+              samePlan={samePlan}
+              showCheckout={showCheckout}
+            />
+          );
+        })}
       </div>
     </div>
   );
@@ -37,13 +59,18 @@ export function PlanUpgradeCards({
 
 function PlanCard({
   plan,
+  interval,
   isCurrent,
+  samePlan,
   showCheckout,
 }: {
   plan: PricingPlan;
+  interval: BillingInterval;
   isCurrent: boolean;
+  samePlan: boolean;
   showCheckout: boolean;
 }) {
+  const quote = planQuote(plan.price, interval);
   const canCheckout =
     !isCurrent &&
     plan.price > 0 &&
@@ -71,14 +98,17 @@ function PlanCard({
       <h3 className="font-semibold text-slate-900">{plan.name}</h3>
       <p className="mt-1 text-xs text-slate-500">{plan.description}</p>
 
-      <p className="mt-4 text-2xl font-bold tabular-nums text-slate-900">
-        {plan.price === 0 ? "Gratis" : `$${plan.price}`}
-        {plan.price > 0 ? (
-          <span className="text-sm font-normal text-slate-500">
-            {" "}{plan.currency}/{plan.interval}
-          </span>
+      <div className="mt-4">
+        <p className="text-2xl font-bold tabular-nums text-slate-900">
+          {quote.amount === 0 ? "Gratis" : `$${formatPlanAmount(quote.amount)}`}
+          {quote.cadence ? (
+            <span className="text-sm font-normal text-slate-500"> {quote.cadence}</span>
+          ) : null}
+        </p>
+        {quote.note ? (
+          <p className="mt-1 text-xs font-medium text-violet-700">{quote.note}</p>
         ) : null}
-      </p>
+      </div>
 
       <ul className="mt-4 flex-1 space-y-1.5">
         {plan.features.map((feature) => (
@@ -96,7 +126,14 @@ function PlanCard({
         <div className="mt-4">
           <CheckoutButton
             planId={plan.id}
-            label={`Cambiar a ${plan.name}`}
+            interval={interval}
+            label={
+              samePlan
+                ? interval === "year"
+                  ? "Pasar a anual"
+                  : "Pasar a mensual"
+                : `Cambiar a ${plan.name}`
+            }
           />
         </div>
       ) : isCurrent ? (

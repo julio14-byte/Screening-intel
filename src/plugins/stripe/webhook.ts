@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { intervalFromStripePrice, type BillingInterval } from "@/lib/billing/interval";
 import { getStripe } from "./client";
 import { getPlanLimits } from "./plans";
 
@@ -74,16 +75,33 @@ async function handleCheckoutCompleted(
 
   const planId = session.metadata?.plan_id || "pro";
   const limits = getPlanLimits(planId);
+  const billingInterval = intervalFromStripePrice(
+    undefined,
+    session.metadata?.billing_interval
+  );
 
   await updateOrganization(orgId, {
     stripe_customer_id: session.customer,
     stripe_subscription_id: session.subscription,
     plan_id: planId,
+    billing_interval: billingInterval,
     subscription_status: "active",
     patient_limit: limits.patientLimit,
     protocol_limit: limits.protocolLimit,
     user_limit: limits.userLimit,
   });
+}
+
+function priceInterval(subscription: {
+  items?: {
+    data?: Array<{
+      price?: { recurring?: { interval?: string | null } | null } | string | null;
+    }>;
+  };
+}): unknown {
+  const price = subscription.items?.data?.[0]?.price;
+  if (price && typeof price === "object") return price.recurring?.interval;
+  return undefined;
 }
 
 async function handleSubscriptionUpdated(subscription: {
@@ -92,6 +110,11 @@ async function handleSubscriptionUpdated(subscription: {
   id: string;
   status: string;
   trial_end?: number | null;
+  items?: {
+    data?: Array<{
+      price?: { recurring?: { interval?: string | null } | null } | string | null;
+    }>;
+  };
 }) {
   const orgId = subscription.metadata?.organization_id;
   if (!orgId) return;
@@ -99,12 +122,17 @@ async function handleSubscriptionUpdated(subscription: {
   const planId = subscription.metadata?.plan_id || "pro";
   const limits = getPlanLimits(planId);
   const status = mapSubscriptionStatus(subscription.status);
+  const billingInterval: BillingInterval = intervalFromStripePrice(
+    priceInterval(subscription),
+    subscription.metadata?.billing_interval
+  );
 
   const patch: Record<string, unknown> = {
     stripe_customer_id: subscription.customer,
     stripe_subscription_id: subscription.id,
     subscription_status: status,
     plan_id: planId,
+    billing_interval: billingInterval,
     patient_limit: limits.patientLimit,
     protocol_limit: limits.protocolLimit,
     user_limit: limits.userLimit,
@@ -128,6 +156,7 @@ async function handleSubscriptionDeleted(subscription: {
   await updateOrganization(orgId, {
     subscription_status: "canceled",
     plan_id: "starter",
+    billing_interval: null,
     stripe_subscription_id: null,
     patient_limit: starterLimits.patientLimit,
     protocol_limit: starterLimits.protocolLimit,

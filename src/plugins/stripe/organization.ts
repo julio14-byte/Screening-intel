@@ -23,6 +23,7 @@ export async function getOrganizationForUser(
         patient_limit,
         protocol_limit,
         user_limit,
+        billing_interval,
         created_at
       )
     `

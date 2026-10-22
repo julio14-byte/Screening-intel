@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import config from "@/config";
+import { parseCheckoutRequest } from "@/lib/billing/interval";
 import { getUser } from "@/lib/supabase/server";
 import {
   createCheckoutSession,
@@ -20,20 +21,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Debes iniciar sesión." }, { status: 401 });
   }
 
-  let planId = "pro";
+  let planId: "pro" | "pro_plus" = "pro";
+  let interval: "month" | "year" = "month";
   try {
-    const body = (await request.json()) as { planId?: string };
-    if (body?.planId === "pro" || body?.planId === "pro_plus") {
-      planId = body.planId;
-    } else if (body?.planId) {
-      return NextResponse.json({ error: "Plan inválido." }, { status: 400 });
+    const body = (await request.json()) as { planId?: unknown; interval?: unknown };
+    const parsed = parseCheckoutRequest(body ?? {});
+    if (!parsed.ok) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 });
     }
+    planId = parsed.planId;
+    interval = parsed.interval;
   } catch {
-    // default pro
+    // sin cuerpo: Pro mensual
   }
 
   try {
-    const { url } = await createCheckoutSession({ user, planId });
+    const { url } = await createCheckoutSession({ user, planId, interval });
     return NextResponse.json({ url });
   } catch (err) {
     if (err instanceof StripeCheckoutError) {

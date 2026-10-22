@@ -321,7 +321,7 @@ const config = {
         },
         {
           q: "¿Cuánto cuesta y qué incluye cada plan?",
-          a: "Free $0, Pro $149 USD/mes (500 pacientes, 50 protocolos, 3 usuarios) y Pro+ $329 USD/mes (2,000 pacientes, 100 protocolos, 10 usuarios). Los límites se aplican en la base de datos: al llegar al tope no se pueden agregar más, pero tus datos siguen disponibles.",
+          a: "Free $0. Pro $149 USD/mes o $1,490 USD/año (500 pacientes, 50 protocolos, 3 usuarios). Pro+ $329 USD/mes o $3,290 USD/año (2,000 pacientes, 100 protocolos, 10 usuarios). El año cobra 10 meses. Los límites se aplican en la base de datos: al llegar al tope no se pueden agregar más, pero tus datos siguen disponibles.",
         },
         {
           q: "¿Qué datos de mis pacientes ve la IA?",
@@ -349,7 +349,7 @@ const config = {
         },
         {
           title: "Modelo",
-          body: "Paga el clinical research site. Free 14 días, Pro $149 y Pro+ $329 USD al mes por sitio, sin costo de implementación.",
+          body: "Paga el clinical research site. Free 14 días. Pro $149 o $1,490 y Pro+ $329 o $3,290 USD, al mes o al año, por sitio. El año incluye 2 meses. Sin costo de implementación.",
         },
         {
           title: "Mercado",
@@ -391,7 +391,7 @@ const config = {
     eyebrow: "Suscripciones",
     title: "Un plan para cada site",
     subtitle:
-      "Precios en USD por sitio, sin costo de implementación. Cancelas cuando quieras.",
+      "Precios en USD por sitio. El anual incluye 2 meses. Cancelas la renovación cuando quieras.",
     plans: [
       {
         id: "free",

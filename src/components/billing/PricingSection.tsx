@@ -1,11 +1,17 @@
+"use client";
+
+import { useState } from "react";
 import config from "@/config";
+import { BillingIntervalToggle } from "@/components/billing/BillingIntervalToggle";
 import { CheckoutButton } from "@/components/billing/CheckoutButton";
 import { Card } from "@/components/ui/Card";
+import { formatPlanAmount, planQuote, type BillingInterval } from "@/lib/billing/interval";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 
 /** Vitrina de precios — se muestra si features.pricing está activo. */
 export function PricingSection() {
+  const [interval, setInterval] = useState<BillingInterval>("month");
   if (!config.features.pricing) return null;
 
   const { eyebrow, title, subtitle, plans } = config.pricing;
@@ -19,6 +25,8 @@ export function PricingSection() {
         <h2 className="text-lg font-bold text-slate-900">{title}</h2>
         <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
       </div>
+
+      <BillingIntervalToggle value={interval} onChange={setInterval} />
 
       <div className="grid gap-4 sm:grid-cols-3">
         {plans.map((plan) => (
@@ -40,14 +48,7 @@ export function PricingSection() {
                 </span>
               ) : null}
             </div>
-            <p className="mt-4 text-2xl font-bold tabular-nums text-slate-900">
-              {plan.price === 0 ? "Gratis" : `$${plan.price}`}
-              {plan.price > 0 ? (
-                <span className="text-sm font-normal text-slate-500">
-                  {" "}{plan.currency}/{plan.interval}
-                </span>
-              ) : null}
-            </p>
+            <PlanAmount price={plan.price} interval={interval} />
             <ul className="mt-4 space-y-1.5">
               {plan.features.map((feature) => (
                 <li
@@ -61,7 +62,7 @@ export function PricingSection() {
             </ul>
             {plan.price > 0 && config.features.payments ? (
               <div className="mt-4">
-                <CheckoutButton planId={plan.id} label={plan.cta} />
+                <CheckoutButton planId={plan.id} interval={interval} label={plan.cta} />
               </div>
             ) : (
               <p className="mt-4 text-xs font-medium text-violet-600">
@@ -72,5 +73,20 @@ export function PricingSection() {
         ))}
       </div>
     </section>
+  );
+}
+
+function PlanAmount({ price, interval }: { price: number; interval: BillingInterval }) {
+  const quote = planQuote(price, interval);
+  return (
+    <div className="mt-4">
+      <p className="text-2xl font-bold tabular-nums text-slate-900">
+        {quote.amount === 0 ? "Gratis" : `$${formatPlanAmount(quote.amount)}`}
+        {quote.cadence ? (
+          <span className="text-sm font-normal text-slate-500"> {quote.cadence}</span>
+        ) : null}
+      </p>
+      {quote.note ? <p className="mt-1 text-xs font-medium text-violet-700">{quote.note}</p> : null}
+    </div>
   );
 }

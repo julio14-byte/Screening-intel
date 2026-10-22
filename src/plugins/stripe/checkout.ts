@@ -1,7 +1,8 @@
 import config from "@/config";
 import { getStripe } from "./client";
 import { getOrganizationForUser } from "./organization";
-import { getStripePriceId } from "./plans";
+import type { BillingInterval } from "@/lib/billing/interval";
+import { getStripePriceId, stripePriceEnv } from "./plans";
 import type { User } from "@supabase/supabase-js";
 
 export class StripeCheckoutError extends Error {
@@ -17,14 +18,16 @@ export class StripeCheckoutError extends Error {
 export async function createCheckoutSession({
   user,
   planId = "pro",
+  interval = "month",
 }: {
   user: User;
   planId?: string;
+  interval?: BillingInterval;
 }) {
-  const priceId = getStripePriceId(planId);
+  const priceId = getStripePriceId(planId, interval);
   if (!priceId) {
     throw new StripeCheckoutError(
-      "Falta STRIPE_PRICE_ID_PRO en .env o stripePriceId en config.",
+      `Falta ${stripePriceEnv(planId, interval)} en .env o el Price ID en config.`,
       500
     );
   }
@@ -53,11 +56,13 @@ export async function createCheckoutSession({
       organization_id: organization.id,
       user_id: user.id,
       plan_id: planId,
+      billing_interval: interval,
     },
     subscription_data: {
       metadata: {
         organization_id: organization.id,
         plan_id: planId,
+        billing_interval: interval,
       },
     },
     allow_promotion_codes: true,
