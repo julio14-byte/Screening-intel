@@ -7,7 +7,7 @@ Cada control marcado con `verify:security` se comprueba de forma automática (`y
 | Capa | Control |
 |------|---------|
 | Identidad | Supabase Auth, MFA TOTP obligatorio a investigadores, contraseñas de 12+ caracteres sin claves comunes (NIST 800-63B), caducidad por inactividad y absoluta, cookies `Secure` y `SameSite=Lax` (el cliente de Supabase necesita leerlas, por eso no son `HttpOnly`) |
-| Autorización | RBAC por rol (investigator, sub-investigator, coordinator, monitor solo lectura), `opsContext`/`requirePermission` en cada API, RLS multi-tenant por `get_user_organization_ids()` en Postgres (`verify:security`) |
+| Autorización | RBAC por rol (investigator, sub-investigator, coordinator, monitor solo lectura), `opsContext`/`requirePermission` en cada API, RLS multi-tenant por `get_user_organization_ids()` en Postgres (`verify:security`). Las tablas de `public` no se exponen solas: cada una tiene `GRANT` explícito |
 | Anti-CSRF | Rechazo de mutaciones `/api` con `Sec-Fetch-Site`/`Origin` de otro sitio (`src/lib/security/csrf.ts`); server actions de Next verifican origen |
 | Abuso | Rate limit compartido en Postgres (`rate_limit_hit`) en login, formularios públicos, IA y **todas las escrituras autenticadas** (240/min por usuario). El cupo por IP usa solo `x-vercel-forwarded-for` |
 | Entrada | Validación estricta (Zod) de cuerpos JSON, límites de tamaño, firma de archivo (PDF/TXT) antes de procesar |
@@ -23,6 +23,7 @@ Cada control marcado con `verify:security` se comprueba de forma automática (`y
 - `sprintf-js` (vía `swagger-ui-react`, solo `/docs/api`): sin parche publicado; DoS por especificadores de formato, sin datos clínicos involucrados.
 - `style-src` conserva `'unsafe-inline'` (atributos `style` de React y Swagger UI); no permite ejecutar scripts.
 - Las migraciones se aplican en CI sobre un Postgres 17 vacío. Conviene repetirlas en un proyecto de staging de Supabase antes de producción.
+- Una tabla nueva en `public` no recibe privilegios de la Data API. La migración que la crea tiene que conceder solo lo que van a usar `anon`, `authenticated` o `service_role`, y dejar RLS activo.
 
 ## Checklist antes de producción
 
@@ -50,4 +51,4 @@ El workflow `Security` ejecuta, además de `verify:all`, un job `database`:
 - `scripts/db/run-rls-tests.sh` ejecuta `supabase/ci/*_tests.sql`: aislamiento entre organizaciones, acceso nulo de `anon`, solo lectura del monitor y escritura de `site_profiles` limitada al investigador.
 
 En local: `createdb crisvia_ci && DATABASE_URL=postgres:///crisvia_ci yarn db:migrate:ci && DATABASE_URL=postgres:///crisvia_ci yarn db:test`.
-Cada migración nueva con tablas de datos de paciente debe añadir aserciones de aislamiento en `supabase/ci/`.
+Cada migración nueva con tablas de datos de paciente debe conceder los privilegios de la Data API y añadir aserciones de aislamiento en `supabase/ci/`.
