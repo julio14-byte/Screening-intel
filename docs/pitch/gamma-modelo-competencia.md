@@ -62,6 +62,40 @@ Crisvia, hoy, es otra fila: suscripción del site por los pacientes que ya llega
 
 ---
 
+# El proceso, lado a lado
+## Dónde empieza cada uno
+
+**Bond Health.** Lee el expediente, arma anuncios, llama o escribe, preselecciona y agenda. El investigador decide y consiente.
+
+**Deep 6 AI.** Cruza el expediente del hospital y entrega una lista de elegibles. El centro recluta desde esa lista.
+
+**Trialbee.** Anuncio o referido, cuestionario y llamada de personal médico. El site recibe al que ya pasó ese filtro y lo sigue por WhatsApp, SMS o voz.
+
+**Antidote.** Llega a pacientes por su red, preselecciona y da seguimiento al site. El patrocinador es el cliente.
+
+**Datacapt.** Arma el estudio completo: eCRF, ePRO, eConsent, aleatorización y CTMS. El centro entra como usuario.
+
+**Crisvia.** Empieza cuando la persona ya está en el centro: expediente, cruce por reglas, evidencia, pipeline y otro protocolo si el primero no entra.
+
+---
+
+# El precio, lado a lado
+## La unidad publicada. El dólar, solo donde existe.
+
+**Bond Health.** Por paciente contactado, más un porcentaje del hito de randomización. Sin dólares públicos. El anuncio lo paga el estudio.
+
+**Deep 6 AI.** Licencia del hospital. Sin lista. A veces el patrocinador comparte el costo.
+
+**Trialbee.** SaaS anual o servicio por estudio. Sin tarifa pública.
+
+**Antidote.** Fee fijo de calibración y después pago por resultado. Sin tarifa pública.
+
+**Datacapt.** Un precio por estudio o licencia anual. Sin tarifa pública. Usuarios ilimitados.
+
+**Crisvia.** Pro, 149 dólares al mes o 1,490 al año. Pro+, 329 o 3,290. El año son 10 meses. Paga el site.
+
+---
+
 # Bond Health
 ## Fee por paciente que contactan, más un porcentaje de la randomización
 
@@ -137,17 +171,20 @@ Pregunta clave: ¿cotizan solo el CTMS de un site, sin EDC, para 50 pacientes qu
 
 ---
 
-# La tabla que llena la llamada
-## Lo publicado hoy, y el hueco que tiene que cerrar la cotización
+# Lo que la cotización tiene que cerrar
+## Quién paga en México, y si operan sin Epic
 
-| | Quién paga, según ellos | Unidad publicada | Dólares publicados | México |
-| --- | --- | --- | --- | --- |
-| Bond Health | Site, red, CRO o patrocinador | Paciente contactado + % del hito de randomización | No | Hay que preguntarlo. El EHR que listan es de Estados Unidos. |
-| Deep 6 AI | Site, y a veces el patrocinador | Licencia empresarial | No | No aparece como producto de site mexicano. |
-| Trialbee | Patrocinador o CRO; el site usa Honey | SaaS anual o servicio por estudio | No | WhatsApp sí está en el producto. El contrato local, no. |
-| Antidote | Patrocinador | Fee de calibración y luego pago por resultado | No. El caso de Crohn es un ahorro, no una lista. | Hay que preguntarlo. |
-| Datacapt | Patrocinador, CRO o centro que compra la suite | Por estudio o licencia anual | No | Tienen página en español. El comprador suele ser quien corre el EDC. |
-| Crisvia, hoy | El clinical research site | Mes o año, por sitio | Pro 149 / 1,490. Pro+ 329 / 3,290. El año son 10 meses. | El producto ya está en español y el pagador es el site. |
+**Bond Health.** Puede cobrarle al site, a la red, al CRO o al patrocinador. El expediente que listan es de hospital en Estados Unidos.
+
+**Deep 6 AI.** Licencia al hospital. No aparece como producto para un site independiente en México.
+
+**Trialbee.** Paga el patrocinador o el CRO. WhatsApp ya está en el producto. El contrato local, no.
+
+**Antidote.** Paga el patrocinador. El caso de Crohn es un ahorro que ellos contaron, no una lista de precios.
+
+**Datacapt.** Paga quien corre el protocolo. Tienen página en español.
+
+**Crisvia.** Paga el site. El producto ya está en español.
 
 ---
 
