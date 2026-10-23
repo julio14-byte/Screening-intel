@@ -84,14 +84,13 @@ const sample: ScreeningWithRelations = {
 
 function renderList(role: "coordinator" | "monitor") {
   return renderToStaticMarkup(
-    createElement(
-      RoleProvider,
-      { role },
-      createElement(PipelineList, {
+    createElement(RoleProvider, {
+      role,
+      children: createElement(PipelineList, {
         screenings: [sample],
         onMove: () => undefined,
-      })
-    )
+      }),
+    })
   );
 }
 
