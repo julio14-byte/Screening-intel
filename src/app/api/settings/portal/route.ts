@@ -5,6 +5,7 @@ import {
   requireAuth,
   requirePermission,
 } from "@/lib/rbac/require-permission";
+import { isCandidatePortalEnabled } from "@/lib/candidato/availability";
 import { portalLinksForOrg } from "@/lib/candidato/paths";
 import { createPortalReadClient } from "@/lib/candidato/portal-supabase";
 import { createClient } from "@/lib/supabase/server";
@@ -78,6 +79,7 @@ export async function GET() {
     organization: org,
     protocols: protocols ?? [],
     links,
+    publicIntakeOpen: isCandidatePortalEnabled(),
   });
 }
 

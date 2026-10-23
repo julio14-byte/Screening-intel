@@ -1,4 +1,9 @@
 import { NextResponse } from "next/server";
+import {
+  CANDIDATE_INTAKE_ACK,
+  CANDIDATE_PORTAL_CLOSED_MESSAGE,
+  isCandidatePortalEnabled,
+} from "@/lib/candidato/availability";
 import { candidatoPaths } from "@/lib/candidato/paths";
 import { clientIp, rateLimit, tooManyRequests } from "@/lib/security/rate-limit";
 import { generateReferralCode } from "@/lib/candidato/referral";
@@ -11,20 +16,14 @@ import { evaluatePatientIntake } from "@/lib/matching";
 import { getServiceSupabase } from "@/lib/screening-services";
 import type { ClinicalProfile, Gender, Patient, Protocol } from "@/lib/types";
 
-function intakeMessage(verdict: string): string {
-  if (verdict === "eligible") {
-    return "Según lo que nos contaste, podrías ser candidato. Un coordinador te contactará.";
-  }
-  if (verdict === "excluded") {
-    return "Por lo que indicaste, este estudio probablemente no es para vos. Un coordinador puede revisar tu caso.";
-  }
-  return "Necesitamos hablar con vos para confirmar algunos puntos. Un coordinador te contactará.";
-}
-
 export async function POST(request: Request) {
   const limited = await rateLimit(`candidato:ip:${clientIp(request)}`, 5, 3600);
   if (!limited.allowed) {
     return tooManyRequests(limited, "Demasiados envíos. Inténtalo más tarde.");
+  }
+
+  if (!isCandidatePortalEnabled()) {
+    return NextResponse.json({ error: CANDIDATE_PORTAL_CLOSED_MESSAGE }, { status: 404 });
   }
 
   let supabase;
@@ -153,8 +152,6 @@ export async function POST(request: Request) {
     ? targets.find((p) => p.id === primaryMatch.protocol_id)
     : undefined;
 
-  const primaryVerdict = primaryMatch?.verdict ?? "pending";
-
   const referralCode = generateReferralCode();
 
   const { error: insertError } = await supabase.from("pre_screen_submissions").insert({
@@ -184,8 +181,7 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     referralCode,
-    message: intakeMessage(primaryVerdict),
-    verdict: primaryVerdict,
+    message: CANDIDATE_INTAKE_ACK,
     graciasUrl: candidatoPaths.gracias(referralCode),
   });
 }

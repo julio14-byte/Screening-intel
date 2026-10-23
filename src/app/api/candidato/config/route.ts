@@ -1,4 +1,8 @@
 import { NextResponse } from "next/server";
+import {
+  CANDIDATE_PORTAL_CLOSED_MESSAGE,
+  isCandidatePortalEnabled,
+} from "@/lib/candidato/availability";
 import { serverError } from "@/lib/security/http";
 import { loadPortalOrganization } from "@/lib/candidato/load-portal-org";
 import { clientIp, rateLimit, tooManyRequests } from "@/lib/security/rate-limit";
@@ -7,6 +11,10 @@ import { createPortalReadClient } from "@/lib/candidato/portal-supabase";
 export async function GET(request: Request) {
   const limited = await rateLimit(`candidato-config:ip:${clientIp(request)}`, 120, 600);
   if (!limited.allowed) return tooManyRequests(limited);
+
+  if (!isCandidatePortalEnabled()) {
+    return NextResponse.json({ error: CANDIDATE_PORTAL_CLOSED_MESSAGE }, { status: 404 });
+  }
 
   const { searchParams } = new URL(request.url);
   const orgSlug = searchParams.get("org")?.trim().toLowerCase();

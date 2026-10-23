@@ -1,5 +1,7 @@
 import { CandidatoIntakeForm } from "@/components/candidato/CandidatoIntakeForm";
+import { CandidatoPortalClosed } from "@/components/candidato/CandidatoPortalClosed";
 import { CandidatoPortalError } from "@/components/candidato/CandidatoPortalError";
+import { isCandidatePortalEnabled } from "@/lib/candidato/availability";
 import { loadPortalOrganization } from "@/lib/candidato/load-portal-org";
 import { createPortalReadClient } from "@/lib/candidato/portal-supabase";
 
@@ -8,6 +10,8 @@ export default async function CandidatoProtocolPage({
 }: {
   params: Promise<{ orgSlug: string; protocolCode: string }>;
 }) {
+  if (!isCandidatePortalEnabled()) return <CandidatoPortalClosed />;
+
   const { orgSlug, protocolCode } = await params;
   const result = await loadPortalOrganization(orgSlug);
 

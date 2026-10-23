@@ -1,8 +1,13 @@
+import { CandidatoPortalClosed } from "@/components/candidato/CandidatoPortalClosed";
+import { isCandidatePortalEnabled } from "@/lib/candidato/availability";
+
 export default async function CandidatoGraciasPage({
   params,
 }: {
   params: Promise<{ referralCode: string }>;
 }) {
+  if (!isCandidatePortalEnabled()) return <CandidatoPortalClosed />;
+
   const { referralCode } = await params;
 
   return (

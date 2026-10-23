@@ -66,14 +66,19 @@ export async function rateLimit(
   return memoryHit(key, max, windowSec);
 }
 
-/** IP del cliente; en Vercel `x-vercel-forwarded-for` no es falsificable. */
-export function clientIp(request: Request): string {
-  const vercel = request.headers.get("x-vercel-forwarded-for");
-  if (vercel) return vercel.split(",")[0]?.trim() || "unknown";
-  const real = request.headers.get("x-real-ip");
-  if (real) return real.trim();
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0]?.trim() || "unknown";
+/**
+ * IP que escribe la plataforma de hospedaje (`x-vercel-forwarded-for`).
+ * No se leen `x-forwarded-for` ni `x-real-ip`: el visitante puede ponerlas.
+ * Sin la cabecera de plataforma, en producción todos comparten el mismo cupo.
+ */
+export function clientIp(
+  request: Request,
+  options: { production?: boolean } = {}
+): string {
+  const production = options.production ?? process.env.NODE_ENV === "production";
+  const platform = request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim();
+  if (platform) return platform;
+  if (!production) return "local";
   return "unknown";
 }
 

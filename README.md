@@ -89,7 +89,7 @@ Crisvia no se vende como “base de pacientes” ni como “te conseguimos reclu
 | `/protocols/[id]/match` | Cruce masivo paciente ↔ protocolo + justificación IA |
 | `/tracker` | Pipeline Kanban con drag & drop |
 | `/rematch` | Re-matching automático post screen failure |
-| `/candidato` | Portal público de pre-registro (pacientes) |
+| `/candidato` | Pre-registro público, apagado hasta `CANDIDATE_PORTAL_ENABLED` |
 | `/candidatos` | Inbox de leads del portal (coordinadores) |
 | `/citas` | Agenda de citas (hoy, próximas, por cerrar, historial) |
 | `/avisos` | Avisos de candidato nuevo y screen failure |
@@ -390,7 +390,7 @@ docs/                        # STRIPE_SETUP.md, BACKUP.md, etc.
 - Roles: un investigador solo puede gestionar usuarios de su propia organización (`20261007010000_security_hardening.sql`)
 - Bitácora de auditoría append-only; el actor siempre es el usuario de la sesión y el registro debe pertenecer a su organización
 - Validación Zod en las APIs, límites de tamaño (importación 2,000 filas, PDF 10 MB) y respuestas de error sin mensajes internos de Postgres
-- Portal público: rate limiting compartido en Postgres (`rate_limit_hit`), vista `portal_sites` sin secretos y `anon` sin `SELECT` sobre `organizations`
+- Pre-registro público apagado hasta `CANDIDATE_PORTAL_ENABLED`; encendido, el acuse no dice si la persona califica. El cupo por IP usa solo `x-vercel-forwarded-for`. Vista `portal_sites` sin secretos y `anon` sin `SELECT` sobre `organizations`
 - Las llamadas a OpenAI (justificación del match, extracción de notas y de protocolos) pasan por permisos y límite por usuario; la justificación recibe iniciales, pero las **notas libres** que pegues para extraer el perfil se envían tal cual a OpenAI: no pegues datos que no quieras compartir con ese proveedor
 
 **Navegador**

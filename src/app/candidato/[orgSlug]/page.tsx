@@ -1,5 +1,7 @@
 import { CandidatoIntakeForm } from "@/components/candidato/CandidatoIntakeForm";
+import { CandidatoPortalClosed } from "@/components/candidato/CandidatoPortalClosed";
 import { CandidatoPortalError } from "@/components/candidato/CandidatoPortalError";
+import { isCandidatePortalEnabled } from "@/lib/candidato/availability";
 import { loadPortalOrganization } from "@/lib/candidato/load-portal-org";
 
 export default async function CandidatoSitePage({
@@ -7,6 +9,8 @@ export default async function CandidatoSitePage({
 }: {
   params: Promise<{ orgSlug: string }>;
 }) {
+  if (!isCandidatePortalEnabled()) return <CandidatoPortalClosed />;
+
   const { orgSlug } = await params;
   const result = await loadPortalOrganization(orgSlug);
 
