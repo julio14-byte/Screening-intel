@@ -10,29 +10,15 @@
 --   * anon: insert en waitlist, select de protocols y de la vista portal_sites
 -- No se conceden truncate, references, trigger ni maintain.
 
-do $defaults$
-declare
-  owner_role text;
-begin
-  foreach owner_role in array array['postgres', 'supabase_admin']
-  loop
-    if exists (select 1 from pg_roles where rolname = owner_role) then
-      execute format(
-        'alter default privileges for role %I in schema public revoke all on tables from anon, authenticated, service_role',
-        owner_role
-      );
-      execute format(
-        'alter default privileges for role %I in schema public revoke all on sequences from anon, authenticated, service_role',
-        owner_role
-      );
-      execute format(
-        'alter default privileges for role %I in schema public revoke execute on functions from public, anon, authenticated, service_role',
-        owner_role
-      );
-    end if;
-  end loop;
-end
-$defaults$;
+-- Solo el rol postgres, que es quien corre las migraciones. supabase_admin no
+-- permite este cambio desde el SQL del proyecto (42501). La plataforma ya dejó
+-- de conceder privilegios por defecto en su propio rol.
+alter default privileges for role postgres in schema public
+  revoke all on tables from anon, authenticated, service_role;
+alter default privileges for role postgres in schema public
+  revoke all on sequences from anon, authenticated, service_role;
+alter default privileges for role postgres in schema public
+  revoke execute on functions from public, anon, authenticated, service_role;
 
 -- La política pública de protocols leía organizations y por eso anon recibía
 -- "permission denied" en cuanto se le quitó el SELECT de esa tabla.
