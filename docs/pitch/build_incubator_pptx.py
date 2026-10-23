@@ -241,7 +241,7 @@ def build() -> Presentation:
     trust = [
         ("Roles", "Investigador, sub-investigador, coordinador. El monitor lee."),
         ("Acceso", "MFA para el equipo clínico y sesión con vencimiento."),
-        ("Rastro", "Bitácora de cambios. Equipo y delegación del protocolo, con vigencia."),
+        ("Rastro", "Bitácora de cambios de lo que el centro registra."),
         ("Aislamiento", "Cada organización ve solo sus datos, en Postgres."),
     ]
     for i, (title, body) in enumerate(trust):

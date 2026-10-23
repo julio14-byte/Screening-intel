@@ -74,15 +74,6 @@ values
 insert into public.candidate_contact_attempts (organization_id, submission_id, channel, outcome)
 select organization_id, id, 'phone', 'no_answer' from public.pre_screen_submissions;
 
-insert into public.site_staff (organization_id, full_name, role_title)
-values ((select org_a from _t_orgs), 'Staff A', 'coordinator'),
-       ((select org_b from _t_orgs), 'Staff B', 'coordinator');
-
-insert into public.delegation_assignments (organization_id, staff_id, protocol_id, tasks)
-select st.organization_id, st.id, pr.id, array['consent']
-  from public.site_staff st
-  join public.protocols pr on pr.clinic_id = st.organization_id;
-
 insert into public.criterion_reviews
   (organization_id, patient_id, protocol_id, criterion, criterion_type, engine_status, decision, note)
 select p.clinic_id, p.id, pr.id, 'Edad 18 a 65 años', 'inclusion', 'pass', 'clarify', 'Pendiente de acta'
@@ -178,8 +169,6 @@ select set_config('t.org_a', (select org_a::text from _t_orgs), true),
        set_config('t.org_b', (select org_b::text from _t_orgs), true),
        set_config('t.sub_a', (select id::text from public.pre_screen_submissions where organization_id = (select org_a from _t_orgs)), true),
        set_config('t.sub_b', (select id::text from public.pre_screen_submissions where organization_id = (select org_b from _t_orgs)), true),
-       set_config('t.staff_a', (select id::text from public.site_staff where organization_id = (select org_a from _t_orgs)), true),
-       set_config('t.staff_b', (select id::text from public.site_staff where organization_id = (select org_b from _t_orgs)), true),
        set_config('t.proto_a', (select id::text from public.protocols where clinic_id = (select org_a from _t_orgs)), true),
        set_config('t.pat_a', (select id::text from public.patients where clinic_id = (select org_a from _t_orgs)), true),
        set_config('t.pat_b', (select id::text from public.patients where clinic_id = (select org_b from _t_orgs)), true),
@@ -194,8 +183,6 @@ select pg_temp.expect_count('anon no ve screenings', 'select 1 from public.scree
 select pg_temp.expect_count('anon no ve perfil de sitio', 'select 1 from public.site_profiles', 0);
 select pg_temp.expect_count('anon no ve metas de enrolamiento', 'select 1 from public.protocol_enrollment_targets', 0);
 select pg_temp.expect_count('anon no ve bitácora de contacto', 'select 1 from public.candidate_contact_attempts', 0);
-select pg_temp.expect_count('anon no ve equipo ni delegaciones',
-  'select 1 from public.site_staff union all select 1 from public.delegation_assignments', 0);
 select pg_temp.expect_count('anon no ve revisiones ni medicación',
   'select 1 from public.criterion_reviews union all select 1 from public.patient_medications', 0);
 select pg_temp.expect_count('anon no ve revisiones de diario', 'select 1 from public.diary_reviews', 0);
@@ -229,31 +216,6 @@ select pg_temp.expect_denied('inv_a no edita la bitácora de contacto',
   'update public.candidate_contact_attempts set outcome = ''reached''');
 select pg_temp.expect_denied('inv_a no borra la bitácora de contacto',
   'delete from public.candidate_contact_attempts');
-select pg_temp.expect_count('inv_a ve solo su equipo', 'select 1 from public.site_staff', 1);
-select pg_temp.expect_count('inv_a ve solo sus delegaciones', 'select 1 from public.delegation_assignments', 1);
-select pg_temp.expect_allowed('inv_a da de alta personal',
-  format($q$insert into public.site_staff (organization_id, full_name, role_title)
-            values (%L, 'Nueva Enfermera', 'nurse')$q$, current_setting('t.org_a')));
-select pg_temp.expect_denied('inv_a no da de alta personal en B',
-  format($q$insert into public.site_staff (organization_id, full_name, role_title)
-            values (%L, 'Intruso', 'nurse')$q$, current_setting('t.org_b')));
-select pg_temp.expect_allowed('inv_a delega tareas',
-  format($q$insert into public.delegation_assignments (organization_id, staff_id, protocol_id, tasks)
-            values (%L, %L, %L, array['vitals','ecg'])$q$, current_setting('t.org_a'), current_setting('t.staff_a'), current_setting('t.proto_a')));
-select pg_temp.expect_denied('inv_a no delega personal de B',
-  format($q$insert into public.delegation_assignments (organization_id, staff_id, protocol_id, tasks)
-            values (%L, %L, %L, array['vitals'])$q$, current_setting('t.org_a'), current_setting('t.staff_b'), current_setting('t.proto_a')));
-select pg_temp.expect_denied('inv_a no delega tareas inexistentes',
-  format($q$insert into public.delegation_assignments (organization_id, staff_id, protocol_id, tasks)
-            values (%L, %L, %L, array['hackear'])$q$, current_setting('t.org_a'), current_setting('t.staff_a'), current_setting('t.proto_a')));
-select pg_temp.expect_allowed('inv_a cierra una delegación con fecha de término',
-  'update public.delegation_assignments set ended_on = current_date');
-select pg_temp.expect_denied('inv_a no reescribe las tareas delegadas',
-  'update public.delegation_assignments set tasks = array[''consent'',''randomization'']');
-select pg_temp.expect_denied('inv_a no borra delegaciones',
-  'delete from public.delegation_assignments');
-select pg_temp.expect_denied('inv_a no edita personal de B',
-  format('update public.site_staff set full_name = ''X'' where organization_id = %L', current_setting('t.org_b')));
 select pg_temp.expect_count('inv_a ve solo sus revisiones', 'select 1 from public.criterion_reviews', 1);
 select pg_temp.expect_count('inv_a ve solo su medicación', 'select 1 from public.patient_medications', 1);
 select pg_temp.expect_denied('inv_a no edita ni corrige revisiones',
@@ -279,12 +241,6 @@ select pg_temp.expect_denied('coord_a no edita perfil de sitio',
   'update public.site_profiles set site_name = ''Hack''');
 select pg_temp.expect_denied('coord_a no borra pacientes (solo investigador)',
   'delete from public.patients');
-select pg_temp.expect_count('coord_a lee el equipo', 'select 1 from public.site_staff', 2);
-select pg_temp.expect_denied('coord_a no edita personal',
-  'update public.site_staff set full_name = ''X''');
-select pg_temp.expect_denied('coord_a no delega',
-  format($q$insert into public.delegation_assignments (organization_id, staff_id, protocol_id, tasks)
-            values (%L, %L, %L, array['consent'])$q$, current_setting('t.org_a'), current_setting('t.staff_a'), current_setting('t.proto_a')));
 select pg_temp.expect_allowed('coord_a registra una revisión con fuente',
   format($q$insert into public.criterion_reviews
               (organization_id, patient_id, protocol_id, criterion, criterion_type, engine_status,
