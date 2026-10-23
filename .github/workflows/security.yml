@@ -32,11 +32,11 @@ jobs:
           if [ $((code & 24)) -ne 0 ]; then exit 1; fi
 
   database:
-    name: Migraciones y RLS (Postgres 16)
+    name: Migraciones y RLS (Postgres 17)
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        image: postgres:17
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: crisvia_ci

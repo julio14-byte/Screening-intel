@@ -20,6 +20,7 @@ type PortalData = {
     siteUrl: string;
     protocolLinks: { code: string; url: string }[];
   };
+  publicIntakeOpen: boolean;
 };
 
 function CopyButton({ text }: { text: string }) {
@@ -117,8 +118,16 @@ export function PortalSettingsPanel() {
       <div className="rounded-xl border border-violet-100 bg-white p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-indigo-950">Activar portal</h3>
         <p className="mt-1 text-sm text-indigo-600">
-          Los candidatos acceden por link público sin login de coordinador.
+          El formulario de internet guarda nombre, contacto y notas para el coordinador.
+          No le dice a la persona si califica.
         </p>
+        {data.publicIntakeOpen ? null : (
+          <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-950">
+            El pre-registro público está apagado en este entorno. Guardar el slug no abre
+            el formulario. Se enciende con CANDIDATE_PORTAL_ENABLED cuando el centro vaya
+            a usarlo.
+          </p>
+        )}
 
         <label className="mt-4 flex items-center gap-2 text-sm text-indigo-900">
           <input
@@ -147,7 +156,7 @@ export function PortalSettingsPanel() {
         </Button>
       </div>
 
-      {enabled && data.links.siteUrl ? (
+      {data.publicIntakeOpen && enabled && data.links.siteUrl ? (
         <div className="rounded-xl border border-violet-100 bg-white p-5 shadow-sm space-y-4">
           <h3 className="text-sm font-semibold text-indigo-950">Links para compartir</h3>
           <p className="text-xs text-indigo-600">
@@ -190,11 +199,11 @@ export function PortalSettingsPanel() {
             </div>
           ) : null}
         </div>
-      ) : (
+      ) : data.publicIntakeOpen ? (
         <p className="text-sm text-indigo-500">
           Activa el portal y guarda un slug para generar links.
         </p>
-      )}
+      ) : null}
     </div>
   );
 }
