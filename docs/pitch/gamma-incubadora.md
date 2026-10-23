@@ -172,7 +172,6 @@ Si el cumplimiento baja de 80 %, hay dosis omitidas, un posible evento que la vi
 - MFA para el equipo clínico
 - Bitácora de cambios
 - Aislamiento por organización en Postgres
-- Equipo y delegación del protocolo, con vigencia
 
 Diseño alineado a una operación de site. La certificación regulatoria del diario y del EDC sigue en el sistema del patrocinador.
 
@@ -237,7 +236,7 @@ Hazlo después de la carta “Qué opera Crisvia”. Vuelve al deck en “Modelo
 | 2:20 | `/rematch` | “Este falló el estudio A. Estos otros protocolos del centro todavía lo aceptan.” |
 | 3:00 | Seguimiento → Revisar diario | “El diario está en Veeva o en Clinical Ink. Aquí solo queda lo que el site revisó en la visita: días, dosis omitidas, posible evento, medicación nueva.” |
 
-Si una migración nueva todavía no está aplicada en Supabase, sáltate esa pantalla y dilo. Las que dependen de migración reciente: metas de enrolamiento, bitácora de contacto, equipo, revisión de expediente y revisión de diario.
+Si una migración nueva todavía no está aplicada en Supabase, sáltate esa pantalla y dilo. Las que dependen de migración reciente: metas de enrolamiento, bitácora de contacto, revisión de expediente y revisión de diario.
 
 ---
 
