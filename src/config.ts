@@ -53,6 +53,12 @@ const config = {
         section: "screening" as const,
       },
       {
+        href: "/asistente",
+        label: "Asistente",
+        icon: "Sparkles",
+        section: "screening" as const,
+      },
+      {
         href: "/candidatos",
         label: "Candidatos",
         icon: "UserPlus",
@@ -135,6 +141,7 @@ const config = {
       "/settings/security",
       "/candidatos",
       "/citas",
+      "/asistente",
       "/avisos",
       "/seguimiento",
       "/dispensacion",
