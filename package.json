@@ -35,7 +35,7 @@
     "verify:diary-review": "tsx --tsconfig tsconfig.json scripts/verify-diary-review.ts",
     "verify:billing-interval": "tsx --tsconfig tsconfig.json scripts/verify-billing-interval.ts",
     "verify:candidate-portal": "tsx --tsconfig tsconfig.json scripts/verify-candidate-portal.ts",
-    "verify:pipeline-list": "tsx --tsconfig tsconfig.json scripts/verify-pipeline-list.ts"
+    "verify:pipeline-list": "tsx --tsconfig tsconfig.json scripts/verify-pipeline-list.tsx"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

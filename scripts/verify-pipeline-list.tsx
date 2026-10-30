@@ -1,6 +1,5 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { RoleProvider } from "../src/contexts/role-context";
 import { PipelineList } from "../src/components/tracker/PipelineList";
@@ -84,13 +83,9 @@ const sample: ScreeningWithRelations = {
 
 function renderList(role: "coordinator" | "monitor") {
   return renderToStaticMarkup(
-    createElement(RoleProvider, {
-      role,
-      children: createElement(PipelineList, {
-        screenings: [sample],
-        onMove: () => undefined,
-      }),
-    })
+    <RoleProvider role={role}>
+      <PipelineList screenings={[sample]} onMove={() => undefined} />
+    </RoleProvider>
   );
 }
 
