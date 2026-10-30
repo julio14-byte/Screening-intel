@@ -61,12 +61,20 @@ export function buildMorningList(input: {
   pairs: { patient: Patient; profile: ClinicalProfile | null }[];
   protocols: Protocol[];
   now: Date;
+  /** Si se pasa, reemplaza el “mañana” del reloj del servidor. */
+  window?: { start: Date; end: Date };
 }): MorningListItem[] {
   const active = input.protocols.filter((protocol) => protocol.status === "active");
   const byPatient = new Map(input.pairs.map((pair) => [pair.patient.id, pair]));
 
+  const window = input.window;
   return input.visits
-    .filter((visit) => isTomorrowScheduled(visit, input.now))
+    .filter((visit) => {
+      if (!window) return isTomorrowScheduled(visit, input.now);
+      if (visit.status !== "scheduled") return false;
+      const at = new Date(visit.scheduled_at).getTime();
+      return at >= window.start.getTime() && at < window.end.getTime();
+    })
     .sort(
       (a, b) =>
         new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime() ||

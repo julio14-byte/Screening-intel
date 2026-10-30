@@ -13,6 +13,7 @@ import {
   RefreshCw,
   ScrollText,
   Settings,
+  Sparkles,
   Bell,
   Users,
   UserPlus,
@@ -33,6 +34,7 @@ export const APP_ICONS: Record<string, LucideIcon> = {
   LogOut,
   Bell,
   CalendarDays,
+  Sparkles,
   CalendarCheck,
   Pill,
 };
@@ -68,6 +70,10 @@ export const APP_NAV_STYLES: Record<
   },
   "/citas": {
     activeClass: "bg-sky-400/20 text-sky-100 ring-1 ring-sky-300/30",
+    idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
+  },
+  "/asistente": {
+    activeClass: "bg-violet-400/20 text-violet-100 ring-1 ring-violet-300/30",
     idleClass: "text-violet-200 hover:bg-white/10 hover:text-white",
   },
   "/seguimiento": {
