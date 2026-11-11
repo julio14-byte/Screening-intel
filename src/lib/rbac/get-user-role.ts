@@ -1,9 +1,14 @@
 import { createClient, getUser } from "@/lib/supabase/server";
+import { roleFromRow } from "./parse-role";
 import type { AppRole, OrganizationMemberWithRole } from "./types";
 
 const DEFAULT_ROLE: AppRole = "coordinator";
 
-/** Obtiene el rol clínico del usuario autenticado. */
+/**
+ * Rol clínico del usuario autenticado.
+ * Sin fila, usa el mismo default que el trigger de alta (coordinador).
+ * Si la consulta falla o el valor no es un rol conocido, devuelve null.
+ */
 export async function getUserAppRole(userId?: string): Promise<AppRole | null> {
   const uid = userId ?? (await getUser())?.id;
   if (!uid) return null;
@@ -17,10 +22,12 @@ export async function getUserAppRole(userId?: string): Promise<AppRole | null> {
 
   if (error) {
     console.error("[rbac] getUserAppRole:", error.message);
-    return DEFAULT_ROLE;
+    return null;
   }
 
-  return (data?.role as AppRole | undefined) ?? DEFAULT_ROLE;
+  const parsed = roleFromRow(data?.role);
+  if (!parsed.ok) return parsed.reason === "missing" ? DEFAULT_ROLE : null;
+  return parsed.role;
 }
 
 /** Contexto de sesión con rol para Server Components / Actions. */
@@ -29,7 +36,7 @@ export async function getAuthContext() {
   if (!user) return null;
 
   const role = await getUserAppRole(user.id);
-  return { user, role: role ?? DEFAULT_ROLE };
+  return { user, role };
 }
 
 /** Miembros de la organización con rol clínico (solo investigator). */

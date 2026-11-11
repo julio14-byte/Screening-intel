@@ -16,13 +16,16 @@ export class AuthorizationError extends Error {
   }
 }
 
-/** Exige sesión activa; devuelve user + rol. */
+/** Exige sesión activa y un rol clínico confirmado. */
 export async function requireAuth() {
   const ctx = await getAuthContext();
   if (!ctx) {
     throw new AuthorizationError("No autenticado.", "UNAUTHENTICATED");
   }
-  return ctx;
+  if (!ctx.role) {
+    throw new AuthorizationError("No se pudo confirmar tu rol.", "FORBIDDEN");
+  }
+  return { user: ctx.user, role: ctx.role };
 }
 
 /** Exige un permiso concreto. */
@@ -63,7 +66,7 @@ export async function checkPermission(
   permission: Permission
 ): Promise<boolean> {
   const ctx = await getAuthContext();
-  if (!ctx) return false;
+  if (!ctx?.role) return false;
   return roleHasPermission(ctx.role, permission);
 }
 

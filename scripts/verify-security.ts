@@ -4,6 +4,8 @@ import nextConfig from "../next.config";
 import { buildContentSecurityPolicy } from "../src/lib/security/csp";
 import config from "../src/config";
 import { rateLimit } from "../src/lib/security/rate-limit";
+import { isTransientAuthError } from "../src/lib/auth/transient-auth-error";
+import { roleFromRow } from "../src/lib/rbac/parse-role";
 import { isSameOriginMutation } from "../src/lib/security/csrf";
 import { validatePassword } from "../src/lib/security/password";
 import { hasPdfSignature, looksLikeText } from "../src/lib/security/file-signature";
@@ -52,6 +54,18 @@ async function main() {
   assert(isSameOriginMutation(req("POST", { origin: "https://app.example.com" })), "POST mismo origen permitido");
   assert(isSameOriginMutation(req("POST", { "sec-fetch-site": "same-origin" })), "POST same-origin permitido");
 
+  const missingRole = roleFromRow(null);
+  const unknownRole = roleFromRow("owner");
+  const coordinatorRole = roleFromRow("coordinator");
+  assert(missingRole.ok === false && roleFromRow(undefined).ok === false, "sin fila no inventa un rol");
+  assert(coordinatorRole.ok && coordinatorRole.role === "coordinator", "coordinador válido");
+  assert(roleFromRow("investigator").ok, "investigador válido");
+  assert(!unknownRole.ok && unknownRole.reason === "invalid", "un rol ajeno no pasa");
+  assert(isTransientAuthError({ name: "AuthRetryableFetchError" }), "caída de Auth es transitoria");
+  assert(isTransientAuthError({ status: 503 }), "Auth 503 es transitorio");
+  assert(!isTransientAuthError({ name: "AuthSessionMissingError", status: 400 }), "sin sesión no es una caída");
+  assert(!isTransientAuthError(null), "sin error no es una caída");
+
   // Contraseñas y archivos
   assert(validatePassword("corta1") !== null, "contraseña corta rechazada");
   assert(validatePassword("password") !== null, "contraseña común rechazada");
@@ -67,6 +81,10 @@ async function main() {
   assert(mw.includes("isSameOriginMutation"), "middleware aplica CSRF");
   assert(mw.includes("write:${user.id}"), "middleware limita escrituras por usuario");
   assert(mw.includes("no-store"), "middleware marca no-store en pantallas protegidas");
+  assert(mw.includes("isCandidatePortalEnabled"), "middleware cierra el pre-registro apagado");
+  assert(mw.includes("No se pudo confirmar tu rol"), "un fallo de rol no abre la app");
+  assert(mw.includes("isTransientAuthError"), "una caída de Auth no parece un logout");
+  assert(!mw.includes('?? "coordinator"'), "un error de rol no se convierte en coordinador");
 
   // Cabeceras de seguridad
   const rules = (await nextConfig.headers?.()) ?? [];
