@@ -2,6 +2,12 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import config from "@/config";
 import { isMfaExemptPath } from "@/lib/auth/mfa-paths";
+import { isTransientAuthError } from "@/lib/auth/transient-auth-error";
+import {
+  CANDIDATE_PORTAL_CLOSED_MESSAGE,
+  isCandidatePortalEnabled,
+} from "@/lib/candidato/availability";
+import { roleFromRow } from "@/lib/rbac/parse-role";
 import {
   applySessionActivityCookies,
   AUTH_AT_COOKIE,
@@ -37,14 +43,25 @@ type CookieToSet = {
 async function fetchUserClinicalRole(
   supabase: ReturnType<typeof createServerClient>,
   userId: string
-): Promise<AppRole> {
-  const { data } = await supabase
+): Promise<{ ok: true; role: AppRole } | { ok: false; reason: "missing" | "invalid" | "error" }> {
+  const { data, error } = await supabase
     .from("user_roles")
     .select("role")
     .eq("user_id", userId)
     .maybeSingle();
 
-  return (data?.role as AppRole | undefined) ?? "coordinator";
+  if (error) {
+    console.error("[middleware] rol:", error.message);
+    return { ok: false, reason: "error" };
+  }
+  return roleFromRow(data?.role);
+}
+
+function isCandidateIntakeApi(pathname: string) {
+  return (
+    pathname === "/api/candidato/config" ||
+    pathname.startsWith("/api/candidato/enviar")
+  );
 }
 
 function isPublicMarketingPath(pathname: string) {
@@ -73,14 +90,17 @@ export async function updateSession(request: NextRequest) {
     if (pathname.startsWith("/api/") && !isPublicApiPath(pathname)) {
       return NextResponse.json(
         { error: "Servicio no disponible. Inténtalo de nuevo." },
-        { status: 503 }
+        { status: 503, headers: { "cache-control": "private, no-store, max-age=0" } }
       );
     }
     if (isProtectedPath(pathname)) {
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = config.auth.loginUrl;
-      loginUrl.search = "";
-      return NextResponse.redirect(loginUrl);
+      return new NextResponse("Servicio no disponible. Inténtalo de nuevo.", {
+        status: 503,
+        headers: {
+          "content-type": "text/plain; charset=utf-8",
+          "cache-control": "private, no-store, max-age=0",
+        },
+      });
     }
     return NextResponse.next({ request });
   }
@@ -102,6 +122,13 @@ async function runUpdateSession(request: NextRequest) {
       ip: clientIp(request),
     });
     return NextResponse.json({ error: "Origen no permitido." }, { status: 403 });
+  }
+
+  if (isCandidateIntakeApi(pathname) && !isCandidatePortalEnabled()) {
+    return NextResponse.json(
+      { error: CANDIDATE_PORTAL_CLOSED_MESSAGE },
+      { status: 404, headers: { "cache-control": "private, no-store, max-age=0" } }
+    );
   }
 
   const isLogin = pathname === config.auth.loginUrl;
@@ -151,6 +178,7 @@ async function runUpdateSession(request: NextRequest) {
 
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
 
   function finish(res: NextResponse, options?: { resetAbsolute?: boolean }) {
@@ -159,10 +187,30 @@ async function runUpdateSession(request: NextRequest) {
       applySessionActivityCookies(res, request, Date.now(), options);
     }
     res.headers.set("x-pathname", pathname);
-    if (isProtectedPath(pathname)) {
+    if (isProtectedPath(pathname) || pathname.startsWith("/api/")) {
       res.headers.set("Cache-Control", "private, no-store, max-age=0");
     }
     return res;
+  }
+
+  function unavailable(message: string) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: message }, { status: 503 });
+    }
+    return new NextResponse(message, {
+      status: 503,
+      headers: { "content-type": "text/plain; charset=utf-8" },
+    });
+  }
+
+  const sessionRequired =
+    isProtectedPath(pathname) ||
+    (pathname.startsWith("/api/") && !isPublicApiPath(pathname));
+
+  if (!user && isTransientAuthError(authError) && sessionRequired) {
+    console.error("[middleware] auth:", authError?.message);
+    securityEvent("auth_unavailable", { path: pathname });
+    return finish(unavailable("No se pudo confirmar la sesión. Inténtalo de nuevo."));
   }
 
   if (user) {
@@ -200,72 +248,95 @@ async function runUpdateSession(request: NextRequest) {
   let role: AppRole | null = null;
 
   if (user) {
-    role = await fetchUserClinicalRole(supabase, user.id);
-    const skipMfa = shouldSkipMfaForUser(user.email, role);
+    const lookup = await fetchUserClinicalRole(supabase, user.id);
+    if (!lookup.ok && lookup.reason !== "missing") {
+      securityEvent("role_unconfirmed", { path: pathname, reason: lookup.reason });
+      if (!isMfaExemptPath(pathname) && !isPublic) {
+        return finish(unavailable("No se pudo confirmar tu rol. Inténtalo de nuevo."));
+      }
+    } else {
+      role = lookup.ok ? lookup.role : "coordinator";
+    }
 
-    if (!skipMfa) {
-      const { data: aal, error: aalError } =
-        await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (role) {
+      const skipMfa = shouldSkipMfaForUser(user.email, role);
 
-      if (aalError) {
-        console.error("[middleware] MFA AAL:", aalError.message);
-      } else if (aal) {
-        const hasAal2 = aal.currentLevel === "aal2";
-        const enrolled = aal.nextLevel === "aal2";
+      if (!skipMfa) {
+        const { data: aal, error: aalError } =
+          await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
-        if (hasAal2 && isMfaChallenge) {
-          const url = request.nextUrl.clone();
-          url.pathname = config.auth.afterLoginUrl;
-          url.search = "";
-          return finish(NextResponse.redirect(url));
-        }
+        if (aalError || !aal) {
+          console.error("[middleware] MFA AAL:", aalError?.message ?? "sin nivel");
+          if (!isMfaExemptPath(pathname)) {
+            securityEvent("mfa_unverified", { path: pathname });
+            if (pathname.startsWith("/api/")) {
+              return finish(
+                unavailable("No se pudo verificar el segundo factor. Inténtalo de nuevo.")
+              );
+            }
+            const url = request.nextUrl.clone();
+            url.pathname = routes.app.security;
+            url.search = "";
+            return finish(NextResponse.redirect(url));
+          }
+        } else {
+          const hasAal2 = aal.currentLevel === "aal2";
+          const enrolled = aal.nextLevel === "aal2";
 
-        if (!hasAal2 && !isMfaExemptPath(pathname)) {
-          if (pathname.startsWith("/api/")) {
-            return finish(
-              NextResponse.json(
-                {
-                  error: enrolled
-                    ? "Se requiere el código MFA de tu autenticador."
-                    : "Debés activar MFA (TOTP) para continuar.",
-                },
-                { status: 403 }
-              )
-            );
+          if (hasAal2 && isMfaChallenge) {
+            const url = request.nextUrl.clone();
+            url.pathname = config.auth.afterLoginUrl;
+            url.search = "";
+            return finish(NextResponse.redirect(url));
           }
 
-          const url = request.nextUrl.clone();
-          if (enrolled) {
-            url.pathname = routes.loginMfa;
-            url.search = "";
-          } else {
+          if (!hasAal2 && !isMfaExemptPath(pathname)) {
+            if (pathname.startsWith("/api/")) {
+              return finish(
+                NextResponse.json(
+                  {
+                    error: enrolled
+                      ? "Se requiere el código MFA de tu autenticador."
+                      : "Debés activar MFA (TOTP) para continuar.",
+                  },
+                  { status: 403 }
+                )
+              );
+            }
+
+            const url = request.nextUrl.clone();
+            if (enrolled) {
+              url.pathname = routes.loginMfa;
+              url.search = "";
+            } else {
+              url.pathname = routes.app.security;
+              url.search = "enroll=1";
+            }
+            return finish(NextResponse.redirect(url));
+          }
+
+          if (!hasAal2 && isMfaChallenge && !enrolled) {
+            const url = request.nextUrl.clone();
             url.pathname = routes.app.security;
             url.search = "enroll=1";
+            return finish(NextResponse.redirect(url));
           }
-          return finish(NextResponse.redirect(url));
         }
-
-        if (!hasAal2 && isMfaChallenge && !enrolled) {
-          const url = request.nextUrl.clone();
-          url.pathname = routes.app.security;
-          url.search = "enroll=1";
-          return finish(NextResponse.redirect(url));
-        }
+      } else if (isMfaChallenge) {
+        const url = request.nextUrl.clone();
+        url.pathname = config.auth.afterLoginUrl;
+        url.search = "";
+        return finish(NextResponse.redirect(url));
       }
-    } else if (isMfaChallenge) {
-      const url = request.nextUrl.clone();
-      url.pathname = config.auth.afterLoginUrl;
-      url.search = "";
-      return finish(NextResponse.redirect(url));
     }
   } else if (isMfaChallenge) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = config.auth.loginUrl;
     loginUrl.search = "";
-    return NextResponse.redirect(loginUrl);
+    return finish(NextResponse.redirect(loginUrl));
   }
 
-  if (user && isLogin) {
+  if (user && role && isLogin) {
     const url = request.nextUrl.clone();
     const from = request.nextUrl.searchParams.get("from");
     const next = request.nextUrl.searchParams.get("next");
@@ -279,24 +350,24 @@ async function runUpdateSession(request: NextRequest) {
     return finish(NextResponse.redirect(url));
   }
 
-  if (user && isPublicMarketingPath(pathname)) {
+  if (user && role && isPublicMarketingPath(pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = config.auth.afterLoginUrl;
     return finish(NextResponse.redirect(url));
   }
 
   if (!user && pathname.startsWith("/api/") && !isPublicApiPath(pathname)) {
-    return NextResponse.json({ error: "No autenticado." }, { status: 401 });
+    return finish(NextResponse.json({ error: "No autenticado." }, { status: 401 }));
   }
 
   if (isProtectedPath(pathname) && !user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = config.auth.loginUrl;
     loginUrl.searchParams.set("from", pathname);
-    return NextResponse.redirect(loginUrl);
+    return finish(NextResponse.redirect(loginUrl));
   }
 
-  if (user && isProtectedPath(pathname) && !pathname.startsWith("/account")) {
+  if (user && role && isProtectedPath(pathname) && !pathname.startsWith("/account")) {
     const paywallRedirect = await getPaywallRedirect(user.id, pathname);
     if (paywallRedirect) {
       const url = request.nextUrl.clone();
@@ -323,15 +394,17 @@ async function runUpdateSession(request: NextRequest) {
       const limited = await rateLimit(`write:${user.id}`, 240, 60);
       if (!limited.allowed) {
         securityEvent("write_rate_limited", { path: pathname, user: user.id });
-        return tooManyRequests(limited);
+        return finish(tooManyRequests(limited));
       }
     }
     const isWriteApi = isWriteApiPath(pathname);
 
     if (isWriteMethod && isWriteApi && role === "monitor") {
-      return NextResponse.json(
-        { error: "Monitor CRA: acceso de solo lectura." },
-        { status: 403 }
+      return finish(
+        NextResponse.json(
+          { error: "Monitor CRA: acceso de solo lectura." },
+          { status: 403 }
+        )
       );
     }
   }

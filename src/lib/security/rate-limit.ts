@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type RateLimitResult = { allowed: boolean; retryAfterSec: number };
@@ -86,11 +87,13 @@ export function tooManyRequests(
   result: RateLimitResult,
   message = "Demasiados intentos. Espera un momento e inténtalo de nuevo."
 ) {
-  return new Response(JSON.stringify({ error: message }), {
-    status: 429,
-    headers: {
-      "Content-Type": "application/json",
-      "Retry-After": String(Math.max(1, result.retryAfterSec)),
-    },
-  });
+  return NextResponse.json(
+    { error: message },
+    {
+      status: 429,
+      headers: {
+        "Retry-After": String(Math.max(1, result.retryAfterSec)),
+      },
+    }
+  );
 }

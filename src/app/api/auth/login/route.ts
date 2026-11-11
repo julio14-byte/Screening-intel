@@ -8,6 +8,7 @@ import {
   isDemoLoginEnabled,
   shouldSkipMfaForUser,
 } from "@/lib/auth/session-policy";
+import { roleFromRow } from "@/lib/rbac/parse-role";
 import type { AppRole } from "@/lib/rbac/types";
 import { clientIp, rateLimit, tooManyRequests } from "@/lib/security/rate-limit";
 import { hardenAuthCookieOptions } from "@/lib/security/safe-redirect";
@@ -149,18 +150,24 @@ export async function POST(request: NextRequest) {
   }
 
   if (user) {
-    const { data: roleRow } = await supabase
+    const { data: roleRow, error: roleError } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
       .maybeSingle();
-    const role = (roleRow?.role as AppRole | undefined) ?? "coordinator";
+    const parsed = roleError ? null : roleFromRow(roleRow?.role);
+    // Si el rol no se puede leer, no lo trates como coordinador: el MFA no se salta.
+    const role: AppRole = parsed?.ok
+      ? parsed.role
+      : parsed?.reason === "missing"
+        ? "coordinator"
+        : "investigator";
 
     if (!shouldSkipMfaForUser(user.email, role)) {
-      const { data: aal } =
+      const { data: aal, error: aalError } =
         await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (aal && aal.currentLevel !== "aal2") {
-        if (aal.nextLevel === "aal2") mfaRequired = true;
+      if (aalError || !aal || aal.currentLevel !== "aal2") {
+        if (aal?.nextLevel === "aal2") mfaRequired = true;
         else mfaEnrollmentRequired = true;
       }
     }
